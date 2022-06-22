@@ -15,3 +15,11 @@ if __name__ == '__main__':
     n1, n2 = 2, 0
     print(f'V({n1}->{n2}) = {calculate_branch_voltage(U, n1, n2)}')
 
+    network = Network()
+    network.add_branch(Branch(1, 0, real_currentsource(I=1, R=100)))
+    network.add_branch(Branch(1, 2, resistor(10)))
+    network.add_branch(Branch(2, 0, resistor(20)))
+
+    Y2 = create_node_admittance_matrix_from_network(network)
+    I2 = create_current_vector_from_network(network)
+

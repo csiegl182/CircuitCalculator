@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from NodalAnalysis import DimensionError, calculate_node_voltages, create_node_admittance_matrix, calculate_branch_voltage
+from NodalAnalysis import DimensionError, Network, calculate_node_voltages, create_node_admittance_matrix, calculate_branch_voltage, resistor, Branch
 
 def test_calculate_nodal_voltages_accepts_only_two_dimensional_y_matrix() -> None:
     with pytest.raises(DimensionError):
@@ -65,4 +65,19 @@ def test_calculate_branch_voltages_raises_dimension_error_when_exceeding_node_in
     V = np.array([3, 2, 1])
     with pytest.raises(DimensionError):
         calculate_branch_voltage(V, 1, 4)
+    
+def test_Network_knows_about_its_node_number() -> None:
+    network = Network()
+    network.add_branch(Branch(0, 1, resistor(10)))
+    assert network.number_of_nodes == 2
+
+def test_Network_returns_branches_connected_to_node() -> None:
+    network = Network()
+    branchA = Branch(0, 1, resistor(10))
+    branchB = Branch(0, 2, resistor(20))
+    branchC = Branch(1, 2, resistor(30))
+    network.add_branch(branchA)
+    network.add_branch(branchB)
+    network.add_branch(branchC)
+    assert network.branches_connected_to_node(2) == [branchB, branchC]
     
