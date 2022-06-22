@@ -39,9 +39,19 @@ def calculate_branch_voltage(V_node : np.ndarray, node1 : int, node2 : int) -> f
         raise DimensionError('dim error')
     return V1 - V2
 
-@dataclass
 class Element(Protocol):
-    Z : float
+    @property
+    def Z(self) -> complex:
+        """"Impedance of Branch"""
+    @property
+    def Y(self) -> complex:
+        """"Impedance of Branch"""
+    @property
+    def I(self) -> complex:
+        """"Impedance of Branch"""
+    @property
+    def U(self) -> complex:
+        """"Impedance of Branch"""
 
 @dataclass
 class Branch:
@@ -52,11 +62,22 @@ class Branch:
 @dataclass
 class Impedeance:
     Z : complex
+    
+    @property
+    def Y(self): return 1/self.Z
+    @property
+    def I(_): return 0
+    @property
+    def U(_): return None
 
 @dataclass
 class CurrentSource:
     Z : complex
     I : complex
+    @property
+    def Y(self): return 1/self.Z
+    @property
+    def U(self): return self.I*self.Z
 
 def resistor(R : float) -> Element:
     return Impedeance(Z=R)
@@ -69,7 +90,7 @@ def real_currentsource(I : float, R : float) -> Element:
 
 class Network:
     def __init__(self) -> None:
-        self.branches = []
+        self.branches : List[Branch] = []
 
     def add_branch(self, branch : Branch) -> None:
         self.branches.append(branch)
@@ -86,9 +107,9 @@ class Network:
 
 def create_node_admittance_matrix_from_network(network : Network) -> np.ndarray:
     zero_node_admittances = [1/branch.element.Z for branch in network.branches_connected_to_node(0)]
-    node_admittances = ()
+    node_admittances = []
     for i in range(1, network.number_of_nodes-1):
-        node_admittances += ([1/branch.element.Z for branch in network.branches_connected_to_node(i) if branch.node1 > i or branch.node2 > i],)
+        node_admittances += [[1/branch.element.Z for branch in network.branches_connected_to_node(i) if branch.node1 > i or branch.node2 > i]]
 
     return create_node_admittance_matrix(zero_node_admittances, *node_admittances)
     
