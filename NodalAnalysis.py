@@ -85,7 +85,7 @@ def resistor(R : float) -> Element:
 def conductor(G : float) -> Element:
     return Impedeance(Z=1/G)
 
-def real_currentsource(I : float, R : float) -> Element:
+def real_current_source(I : float, R : float) -> Element:
     return CurrentSource(I=I, Z=R)
 
 class Network:
@@ -96,7 +96,9 @@ class Network:
         self.branches.append(branch)
         
     def branches_connected_to_node(self, node) -> List[Branch]:
-        return [branch for branch in self.branches if branch.node1 == node or branch.node2 == node]
+        connected_branches = [branch for branch in self.branches if branch.node1 == node or branch.node2 == node]
+        connected_branches.sort(key=lambda x: x.node1 if x.node1!=node else x.node2)
+        return connected_branches
 
     @property
     def number_of_nodes(self) -> int:
@@ -110,7 +112,6 @@ def create_node_admittance_matrix_from_network(network : Network) -> np.ndarray:
     node_admittances = []
     for i in range(1, network.number_of_nodes-1):
         node_admittances += [[1/branch.element.Z for branch in network.branches_connected_to_node(i) if branch.node1 > i or branch.node2 > i]]
-
     return create_node_admittance_matrix(zero_node_admittances, *node_admittances)
     
 def create_current_vector_from_network(network : Network) -> np.ndarray:
@@ -123,9 +124,3 @@ def create_current_vector_from_network(network : Network) -> np.ndarray:
             I[i-1] = 0
 
     return I
-            
-
-
-
-
-        

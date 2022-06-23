@@ -1,0 +1,21 @@
+[
+    {
+        "type": "resistor",
+        "N1": 1,
+        "N2": 2,
+        "R": 10
+    },
+    {
+        "type": "resistor",
+        "N1": 2,
+        "N2": 0,
+        "R": 20
+    },
+    {
+        "type": "real_current_source",
+        "N1": 1,
+        "N2": 0,
+        "I": 1,
+        "R": 100
+    }
+]
