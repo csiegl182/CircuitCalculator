@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Protocol, List
+from typing import Protocol, List, Dict, Callable
 import numpy as np
 
 class DimensionError(Exception): pass
@@ -79,13 +79,13 @@ class CurrentSource:
     @property
     def U(self): return self.I*self.Z
 
-def resistor(R : float) -> Element:
+def resistor(R : float, **_) -> Element:
     return Impedeance(Z=R)
 
-def conductor(G : float) -> Element:
+def conductor(G : float, **_) -> Element:
     return Impedeance(Z=1/G)
 
-def real_current_source(I : float, R : float) -> Element:
+def real_current_source(I : float, R : float, **_) -> Element:
     return CurrentSource(I=I, Z=R)
 
 class Network:
@@ -124,3 +124,22 @@ def create_current_vector_from_network(network : Network) -> np.ndarray:
             I[i-1] = 0
 
     return I
+
+branch_types : Dict[str, Callable[..., Element]] = {
+    "resistor" : resistor,
+    "real_current_source" : real_current_source
+}
+
+def load_network_from_json(filename) -> Network:
+    import json
+    with open(filename, 'r') as json_file:
+        network_dict = json.load(json_file)
+
+    network = Network()
+    for branch in network_dict:
+        n1 = branch.pop('N1')
+        n2 = branch.pop('N2')
+        element_factory = branch_types[branch.pop('type')]
+        element = element_factory(**branch)
+        network.add_branch(Branch(n1, n2, element))
+    return network
