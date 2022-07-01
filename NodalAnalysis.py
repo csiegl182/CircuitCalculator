@@ -54,12 +54,6 @@ class Element(Protocol):
         """"Impedance of Branch"""
 
 @dataclass
-class Branch:
-    node1 : int
-    node2 : int
-    element : Element
-
-@dataclass
 class Impedeance:
     Z : complex
     
@@ -87,6 +81,12 @@ def conductor(G : float, **_) -> Element:
 
 def real_current_source(I : float, R : float, **_) -> Element:
     return CurrentSource(I=I, Z=R)
+
+@dataclass
+class Branch:
+    node1 : int
+    node2 : int
+    element : Element
 
 class Network:
     def __init__(self) -> None:
