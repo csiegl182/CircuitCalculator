@@ -1,4 +1,4 @@
-from NodalAnalysis import Network, resistor, Branch
+from Network import Network, resistor, Branch
 
 def test_Network_knows_about_its_node_number() -> None:
     network = Network()
