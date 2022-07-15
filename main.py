@@ -1,8 +1,9 @@
 from NodalAnalysis import calculate_branch_voltage, create_current_vector_from_network, calculate_node_voltages, create_node_admittance_matrix_from_network
 from Network import load_network_from_json, load_network
 import json
-from SchemdrawWrapper import RealCurrentSource, Resistor, Line, Ground, parse_drawing
+from SchemdrawWrapper import RealCurrentSource, Resistor, Line, Ground, parse_drawing, draw_volatages
 from schemdraw import Drawing
+import schemdraw
 
 if __name__ == '__main__':
 
@@ -50,3 +51,5 @@ if __name__ == '__main__':
     print(f'V({n1}->{n2}) = {calculate_branch_voltage(U2, n1, n2):.2f}')
     n1, n2 = 2, 0
     print(f'V({n1}->{n2}) = {calculate_branch_voltage(U2, n1, n2):.2f}')
+
+    draw_voltages()

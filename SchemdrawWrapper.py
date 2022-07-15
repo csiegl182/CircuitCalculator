@@ -1,9 +1,12 @@
-from NodalAnalysis import *
-from Network import load_network, load_network_from_json
+from dataclasses import dataclass
+from Network import load_network
 from typing import Set, List, Tuple, Dict, Any
-import json
 import schemdraw
 import schemdraw.elements as elm
+
+class TooManyGroundNodes(Exception): pass
+
+class NoGroundNode(Exception): pass
 
 class RealCurrentSource(elm.sources.SourceI):
     def __init__(self, I: float, R: float, name: str, *args, **kwargs):
@@ -83,25 +86,21 @@ class Line(elm.lines.Line):
 class Ground(elm.Ground):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+element_type = {
+    RealCurrentSource : "real_current_source",
+    Resistor : "resistor",
+    Line : "line",
+    Ground : "ground"
+}
     
 def round_node(node: schemdraw.util.Point) -> schemdraw.util.Point:
     def local_round(x):
         return round(x, ndigits=2)
     return schemdraw.util.Point((local_round(node.x), local_round(node.y)))
 
-def get_nodes(element: schemdraw.elements.Element2Term) -> Tuple[schemdraw.util.Point, schemdraw.util.Point]:
+def get_nodes(element: schemdraw.elements.Element) -> Tuple[schemdraw.util.Point, schemdraw.util.Point]:
     return round_node(element.absanchors['start']), round_node(element.absanchors['end'])
-
-def get_all_nodes(elements: List[schemdraw.elements.Element2Term]) -> Set[schemdraw.util.Point]:
-    nodes = {round_node(e.absanchors['start']) for e in elements}
-    nodes = nodes.union({round_node(e.absanchors['end']) for e in elements})
-    return nodes
-
-element_type = {
-    RealCurrentSource : "real_current_source",
-    Resistor : "resistor",
-    Line : "line"
-}
 
 def get_identical_nodes(node: schemdraw.util.Point, elements: List[schemdraw.elements.Element2Term]) -> Set[schemdraw.util.Point]:
     lines = [element for element in elements if element_type[type(element)] == "line"]
@@ -114,42 +113,100 @@ def get_identical_nodes(node: schemdraw.util.Point, elements: List[schemdraw.ele
             identical_nodes.add(n1)
     return identical_nodes
 
-def get_unique_nodes(elements: List[schemdraw.elements.Element2Term]) -> Set[schemdraw.util.Point]:
-    unique_nodes = get_all_nodes(elements)
-    for node in get_all_nodes(elements):
-        if node in unique_nodes:
-            for n in get_identical_nodes(node, elements):
-                unique_nodes.remove(n)
-    return unique_nodes
+@dataclass
+class SchemdrawNetwork:
+    drawing: schemdraw.Drawing
 
-def get_unique_node_mapping(elements: List[schemdraw.elements.Element2Term]) -> Dict[schemdraw.util.Point, schemdraw.util.Point]:
-    unique_nodes = get_unique_nodes(elements)
-    node_mapping = {}
-    for n in get_all_nodes(elements):
-        identical_nodes = get_identical_nodes(n, elements)
-        current_unique_node = unique_nodes.intersection(identical_nodes)
-        if len(current_unique_node) > 0:
-            node_mapping.update({n: current_unique_node.pop()})
-        else:
-            node_mapping.update({n: n})
-    return node_mapping
+    @property
+    def two_term_elements(self) -> List[schemdraw.elements.Element2Term]:
+        return [e for e in self.drawing.elements if isinstance(e, schemdraw.elements.Element2Term)]
 
-def get_two_term_elements(drawing: schemdraw.Drawing) -> List[schemdraw.elements.Element2Term]:
-    return [e for e in drawing.elements if isinstance(e, schemdraw.elements.Element2Term)]
+    @property
+    def all_nodes(self) -> Set[schemdraw.util.Point]:
+        nodes = {round_node(e.absanchors['start']) for e in self.two_term_elements}
+        nodes = nodes.union({round_node(e.absanchors['end']) for e in self.two_term_elements})
+        return nodes
 
-def parse_drawing(drawing: schemdraw.Drawing) -> List[Dict[str, Any]]:
-    el = []
-    unique_node_mapping = get_unique_node_mapping(get_two_term_elements(drawing))
-    unique_nodes = list(get_unique_nodes(get_two_term_elements(drawing)))
-    elements = [e for e in get_two_term_elements(drawing) if element_type[type(e)] != "line"]
-    for e in elements:
-        n1, n2 = get_nodes(e)
-        d = {
-            "type": element_type[type(e)],
-            "id" : e.name,
-            "N1" : unique_nodes.index(unique_node_mapping[n1]),
-            "N2" : unique_nodes.index(unique_node_mapping[n2])
-        }
-        d.update(e.values())
-        el.append(d)
-    return el
+    @property
+    def unique_nodes(self) -> Set[schemdraw.util.Point]:
+        nodes = self.all_nodes
+        for node in self.all_nodes:
+            if node in nodes:
+                for n in get_identical_nodes(node, self.two_term_elements):
+                    nodes.remove(n)
+        return nodes
+
+    @property
+    def ordered_unique_nodes(self) -> List[schemdraw.util.Point]:
+        return list(self.unique_nodes)
+
+    @property
+    def unique_node_mapping(self) -> Dict[schemdraw.util.Point, schemdraw.util.Point]:
+        node_mapping = {}
+        for n in self.all_nodes:
+            identical_nodes = get_identical_nodes(n, self.two_term_elements)
+            current_unique_node = self.unique_nodes.intersection(identical_nodes)
+            if len(current_unique_node) > 0:
+                node_mapping.update({n: current_unique_node.pop()})
+            else:
+                node_mapping.update({n: n})
+        return node_mapping
+
+    @property
+    def dependency_list(self) -> List[Dict[str, Any]]:
+        el = []
+        elements = [e for e in self.two_term_elements if element_type[type(e)] != "line"]
+        for e in elements:
+            n1, n2 = get_nodes(e)
+            d = {
+                "type": element_type[type(e)],
+                "id" : e.name,
+                "N1" : self.get_node_index(n1),
+                "N2" : self.get_node_index(n2)
+            }
+            d.update(e.values())
+            el.append(d)
+        return el
+
+    def get_node_index(self, node: schemdraw.util.Point) -> int:
+        return self.ordered_unique_nodes.index(self.unique_node_mapping[node])
+
+    def get_element_from_name(self, name: str) -> schemdraw.elements.Element:
+        elements = [e for e in self.two_term_elements if e.name == name]
+        return elements[0]
+
+def draw_voltage(schemdraw_network: SchemdrawNetwork, element_name: str) -> None:
+    network = load_network(schemdraw_network.dependency_list)
+    V = calculate_branch_voltages(network)
+
+    element = schemdraw_network.get_element_from_name(element_name)
+    n1, n2 = get_nodes(element)
+    i1, i2 = schemdraw_network.get_node_index(n1), schemdraw_network.get_node_index(n2)
+
+
+if __name__ == '__main__':
+    from NodalAnalysis import *
+    from schemdraw import Drawing
+    
+    with Drawing() as d:
+        d += RealCurrentSource(I=1, R=100, name='I1').up()
+        d += Resistor(R=10, name='R1').right()
+        d += Resistor(R=20, name='R2').down()
+        d += Line().left()
+        d += Ground()
+    #d.draw()
+    schemdraw_network = SchemdrawNetwork(d)
+    network2 = load_network(schemdraw_network.dependency_list)
+
+    Y2 = create_node_admittance_matrix_from_network(network2)
+    I2 = create_current_vector_from_network(network2)
+    U2 = calculate_node_voltages(Y2, I2)
+
+    n1, n2 = 1, 0
+    print(f'V({n1}->{n2}) = {calculate_branch_voltage(U2, n1, n2):.2f}')
+    n1, n2 = 1, 2
+    print(f'V({n1}->{n2}) = {calculate_branch_voltage(U2, n1, n2):.2f}')
+    n1, n2 = 2, 0
+    print(f'V({n1}->{n2}) = {calculate_branch_voltage(U2, n1, n2):.2f}')
+
+    # draw_voltages()

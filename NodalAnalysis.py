@@ -53,3 +53,8 @@ def create_current_vector_from_network(network : Network) -> np.ndarray:
         else:
             I[i-1] = 0
     return I
+
+def calculate_branch_voltages(network: Network) -> np.ndarray:
+    Y = create_node_admittance_matrix_from_network(network)
+    I = create_current_vector_from_network(network)
+    return calculate_node_voltages(Y, I)
