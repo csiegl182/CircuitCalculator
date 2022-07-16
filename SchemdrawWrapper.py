@@ -3,10 +3,9 @@ from Network import load_network
 from typing import Set, List, Tuple, Dict, Any
 import schemdraw
 import schemdraw.elements as elm
+import NodalAnalysis
 
-class TooManyGroundNodes(Exception): pass
-
-class NoGroundNode(Exception): pass
+class UnknownElement(Exception): pass
 
 class RealCurrentSource(elm.sources.SourceI):
     def __init__(self, I: float, R: float, name: str, *args, **kwargs):
@@ -57,35 +56,21 @@ class Resistor(elm.twoterm.ResistorIEC):
     def values(self) -> Dict[str, float]:
         return {'R' : self.resistance}
 
-class Inductor(elm.twoterm.ResistorIEC):
-    def __init__(self, G: float, name: str, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._inductance = G
-        self._name = name
-        self.label(self._name)
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def resistance(self) -> float:
-        return 1/self._inductance
-
-    @property
-    def inductance(self) -> float:
-        return self._resistance
-
-    def values(self) -> Dict[str, float]:
-        return {'R' : self.resistance}
-
 class Line(elm.lines.Line):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    @property
+    def name(self) -> str:
+        return ''
+
 class Ground(elm.Ground):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    @property
+    def name(self) -> str:
+        return 'Ground'
 
 element_type = {
     RealCurrentSource : "real_current_source",
@@ -113,7 +98,7 @@ def get_identical_nodes(node: schemdraw.util.Point, elements: List[schemdraw.ele
             identical_nodes.add(n1)
     return identical_nodes
 
-@dataclass
+@dataclass(frozen=True)
 class SchemdrawNetwork:
     drawing: schemdraw.Drawing
 
@@ -173,40 +158,18 @@ class SchemdrawNetwork:
 
     def get_element_from_name(self, name: str) -> schemdraw.elements.Element:
         elements = [e for e in self.two_term_elements if e.name == name]
-        return elements[0]
+        if len(elements) == 0:
+            raise UnknownElement
+        else:
+            return elements[0]
 
-def draw_voltage(schemdraw_network: SchemdrawNetwork, element_name: str) -> None:
+def draw_voltage(schemdraw_network: SchemdrawNetwork, element_name: str, reverse: bool = False) -> schemdraw.Drawing:
     network = load_network(schemdraw_network.dependency_list)
-    V = calculate_branch_voltages(network)
+    V = NodalAnalysis.calculate_branch_voltages(network)
 
     element = schemdraw_network.get_element_from_name(element_name)
     n1, n2 = get_nodes(element)
     i1, i2 = schemdraw_network.get_node_index(n1), schemdraw_network.get_node_index(n2)
 
-
-if __name__ == '__main__':
-    from NodalAnalysis import *
-    from schemdraw import Drawing
-    
-    with Drawing() as d:
-        d += RealCurrentSource(I=1, R=100, name='I1').up()
-        d += Resistor(R=10, name='R1').right()
-        d += Resistor(R=20, name='R2').down()
-        d += Line().left()
-        d += Ground()
-    #d.draw()
-    schemdraw_network = SchemdrawNetwork(d)
-    network2 = load_network(schemdraw_network.dependency_list)
-
-    Y2 = create_node_admittance_matrix_from_network(network2)
-    I2 = create_current_vector_from_network(network2)
-    U2 = calculate_node_voltages(Y2, I2)
-
-    n1, n2 = 1, 0
-    print(f'V({n1}->{n2}) = {calculate_branch_voltage(U2, n1, n2):.2f}')
-    n1, n2 = 1, 2
-    print(f'V({n1}->{n2}) = {calculate_branch_voltage(U2, n1, n2):.2f}')
-    n1, n2 = 2, 0
-    print(f'V({n1}->{n2}) = {calculate_branch_voltage(U2, n1, n2):.2f}')
-
-    # draw_voltages()
+    V_branch = NodalAnalysis.calculate_branch_voltage(V, i1, i2)
+    return elm.CurrentLabel(reverse=reverse).at(element).label(f'{V_branch:2.2f}V')
