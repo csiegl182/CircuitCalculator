@@ -10,10 +10,10 @@ class UnknownElement(Exception): pass
 class RealCurrentSource(elm.sources.SourceI):
     def __init__(self, I: float, R: float, name: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._current = I
-        self._resistance = R
+        self._I = -I # generator counter arrow system
+        self._R = R
         self._name = name
-        self.label(self._name)
+        self.label(f'${self._name}$\n ${I}\\mathrm{{A}} / {R}\\Omega$')
 
     @property
     def name(self) -> str:
@@ -21,40 +21,40 @@ class RealCurrentSource(elm.sources.SourceI):
 
     @property
     def current(self) -> float:
-        return self._current
+        return self._I
 
     @property
-    def resistance(self) -> float:
-        return self._resistance
+    def R(self) -> float:
+        return self._R
 
     @property
-    def inductance(self) -> float:
-        return 1/self._resistance
+    def G(self) -> float:
+        return 1/self._R
 
     def values(self) -> Dict[str, float]:
-        return {'I' : self.current, 'R' : self.resistance}
+        return {'I' : self.current, 'R' : self.R}
 
 class Resistor(elm.twoterm.ResistorIEC):
     def __init__(self, R: float, name: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._resistance = R
+        self._R = R
         self._name = name
-        self.label(self._name)
+        self.label(f'${self._name}={self._R}\\Omega$')
 
     @property
     def name(self) -> str:
         return self._name
 
     @property
-    def resistance(self) -> float:
-        return self._resistance
+    def R(self) -> float:
+        return self._R
 
     @property
-    def inductance(self) -> float:
-        return 1/self._resistance
+    def G(self) -> float:
+        return 1/self._R
 
     def values(self) -> Dict[str, float]:
-        return {'R' : self.resistance}
+        return {'R' : self._R}
 
 class Line(elm.lines.Line):
     def __init__(self, *args, **kwargs):
@@ -166,10 +166,27 @@ class SchemdrawNetwork:
 def draw_voltage(schemdraw_network: SchemdrawNetwork, element_name: str, reverse: bool = False) -> schemdraw.Drawing:
     network = load_network(schemdraw_network.dependency_list)
     V = NodalAnalysis.calculate_branch_voltages(network)
+    print(V)
 
     element = schemdraw_network.get_element_from_name(element_name)
     n1, n2 = get_nodes(element)
     i1, i2 = schemdraw_network.get_node_index(n1), schemdraw_network.get_node_index(n2)
 
     V_branch = NodalAnalysis.calculate_branch_voltage(V, i1, i2)
-    return elm.CurrentLabel(reverse=reverse).at(element).label(f'{V_branch:2.2f}V')
+    if reverse:
+        V_branch *= -1
+    return elm.CurrentLabel(top=False, reverse=reverse).at(element).label(f'{V_branch:2.2f}V')
+
+def draw_current(schemdraw_network: SchemdrawNetwork, element_name: str, reverse: bool = False) -> schemdraw.Drawing:
+    network = load_network(schemdraw_network.dependency_list)
+    V = NodalAnalysis.calculate_branch_voltages(network)
+
+    element = schemdraw_network.get_element_from_name(element_name)
+    n1, n2 = get_nodes(element)
+    i1, i2 = schemdraw_network.get_node_index(n1), schemdraw_network.get_node_index(n2)
+
+    V_branch = NodalAnalysis.calculate_branch_voltage(V, i1, i2)
+    if reverse:
+        V_branch *= -1
+    I_branch = V_branch / element.R
+    return elm.CurrentLabelInline(top=False, reverse=reverse).at(element).label(f'{I_branch:2.2f}A')
