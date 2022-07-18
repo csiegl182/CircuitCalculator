@@ -98,6 +98,12 @@ def get_identical_nodes(node: schemdraw.util.Point, elements: List[schemdraw.ele
             identical_nodes.add(n1)
     return identical_nodes
 
+def get_node_direction(node1: schemdraw.util.Point, node2: schemdraw.util.Point) -> Tuple[int, int]:
+    delta = node2 - node1
+    delta_x = +1 if delta.x >= 0 else -1
+    delta_y = +1 if delta.y >= 0 else -1
+    return delta_x, delta_y
+
 @dataclass(frozen=True)
 class SchemdrawNetwork:
     drawing: schemdraw.Drawing
@@ -166,7 +172,6 @@ class SchemdrawNetwork:
 def draw_voltage(schemdraw_network: SchemdrawNetwork, element_name: str, reverse: bool = False) -> schemdraw.Drawing:
     network = load_network(schemdraw_network.dependency_list)
     V = NodalAnalysis.calculate_branch_voltages(network)
-    print(V)
 
     element = schemdraw_network.get_element_from_name(element_name)
     n1, n2 = get_nodes(element)
@@ -175,6 +180,12 @@ def draw_voltage(schemdraw_network: SchemdrawNetwork, element_name: str, reverse
     V_branch = NodalAnalysis.calculate_branch_voltage(V, i1, i2)
     if reverse:
         V_branch *= -1
+
+    # adjust missing direction information of CurrentLabel() method
+    dx, dy = get_node_direction(n1, n2)
+    if dx < 0 or dy < 0:
+        reverse = not reverse
+
     return elm.CurrentLabel(top=False, reverse=reverse).at(element).label(f'{V_branch:2.2f}V')
 
 def draw_current(schemdraw_network: SchemdrawNetwork, element_name: str, reverse: bool = False) -> schemdraw.Drawing:

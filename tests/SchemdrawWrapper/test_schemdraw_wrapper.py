@@ -33,4 +33,3 @@ def test_unknown_element_name_raises_exception() -> None:
     schemdraw_network = SchemdrawNetwork(setup_simple_drawing())
     with pytest.raises(UnknownElement):
         schemdraw_network.get_element_from_name('RX')
-    
