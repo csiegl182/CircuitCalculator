@@ -103,11 +103,9 @@ def get_node_direction(node1: schemdraw.util.Point, node2: schemdraw.util.Point)
     delta_y = +1 if delta.y >= 0 else -1
     return delta_x, delta_y
 
+@dataclass(frozen=True)
 class SchemdrawNetwork:
-
-    def __init__(self, drawing: schemdraw.Drawing, solver: NetworkSolver):
-        self.drawing = drawing
-        self.solution = solver(self.network)
+    drawing: schemdraw.Drawing
 
     @property
     def two_term_elements(self) -> List[schemdraw.elements.Element2Term]:
@@ -145,7 +143,7 @@ class SchemdrawNetwork:
         return node_mapping
 
     @property
-    def dependency_list(self) -> List[Dict[str, Any]]:
+    def elements(self) -> List[Dict[str, Any]]:
         el = []
         elements = [e for e in self.two_term_elements if element_type[type(e)] != "line"]
         for e in elements:
@@ -162,7 +160,7 @@ class SchemdrawNetwork:
 
     @property
     def network(self) -> Network:
-        return load_network(self.dependency_list)
+        return load_network(self.elements)
 
     def get_node_index(self, node: schemdraw.util.Point) -> int:
         return self.ordered_unique_nodes.index(self.unique_node_mapping[node])
@@ -176,14 +174,20 @@ class SchemdrawNetwork:
 
     def get_branch_from_name(self, id: str) -> Branch:
         try:
-            return self.network.branches[[b['id'] for b in self.dependency_list].index(id)]
+            return self.network.branches[[b['id'] for b in self.elements].index(id)]
         except IndexError:
             raise UnknownElement
 
+class SchemdrawSolution:
+
+    def __init__(self, schemdraw_network: SchemdrawNetwork, solver: NetworkSolver):
+        self.schemdraw_network = schemdraw_network
+        self.network_solution = solver(self.schemdraw_network.network)
+
     def draw_voltage(self, element_name: str, reverse: bool = False) -> schemdraw.Drawing:
-        element = self.get_element_from_name(element_name)
-        branch = self.get_branch_from_name(element_name)
-        V_branch = self.solution.get_voltage(branch)
+        element = self.schemdraw_network.get_element_from_name(element_name)
+        branch = self.schemdraw_network.get_branch_from_name(element_name)
+        V_branch = self.network_solution.get_voltage(branch)
         if reverse:
             V_branch *= -1
 
@@ -196,7 +200,7 @@ class SchemdrawNetwork:
         return elm.CurrentLabel(top=False, reverse=reverse).at(element).label(f'{V_branch:2.2f}V')
 
     def draw_current(self, element_name: str, reverse: bool = False) -> schemdraw.Drawing:
-        element = self.get_element_from_name(element_name)
-        branch = self.get_branch_from_name(element_name)
-        I_branch = self.solution.get_current(branch)
+        element = self.schemdraw_network.get_element_from_name(element_name)
+        branch = self.schemdraw_network.get_branch_from_name(element_name)
+        I_branch = self.network_solution.get_current(branch)
         return elm.CurrentLabelInline(top=False, reverse=reverse).at(element).label(f'{I_branch:2.2f}A')
