@@ -1,5 +1,5 @@
+from Network import Network, CurrentSource, Branch
 import numpy as np
-from Network import Network, CurrentSource
 
 class DimensionError(Exception): pass
 
@@ -49,12 +49,25 @@ def create_current_vector_from_network(network : Network) -> np.ndarray:
     for i in range(1, network.number_of_nodes):
         current_sources = [branch for branch in network.branches_connected_to_node(i) if type(branch.element) == CurrentSource]
         if len(current_sources) > 0:
-            I[i-1] = sum([cs.element.I if cs.node1 == i else -cs.element.I for cs in current_sources])
+            I[i-1] = sum([cs.element.I if cs.node2 == i else -cs.element.I for cs in current_sources])
         else:
             I[i-1] = 0
     return I
 
-def calculate_branch_voltages(network: Network) -> np.ndarray:
+def calculate_node_voltages_from_network(network: Network) -> np.ndarray:
     Y = create_node_admittance_matrix_from_network(network)
     I = create_current_vector_from_network(network)
     return calculate_node_voltages(Y, I)
+
+class NodalAnalysisSolution:
+    def __init__(self, node_voltages = np.ndarray) -> None:
+        self.node_voltages = node_voltages
+    
+    def get_voltage(self, branch: Branch) -> float:
+        return calculate_branch_voltage(self.node_voltages, branch.node1, branch.node2)
+
+    def get_current(self, branch: Branch) -> float:
+        return self.get_voltage(branch)/branch.element.Z.real
+        
+def nodal_analysis_solver(network):
+    return NodalAnalysisSolution(calculate_node_voltages_from_network(network))

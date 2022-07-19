@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Protocol, List, Dict, Callable, Any
 
+class UnknownBranchResult(Exception): pass
+
 class Element(Protocol):
     @property
     def Z(self) -> complex:
@@ -44,7 +46,12 @@ def conductor(G : float, **_) -> Element:
 def real_current_source(I : float, R : float, **_) -> Element:
     return CurrentSource(I=I, Z=R)
 
-@dataclass
+branch_types : Dict[str, Callable[..., Element]] = {
+    "resistor" : resistor,
+    "real_current_source" : real_current_source
+}
+
+@dataclass(frozen=True)
 class Branch:
     node1 : int
     node2 : int
@@ -69,10 +76,12 @@ class Network:
         node_set = node1_set.union(node2_set)
         return len(node_set)
 
-branch_types : Dict[str, Callable[..., Element]] = {
-    "resistor" : resistor,
-    "real_current_source" : real_current_source
-}
+class NetworkSolution(Protocol):
+    def get_voltage(self, branch: Branch) -> float: pass
+
+    def get_current(self, branch: Branch) -> float: pass
+
+NetworkSolver = Callable[[Network], NetworkSolution]
 
 def load_network(network_dict: List[Dict[str, Any]]) -> Network:
     network = Network()

@@ -1,16 +1,15 @@
 from dataclasses import dataclass
-from Network import load_network
+from Network import Network, NetworkSolver, load_network, Branch
 from typing import Set, List, Tuple, Dict, Any
 import schemdraw
 import schemdraw.elements as elm
-import NodalAnalysis
 
 class UnknownElement(Exception): pass
 
 class RealCurrentSource(elm.sources.SourceI):
     def __init__(self, I: float, R: float, name: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._I = -I # generator counter arrow system
+        self._I = I
         self._R = R
         self._name = name
         self.label(f'${self._name}$\n ${I}\\mathrm{{A}} / {R}\\Omega$')
@@ -104,9 +103,11 @@ def get_node_direction(node1: schemdraw.util.Point, node2: schemdraw.util.Point)
     delta_y = +1 if delta.y >= 0 else -1
     return delta_x, delta_y
 
-@dataclass(frozen=True)
 class SchemdrawNetwork:
-    drawing: schemdraw.Drawing
+
+    def __init__(self, drawing: schemdraw.Drawing, solver: NetworkSolver):
+        self.drawing = drawing
+        self.solution = solver(self.network)
 
     @property
     def two_term_elements(self) -> List[schemdraw.elements.Element2Term]:
@@ -159,6 +160,10 @@ class SchemdrawNetwork:
             el.append(d)
         return el
 
+    @property
+    def network(self) -> Network:
+        return load_network(self.dependency_list)
+
     def get_node_index(self, node: schemdraw.util.Point) -> int:
         return self.ordered_unique_nodes.index(self.unique_node_mapping[node])
 
@@ -169,35 +174,29 @@ class SchemdrawNetwork:
         else:
             return elements[0]
 
-def draw_voltage(schemdraw_network: SchemdrawNetwork, element_name: str, reverse: bool = False) -> schemdraw.Drawing:
-    network = load_network(schemdraw_network.dependency_list)
-    V = NodalAnalysis.calculate_branch_voltages(network)
+    def get_branch_from_name(self, id: str) -> Branch:
+        try:
+            return self.network.branches[[b['id'] for b in self.dependency_list].index(id)]
+        except IndexError:
+            raise UnknownElement
 
-    element = schemdraw_network.get_element_from_name(element_name)
-    n1, n2 = get_nodes(element)
-    i1, i2 = schemdraw_network.get_node_index(n1), schemdraw_network.get_node_index(n2)
+    def draw_voltage(self, element_name: str, reverse: bool = False) -> schemdraw.Drawing:
+        element = self.get_element_from_name(element_name)
+        branch = self.get_branch_from_name(element_name)
+        V_branch = self.solution.get_voltage(branch)
+        if reverse:
+            V_branch *= -1
 
-    V_branch = NodalAnalysis.calculate_branch_voltage(V, i1, i2)
-    if reverse:
-        V_branch *= -1
+        # adjust missing direction information of CurrentLabel() method
+        n1, n2 = get_nodes(element)
+        dx, dy = get_node_direction(n1, n2)
+        if dx < 0 or dy < 0:
+            reverse = not reverse
 
-    # adjust missing direction information of CurrentLabel() method
-    dx, dy = get_node_direction(n1, n2)
-    if dx < 0 or dy < 0:
-        reverse = not reverse
+        return elm.CurrentLabel(top=False, reverse=reverse).at(element).label(f'{V_branch:2.2f}V')
 
-    return elm.CurrentLabel(top=False, reverse=reverse).at(element).label(f'{V_branch:2.2f}V')
-
-def draw_current(schemdraw_network: SchemdrawNetwork, element_name: str, reverse: bool = False) -> schemdraw.Drawing:
-    network = load_network(schemdraw_network.dependency_list)
-    V = NodalAnalysis.calculate_branch_voltages(network)
-
-    element = schemdraw_network.get_element_from_name(element_name)
-    n1, n2 = get_nodes(element)
-    i1, i2 = schemdraw_network.get_node_index(n1), schemdraw_network.get_node_index(n2)
-
-    V_branch = NodalAnalysis.calculate_branch_voltage(V, i1, i2)
-    if reverse:
-        V_branch *= -1
-    I_branch = V_branch / element.R
-    return elm.CurrentLabelInline(top=False, reverse=reverse).at(element).label(f'{I_branch:2.2f}A')
+    def draw_current(self, element_name: str, reverse: bool = False) -> schemdraw.Drawing:
+        element = self.get_element_from_name(element_name)
+        branch = self.get_branch_from_name(element_name)
+        I_branch = self.solution.get_current(branch)
+        return elm.CurrentLabelInline(top=False, reverse=reverse).at(element).label(f'{I_branch:2.2f}A')
