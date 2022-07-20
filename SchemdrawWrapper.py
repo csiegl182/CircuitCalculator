@@ -6,7 +6,7 @@ import schemdraw.elements as elm
 
 class UnknownElement(Exception): pass
 
-class RealCurrentSource(elm.sources.SourceI):
+class RealCurrentSource(schemdraw.elements.sources.SourceI):
     def __init__(self, I: float, R: float, name: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._I = I
@@ -33,7 +33,7 @@ class RealCurrentSource(elm.sources.SourceI):
     def values(self) -> Dict[str, float]:
         return {'I' : self.current, 'R' : self.R}
 
-class Resistor(elm.twoterm.ResistorIEC):
+class Resistor(schemdraw.elements.twoterm.ResistorIEC):
     def __init__(self, R: float, name: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._R = R
@@ -55,7 +55,7 @@ class Resistor(elm.twoterm.ResistorIEC):
     def values(self) -> Dict[str, float]:
         return {'R' : self._R}
 
-class Line(elm.lines.Line):
+class Line(schemdraw.elements.lines.Line):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -63,7 +63,7 @@ class Line(elm.lines.Line):
     def name(self) -> str:
         return ''
 
-class Ground(elm.Ground):
+class Ground(schemdraw.elements.Ground):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -86,17 +86,6 @@ def round_node(node: schemdraw.util.Point) -> schemdraw.util.Point:
 def get_nodes(element: schemdraw.elements.Element) -> Tuple[schemdraw.util.Point, schemdraw.util.Point]:
     return round_node(element.absanchors['start']), round_node(element.absanchors['end'])
 
-def get_identical_nodes(node: schemdraw.util.Point, elements: List[schemdraw.elements.Element2Term]) -> Set[schemdraw.util.Point]:
-    lines = [element for element in elements if element_type[type(element)] == "line"]
-    identical_nodes = set()
-    for line in lines:
-        n1, n2 = get_nodes(line)
-        if node == n1:
-            identical_nodes.add(n2)
-        elif node == n2:
-            identical_nodes.add(n1)
-    return identical_nodes
-
 def get_node_direction(node1: schemdraw.util.Point, node2: schemdraw.util.Point) -> Tuple[int, int]:
     delta = node2 - node1
     delta_x = +1 if delta.x >= 0 else -1
@@ -112,6 +101,10 @@ class SchemdrawNetwork:
         return [e for e in self.drawing.elements if isinstance(e, schemdraw.elements.Element2Term)]
 
     @property
+    def line_elements(self) -> List[schemdraw.elements.lines.Line]:
+        return [e for e in self.two_term_elements if isinstance(e, schemdraw.elements.lines.Line)]
+
+    @property
     def all_nodes(self) -> Set[schemdraw.util.Point]:
         nodes = {round_node(e.absanchors['start']) for e in self.two_term_elements}
         nodes = nodes.union({round_node(e.absanchors['end']) for e in self.two_term_elements})
@@ -122,8 +115,9 @@ class SchemdrawNetwork:
         nodes = self.all_nodes
         for node in self.all_nodes:
             if node in nodes:
-                for n in get_identical_nodes(node, self.two_term_elements):
+                for n in self.get_equal_electrical_potential_nodes(node).intersection(nodes):
                     nodes.remove(n)
+                nodes.add(node)
         return nodes
 
     @property
@@ -134,7 +128,8 @@ class SchemdrawNetwork:
     def unique_node_mapping(self) -> Dict[schemdraw.util.Point, schemdraw.util.Point]:
         node_mapping = {}
         for n in self.all_nodes:
-            identical_nodes = get_identical_nodes(n, self.two_term_elements)
+            identical_nodes = self.get_equal_electrical_potential_nodes(n)
+            identical_nodes.remove(n)
             current_unique_node = self.unique_nodes.intersection(identical_nodes)
             if len(current_unique_node) > 0:
                 node_mapping.update({n: current_unique_node.pop()})
@@ -161,6 +156,19 @@ class SchemdrawNetwork:
     @property
     def network(self) -> Network:
         return load_network(self.elements)
+
+    def get_equal_electrical_potential_nodes(self, node: schemdraw.util.Point) -> Set[schemdraw.util.Point]:
+        equal_electrical_potential_nodes = set([node])
+        old_length = 0
+        while len(equal_electrical_potential_nodes) > old_length:
+            old_length = len(equal_electrical_potential_nodes)
+            for line in self.line_elements:
+                n1, n2 = get_nodes(line)
+                if n1 in equal_electrical_potential_nodes:
+                    equal_electrical_potential_nodes.add(n2)
+                elif n2 in equal_electrical_potential_nodes:
+                    equal_electrical_potential_nodes.add(n1)
+        return equal_electrical_potential_nodes
 
     def get_node_index(self, node: schemdraw.util.Point) -> int:
         return self.ordered_unique_nodes.index(self.unique_node_mapping[node])
@@ -197,10 +205,10 @@ class SchemdrawSolution:
         if dx < 0 or dy < 0:
             reverse = not reverse
 
-        return elm.CurrentLabel(top=False, reverse=reverse).at(element).label(f'{V_branch:2.2f}V')
+        return schemdraw.elements.CurrentLabel(top=False, reverse=reverse).at(element).label(f'{V_branch:2.2f}V')
 
     def draw_current(self, element_name: str, reverse: bool = False) -> schemdraw.Drawing:
         element = self.schemdraw_network.get_element_from_name(element_name)
         branch = self.schemdraw_network.get_branch_from_name(element_name)
         I_branch = self.network_solution.get_current(branch)
-        return elm.CurrentLabelInline(top=False, reverse=reverse).at(element).label(f'{I_branch:2.2f}A')
+        return schemdraw.elements.CurrentLabelInline(top=False, reverse=reverse).at(element).label(f'{I_branch:2.2f}A')
