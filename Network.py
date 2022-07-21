@@ -49,6 +49,16 @@ class CurrentSource:
     U : complex = field(default=np.nan, init=False)
     active: bool = field(default=True, init=False)
 
+@dataclass(frozen=True)
+class RealVoltageSource:
+    Z : complex
+    U : complex
+    active: bool = field(default=True, init=False)
+    @property
+    def Y(self) -> complex: return 1/self.Z
+    @property
+    def I(self) -> complex: return self.U/self.Z
+
 def resistor(R : float, **_) -> Element:
     return Impedeance(Z=R)
 
@@ -61,10 +71,14 @@ def real_current_source(I : float, R : float, **_) -> Element:
 def current_source(I : float, **_) -> Element:
     return CurrentSource(I=I)
 
+def real_voltage_source(U : float, R : float, **_) -> Element:
+    return RealVoltageSource(U=U, Z=R)
+
 branch_types : Dict[str, Callable[..., Element]] = {
     "resistor" : resistor,
     "real_current_source" : real_current_source,
-    "current_source" : current_source
+    "current_source" : current_source,
+    "real_voltage_source" : real_voltage_source,
 }
 
 @dataclass(frozen=True)

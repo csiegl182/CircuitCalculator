@@ -6,6 +6,33 @@ import schemdraw.elements as elm
 
 class UnknownElement(Exception): pass
 
+class RealVoltageSource(schemdraw.elements.sources.SourceV):
+    def __init__(self, U: float, R: float, name: str, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._U = U
+        self._R = R
+        self._name = name
+        self.label(f'${self._name}$\n ${U}\\mathrm{{V}} / {R}\\Omega$')
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def voltage(self) -> float:
+        return self._U
+
+    @property
+    def R(self) -> float:
+        return self._R
+
+    @property
+    def G(self) -> float:
+        return 1/self._R
+
+    def values(self) -> Dict[str, float]:
+        return {'U' : self.voltage, 'R' : self.R}
+
 class CurrentSource(schemdraw.elements.sources.SourceI):
     def __init__(self, I: float, name: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -94,7 +121,8 @@ element_type = {
     Resistor : "resistor",
     Line : "line",
     Ground : "ground",
-    CurrentSource: "current_source"
+    CurrentSource: "current_source",
+    RealVoltageSource : "real_voltage_source",
 }
     
 def round_node(node: schemdraw.util.Point) -> schemdraw.util.Point:
