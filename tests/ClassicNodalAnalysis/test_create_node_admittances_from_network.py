@@ -1,4 +1,4 @@
-from NodalAnalysis import create_node_admittance_matrix_from_network
+from ClassicNodalAnalysis import create_node_admittance_matrix_from_network
 from Network import Network, Branch, conductor
 import numpy as np
 

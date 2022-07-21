@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from NodalAnalysis import DimensionError, create_node_admittance_matrix
+from ClassicNodalAnalysis import DimensionError, create_node_admittance_matrix
 
 def test_create_node_admittances_number_of_node_admittances_is_decreasing() -> None:
     with pytest.raises(DimensionError):

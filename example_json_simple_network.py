@@ -1,5 +1,5 @@
 from Network import load_network_from_json
-from NodalAnalysis import nodal_analysis_solver
+from ClassicNodalAnalysis import nodal_analysis_solver
 
 if __name__ == '__main__':
     network = load_network_from_json('./example_network_1.json')

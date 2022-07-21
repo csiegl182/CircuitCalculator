@@ -1,5 +1,5 @@
 from SchemdrawWrapper import RealCurrentSource, Resistor, Line, Ground, SchemdrawNetwork, SchemdrawSolution
-from NodalAnalysis import nodal_analysis_solver
+from ClassicNodalAnalysis import nodal_analysis_solver
 from schemdraw import Drawing
 import schemdraw.elements as elm
 

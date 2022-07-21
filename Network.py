@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Protocol, List, Dict, Callable, Any
 import functools
-from numpy import inf, nan
+from numpy import inf, nan, PZERO
 
 class UnknownBranchResult(Exception): pass
 
@@ -59,6 +59,14 @@ class RealVoltageSource:
     @property
     def I(self) -> complex: return self.U/self.Z
 
+@dataclass(frozen=True)
+class VoltageSource:
+    Z : complex = field(default=0, init=False)
+    Y : complex = field(default=inf, init=False)
+    U : complex
+    I : complex = field(default=nan, init=False)
+    active: bool = field(default=True, init=False)
+
 def resistor(R : float, **_) -> Element:
     return Impedeance(Z=R)
 
@@ -74,11 +82,15 @@ def current_source(I : float, **_) -> Element:
 def real_voltage_source(U : float, R : float, **_) -> Element:
     return RealVoltageSource(U=U, Z=R)
 
+def voltage_source(U : float, **_) -> Element:
+    return VoltageSource(U=U)
+
 branch_types : Dict[str, Callable[..., Element]] = {
     "resistor" : resistor,
     "real_current_source" : real_current_source,
     "current_source" : current_source,
     "real_voltage_source" : real_voltage_source,
+    "voltage_source" : voltage_source,
 }
 
 @dataclass(frozen=True)

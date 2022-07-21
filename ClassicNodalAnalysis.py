@@ -39,10 +39,10 @@ def calculate_branch_voltage(V_node : np.ndarray, node1 : int, node2 : int) -> f
 
 def create_node_admittance_matrix_from_network(network : Network) -> np.ndarray:
     network = NetworkReducedParallel(network.branches)
-    zero_node_admittances = [1/branch.element.Z for branch in network.branches_connected_to(node=0)]
+    zero_node_admittances = [branch.element.Y for branch in network.branches_connected_to(node=0)]
     node_admittances = []
     for i in range(1, network.number_of_nodes-1):
-        node_admittances += [[1/branch.element.Z for branch in network.branches_connected_to(node=i) if branch.node1 > i or branch.node2 > i]]
+        node_admittances += [[branch.element.Y for branch in network.branches_connected_to(node=i) if branch.node1 > i or branch.node2 > i]]
     return create_node_admittance_matrix(zero_node_admittances, *node_admittances)
     
 def create_current_vector_from_network(network : Network) -> np.ndarray:

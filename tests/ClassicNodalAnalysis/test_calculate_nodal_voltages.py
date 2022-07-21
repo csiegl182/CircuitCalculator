@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from NodalAnalysis import DimensionError, calculate_node_voltages
+from ClassicNodalAnalysis import DimensionError, calculate_node_voltages
 
 def test_only_two_dimensional_y_matrix_is_accepted() -> None:
     with pytest.raises(DimensionError):
