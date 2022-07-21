@@ -21,3 +21,8 @@ def test_NetworkReducedParallel_calculates_parallel_resistors() -> None:
     R1, R2, R3, R4 = 10, 20, 30, 40
     network = NetworkReducedParallel([Branch(0, 1, resistor(R1)), Branch(0, 1, resistor(R2)), Branch(1, 2, resistor(R3)), Branch(0, 1, resistor(R4))])
     assert network.branches_between(node1=0, node2=1)[0].element.Z == pytest.approx(1/(1/R1+1/R2+1/R4), 0.0001)
+
+def test_NetworkReducedParallel_reduces_reversed_parallel_branches() -> None:
+    R1, R2, R3, R4 = 10, 20, 30, 40
+    network = NetworkReducedParallel([Branch(0, 1, resistor(R1)), Branch(1, 0, resistor(R2))])
+    assert len(network.branches) == 1
