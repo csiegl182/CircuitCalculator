@@ -1,4 +1,4 @@
-from Network import Network, CurrentSource, Branch, NetworkReducedParallel
+from Network import Network, RealCurrentSource, Branch, NetworkReducedParallel
 import numpy as np
 
 class DimensionError(Exception): pass
@@ -48,7 +48,7 @@ def create_node_admittance_matrix_from_network(network : Network) -> np.ndarray:
 def create_current_vector_from_network(network : Network) -> np.ndarray:
     I = np.zeros(network.number_of_nodes-1)
     for i in range(1, network.number_of_nodes):
-        current_sources = [branch for branch in network.branches_connected_to(node=i) if type(branch.element) == CurrentSource]
+        current_sources = [branch for branch in network.branches_connected_to(node=i) if branch.element.active]
         if len(current_sources) > 0:
             I[i-1] = sum([cs.element.I if cs.node2 == i else -cs.element.I for cs in current_sources])
         else:

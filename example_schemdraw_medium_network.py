@@ -1,11 +1,11 @@
-from SchemdrawWrapper import RealCurrentSource, Resistor, Line, Ground, SchemdrawNetwork, SchemdrawSolution
+from SchemdrawWrapper import Resistor, Line, Ground, SchemdrawNetwork, SchemdrawSolution, CurrentSource
 from NodalAnalysis import nodal_analysis_solver
 from schemdraw import Drawing
 import schemdraw.elements as elm
 
 if __name__ == '__main__':
     with Drawing() as d:
-        d += RealCurrentSource(I=1, R=100, name='I1').up()
+        d += CurrentSource(I=1, name='I1').up()
         d += (R1:=Resistor(R=10, name='R1').right())
         d += Resistor(R=20, name='R2').down()
         d += Resistor(R=30, name='R3').at(R1.end).right()

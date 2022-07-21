@@ -6,6 +6,24 @@ import schemdraw.elements as elm
 
 class UnknownElement(Exception): pass
 
+class CurrentSource(schemdraw.elements.sources.SourceI):
+    def __init__(self, I: float, name: str, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._I = I
+        self._name = name
+        self.label(f'${self._name}$\n ${I}\\mathrm{{A}}$')
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def current(self) -> float:
+        return self._I
+
+    def values(self) -> Dict[str, float]:
+        return {'I' : self.current}
+
 class RealCurrentSource(schemdraw.elements.sources.SourceI):
     def __init__(self, I: float, R: float, name: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -75,7 +93,8 @@ element_type = {
     RealCurrentSource : "real_current_source",
     Resistor : "resistor",
     Line : "line",
-    Ground : "ground"
+    Ground : "ground",
+    CurrentSource: "current_source"
 }
     
 def round_node(node: schemdraw.util.Point) -> schemdraw.util.Point:

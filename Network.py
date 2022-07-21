@@ -1,42 +1,53 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Protocol, List, Dict, Callable, Any
 import functools
+import numpy as np
 
 class UnknownBranchResult(Exception): pass
 
 class Element(Protocol):
     @property
     def Z(self) -> complex:
-        """"Impedance of Branch"""
+        """Impedance of Branch"""
     @property
     def Y(self) -> complex:
-        """"Impedance of Branch"""
+        """Admittance of Branch"""
     @property
     def I(self) -> complex:
-        """"Impedance of Branch"""
+        """Current of Branch"""
     @property
     def U(self) -> complex:
-        """"Impedance of Branch"""
+        """Voltage of Branch"""
+    @property
+    def active(self) -> bool:
+        """Whether or not the branch is active"""
 
-@dataclass
+@dataclass(frozen=True)
 class Impedeance:
     Z : complex
-    
+    I : complex = field(default=np.nan, init=False)
+    U : complex = field(default=np.nan, init=False)
+    active: bool = field(default=False, init=False)
     @property
-    def Y(self): return 1/self.Z
-    @property
-    def I(_): return 0
-    @property
-    def U(_): return None
+    def Y(self) -> complex: return 1/self.Z
 
-@dataclass
-class CurrentSource:
+@dataclass(frozen=True)
+class RealCurrentSource:
     Z : complex
     I : complex
+    active: bool = field(default=True, init=False)
     @property
-    def Y(self): return 1/self.Z
+    def Y(self) -> complex: return 1/self.Z
     @property
-    def U(self): return self.I*self.Z
+    def U(self) -> complex: return self.I*self.Z
+
+@dataclass(frozen=True)
+class CurrentSource:
+    Z : complex = field(default=np.inf, init=False)
+    Y : complex = field(default=0, init=False)
+    I : complex
+    U : complex = field(default=np.nan, init=False)
+    active: bool = field(default=True, init=False)
 
 def resistor(R : float, **_) -> Element:
     return Impedeance(Z=R)
@@ -45,11 +56,15 @@ def conductor(G : float, **_) -> Element:
     return Impedeance(Z=1/G)
 
 def real_current_source(I : float, R : float, **_) -> Element:
-    return CurrentSource(I=I, Z=R)
+    return RealCurrentSource(I=I, Z=R)
+
+def current_source(I : float, **_) -> Element:
+    return CurrentSource(I=I)
 
 branch_types : Dict[str, Callable[..., Element]] = {
     "resistor" : resistor,
-    "real_current_source" : real_current_source
+    "real_current_source" : real_current_source,
+    "current_source" : current_source
 }
 
 @dataclass(frozen=True)
@@ -94,8 +109,8 @@ class NetworkReducedParallel(Network):
         return reduced_branch_list
 
     def _reduce_parallel(_, branch1: Branch, branch2: Branch) -> Branch:
-        if type(branch1.element) == CurrentSource or type(branch2.element) == CurrentSource:
-            if type(branch1.element) == CurrentSource:
+        if type(branch1.element) == RealCurrentSource or type(branch2.element) == RealCurrentSource:
+            if type(branch1.element) == RealCurrentSource:
                 I = branch1.element.I
             else:
                 I= branch2.element.I
