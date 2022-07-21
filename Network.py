@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Protocol, List, Dict, Callable, Any
 import functools
-import numpy as np
+from numpy import inf, nan
 
 class UnknownBranchResult(Exception): pass
 
@@ -25,8 +25,8 @@ class Element(Protocol):
 @dataclass(frozen=True)
 class Impedeance:
     Z : complex
-    I : complex = field(default=np.nan, init=False)
-    U : complex = field(default=np.nan, init=False)
+    I : complex = field(default=nan, init=False)
+    U : complex = field(default=nan, init=False)
     active: bool = field(default=False, init=False)
     @property
     def Y(self) -> complex: return 1/self.Z
@@ -43,10 +43,10 @@ class RealCurrentSource:
 
 @dataclass(frozen=True)
 class CurrentSource:
-    Z : complex = field(default=np.inf, init=False)
+    Z : complex = field(default=inf, init=False)
     Y : complex = field(default=0, init=False)
     I : complex
-    U : complex = field(default=np.nan, init=False)
+    U : complex = field(default=nan, init=False)
     active: bool = field(default=True, init=False)
 
 @dataclass(frozen=True)
