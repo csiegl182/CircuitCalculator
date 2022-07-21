@@ -1,4 +1,4 @@
-from Network import Network, CurrentSource, Branch
+from Network import Network, CurrentSource, Branch, NetworkReducedParallel
 import numpy as np
 
 class DimensionError(Exception): pass
@@ -38,16 +38,17 @@ def calculate_branch_voltage(V_node : np.ndarray, node1 : int, node2 : int) -> f
     return V1 - V2
 
 def create_node_admittance_matrix_from_network(network : Network) -> np.ndarray:
-    zero_node_admittances = [1/branch.element.Z for branch in network.branches_connected_to_node(0)]
+    network = NetworkReducedParallel(network.branches)
+    zero_node_admittances = [1/branch.element.Z for branch in network.branches_connected_to(node=0)] #### ISSUE Parallele Elemente identifizieren
     node_admittances = []
     for i in range(1, network.number_of_nodes-1):
-        node_admittances += [[1/branch.element.Z for branch in network.branches_connected_to_node(i) if branch.node1 > i or branch.node2 > i]]
+        node_admittances += [[1/branch.element.Z for branch in network.branches_connected_to(node=i) if branch.node1 > i or branch.node2 > i]]
     return create_node_admittance_matrix(zero_node_admittances, *node_admittances)
     
 def create_current_vector_from_network(network : Network) -> np.ndarray:
     I = np.zeros(network.number_of_nodes-1)
     for i in range(1, network.number_of_nodes):
-        current_sources = [branch for branch in network.branches_connected_to_node(i) if type(branch.element) == CurrentSource]
+        current_sources = [branch for branch in network.branches_connected_to(node=i) if type(branch.element) == CurrentSource]
         if len(current_sources) > 0:
             I[i-1] = sum([cs.element.I if cs.node2 == i else -cs.element.I for cs in current_sources])
         else:

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Protocol, List, Dict, Callable, Any
+import functools
 
 class UnknownBranchResult(Exception): pass
 
@@ -57,17 +58,13 @@ class Branch:
     node2 : int
     element : Element
 
+@dataclass(frozen=True)
 class Network:
-    def __init__(self) -> None:
-        self.branches : List[Branch] = []
+    branch_list: List[Branch]
 
-    def add_branch(self, branch : Branch) -> None:
-        self.branches.append(branch)
-        
-    def branches_connected_to_node(self, node) -> List[Branch]:
-        connected_branches = [branch for branch in self.branches if branch.node1 == node or branch.node2 == node]
-        connected_branches.sort(key=lambda x: x.node1 if x.node1!=node else x.node2)
-        return connected_branches
+    @property
+    def branches(self) -> List[Branch]:
+        return self.branch_list
 
     @property
     def number_of_nodes(self) -> int:
@@ -75,6 +72,36 @@ class Network:
         node2_set = {branch.node2 for branch in self.branches}
         node_set = node1_set.union(node2_set)
         return len(node_set)
+
+    def branches_connected_to(self, node: int) -> List[Branch]:
+        connected_branches = [branch for branch in self.branches if branch.node1 == node or branch.node2 == node]
+        connected_branches.sort(key=lambda x: x.node1 if x.node1!=node else x.node2)
+        return connected_branches
+
+    def branches_between(self, node1: int, node2: int) -> List[Branch]:
+        return [branch for branch in self.branches if branch.node1 == node1 and branch.node2 == node2]
+
+class NetworkReducedParallel(Network):
+    @property
+    def branches(self) -> List[Branch]:
+        reduced_branch_list = self.branch_list
+        for branch in self.branch_list:
+            if branch in reduced_branch_list:
+                parallel_branches = [b for b in reduced_branch_list if b.node1 == branch.node1 and b.node2 == branch.node2]
+                reduced_branch_list = [b for b in reduced_branch_list if b not in parallel_branches]
+                reduced_branch = functools.reduce(lambda b1, b2 :  self._reduce_parallel(b1, b2), parallel_branches)
+                reduced_branch_list.append(reduced_branch)
+        return reduced_branch_list
+
+    def _reduce_parallel(_, branch1: Branch, branch2: Branch) -> Branch:
+        if type(branch1.element) == CurrentSource or type(branch2.element) == CurrentSource:
+            if type(branch1.element) == CurrentSource:
+                I = branch1.element.I
+            else:
+                I= branch2.element.I
+            return Branch(branch1.node1, branch1.node2, real_current_source(I=I.real, R=1/(1/branch1.element.Z.real + 1/branch2.element.Z.real)))
+        else:
+            return Branch(branch1.node1, branch1.node2, resistor(R=1/(1/branch1.element.Z.real + 1/branch2.element.Z.real)))
 
 class NetworkSolution(Protocol):
     def get_voltage(self, branch: Branch) -> float: pass
@@ -84,14 +111,14 @@ class NetworkSolution(Protocol):
 NetworkSolver = Callable[[Network], NetworkSolution]
 
 def load_network(network_dict: List[Dict[str, Any]]) -> Network:
-    network = Network()
+    branches = []
     for branch in network_dict:
         n1 = branch.pop('N1')
         n2 = branch.pop('N2')
         element_factory = branch_types[branch.pop('type')]
         element = element_factory(**branch)
-        network.add_branch(Branch(n1, n2, element))
-    return network
+        branches.append(Branch(n1, n2, element))
+    return Network(branches)
 
 def load_network_from_json(filename: str) -> Network:
     import json
