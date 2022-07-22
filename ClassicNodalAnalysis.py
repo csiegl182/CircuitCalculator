@@ -1,9 +1,13 @@
-from Network import Network, RealCurrentSource, Branch, NetworkReducedParallel
+from Network import Network, Branch, NetworkReducedParallel
 import numpy as np
 
 class DimensionError(Exception): pass
 
 def calculate_node_voltages(Y : np.ndarray, I : np.ndarray) -> np.ndarray:
+    if np.any(np.logical_not(np.isfinite(Y))):
+        raise ValueError
+    if np.any(np.logical_not(np.isfinite(I))):
+        raise ValueError
     if Y.ndim != 2:
         raise DimensionError('dim error')
     if I.ndim != 1:
