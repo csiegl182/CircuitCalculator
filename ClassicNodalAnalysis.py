@@ -1,5 +1,6 @@
-from Network import Network, Branch, NetworkReducedParallel
+from Network import Network, Branch, Element, conductor
 import numpy as np
+import functools
 
 class DimensionError(Exception): pass
 
@@ -17,20 +18,6 @@ def calculate_node_voltages(Y : np.ndarray, I : np.ndarray) -> np.ndarray:
         raise DimensionError('dim error')
     return np.linalg.solve(Y, I)
 
-def create_node_admittance_matrix(zero_node_admittances, *node_admittances) ->  np.ndarray:
-    if [len(y_vec) for y_vec in node_admittances] != list(range(1, len(zero_node_admittances)))[::-1]:
-        raise DimensionError('dim error')
-        
-    Y = np.diag(zero_node_admittances)
-    for n, admittances in enumerate(node_admittances):
-        Y[n,n] += np.sum(admittances)
-        for m, y in enumerate(admittances):
-            Y[n+m+1,n+m+1] += y
-            Y[n+m+1, n] = -y
-    Y += np.tril(Y,-1).T
-
-    return Y
-
 def calculate_branch_voltage(V_node : np.ndarray, node1 : int, node2 : int) -> float:
     if node1 < 0 or node2 < 0:
         raise DimensionError('dim error')
@@ -42,12 +29,16 @@ def calculate_branch_voltage(V_node : np.ndarray, node1 : int, node2 : int) -> f
     return V1 - V2
 
 def create_node_admittance_matrix_from_network(network : Network) -> np.ndarray:
-    network = NetworkReducedParallel(network.branches)
-    zero_node_admittances = [branch.element.Y for branch in network.branches_connected_to(node=0)]
-    node_admittances = []
-    for i in range(1, network.number_of_nodes-1):
-        node_admittances += [[branch.element.Y for branch in network.branches_connected_to(node=i) if branch.node1 > i or branch.node2 > i]]
-    return create_node_admittance_matrix(zero_node_admittances, *node_admittances)
+    def full_admittance_between(node1: int, node2: int) -> complex:
+        return sum(b.element.Y for b in network.branches_between(node1=node1, node2=node2))
+    def full_admittance_connected_to(node: int) -> complex:
+        return sum(b.element.Y for b in network.branches_connected_to(node))
+    Y = np.diag([full_admittance_connected_to(node) for node in range(1, network.number_of_nodes)])
+    for n1 in range(1, network.number_of_nodes):
+        for n2 in range(n1+1, network.number_of_nodes):
+            Y[n1-1, n2-1] = -full_admittance_between(n1, n2)
+    Y += np.triu(Y,1).T
+    return Y
     
 def create_current_vector_from_network(network : Network) -> np.ndarray:
     I = np.zeros(network.number_of_nodes-1)
