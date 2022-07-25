@@ -1,12 +1,15 @@
 import ClassicNodalAnalysis as cna
 import numpy as np
-from Network import Network, Branch, voltage_source
-from typing import List, Dict
+from Network import Network, Branch, Element
+from typing import Dict
 
 class AmbiguousElectricalPotential(Exception): pass
 
+def is_ideal_voltage_source(element: Element) -> bool:
+    return element.active and element.Z==0 and np.isfinite(element.U)
+
 def get_ideal_voltage_sources(network: Network) -> Network:
-    return Network([b for b in network.branches if b.element.active and b.element.Z==0 and np.isfinite(b.element.U)])
+    return Network([b for b in network.branches if is_ideal_voltage_source(b.element)])
 
 def get_supernodes(network: Network) -> Dict[int, Branch]:
     voltage_sources = get_ideal_voltage_sources(network)
@@ -38,11 +41,13 @@ def create_node_matrix_from_network(network: Network) -> np.ndarray:
 def create_current_vector_from_network(network: Network) -> np.ndarray:
     I = cna.create_current_vector_from_network(network)
     voltage_sources = get_ideal_voltage_sources(network)
+    if len(voltage_sources.branches) == 0:
+        return I
     for sn in get_supernodes(network):
         I[sn-1] = 0
         for vs in voltage_sources.branches_connected_to(sn):
             Y_all = sum([b.element.Y for b in network.branches_connected_to(sn) if np.isfinite(b.element.Y)])
-            I[sn-1] += vs.element.U*Y_all
+            I[sn-1] += -vs.element.U*Y_all
     I[1] = vs.element.U*network.branches[1].element.Y
     return I
 
@@ -52,28 +57,22 @@ class NodalAnalysisSolution:
         I = create_current_vector_from_network(network)
         self.solution_vector = cna.calculate_node_voltages(Y, I)
         self.super_nodes = get_supernodes(network)
-        self.super_node_voltages = 0###
-        self.node_potentials = self.solution_vector
-        for i in self.super_nodes:
-            self.node_potentials[i-1] = 0
+        self.node_potentials = np.copy(self.solution_vector)
+        for i in self.super_nodes.keys():
+            self.node_potentials[i-1] = self.super_nodes[i].element.U
     
     def get_voltage(self, branch: Branch) -> float:
-        return 0
+        if is_ideal_voltage_source(branch.element):
+            return cna.calculate_branch_voltage(self.node_potentials, branch.node2, branch.node1)
+        else:
+            return cna.calculate_branch_voltage(self.node_potentials, branch.node1, branch.node2)
 
     def get_current(self, branch: Branch) -> float:
-        return self.get_voltage(branch)/branch.element.Z.real
+        if is_ideal_voltage_source(branch.element):
+            sn = list(self.super_nodes.keys())[list(self.super_nodes.values()).index(branch)]
+            return -self.solution_vector[sn-1]
+        else:
+            return self.get_voltage(branch)/branch.element.Z.real
 
 def nodal_analysis_solver(network):
     return NodalAnalysisSolution(network)
-    
-
-if __name__ == '__main__':
-    from Network import load_network_from_json
-    network = load_network_from_json('example_network_2.json')
-    print(network)
-    Y = create_node_matrix_from_network(network)
-    print(Y)
-    I = create_current_vector_from_network(network)
-    print(I)
-    # V = calculate_node_voltages_from_network(network)
-    # print(V)
