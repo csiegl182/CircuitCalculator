@@ -143,30 +143,12 @@ class Network:
         connected_branches.sort(key=lambda x: x.node1 if x.node1!=node else x.node2)
         return connected_branches
 
+    def nodes_connected_to(self, node: int) -> List[int]:
+        return list({b.node1 if b.node1 != node else b.node2 for b in self.branches_connected_to(node=node)})
+
     def branches_between(self, node1: int, node2: int) -> List[Branch]:
-        return [branch for branch in self.branches if branch.node1 == node1 and branch.node2 == node2]
-
-class NetworkReducedParallel(Network):
-    @property
-    def branches(self) -> List[Branch]:
-        reduced_branch_list = self.branch_list
-        for branch in self.branch_list:
-            if branch in reduced_branch_list:
-                parallel_branches = [b for b in reduced_branch_list if {b.node1, b.node2} == {branch.node1, branch.node2}]
-                reduced_branch_list = [b for b in reduced_branch_list if b not in parallel_branches]
-                reduced_branch = functools.reduce(lambda b1, b2 :  self._reduce_parallel(b1, b2), parallel_branches)
-                reduced_branch_list.append(reduced_branch)
-        return reduced_branch_list
-
-    def _reduce_parallel(_, branch1: Branch, branch2: Branch) -> Branch:
-        if type(branch1.element) == RealCurrentSource or type(branch2.element) == RealCurrentSource:
-            if type(branch1.element) == RealCurrentSource:
-                I = branch1.element.I
-            else:
-                I= branch2.element.I
-            return Branch(branch1.node1, branch1.node2, real_current_source(I=I.real, R=1/(branch1.element.Y.real + branch2.element.Y.real)))
-        else:
-            return Branch(branch1.node1, branch1.node2, conductor(G=branch1.element.Y.real+branch2.element.Y.real))
+        if node1 == node2: raise ValueError(f'Cannot determine branch between equal nodes {node1=} and {node2=}.')
+        return [branch for branch in self.branches if set((branch.node1, branch.node2)) == set((node1, node2))]
 
 class NetworkSolution(Protocol):
     def get_voltage(self, branch: Branch) -> float: pass
