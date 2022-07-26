@@ -89,17 +89,3 @@ class NodalAnalysisSolution:
 
 def nodal_analysis_solver(network):
     return NodalAnalysisSolution(network)
-    
-if __name__ == '__main__':
-    from Network import load_network_from_json
-    network = load_network_from_json('example_network_3.json')
-    print(network)
-    Y = create_node_matrix_from_network(network)
-    print(Y)
-    I = create_current_vector_from_network(network)
-    print(I)
-    V = cna.calculate_node_voltages(Y, I)
-    print(V)
-    solution = nodal_analysis_solver(network)
-    R1, R2, R3, R4, R5, U1, U2 = tuple(network.branches)
-    print(solution.get_voltage(R1))
