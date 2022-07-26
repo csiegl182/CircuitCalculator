@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 from decimal import DivisionByZero
-from typing import Protocol, List, Dict, Callable, Any
+from typing import Protocol, List, Dict, Callable, Any, Set
 import functools
-from numpy import inf, nan, PZERO
+from numpy import inf, nan
 
 class UnknownBranchResult(Exception): pass
 
@@ -143,8 +143,8 @@ class Network:
         connected_branches.sort(key=lambda x: x.node1 if x.node1!=node else x.node2)
         return connected_branches
 
-    def nodes_connected_to(self, node: int) -> List[int]:
-        return list({b.node1 if b.node1 != node else b.node2 for b in self.branches_connected_to(node=node)})
+    def nodes_connected_to(self, node: int) -> Set[int]:
+        return {b.node1 if b.node1 != node else b.node2 for b in self.branches_connected_to(node=node)}
 
     def branches_between(self, node1: int, node2: int) -> List[Branch]:
         if node1 == node2: raise ValueError(f'Cannot determine branch between equal nodes {node1=} and {node2=}.')
