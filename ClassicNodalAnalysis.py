@@ -1,6 +1,5 @@
-from Network import Network, Branch, Element, conductor
+from Network import Network, Branch
 import numpy as np
-import functools
 
 class DimensionError(Exception): pass
 
@@ -18,7 +17,7 @@ def calculate_node_voltages(Y : np.ndarray, I : np.ndarray) -> np.ndarray:
         raise DimensionError('dim error')
     return np.linalg.solve(Y, I)
 
-def calculate_branch_voltage(V_node : np.ndarray, node1 : int, node2 : int) -> float:
+def calculate_branch_voltage(V_node : np.ndarray, node1 : int, node2 : int) -> complex:
     if node1 < 0 or node2 < 0:
         raise DimensionError('dim error')
     try:
@@ -59,10 +58,10 @@ class NodalAnalysisSolution:
     def __init__(self, node_voltages = np.ndarray) -> None:
         self.node_voltages = node_voltages
     
-    def get_voltage(self, branch: Branch) -> float:
+    def get_voltage(self, branch: Branch) -> complex:
         return calculate_branch_voltage(self.node_voltages, branch.node1, branch.node2)
 
-    def get_current(self, branch: Branch) -> float:
+    def get_current(self, branch: Branch) -> complex:
         return self.get_voltage(branch)/branch.element.Z.real
         
 def nodal_analysis_solver(network):

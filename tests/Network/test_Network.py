@@ -43,4 +43,4 @@ def test_Network_returns_nodes_connected_to_node() -> None:
     branchC = Branch(1, 2, resistor(30))
     branchD = Branch(0, 2, resistor(30))
     network = Network([branchA, branchB, branchC, branchD])
-    assert network.nodes_connected_to(node=0) == [1, 2]
+    assert network.nodes_connected_to(node=0) == {1, 2}
