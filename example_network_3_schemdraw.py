@@ -4,7 +4,7 @@ from schemdraw import Drawing
 
 if __name__ == '__main__':
     with Drawing() as d:
-        d += (U1:=VoltageSource(U=-1, R=0, name='U1').up())
+        d += (U1:=VoltageSource(V=1, R=0, name='U1').up())
         d += (R1:=Resistor(R=10, name='R1').right())
         d += (R2:=Resistor(R=20, name='R2').down())
         d += Line().left()
@@ -12,7 +12,7 @@ if __name__ == '__main__':
         d += (R4:=Resistor(R=40, name='R4').down())
         d += (R5:=Resistor(R=50, name='R5').left())
         d += Line().at(R4.end).down()
-        d += (U2:=VoltageSource(U=-2, R=0, name='U2').left())
+        d += (U2:=VoltageSource(V=2, R=0, name='U2').left())
         d += Line().left()
         d += Ground()
         d += Line().up()
@@ -20,6 +20,6 @@ if __name__ == '__main__':
         schemdraw_solution = SchemdrawSolution(schemdraw_network, nodal_analysis_solver)
         d += schemdraw_solution.draw_voltage('R1')
         d += schemdraw_solution.draw_current('R1')
-        d += schemdraw_solution.draw_voltage('R2', reverse=False)
+        d += schemdraw_solution.draw_voltage('R2')
         d += schemdraw_solution.draw_current('R2')
-        d += schemdraw_solution.draw_voltage('U1', reverse=True)
+        d += schemdraw_solution.draw_voltage('U1')

@@ -4,7 +4,7 @@ from schemdraw import Drawing
 
 if __name__ == '__main__':
     with Drawing() as d:
-        d += (U1:=VoltageSource(U=-1, R=0, name='U1').up())
+        d += (U1:=VoltageSource(V=1, R=0, name='U1').up())
         d += Line().right()
         d += (R1:=Resistor(R=10, name='R1').down())
         d += Line().left()
@@ -18,4 +18,4 @@ if __name__ == '__main__':
         d += schemdraw_solution.draw_current('R1')
         d += schemdraw_solution.draw_voltage('R2', reverse=False)
         d += schemdraw_solution.draw_current('R2')
-        d += schemdraw_solution.draw_voltage('U1', reverse=True)
+        d += schemdraw_solution.draw_voltage('U1')
