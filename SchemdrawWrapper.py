@@ -303,6 +303,7 @@ class SchemdrawSolution:
         I_branch = self.network_solution.get_current(branch)
         # adjust counting arrow system of voltage sources for display
         if type(element) is VoltageSource or type(element) is RealVoltageSource:
-            reverse = not reverse
             start = False
+        if start is False:
+            reverse = not reverse
         return schemdraw.elements.CurrentLabelInline(reverse=reverse, start=start).at(element).label(f'{I_branch:2.2f}A')
