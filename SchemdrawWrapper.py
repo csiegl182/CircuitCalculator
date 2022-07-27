@@ -297,8 +297,12 @@ class SchemdrawSolution:
             reverse = not reverse
         return schemdraw.elements.CurrentLabel(top=False, reverse=reverse).at(element).label(f'{V_branch:2.2f}V')
 
-    def draw_current(self, element_name: str, reverse: bool = False) -> schemdraw.Drawing:
+    def draw_current(self, element_name: str, reverse: bool = False, start: bool = True) -> schemdraw.Drawing:
         element = self.schemdraw_network.get_element_from_name(element_name)
         branch = self.schemdraw_network.get_branch_from_name(element_name)
         I_branch = self.network_solution.get_current(branch)
-        return schemdraw.elements.CurrentLabelInline(top=False, reverse=reverse).at(element).label(f'{I_branch:2.2f}A')
+        # adjust counting arrow system of voltage sources for display
+        if type(element) is VoltageSource or type(element) is RealVoltageSource:
+            reverse = not reverse
+            start = False
+        return schemdraw.elements.CurrentLabelInline(reverse=reverse, start=start).at(element).label(f'{I_branch:2.2f}A')
