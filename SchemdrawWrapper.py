@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import Network
-from typing import Callable, Set, List, Tuple, Dict, Any, Type, TypeVar, Union
+from typing import Callable, Set, List, Tuple, Dict, Any, Type, TypeVar 
 import schemdraw
 
 class UnknownElement(Exception): pass
@@ -10,7 +10,7 @@ class VoltageSource(schemdraw.elements.sources.SourceV):
         super().__init__(*args, **kwargs)
         self._V = V
         self._name = name
-        self.label(f'${self._name}$\n ${V}\\mathrm{{V}}$')
+        self.label(f'${self._name}={self._V}\\mathrm{{V}}$', rotate=True)
 
     @property
     def name(self) -> str:
@@ -55,7 +55,7 @@ class CurrentSource(schemdraw.elements.sources.SourceI):
         super().__init__(*args, **kwargs)
         self._I = I
         self._name = name
-        self.label(f'${self._name}$\n ${I}\\mathrm{{A}}$')
+        self.label(f'${self._name}={self._I}\\mathrm{{A}}$', rotate=True)
 
     @property
     def name(self) -> str:
@@ -100,7 +100,7 @@ class Resistor(schemdraw.elements.twoterm.ResistorIEC):
         super().__init__(*args, **kwargs)
         self._R = R
         self._name = name
-        self.label(f'${self._name}={self._R}\\Omega$')
+        self.label(f'${self._name}={self._R}\\Omega$', rotate=True)
 
     @property
     def name(self) -> str:
