@@ -2,7 +2,7 @@ from AdvancedNodalAnalysis import create_current_vector_from_network
 from Network import Network, Branch, resistor, voltage_source
 import numpy as np
 
-def test_create_current_vector_from_reference_network() -> None:
+def test_create_current_vector_from_reference_network_3() -> None:
     R1, R4, R5 = 10, 40, 50
     G1, G4, G5 = 1/R1, 1/R4, 1/R5
     U1, U2 = 1, 2
@@ -17,4 +17,20 @@ def test_create_current_vector_from_reference_network() -> None:
     )
     I = create_current_vector_from_network(network)
     I_ref = np.array([-U1*G1, U1*G1, -U2*G4, U2*(G4+G5)])
+    np.testing.assert_almost_equal(I, I_ref)
+
+def test_create_current_vector_from_reference_network_4() -> None:
+    R1, R3, R4 = 10, 30, 40
+    G1, G3, G4 = 1/R1, 1/R3, 1/R4
+    U1, U2 = 1, 2
+    network = Network(
+        [
+            Branch(1, 0, voltage_source(U=U1)),
+            Branch(0, 4, voltage_source(U=U2)),
+            Branch(1, 2, resistor(R=R1)),
+            Branch(3, 4, resistor(R=R4)),
+        ]
+    )
+    I = create_current_vector_from_network(network)
+    I_ref = np.array([-U1*G1, U1*G1+U2*G3, -U2*(G4+G3), U2*G4])
     np.testing.assert_almost_equal(I, I_ref)

@@ -13,7 +13,7 @@ if __name__ == '__main__':
         d += (R5:=Resistor(R=50, name='R5').left())
         d += Line().left()
         d += Ground()
-        d += Line().at(U1.end).up()
+        d += Line().at(R1.end).up()
         d += (U2:=VoltageSource(V=2, R=0, name='U2').right())
         d += Line().down()
         schemdraw_network = SchemdrawNetwork(d)
