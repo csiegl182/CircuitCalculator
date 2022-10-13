@@ -1,6 +1,6 @@
 import ClassicNodalAnalysis as cna
 import numpy as np
-from Network import Network, Branch, Element
+from Network import Network, Branch, Element, NetworkSolution
 from typing import Dict
 
 class AmbiguousElectricalPotential(Exception): pass
@@ -10,6 +10,9 @@ def is_ideal_voltage_source(element: Element) -> bool:
 
 def get_ideal_voltage_sources(network: Network) -> Network:
     return Network([b for b in network.branches if is_ideal_voltage_source(b.element)])
+
+def remove_ideal_voltage_sources(network: Network) -> Network:
+    return Network([b for b in network.branches if not is_ideal_voltage_source(b.element)])
 
 def get_supernodes(network: Network) -> Dict[int, Branch]:
     voltage_sources = get_ideal_voltage_sources(network)
@@ -28,8 +31,18 @@ def get_supernodes(network: Network) -> Dict[int, Branch]:
             supernodes.update({vs.node2: vs})
     return supernodes
 
+def get_supernode_counterparts(network: Network) -> Dict[int, Branch]:
+    counterparts = {b.node2 if b.node1 == sn else b.node1 : b for sn, b in get_supernodes(network).items()}
+    counterparts.pop(0, None)
+    return counterparts
+
 def create_node_matrix_from_network(network: Network) -> np.ndarray:
-    Y = cna.create_node_admittance_matrix_from_network(network)
+    Y = cna.create_node_admittance_matrix_from_network(remove_ideal_voltage_sources(network))
+    for cp, b in get_supernode_counterparts(network).items():
+        if b.node1 == cp:
+            Y[:,cp-1] += Y[:,b.node2-1]
+        else:
+            Y[:,cp-1] += Y[:,b.node1-1]
     for sn, b in get_supernodes(network).items():
         Y[:,sn-1] = 0
         if b.node1 > 0:
@@ -87,5 +100,5 @@ class NodalAnalysisSolution:
         else:
             return self.get_voltage(branch)/branch.element.Z.real
 
-def nodal_analysis_solver(network):
+def nodal_analysis_solver(network) -> NetworkSolution:
     return NodalAnalysisSolution(network)

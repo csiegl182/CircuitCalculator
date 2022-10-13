@@ -1,4 +1,4 @@
-from Network import Network, Branch
+from Network import Network, Branch, NetworkSolution
 import numpy as np
 
 class DimensionError(Exception): pass
@@ -64,5 +64,5 @@ class NodalAnalysisSolution:
     def get_current(self, branch: Branch) -> complex:
         return self.get_voltage(branch)/branch.element.Z.real
         
-def nodal_analysis_solver(network):
+def nodal_analysis_solver(network) -> NetworkSolution:
     return NodalAnalysisSolution(calculate_node_voltages_from_network(network))

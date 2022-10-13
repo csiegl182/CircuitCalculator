@@ -151,9 +151,9 @@ class Network:
         return [branch for branch in self.branches if set((branch.node1, branch.node2)) == set((node1, node2))]
 
 class NetworkSolution(Protocol):
-    def get_voltage(self, branch: Branch) -> float: pass
+    def get_voltage(self, branch: Branch) -> complex: pass
 
-    def get_current(self, branch: Branch) -> float: pass
+    def get_current(self, branch: Branch) -> complex: pass
 
 NetworkSolver = Callable[[Network], NetworkSolution]
 
