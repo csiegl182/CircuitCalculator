@@ -62,7 +62,7 @@ def create_current_vector_from_network(network: Network) -> np.ndarray:
         return sum(b.element.Y for b in network.branches_between(node1=node1, node2=node2) if np.isfinite(b.element.Y))
     def full_admittance_connected_to(node: int) -> complex:
         return sum(b.element.Y for b in network.branches_connected_to(node) if np.isfinite(b.element.Y))
-    I = cna.create_current_vector_from_network(network)
+    I = cna.create_current_vector_from_network(remove_ideal_voltage_sources(network))
     voltage_sources = get_ideal_voltage_sources(network)
     if len(voltage_sources.branches) == 0:
         return I
@@ -81,16 +81,26 @@ class NodalAnalysisSolution:
         self.solution_vector = cna.calculate_node_voltages(Y, I)
         self.super_nodes = get_supernodes(network)
         self.node_potentials = np.copy(self.solution_vector)
-        for i in self.super_nodes.keys():
-            self.node_potentials[i-1] = self.super_nodes[i].element.U
+        for i, b in self.super_nodes.items():
+            if i == b.node1:
+                if b.node2 == 0:
+                    self.node_potentials[i-1] = b.element.U
+                else:
+                    self.node_potentials[i-1] = b.element.U + self.node_potentials[b.node2-1]
+            else:
+                if b.node1 == 0:
+                    self.node_potentials[i-1] = -b.element.U
+                else:
+                    self.node_potentials[i-1] = -b.element.U + self.node_potentials[b.node1-1]
+        print('hello')
     
     def get_voltage(self, branch: Branch) -> complex:
-        if is_ideal_voltage_source(branch.element):
-            return branch.element.U
-        if branch.node1 in self.super_nodes:
-            return -(cna.calculate_branch_voltage(self.node_potentials, branch.node2, 0) + signed_voltage(self.super_nodes[branch.node1], branch.node1))
-        if branch.node2 in self.super_nodes:
-            return cna.calculate_branch_voltage(self.node_potentials, branch.node1, 0) + signed_voltage(self.super_nodes[branch.node2], branch.node2)
+        # if is_ideal_voltage_source(branch.element):
+        #     return branch.element.U
+        # if branch.node1 in self.super_nodes:
+        #     return -(cna.calculate_branch_voltage(self.node_potentials, branch.node2, 0) + signed_voltage(self.super_nodes[branch.node1], branch.node1))
+        # if branch.node2 in self.super_nodes:
+        #     return cna.calculate_branch_voltage(self.node_potentials, branch.node1, 0) + signed_voltage(self.super_nodes[branch.node2], branch.node2)
         return cna.calculate_branch_voltage(self.node_potentials, branch.node1, branch.node2)
 
     def get_current(self, branch: Branch) -> complex:
