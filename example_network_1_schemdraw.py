@@ -1,7 +1,6 @@
 from SchemdrawWrapper import RealCurrentSource, Resistor, Line, Ground, SchemdrawNetwork, SchemdrawSolution
-from NodalAnalysis import nodal_analysis_solver
+from ClassicNodalAnalysis import nodal_analysis_solver
 from schemdraw import Drawing
-import schemdraw.elements as elm
 
 if __name__ == '__main__':
     with Drawing() as d:
@@ -16,4 +15,4 @@ if __name__ == '__main__':
         d += schemdraw_solution.draw_current('R1')
         d += schemdraw_solution.draw_voltage('R2', reverse=False)
         d += schemdraw_solution.draw_current('R2')
-        d += schemdraw_solution.draw_voltage('I1', reverse=True)
+        d += schemdraw_solution.draw_voltage('I1')

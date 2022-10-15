@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
-from typing import Protocol, List, Dict, Callable, Any
+from decimal import DivisionByZero
+from typing import Protocol, List, Dict, Callable, Any, Set
 import functools
 from numpy import inf, nan
 
@@ -29,7 +30,11 @@ class Impedeance:
     U : complex = field(default=nan, init=False)
     active: bool = field(default=False, init=False)
     @property
-    def Y(self) -> complex: return 1/self.Z
+    def Y(self) -> complex:
+        try:
+            return 1/self.Z
+        except ZeroDivisionError:
+            return inf
 
 @dataclass(frozen=True)
 class RealCurrentSource:
@@ -37,9 +42,17 @@ class RealCurrentSource:
     I : complex
     active: bool = field(default=True, init=False)
     @property
-    def Y(self) -> complex: return 1/self.Z
+    def Y(self) -> complex:
+        try:
+            return 1/self.Z
+        except ZeroDivisionError:
+            return inf
     @property
-    def U(self) -> complex: return self.I*self.Z
+    def U(self) -> complex:
+        try:
+            return self.I/self.Y
+        except ZeroDivisionError:
+            return nan
 
 @dataclass(frozen=True)
 class CurrentSource:
@@ -55,15 +68,34 @@ class RealVoltageSource:
     U : complex
     active: bool = field(default=True, init=False)
     @property
-    def Y(self) -> complex: return 1/self.Z
+    def Y(self) -> complex:
+        try:
+            return 1/self.Z
+        except ZeroDivisionError:
+            return inf
     @property
-    def I(self) -> complex: return self.U/self.Z
+    def I(self) -> complex:
+        try:
+            return self.U/self.Z
+        except ZeroDivisionError:
+            return nan
+
+@dataclass(frozen=True)
+class VoltageSource:
+    Z : complex = field(default=0, init=False)
+    Y : complex = field(default=inf, init=False)
+    U : complex
+    I : complex = field(default=nan, init=False)
+    active: bool = field(default=True, init=False)
 
 def resistor(R : float, **_) -> Element:
     return Impedeance(Z=R)
 
 def conductor(G : float, **_) -> Element:
-    return Impedeance(Z=1/G)
+    try:
+        return Impedeance(Z=1/G)
+    except ZeroDivisionError:
+        return Impedeance(Z=inf)
 
 def real_current_source(I : float, R : float, **_) -> Element:
     return RealCurrentSource(I=I, Z=R)
@@ -74,11 +106,15 @@ def current_source(I : float, **_) -> Element:
 def real_voltage_source(U : float, R : float, **_) -> Element:
     return RealVoltageSource(U=U, Z=R)
 
+def voltage_source(U : float, **_) -> Element:
+    return VoltageSource(U=U)
+
 branch_types : Dict[str, Callable[..., Element]] = {
     "resistor" : resistor,
     "real_current_source" : real_current_source,
     "current_source" : current_source,
     "real_voltage_source" : real_voltage_source,
+    "voltage_source" : voltage_source,
 }
 
 @dataclass(frozen=True)
@@ -107,35 +143,17 @@ class Network:
         connected_branches.sort(key=lambda x: x.node1 if x.node1!=node else x.node2)
         return connected_branches
 
+    def nodes_connected_to(self, node: int) -> Set[int]:
+        return {b.node1 if b.node1 != node else b.node2 for b in self.branches_connected_to(node=node)}
+
     def branches_between(self, node1: int, node2: int) -> List[Branch]:
-        return [branch for branch in self.branches if branch.node1 == node1 and branch.node2 == node2]
-
-class NetworkReducedParallel(Network):
-    @property
-    def branches(self) -> List[Branch]:
-        reduced_branch_list = self.branch_list
-        for branch in self.branch_list:
-            if branch in reduced_branch_list:
-                parallel_branches = [b for b in reduced_branch_list if b.node1 == branch.node1 and b.node2 == branch.node2]
-                reduced_branch_list = [b for b in reduced_branch_list if b not in parallel_branches]
-                reduced_branch = functools.reduce(lambda b1, b2 :  self._reduce_parallel(b1, b2), parallel_branches)
-                reduced_branch_list.append(reduced_branch)
-        return reduced_branch_list
-
-    def _reduce_parallel(_, branch1: Branch, branch2: Branch) -> Branch:
-        if type(branch1.element) == RealCurrentSource or type(branch2.element) == RealCurrentSource:
-            if type(branch1.element) == RealCurrentSource:
-                I = branch1.element.I
-            else:
-                I= branch2.element.I
-            return Branch(branch1.node1, branch1.node2, real_current_source(I=I.real, R=1/(1/branch1.element.Z.real + 1/branch2.element.Z.real)))
-        else:
-            return Branch(branch1.node1, branch1.node2, resistor(R=1/(1/branch1.element.Z.real + 1/branch2.element.Z.real)))
+        if node1 == node2: raise ValueError(f'Cannot determine branch between equal nodes {node1=} and {node2=}.')
+        return [branch for branch in self.branches if set((branch.node1, branch.node2)) == set((node1, node2))]
 
 class NetworkSolution(Protocol):
-    def get_voltage(self, branch: Branch) -> float: pass
+    def get_voltage(self, branch: Branch) -> complex: pass
 
-    def get_current(self, branch: Branch) -> float: pass
+    def get_current(self, branch: Branch) -> complex: pass
 
 NetworkSolver = Callable[[Network], NetworkSolution]
 
