@@ -1,6 +1,6 @@
-from Network import load_network_from_json
-from ClassicNodalAnalysis import nodal_analysis_solver
-from EquivalentSources import TheveninEquivalentSource, NortenEquivalentSource
+from CircuitCalculator.Network import load_network_from_json
+from CircuitCalculator.ClassicNodalAnalysis import nodal_analysis_solver
+from CircuitCalculator.EquivalentSources import TheveninEquivalentSource, NortenEquivalentSource
 
 if __name__ == '__main__':
     network = load_network_from_json('./example_network_1.json')
