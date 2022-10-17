@@ -1,5 +1,5 @@
-from AdvancedNodalAnalysis import create_node_matrix_from_network
-from Network import Network, Branch, voltage_source, resistor
+from CircuitCalculator.AdvancedNodalAnalysis import create_node_matrix_from_network
+from CircuitCalculator.Network import Network, Branch, voltage_source, resistor
 import numpy as np
 
 def test_create_node_matrix_from_reference_network_3() -> None:

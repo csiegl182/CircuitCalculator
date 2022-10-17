@@ -1,6 +1,6 @@
 import pytest
-from AdvancedNodalAnalysis import get_supernode_counterparts, AmbiguousElectricalPotential
-from Network import Network, Branch, voltage_source, resistor
+from CircuitCalculator.AdvancedNodalAnalysis import get_supernode_counterparts, AmbiguousElectricalPotential
+from CircuitCalculator.Network import Network, Branch, voltage_source, resistor
 
 def test_parallel_voltage_sources_attached_to_node_zero_lead_to_error() -> None:
     network = Network([

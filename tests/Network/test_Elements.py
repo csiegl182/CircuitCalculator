@@ -1,4 +1,4 @@
-from Network import real_current_source, resistor, conductor, real_voltage_source
+from CircuitCalculator.Network import real_current_source, resistor, conductor, real_voltage_source
 from numpy import inf, nan, isnan
 
 def test_zero_resistance_has_inf_conductance() -> None:

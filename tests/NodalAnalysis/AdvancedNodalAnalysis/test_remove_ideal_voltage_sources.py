@@ -1,5 +1,5 @@
-from AdvancedNodalAnalysis import remove_ideal_voltage_sources
-from Network import Network, Branch, resistor, voltage_source, real_voltage_source, current_source, real_current_source
+from CircuitCalculator.AdvancedNodalAnalysis import remove_ideal_voltage_sources
+from CircuitCalculator.Network import Network, Branch, resistor, voltage_source, real_voltage_source, current_source, real_current_source
 
 def test_ideal_voltage_sources_are_removed_from_network() -> None:
     vs1 = Branch(2, 3, voltage_source(1))

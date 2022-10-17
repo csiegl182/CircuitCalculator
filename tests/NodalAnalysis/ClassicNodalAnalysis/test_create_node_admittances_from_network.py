@@ -1,5 +1,5 @@
-from ClassicNodalAnalysis import create_node_admittance_matrix_from_network
-from Network import Network, Branch, conductor
+from CircuitCalculator.ClassicNodalAnalysis import create_node_admittance_matrix_from_network
+from CircuitCalculator.Network import Network, Branch, conductor
 import numpy as np
 
 def test_node_admittance_matrix_is_correct() -> None:

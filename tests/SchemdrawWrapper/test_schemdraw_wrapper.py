@@ -1,6 +1,6 @@
-from SchemdrawWrapper import SchemdrawNetwork, round_node
-from SchemdrawWrapper import RealCurrentSource, Resistor, Ground, Line
-from SchemdrawWrapper import UnknownElement
+from CircuitCalculator.SchemdrawWrapper import SchemdrawNetwork, round_node
+from CircuitCalculator.SchemdrawWrapper import RealCurrentSource, Resistor, Ground, Line
+from CircuitCalculator.SchemdrawWrapper import UnknownElement
 import pytest
 import schemdraw
 

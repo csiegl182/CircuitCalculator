@@ -1,7 +1,7 @@
 import pytest
-from Network import load_network_from_json
-from ClassicNodalAnalysis import nodal_analysis_solver as classic_nodal_analysis_solver
-from AdvancedNodalAnalysis import nodal_analysis_solver as advanced_nodal_analysis_solver
+from CircuitCalculator.Network import load_network_from_json
+from CircuitCalculator.ClassicNodalAnalysis import nodal_analysis_solver as classic_nodal_analysis_solver
+from CircuitCalculator.AdvancedNodalAnalysis import nodal_analysis_solver as advanced_nodal_analysis_solver
 import numpy as np
 
 def test_network_1_with_classic_nodal_analysis() -> None:

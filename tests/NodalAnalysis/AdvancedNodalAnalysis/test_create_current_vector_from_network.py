@@ -1,5 +1,5 @@
-from AdvancedNodalAnalysis import create_current_vector_from_network
-from Network import Network, Branch, resistor, voltage_source
+from CircuitCalculator.AdvancedNodalAnalysis import create_current_vector_from_network
+from CircuitCalculator.Network import Network, Branch, resistor, voltage_source
 import numpy as np
 
 def test_create_current_vector_from_reference_network_3() -> None:

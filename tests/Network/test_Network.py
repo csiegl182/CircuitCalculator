@@ -1,5 +1,5 @@
 import pytest
-from Network import Network, resistor, Branch, switch_network_nodes
+from CircuitCalculator.Network import Network, resistor, Branch, switch_network_nodes
 
 def test_Network_knows_about_its_node_number() -> None:
     network = Network([Branch(0, 1, resistor(10))])

@@ -1,6 +1,5 @@
-import pytest
-from Network import Network, Branch, resistor
-from EquivalentSources import calculate_total_impedeance
+from CircuitCalculator.Network import Network, Branch, resistor
+from CircuitCalculator.EquivalentSources import calculate_total_impedeance
 from numpy.testing import assert_almost_equal
 
 def test_total_impedeance_returns_zero_on_equal_nodes() -> None:
