@@ -150,6 +150,16 @@ class Network:
         if node1 == node2: raise ValueError(f'Cannot determine branch between equal nodes {node1=} and {node2=}.')
         return [branch for branch in self.branches if set((branch.node1, branch.node2)) == set((node1, node2))]
 
+def switch_network_nodes(network: Network, new_node: int, old_node: int=0) -> Network:
+    def switch_node_indices(branch: Branch, i1: int, i2: int) -> Branch:
+        node1, node2 = branch.node1, branch.node2
+        if branch.node1 == i1: node1 = i2
+        if branch.node1 == i2: node1 = i1
+        if branch.node2 == i1: node2 = i2
+        if branch.node2 == i2: node2 = i1
+        return Branch(node1, node2, branch.element)
+    return Network([switch_node_indices(b, new_node, old_node) for b in network.branches])
+
 class NetworkSolution(Protocol):
     def get_voltage(self, branch: Branch) -> complex: pass
 

@@ -1,5 +1,5 @@
 import pytest
-from Network import Network, resistor, Branch
+from Network import Network, resistor, Branch, switch_network_nodes
 
 def test_Network_knows_about_its_node_number() -> None:
     network = Network([Branch(0, 1, resistor(10))])
@@ -44,3 +44,16 @@ def test_Network_returns_nodes_connected_to_node() -> None:
     branchD = Branch(0, 2, resistor(30))
     network = Network([branchA, branchB, branchC, branchD])
     assert network.nodes_connected_to(node=0) == {1, 2}
+
+def test_node_zero_of_network_can_be_changed() -> None:
+    R1, R2, R3, R4 = 10, 20, 30, 40
+    branchA = Branch(0, 1, resistor(R1))
+    branchB = Branch(0, 2, resistor(R2))
+    branchC = Branch(1, 2, resistor(R3))
+    branchD = Branch(0, 2, resistor(R4))
+    network = Network([branchA, branchB, branchC, branchD])
+    new_network = switch_network_nodes(network, 2)
+    assert new_network.branches_between(2, 1)[0].element.Z == R1
+    assert new_network.branches_between(2, 0)[0].element.Z == R2
+    assert new_network.branches_between(1, 0)[0].element.Z == R3
+    assert new_network.branches_between(2, 0)[1].element.Z == R4
