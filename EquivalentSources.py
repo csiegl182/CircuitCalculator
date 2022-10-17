@@ -1,4 +1,3 @@
-from typing import Tuple
 from Network import Network, switch_network_nodes
 from AdvancedNodalAnalysis import NodalAnalysisSolution, create_node_matrix_from_network
 from numpy.linalg import inv as inverse_matrix
@@ -15,14 +14,19 @@ def calculate_total_impedeance(network: Network, node1: int, node2: int = 0) -> 
     Z = inverse_matrix(Y)
     return Z[node1-1][node1-1]
 
+def calculate_open_circuit_voltage(network: Network, node1: int, node2: int = 0) -> complex:
+    if node1 == node2:
+        return 0
+    solution = NodalAnalysisSolution(network)
+    open_circuit_branch = network.branches_between(node1, node2)[0]
+    if open_circuit_branch.node1 == node1:
+        return solution.get_voltage(open_circuit_branch)
+    else:
+        return -solution.get_voltage(open_circuit_branch)
+
 class TheveninEquivalentSource:
     def __init__(self, network: Network, node1: int, node2: int = 0) -> None:
-        solution = NodalAnalysisSolution(network)
-        branch = network.branches_between(node1, node2)[0]
-        if branch.node1 == node1:
-            self.U = solution.get_voltage(branch)
-        else:
-            self.U = -solution.get_voltage(branch)
+        self.U = calculate_open_circuit_voltage(network, node1, node2)
         self.Z = calculate_total_impedeance(network, node1, node2)
 
 class NortenEquivalentSource:
