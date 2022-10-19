@@ -133,6 +133,31 @@ class Ground(schemdraw.elements.Ground):
     def name(self) -> str:
         return 'Ground'
 
+class Node(schemdraw.elements.Element):
+    def __init__(self, id=0, id_loc=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.node_id = id
+        self.theta(0)
+        self.segments.append(schemdraw.SegmentCircle([0, 0], 0.12, fill='black'))
+        self.anchors['start'] = [0, 0]
+        self.anchors['center'] = [0, 0]
+        self.anchors['end'] = [0, 0]
+        self.bbox = self.get_bbox(includetext=False)
+        if id_loc is not None:
+            if id_loc == 'W':
+                label_param = {'loc': 'left', 'align': ['right', 'center']}
+            elif id_loc == 'N':
+                label_param = {'loc': 'top', 'align': ['center', 'bottom']}
+            elif id_loc == 'E':
+                label_param = {'loc': 'right', 'align': ['left', 'center']}
+            else: # id_loc == 'S'
+                label_param = {'loc': 'bottom', 'align': ['center', 'top']}
+            self.add_label(f'{self.node_id}', **label_param)
+
+    @property
+    def name(self) -> str:
+        return f'Node {self.node_id}'
+
         
 SchemdrawElement = TypeVar('SchemdrawElement', bound=schemdraw.elements.Element)
 SchemdrawElementTranslator = Callable[[SchemdrawElement, Callable[[schemdraw.util.Point], int]], Tuple[Network.Branch, str]]
@@ -207,8 +232,12 @@ class SchemdrawNetwork:
         return [e for e in self.elements if isinstance(e, schemdraw.elements.Element2Term)]
 
     @property
-    def line_elements(self) -> List[schemdraw.elements.lines.Line]:
-        return [e for e in self.two_term_elements if isinstance(e, schemdraw.elements.lines.Line)]
+    def line_elements(self) -> List[Line]:
+        return [e for e in self.two_term_elements if type(e) is Line]
+    
+    @property
+    def node_elements(self) -> List[Node]:
+        return [e for e in self.elements if type(e) is Node]
 
     @property
     def all_nodes(self) -> Set[schemdraw.util.Point]:
@@ -228,7 +257,14 @@ class SchemdrawNetwork:
 
     @property
     def ordered_unique_nodes(self) -> List[schemdraw.util.Point]:
-        return list(self.unique_nodes)
+        indexed_nodes = self.node_elements
+        ordered_nodes = list(self.unique_nodes)
+        for x in indexed_nodes:
+            node = get_nodes(x)[0]
+            current_index = ordered_nodes.index(self.unique_node_mapping[node])
+            desired_index = x.node_id
+            ordered_nodes[desired_index], ordered_nodes[current_index] = ordered_nodes[current_index], ordered_nodes[desired_index]
+        return ordered_nodes
 
     @property
     def unique_node_mapping(self) -> Dict[schemdraw.util.Point, schemdraw.util.Point]:
