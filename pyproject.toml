@@ -1,0 +1,16 @@
+[build-system]
+requires = [
+    "setuptools>=42",
+    "wheel",
+    "numpy",
+    "schemdraw>=0.15",
+    "matplotlib>=3.6.0"
+    ]
+
+[project]
+name = "CircuitCalculator"
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+]

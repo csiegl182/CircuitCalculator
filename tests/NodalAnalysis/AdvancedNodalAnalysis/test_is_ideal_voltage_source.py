@@ -1,5 +1,5 @@
-from AdvancedNodalAnalysis import is_ideal_voltage_source
-from Network import voltage_source, real_voltage_source
+from CircuitCalculator.AdvancedNodalAnalysis import is_ideal_voltage_source
+from CircuitCalculator.Network import voltage_source, real_voltage_source
 
 def test_ideal_voltage_source_is_ideal_voltage_source() -> None:
     vs = voltage_source(U=1)

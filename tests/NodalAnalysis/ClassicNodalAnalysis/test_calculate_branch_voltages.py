@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from ClassicNodalAnalysis import DimensionError, calculate_branch_voltage
+from CircuitCalculator.ClassicNodalAnalysis import DimensionError, calculate_branch_voltage
 
 def test_calculate_branch_voltages_returns_diff_from_node_voltages() -> None:
     V = np.array([3, 2, 1])

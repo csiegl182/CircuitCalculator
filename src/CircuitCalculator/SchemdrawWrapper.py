@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-import Network
-from typing import Callable, Set, List, Tuple, Dict, Any, Type, TypeVar 
+import CircuitCalculator.Network as Network
+from typing import Callable, Set, List, Tuple, Dict, Type, TypeVar 
 import schemdraw
 
 class UnknownElement(Exception): pass
