@@ -125,24 +125,24 @@ class Line(schemdraw.elements.lines.Line):
     def name(self) -> str:
         return ''
 
-class Ground(schemdraw.elements.Ground):
-    def __init__(self, *args, **kwargs):
+class Node(schemdraw.elements.Element):
+    def __init__(self, id=0, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.node_id = id
+        self.params['theta'] = 0
+        self.params['drop'] = (0, 0)
+        self.anchors['start'] = (0, 0)
+        self.anchors['center'] = (0, 0)
+        self.anchors['end'] = (0, 0)
 
     @property
     def name(self) -> str:
-        return 'Ground'
+        return f'Node {self.node_id}'
 
-class Node(schemdraw.elements.Element):
+class LabelNode(Node):
     def __init__(self, id=0, id_loc=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.node_id = id
-        self.theta(0)
+        super().__init__(id=id, *args, **kwargs)
         self.segments.append(schemdraw.SegmentCircle([0, 0], 0.12, fill='black'))
-        self.anchors['start'] = [0, 0]
-        self.anchors['center'] = [0, 0]
-        self.anchors['end'] = [0, 0]
-        self.bbox = self.get_bbox(includetext=False)
         if id_loc is not None:
             if id_loc == 'W':
                 label_param = {'loc': 'left', 'align': ['right', 'center']}
@@ -152,12 +152,30 @@ class Node(schemdraw.elements.Element):
                 label_param = {'loc': 'right', 'align': ['left', 'center']}
             else: # id_loc == 'S'
                 label_param = {'loc': 'bottom', 'align': ['center', 'top']}
+            self.bbox = self.get_bbox(includetext=False)
             self.add_label(f'{self.node_id}', **label_param)
 
     @property
     def name(self) -> str:
         return f'Node {self.node_id}'
 
+class Ground(Node):
+    def __init__(self, *args, **kwargs):
+        super().__init__(id=0, *args, **kwargs)
+        gndgap = 0.12
+        gnd_lead = 0.4
+        resheight = schemdraw.elements.twoterm.resheight
+        gap = schemdraw.elements.twoterm.gap
+        self.segments.append(schemdraw.Segment(
+            [(0, 0), (0, -gnd_lead), (-resheight, -gnd_lead),
+             (resheight, -gnd_lead), gap, (-resheight*.7, -gndgap-gnd_lead),
+             (resheight*.7, -gndgap-gnd_lead), gap,
+             (-resheight*.2, -gndgap*2-gnd_lead),
+             (resheight*.2, -gndgap*2-gnd_lead)]))
+
+    @property
+    def name(self) -> str:
+        return 'Ground'
         
 SchemdrawElement = TypeVar('SchemdrawElement', bound=schemdraw.elements.Element)
 SchemdrawElementTranslator = Callable[[SchemdrawElement, Callable[[schemdraw.util.Point], int]], Tuple[Network.Branch, str]]
@@ -236,8 +254,8 @@ class SchemdrawNetwork:
         return [e for e in self.two_term_elements if type(e) is Line]
     
     @property
-    def node_elements(self) -> List[Node]:
-        return [e for e in self.elements if type(e) is Node]
+    def node_elements(self) -> List[LabelNode]:
+        return [e for e in self.elements if isinstance(e, Node)]
 
     @property
     def all_nodes(self) -> Set[schemdraw.util.Point]:
