@@ -5,7 +5,7 @@ from CircuitCalculator.AdvancedNodalAnalysis import nodal_analysis_solver as adv
 import numpy as np
 
 def test_network_1_with_classic_nodal_analysis() -> None:
-    network = load_network_from_json('./example_network_1.json')
+    network = load_network_from_json('./examples/example_network_1.json')
     solution = classic_nodal_analysis_solver(network)
     R1, R2, I1 = tuple(network.branches)
     np.testing.assert_almost_equal(solution.get_voltage(R1), 7.69, decimal=2)
@@ -16,7 +16,7 @@ def test_network_1_with_classic_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_current(I1), -0.23, decimal=2)
 
 def test_network_1_with_advanced_nodal_analysis() -> None:
-    network = load_network_from_json('./example_network_1.json')
+    network = load_network_from_json('./examples/example_network_1.json')
     solution = advanced_nodal_analysis_solver(network)
     R1, R2, I1 = tuple(network.branches)
     np.testing.assert_almost_equal(solution.get_voltage(R1), 7.69, decimal=2)
@@ -27,12 +27,12 @@ def test_network_1_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_current(I1), -0.23, decimal=2)
 
 def test_network_2_with_classic_nodal_analysis() -> None:
-    network = load_network_from_json('./example_network_2.json')
+    network = load_network_from_json('./examples/example_network_2.json')
     with pytest.raises(ValueError):
         classic_nodal_analysis_solver(network)
 
 def test_network_2_with_advanced_nodal_analysis() -> None:
-    network = load_network_from_json('./example_network_2.json')
+    network = load_network_from_json('./examples/example_network_2.json')
     solution = advanced_nodal_analysis_solver(network)
     R1, R2, R3, U1 = tuple(network.branches)
     np.testing.assert_almost_equal(solution.get_voltage(R1), 1.00, decimal=2)
@@ -45,7 +45,7 @@ def test_network_2_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_current(U1), 0.12, decimal=2)
 
 def test_network_3_with_advanced_nodal_analysis() -> None:
-    network = load_network_from_json('./example_network_3.json')
+    network = load_network_from_json('./examples/example_network_3.json')
     solution = advanced_nodal_analysis_solver(network)
     R1, R2, R3, R4, R5, U1, U2 = tuple(network.branches)
     np.testing.assert_almost_equal(solution.get_voltage(R1), 0.56, decimal=2)
@@ -64,7 +64,7 @@ def test_network_3_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_current(U2), 0.075, decimal=3)
 
 def test_network_4_with_advanced_nodal_analysis() -> None:
-    network = load_network_from_json('./example_network_4.json')
+    network = load_network_from_json('./examples/example_network_4.json')
     solution = advanced_nodal_analysis_solver(network)
     R1, R2, R3, R4, R5, U1, U2 = tuple(network.branches)
     np.testing.assert_almost_equal(solution.get_voltage(R1), 0.52, decimal=2)
