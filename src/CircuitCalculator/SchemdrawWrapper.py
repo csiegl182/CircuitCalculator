@@ -6,9 +6,12 @@ import schemdraw
 class UnknownElement(Exception): pass
 
 class VoltageSource(schemdraw.elements.sources.SourceV):
-    def __init__(self, V: float, name: str, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._V = V
+    def __init__(self, V: float, name: str, *args, reverse=False, **kwargs):
+        super().__init__(*args, reverse=reverse, **kwargs)
+        if reverse:
+            self._V = -V
+        else:
+            self._V = V
         self._name = name
         self.label(f'${self._name}={self._V}\\mathrm{{V}}$', rotate=True)
 
@@ -24,9 +27,12 @@ class VoltageSource(schemdraw.elements.sources.SourceV):
         return {'U' : self.V}
 
 class RealVoltageSource(schemdraw.elements.sources.SourceV):
-    def __init__(self, V: float, R: float, name: str, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._V = V
+    def __init__(self, V: float, R: float, name: str, *args, reverse=False, **kwargs):
+        super().__init__(*args, reverse=reverse, **kwargs)
+        if reverse:
+            self._V = -V
+        else:
+            self._V = V
         self._R = R
         self._name = name
         self.label(f'${self._name}$\n ${V}\\mathrm{{V}} / {R}\\Omega$')
@@ -51,9 +57,12 @@ class RealVoltageSource(schemdraw.elements.sources.SourceV):
         return {'U' : self.V, 'R' : self.R}
 
 class CurrentSource(schemdraw.elements.sources.SourceI):
-    def __init__(self, I: float, name: str, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._I = I
+    def __init__(self, I: float, name: str, *args, reverse=False, **kwargs):
+        super().__init__(*args, reverse=reverse, **kwargs)
+        if reverse:
+            self._I = -I
+        else:
+            self._I = I
         self._name = name
         self.label(f'${self._name}={self._I}\\mathrm{{A}}$', rotate=True)
 
@@ -69,9 +78,12 @@ class CurrentSource(schemdraw.elements.sources.SourceI):
         return {'I' : self.I}
 
 class RealCurrentSource(schemdraw.elements.sources.SourceI):
-    def __init__(self, I: float, R: float, name: str, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._I = I
+    def __init__(self, I: float, R: float, name: str, *args, reverse=False, **kwargs):
+        super().__init__(*args, reverse=reverse, **kwargs)
+        if reverse:
+            self._I = -I
+        else:
+            self._I = I
         self._R = R
         self._name = name
         self.label(f'${self._name}$\n ${I}\\mathrm{{A}} / {R}\\Omega$')
