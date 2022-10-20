@@ -5,6 +5,14 @@ def test_Network_knows_about_its_node_number() -> None:
     network = Network([Branch(0, 1, resistor(10))])
     assert network.number_of_nodes == 2
 
+def test_not_connected_nodes_count_for_total_number_of_nodes() -> None:
+    network = Network([
+        Branch(0, 1, resistor(1)),
+        Branch(1, 3, resistor(1)),
+        Branch(3, 0, resistor(1))
+    ])
+    assert network.number_of_nodes == 4
+
 def test_Network_returns_branches_connected_to_node() -> None:
     branchA = Branch(0, 1, resistor(10))
     branchB = Branch(0, 2, resistor(20))

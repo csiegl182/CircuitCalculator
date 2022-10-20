@@ -29,6 +29,6 @@ def test_node_admittance_matrix_sorts_node_indices() -> None:
     Y = create_node_admittance_matrix_from_network(network)
 
     np.testing.assert_almost_equal(Y, Y_ref)
-    
+
 
     

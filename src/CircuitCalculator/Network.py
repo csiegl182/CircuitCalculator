@@ -135,7 +135,7 @@ class Network:
         node1_set = {branch.node1 for branch in self.branches}
         node2_set = {branch.node2 for branch in self.branches}
         node_set = node1_set.union(node2_set)
-        return len(node_set)
+        return max(node_set)+1
 
     def branches_connected_to(self, node: int) -> List[Branch]:
         connected_branches = [branch for branch in self.branches if branch.node1 == node or branch.node2 == node]
