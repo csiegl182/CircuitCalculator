@@ -8,6 +8,9 @@ class AmbiguousElectricalPotential(Exception): pass
 def is_ideal_voltage_source(element: Element) -> bool:
     return element.active and element.Z==0 and np.isfinite(element.U)
 
+def is_ideal_current_source(element: Element) -> bool:
+    return element.active and element.Y==0 and np.isfinite(element.I)
+
 def get_ideal_voltage_sources(network: Network) -> Network:
     return Network([b for b in network.branches if is_ideal_voltage_source(b.element)])
 
@@ -67,11 +70,10 @@ def create_current_vector_from_network(network: Network) -> np.ndarray:
     if len(voltage_sources.branches) == 0:
         return I
     for sn, vs in get_supernodes(network).items():
-        I[sn-1] = full_admittance_connected_to(sn)*signed_voltage(vs, sn)
+        I[sn-1] += full_admittance_connected_to(sn)*signed_voltage(vs, sn)
     for node in range(1,network.number_of_nodes):
-        if node not in get_supernodes(network):
-            for connected_supernode in network.nodes_connected_to(node).intersection(get_supernodes(network)):
-                I[node-1] += full_admittance_between(node, connected_supernode)*-signed_voltage(get_supernodes(network)[connected_supernode], connected_supernode)
+        for connected_supernode in network.nodes_connected_to(node).intersection(get_supernodes(network)):
+            I[node-1] += full_admittance_between(node, connected_supernode)*-signed_voltage(get_supernodes(network)[connected_supernode], connected_supernode)
     return I
 
 class NodalAnalysisSolution:
@@ -100,6 +102,8 @@ class NodalAnalysisSolution:
         if is_ideal_voltage_source(branch.element):
             sn = list(self.super_nodes.keys())[list(self.super_nodes.values()).index(branch)]
             return self.solution_vector[sn-1]
+        elif is_ideal_current_source(branch.element):
+            return branch.element.I
         else:
             return self.get_voltage(branch)/branch.element.Z.real
 

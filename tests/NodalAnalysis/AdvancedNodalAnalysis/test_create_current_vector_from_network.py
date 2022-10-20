@@ -1,5 +1,5 @@
 from CircuitCalculator.AdvancedNodalAnalysis import create_current_vector_from_network
-from CircuitCalculator.Network import Network, Branch, resistor, voltage_source
+from CircuitCalculator.Network import Network, Branch, resistor, voltage_source, current_source
 import numpy as np
 
 def test_create_current_vector_from_reference_network_3() -> None:
@@ -36,4 +36,24 @@ def test_create_current_vector_from_reference_network_4() -> None:
     )
     I = create_current_vector_from_network(network)
     I_ref = np.array([-U1*G1, U1*G1+U2*G3, -U2*(G4+G3), U2*G4])
+    np.testing.assert_almost_equal(I, I_ref)
+
+def test_create_current_vector_from_reference_network_5() -> None:
+    R1, R2, R3, R4 = 10, 20, 30, 40
+    G1, G2, G3, G4 = 1/R1, 1/R2, 1/R3, 1/R4
+    U1, U2, U3, I4 = 1, 2, 3, 0.1
+    network = Network(
+        [
+            Branch(0, 5, voltage_source(U=U1)),
+            Branch(0, 1, resistor(R=R1)),
+            Branch(2, 1, voltage_source(U=U2)),
+            Branch(2, 5, resistor(R=R3)),
+            Branch(1, 3, resistor(R=R2)),
+            Branch(4, 3, voltage_source(U=U3)),
+            Branch(4, 5, resistor(R=R4)),
+            Branch(3, 5, current_source(I=I4))
+        ]
+    )
+    I = create_current_vector_from_network(network)
+    I_ref = np.array([0, -(U1+U2)*G3, -I4, -(U1+U3)*G4, I4+U1*(G3+G4)+U2*G3+U3*G4])
     np.testing.assert_almost_equal(I, I_ref)

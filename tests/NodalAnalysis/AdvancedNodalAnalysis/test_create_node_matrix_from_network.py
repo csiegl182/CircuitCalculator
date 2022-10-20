@@ -1,5 +1,5 @@
 from CircuitCalculator.AdvancedNodalAnalysis import create_node_matrix_from_network
-from CircuitCalculator.Network import Network, Branch, voltage_source, resistor
+from CircuitCalculator.Network import Network, Branch, voltage_source, resistor, current_source
 import numpy as np
 
 def test_create_node_matrix_from_reference_network_3() -> None:
@@ -38,4 +38,24 @@ def test_create_node_matrix_from_reference_network_4() -> None:
     )
     Y = create_node_matrix_from_network(network)
     Y_ref = np.array([[-1, -G1, 0, 0], [0, G1+G2, 1, 0], [0, G4, -1, -G4], [0, -G4, 0, G4+G5]])
+    np.testing.assert_almost_equal(Y, Y_ref)
+
+def test_create_node_matrix_from_reference_network_5() -> None:
+    R1, R2, R3, R4 = 10, 20, 30, 40
+    G1, G2, G3, G4 = 1/R1, 1/R2, 1/R3, 1/R4
+    U1, U2, U3, I4 = 1, 2, 3, 0.1
+    network = Network(
+        [
+            Branch(0, 5, voltage_source(U=U1)),
+            Branch(0, 1, resistor(R=R1)),
+            Branch(2, 1, voltage_source(U=U2)),
+            Branch(2, 5, resistor(R=R3)),
+            Branch(1, 3, resistor(R=R2)),
+            Branch(4, 3, voltage_source(U=U3)),
+            Branch(4, 5, resistor(R=R4)),
+            Branch(5, 0, current_source(I=I4))
+        ]
+    )
+    Y = create_node_matrix_from_network(network)
+    Y_ref = np.array([[G1+G2, 1, -G2, 0, 0], [G3, -1, 0, 0, 0], [-G2, 0, G2, 1, 0], [0, 0, G4, -1, 0], [-G3, 0, -G4, 0, 1]])
     np.testing.assert_almost_equal(Y, Y_ref)
