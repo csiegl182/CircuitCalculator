@@ -13,7 +13,7 @@ class VoltageSource(schemdraw.elements.sources.SourceV):
         else:
             self._V = V
         self._name = name
-        self.label(f'${self._name}={self._V}\\mathrm{{V}}$', rotate=True)
+        self.label(f'${self._name}={V}\\mathrm{{V}}$', rotate=True)
 
     @property
     def name(self) -> str:
@@ -64,7 +64,7 @@ class CurrentSource(schemdraw.elements.sources.SourceI):
         else:
             self._I = I
         self._name = name
-        self.label(f'${self._name}={self._I}\\mathrm{{A}}$', rotate=True)
+        self.label(f'${self._name}={I}\\mathrm{{A}}$', rotate=True)
 
     @property
     def name(self) -> str:
