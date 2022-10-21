@@ -3,6 +3,9 @@ from .Network import NetworkSolver, Network, Branch, resistor, current_source, r
 from typing import Callable, Set, List, Tuple, Dict, Type, TypeVar 
 import schemdraw
 
+blue = [3/255, 70/255, 143/255]
+red = [210/255, 0, 0]
+
 class UnknownElement(Exception): pass
 
 class VoltageSource(schemdraw.elements.sources.SourceV):
@@ -14,6 +17,9 @@ class VoltageSource(schemdraw.elements.sources.SourceV):
             self._V = V
         self._name = name
         self.label(f'${self._name}={V}\\mathrm{{V}}$', rotate=True)
+
+        a, b = (1.5, 0.7), (-0.5, 0.7)
+        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=blue))
 
     @property
     def name(self) -> str:
@@ -65,6 +71,9 @@ class CurrentSource(schemdraw.elements.sources.SourceI):
             self._I = I
         self._name = name
         self.label(f'${self._name}={I}\\mathrm{{A}}$', rotate=True)
+
+        a, b = (1.2, -0.3), (1.8, -0.3)
+        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=red))
 
     @property
     def name(self) -> str:
@@ -361,9 +370,9 @@ class SchemdrawSolution:
         dx, dy = get_node_direction(n1, n2)
         if dx < 0 or dy < 0:
             reverse = not reverse
-        return schemdraw.elements.CurrentLabel(top=False, reverse=reverse).at(element).label(f'{V_branch:2.2f}V')
+        return schemdraw.elements.CurrentLabel(top=False, reverse=reverse, color=blue).at(element).label(f'{V_branch:2.2f}V')
 
-    def draw_current(self, element_name: str, reverse: bool = False, start: bool = True) -> schemdraw.Drawing:
+    def draw_current(self, element_name: str, reverse: bool = False, start: bool = True, ofst: float = 0.8) -> schemdraw.Drawing:
         element = self.schemdraw_network.get_element_from_name(element_name)
         branch = self.schemdraw_network.get_branch_from_name(element_name)
         I_branch = self.network_solution.get_current(branch)
@@ -372,4 +381,4 @@ class SchemdrawSolution:
             start = False
         if start is False:
             reverse = not reverse
-        return schemdraw.elements.CurrentLabelInline(reverse=reverse, start=start).at(element).label(f'{I_branch:2.2f}A')
+        return schemdraw.elements.CurrentLabelInline(reverse=reverse, start=start, color=red, ofst=ofst).at(element).label(f'{I_branch:2.2f}A')

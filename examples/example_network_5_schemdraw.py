@@ -5,7 +5,7 @@ from CircuitCalculator.AdvancedNodalAnalysis import nodal_analysis_solver
 R1, R2, R3, R4 = 10, 20, 30, 40
 Uq1, Uq2, Uq3, Iq4 = 1, 2, 3, 0.1
 
-with sd.Drawing() as d:
+with sd.Drawing(unit=5) as d:
     d += sdw.LabelNode(id=5, id_loc='S')
     d += sdw.VoltageSource(V=Uq1, name='Uq1').up()
     d += sdw.Line().up()
@@ -32,9 +32,7 @@ with sd.Drawing() as d:
     d += schemdraw_solution.draw_voltage('R2')
     d += schemdraw_solution.draw_voltage('R3')
     d += schemdraw_solution.draw_voltage('R4')
-    d += schemdraw_solution.draw_voltage('Uq1')
-    d += schemdraw_solution.draw_current('R1')
-    d += schemdraw_solution.draw_current('R2')
-    d += schemdraw_solution.draw_current('R3')
-    d += schemdraw_solution.draw_current('R4')
-    d += schemdraw_solution.draw_current('Iq4')
+    d += schemdraw_solution.draw_current('R1', ofst=1.2)
+    d += schemdraw_solution.draw_current('R2', ofst=1.2)
+    d += schemdraw_solution.draw_current('R3', ofst=1.2)
+    d += schemdraw_solution.draw_current('R4', ofst=1.2)
