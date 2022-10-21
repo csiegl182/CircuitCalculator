@@ -1,0 +1,58 @@
+[
+    {
+        "type": "resistor",
+        "id": "R1",
+        "N1": 1,
+        "N2": 0,
+        "R": 10
+    },
+    {
+        "type": "resistor",
+        "id": "R2",
+        "N1": 1,
+        "N2": 3,
+        "R": 20
+    },
+    {
+        "type": "resistor",
+        "id": "R3",
+        "N1": 2,
+        "N2": 5,
+        "R": 30
+    },
+    {
+        "type": "resistor",
+        "id": "R4",
+        "N1": 4,
+        "N2": 5,
+        "R": 40
+    },
+    {
+        "type": "voltage_source",
+        "id": "U1",
+        "N1": 0,
+        "N2": 5,
+        "U": 1
+    },
+    {
+        "type": "voltage_source",
+        "id": "U2",
+        "N1": 2,
+        "N2": 1,
+        "U": 2
+    },
+    {
+        "type": "voltage_source",
+        "id": "U3",
+        "N1": 4,
+        "N2": 3,
+        "U": 3
+    },
+    {
+        "type": "current_source",
+        "id": "I4",
+        "N1": 3,
+        "N2": 5,
+        "I": 0.1
+    }
+]

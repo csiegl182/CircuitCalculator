@@ -2,8 +2,6 @@ import schemdraw as sd
 import CircuitCalculator.SchemdrawWrapper as sdw
 from CircuitCalculator.AdvancedNodalAnalysis import nodal_analysis_solver
 
-R1, R2, R3, R4 = 10, 20, 10, 10
-Uq1, Uq2, Uq3, Iq4 = 1, 1, 3, 0.1
 R1, R2, R3, R4 = 10, 20, 30, 40
 Uq1, Uq2, Uq3, Iq4 = 1, 2, 3, 0.1
 
