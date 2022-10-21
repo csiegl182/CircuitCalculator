@@ -1,4 +1,4 @@
-from CircuitCalculator.Network import Network, Branch, NetworkSolution
+from .Network import Network, Branch, NetworkSolution
 import numpy as np
 
 class DimensionError(Exception): pass

@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from typing import Protocol, List, Dict, Callable, Any, Set
-import functools
 from numpy import inf, nan
 
 class UnknownBranchResult(Exception): pass

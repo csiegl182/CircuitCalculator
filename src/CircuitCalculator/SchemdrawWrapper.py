@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-import CircuitCalculator.Network as Network
+from .Network import NetworkSolver, Network, Branch, resistor, current_source, real_current_source, voltage_source, real_voltage_source
 from typing import Callable, Set, List, Tuple, Dict, Type, TypeVar 
 import schemdraw
 
@@ -190,31 +190,31 @@ class Ground(Node):
         return 'Ground'
         
 SchemdrawElement = TypeVar('SchemdrawElement', bound=schemdraw.elements.Element)
-SchemdrawElementTranslator = Callable[[SchemdrawElement, Callable[[schemdraw.util.Point], int]], Tuple[Network.Branch, str]]
+SchemdrawElementTranslator = Callable[[SchemdrawElement, Callable[[schemdraw.util.Point], int]], Tuple[Branch, str]]
 
-def real_current_source_translator(element: RealCurrentSource, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Network.Branch, str]:
+def real_current_source_translator(element: RealCurrentSource, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Branch, str]:
     n1, n2 = get_nodes(element)
-    return Network.Branch(node_mapper(n1), node_mapper(n2), Network.real_current_source(element.I, element.R)), element.name
+    return Branch(node_mapper(n1), node_mapper(n2), real_current_source(element.I, element.R)), element.name
 
-def line_translator(element: Line, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Network.Branch, str]:
+def line_translator(element: Line, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Branch, str]:
     n1, _ = get_nodes(element)
-    return Network.Branch(node_mapper(n1), node_mapper(n1), Network.resistor(R=0)), element.name
+    return Branch(node_mapper(n1), node_mapper(n1), resistor(R=0)), element.name
 
-def resistor_translator(element: Resistor, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Network.Branch, str]:
+def resistor_translator(element: Resistor, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Branch, str]:
     n1, n2 = get_nodes(element)
-    return Network.Branch(node_mapper(n1), node_mapper(n2), Network.resistor(element.R)), element.name
+    return Branch(node_mapper(n1), node_mapper(n2), resistor(element.R)), element.name
 
-def current_source_translator(element: CurrentSource, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Network.Branch, str]:
+def current_source_translator(element: CurrentSource, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Branch, str]:
     n1, n2 = get_nodes(element)
-    return Network.Branch(node_mapper(n1), node_mapper(n2), Network.current_source(element.I)), element.name
+    return Branch(node_mapper(n1), node_mapper(n2), current_source(element.I)), element.name
 
-def real_voltage_source_translator(element: RealVoltageSource, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Network.Branch, str]:
+def real_voltage_source_translator(element: RealVoltageSource, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Branch, str]:
     n1, n2 = get_nodes(element)
-    return Network.Branch(node_mapper(n2), node_mapper(n1), Network.real_voltage_source(element.V, element.R)), element.name
+    return Branch(node_mapper(n2), node_mapper(n1), real_voltage_source(element.V, element.R)), element.name
 
-def voltage_source_translator(element: VoltageSource, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Network.Branch, str]:
+def voltage_source_translator(element: VoltageSource, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Branch, str]:
     n1, n2 = get_nodes(element)
-    return Network.Branch(node_mapper(n2), node_mapper(n1), Network.voltage_source(element.V)), element.name
+    return Branch(node_mapper(n2), node_mapper(n1), voltage_source(element.V)), element.name
 
 element_translator : Dict[Type[schemdraw.elements.Element], SchemdrawElementTranslator] = {
     RealCurrentSource : real_current_source_translator,
@@ -310,9 +310,9 @@ class SchemdrawNetwork:
         return node_mapping
 
     @property
-    def network(self) -> Network.Network:
+    def network(self) -> Network:
         translator = lambda e : element_translator[type(e)](e, self.get_node_index)[0]
-        return Network.Network([translator(e) for e in self.two_term_elements if type(e) is not Line])
+        return Network([translator(e) for e in self.two_term_elements if type(e) is not Line])
 
     def get_equal_electrical_potential_nodes(self, node: schemdraw.util.Point) -> Set[schemdraw.util.Point]:
         equal_electrical_potential_nodes = set([node])
@@ -337,13 +337,13 @@ class SchemdrawNetwork:
         else:
             return elements[0]
 
-    def get_branch_from_name(self, id: str) -> Network.Branch:
+    def get_branch_from_name(self, id: str) -> Branch:
         element = self.get_element_from_name(id)
         return element_translator[type(element)](element, self.get_node_index)[0]
 
 class SchemdrawSolution:
 
-    def __init__(self, schemdraw_network: SchemdrawNetwork, solver: Network.NetworkSolver):
+    def __init__(self, schemdraw_network: SchemdrawNetwork, solver: NetworkSolver):
         self.schemdraw_network = schemdraw_network
         self.network_solution = solver(self.schemdraw_network.network)
 

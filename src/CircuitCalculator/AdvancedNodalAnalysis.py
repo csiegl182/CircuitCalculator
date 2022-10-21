@@ -1,6 +1,6 @@
 import CircuitCalculator.ClassicNodalAnalysis as cna
 import numpy as np
-from CircuitCalculator.Network import Network, Branch, Element, NetworkSolution
+from .Network import Network, Branch, Element, NetworkSolution
 from typing import Dict
 
 class AmbiguousElectricalPotential(Exception): pass
