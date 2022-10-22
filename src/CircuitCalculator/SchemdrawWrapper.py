@@ -2,21 +2,28 @@ from dataclasses import dataclass
 from .Network import NetworkSolver, Network, Branch, resistor, current_source, real_current_source, voltage_source, real_voltage_source
 from typing import Callable, Set, List, Tuple, Dict, Type, TypeVar 
 import schemdraw
+from .Utils import scientific_float
 
 blue = [3/255, 70/255, 143/255]
 red = [210/255, 0, 0]
 
 class UnknownElement(Exception): pass
 
+def print_current(I: float, precision: int = 3) -> str:
+    return scientific_float(I, precision=precision, use_exp_prefix=True, exp_prefixes={-6: 'u', -3: 'm', 3: 'k'})
+
+def print_voltage(V: float, precision: int = 3) -> str:
+    return scientific_float(V, precision=precision, use_exp_prefix=True, exp_prefixes={-6: 'u', -3: 'm', 3: 'k'})
+
 class VoltageSource(schemdraw.elements.sources.SourceV):
-    def __init__(self, V: float, name: str, *args, reverse=False, **kwargs):
+    def __init__(self, V: float, name: str, *args, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
         if reverse:
             self._V = -V
         else:
             self._V = V
         self._name = name
-        self.label(f'${self._name}={V}\\mathrm{{V}}$', rotate=True)
+        self.label(f'{self._name}={print_voltage(V, precision=precision)}V', rotate=True)
 
         a, b = (1.5, 0.7), (-0.5, 0.7)
         self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=blue))
@@ -33,7 +40,7 @@ class VoltageSource(schemdraw.elements.sources.SourceV):
         return {'U' : self.V}
 
 class RealVoltageSource(schemdraw.elements.sources.SourceV):
-    def __init__(self, V: float, R: float, name: str, *args, reverse=False, **kwargs):
+    def __init__(self, V: float, R: float, name: str, *args, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
         if reverse:
             self._V = -V
@@ -41,7 +48,7 @@ class RealVoltageSource(schemdraw.elements.sources.SourceV):
             self._V = V
         self._R = R
         self._name = name
-        self.label(f'${self._name}$\n ${V}\\mathrm{{V}} / {R}\\Omega$')
+        self.label(f'{self._name} {print_voltage(V, precision=precision)}V / {R}$\\Omega$')
 
     @property
     def name(self) -> str:
@@ -63,14 +70,14 @@ class RealVoltageSource(schemdraw.elements.sources.SourceV):
         return {'U' : self.V, 'R' : self.R}
 
 class CurrentSource(schemdraw.elements.sources.SourceI):
-    def __init__(self, I: float, name: str, *args, reverse=False, **kwargs):
+    def __init__(self, I: float, name: str, *args, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
         if reverse:
             self._I = -I
         else:
             self._I = I
         self._name = name
-        self.label(f'${self._name}={I}\\mathrm{{A}}$', rotate=True)
+        self.label(f'{self._name}={print_current(I, precision=precision)}A', rotate=True)
 
         a, b = (1.2, -0.3), (1.8, -0.3)
         self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=red))
@@ -87,7 +94,7 @@ class CurrentSource(schemdraw.elements.sources.SourceI):
         return {'I' : self.I}
 
 class RealCurrentSource(schemdraw.elements.sources.SourceI):
-    def __init__(self, I: float, R: float, name: str, *args, reverse=False, **kwargs):
+    def __init__(self, I: float, R: float, name: str, *args, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
         if reverse:
             self._I = -I
@@ -95,7 +102,7 @@ class RealCurrentSource(schemdraw.elements.sources.SourceI):
             self._I = I
         self._R = R
         self._name = name
-        self.label(f'${self._name}$\n ${I}\\mathrm{{A}} / {R}\\Omega$')
+        self.label(f'{self._name} {print_current(I)}A / {R}$\\Omega$')
 
     @property
     def name(self) -> str:
@@ -121,7 +128,7 @@ class Resistor(schemdraw.elements.twoterm.ResistorIEC):
         super().__init__(*args, **kwargs)
         self._R = R
         self._name = name
-        self.label(f'${self._name}={self._R}\\Omega$', rotate=True)
+        self.label(f'{self._name}={self._R}$\\Omega$', rotate=True)
 
     @property
     def name(self) -> str:
@@ -356,7 +363,7 @@ class SchemdrawSolution:
         self.schemdraw_network = schemdraw_network
         self.network_solution = solver(self.schemdraw_network.network)
 
-    def draw_voltage(self, element_name: str, reverse: bool = False) -> schemdraw.Drawing:
+    def draw_voltage(self, element_name: str, reverse: bool = False, precision = 3) -> schemdraw.Drawing:
         element = self.schemdraw_network.get_element_from_name(element_name)
         branch = self.schemdraw_network.get_branch_from_name(element_name)
         V_branch = self.network_solution.get_voltage(branch)
@@ -370,9 +377,9 @@ class SchemdrawSolution:
         dx, dy = get_node_direction(n1, n2)
         if dx < 0 or dy < 0:
             reverse = not reverse
-        return schemdraw.elements.CurrentLabel(top=False, reverse=reverse, color=blue).at(element).label(f'{V_branch:2.2f}V')
+        return schemdraw.elements.CurrentLabel(top=False, reverse=reverse, color=blue).at(element).label(f'{print_voltage(V_branch, precision=precision)}V')
 
-    def draw_current(self, element_name: str, reverse: bool = False, start: bool = True, ofst: float = 0.8) -> schemdraw.Drawing:
+    def draw_current(self, element_name: str, reverse: bool = False, start: bool = True, ofst: float = 0.8, precision=3) -> schemdraw.Drawing:
         element = self.schemdraw_network.get_element_from_name(element_name)
         branch = self.schemdraw_network.get_branch_from_name(element_name)
         I_branch = self.network_solution.get_current(branch)
@@ -381,4 +388,4 @@ class SchemdrawSolution:
             start = False
         if start is False:
             reverse = not reverse
-        return schemdraw.elements.CurrentLabelInline(reverse=reverse, start=start, color=red, ofst=ofst).at(element).label(f'{I_branch:2.2f}A')
+        return schemdraw.elements.CurrentLabelInline(reverse=reverse, start=start, color=red, ofst=ofst).at(element).label(f'{print_current(I_branch, precision=precision)}A')
