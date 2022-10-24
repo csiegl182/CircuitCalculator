@@ -1,5 +1,5 @@
-from SchemdrawWrapper import VoltageSource, Resistor, Line, Ground, SchemdrawNetwork, SchemdrawSolution
-from AdvancedNodalAnalysis import nodal_analysis_solver
+from CircuitCalculator.SchemdrawWrapper import VoltageSource, Resistor, Line, Ground, SchemdrawNetwork, SchemdrawSolution
+from CircuitCalculator.AdvancedNodalAnalysis import nodal_analysis_solver
 from schemdraw import Drawing
 
 if __name__ == '__main__':
@@ -20,5 +20,4 @@ if __name__ == '__main__':
         d += schemdraw_solution.draw_current('R2')
         d += schemdraw_solution.draw_voltage('R3')
         d += schemdraw_solution.draw_current('R3', start=False)
-        d += schemdraw_solution.draw_voltage('U1')
         d += schemdraw_solution.draw_current('U1')

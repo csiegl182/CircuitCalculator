@@ -24,6 +24,7 @@ class VoltageSource(schemdraw.elements.sources.SourceV):
             self._V = V
         self._name = name
         self.label(f'{self._name}={print_voltage(V, precision=precision)}V', rotate=True)
+        self.segments = DrawVoltageSource()
 
         a, b = (1.5, 0.7), (-0.5, 0.7)
         self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=blue))
@@ -78,6 +79,7 @@ class CurrentSource(schemdraw.elements.sources.SourceI):
             self._I = I
         self._name = name
         self.label(f'{self._name}={print_current(I, precision=precision)}A', rotate=True)
+        self.segments = DrawCurrentSource()
 
         a, b = (1.2, -0.3), (1.8, -0.3)
         self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=red))
@@ -93,6 +95,33 @@ class CurrentSource(schemdraw.elements.sources.SourceI):
     def values(self) -> Dict[str, float]:
         return {'I' : self.I}
 
+def DrawSource() -> List[schemdraw.segments.SegmentType]:
+    return [
+        schemdraw.segments.Segment([(0, 0), (0, 0), schemdraw.elements.elements.gap, (1, 0), (1, 0)]),
+        schemdraw.segments.SegmentCircle((0.5, 0), 0.5,)
+    ]
+
+def DrawCurrentSource() -> List[schemdraw.segments.SegmentType]:
+    return DrawSource() + [
+        schemdraw.segments.Segment([(0.5, -0.5), (0.5, 0.5)])
+    ]
+
+def DrawRealCurrentSource() -> List[schemdraw.segments.SegmentType]:
+    return DrawCurrentSource() + [
+        schemdraw.segments.SegmentCircle((-0.5, 0), 0.07, fill='black'),
+        schemdraw.segments.SegmentCircle((1.5, 0), 0.07, fill='black'),
+        schemdraw.segments.Segment([(-0.5, 0), (-0.5, 1)]),
+        schemdraw.segments.Segment([(1.5, 0), (1.5, 1)]),
+        schemdraw.segments.Segment([(-0.5, 1), (0, 1)]),
+        schemdraw.segments.Segment([(1, 1), (1.5, 1)]),
+        schemdraw.segments.Segment([(0, 0.8), (1, 0.8), (1, 1.2), (0, 1.2), (0, 0.8)])
+    ]
+
+def DrawVoltageSource() -> List[schemdraw.segments.SegmentType]:
+    return DrawSource() + [
+        schemdraw.segments.Segment([(0.5, -0.5), (0.5, 0.5)])
+    ]
+
 class RealCurrentSource(schemdraw.elements.sources.SourceI):
     def __init__(self, I: float, R: float, name: str, *args, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
@@ -102,7 +131,12 @@ class RealCurrentSource(schemdraw.elements.sources.SourceI):
             self._I = I
         self._R = R
         self._name = name
-        self.label(f'{self._name} {print_current(I)}A / {R}$\\Omega$')
+        self.segments = DrawRealCurrentSource()
+
+        a, b = (1, -0.3), (1.5, -0.3)
+        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.2, arrowlength=.3, color=red))
+        self.label(f'{self._name}={print_current(I, precision=precision)}A', rotate=True, ofst=(0, -2.1))
+        self.label(f'{print_current(R, precision=precision)}$\\Omega$', rotate=True, ofst=(0, .2))
 
     @property
     def name(self) -> str:
@@ -363,7 +397,7 @@ class SchemdrawSolution:
         self.schemdraw_network = schemdraw_network
         self.network_solution = solver(self.schemdraw_network.network)
 
-    def draw_voltage(self, element_name: str, reverse: bool = False, precision = 3) -> schemdraw.Drawing:
+    def draw_voltage(self, element_name: str, reverse: bool = False, precision: float = 3, top: bool = False) -> schemdraw.Drawing:
         element = self.schemdraw_network.get_element_from_name(element_name)
         branch = self.schemdraw_network.get_branch_from_name(element_name)
         V_branch = self.network_solution.get_voltage(branch)
@@ -377,7 +411,7 @@ class SchemdrawSolution:
         dx, dy = get_node_direction(n1, n2)
         if dx < 0 or dy < 0:
             reverse = not reverse
-        return schemdraw.elements.CurrentLabel(top=False, reverse=reverse, color=blue).at(element).label(f'{print_voltage(V_branch, precision=precision)}V')
+        return schemdraw.elements.CurrentLabel(reverse=reverse, color=blue, top=top).at(element).label(f'{print_voltage(V_branch, precision=precision)}V')
 
     def draw_current(self, element_name: str, reverse: bool = False, start: bool = True, ofst: float = 0.8, precision=3) -> schemdraw.Drawing:
         element = self.schemdraw_network.get_element_from_name(element_name)
