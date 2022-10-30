@@ -1,7 +1,7 @@
 import CircuitCalculator.ClassicNodalAnalysis as cna
 import numpy as np
 from .Network import Network, Branch, Element, NetworkSolution
-from typing import Dict
+from typing import Dict, List
 
 class AmbiguousElectricalPotential(Exception): pass
 
@@ -19,39 +19,54 @@ def remove_ideal_voltage_sources(network: Network) -> Network:
 
 def get_supernodes(network: Network) -> Dict[int, Branch]:
     voltage_sources = get_ideal_voltage_sources(network)
-    node_zero_voltage_sources = voltage_sources.branches_connected_to(node=0)
-    voltage_source_nodes = [tuple(sorted([b.node1, b.node2])) for b in node_zero_voltage_sources]
-    if len(voltage_source_nodes) != len(set(voltage_source_nodes)):
-        raise AmbiguousElectricalPotential
-    supernodes = {b.node1 if b.node1 != 0 else b.node2 : b for b in node_zero_voltage_sources}
-    voltage_sources = Network([vs for vs in voltage_sources.branches if vs not in node_zero_voltage_sources])
+    supernodes = {}
     for vs in voltage_sources.branches:
-        if vs.node1 in supernodes.keys() and vs.node2 in supernodes.keys():
+        node = vs.node1
+        if node == 0 or node in supernodes.keys():
+            node = vs.node2
+        if node == 0 or node in supernodes.keys():
             raise AmbiguousElectricalPotential
-        if vs.node1 not in supernodes.keys():
-            supernodes.update({vs.node1: vs})
-        else:
-            supernodes.update({vs.node2: vs})
+        supernodes.update({node: vs})
     return supernodes
 
 def get_supernode_counterparts(network: Network) -> Dict[int, Branch]:
-    counterparts = {b.node2 if b.node1 == sn else b.node1 : b for sn, b in get_supernodes(network).items()}
+    counterparts = {}
+    for sn, b in get_supernodes(network).items():
+        if b.node1 == sn and b.node2 not in get_supernodes(network).keys():
+            counterparts.update({b.node2: b})
+        if b.node2 == sn and b.node1 not in get_supernodes(network).keys():
+            counterparts.update({b.node1: b})
     counterparts.pop(0, None)
     return counterparts
 
+def get_non_supernodes(network: Network) -> List[int]:
+    return list(set(range(1, network.number_of_nodes)).difference(get_supernodes(network).keys()))
+
 def create_node_matrix_from_network(network: Network) -> np.ndarray:
-    Y = cna.create_node_admittance_matrix_from_network(remove_ideal_voltage_sources(network))
-    for cp, b in get_supernode_counterparts(network).items():
-        if b.node1 == cp:
-            Y[:,cp-1] += Y[:,b.node2-1]
-        else:
-            Y[:,cp-1] += Y[:,b.node1-1]
-    for sn, b in get_supernodes(network).items():
-        Y[:,sn-1] = 0
-        if b.node1 > 0:
-            Y[b.node1-1, sn-1] = -1
-        if b.node2 > 0:
-            Y[b.node2-1, sn-1] = +1
+    def fill_supernode_part(Y: np.ndarray) -> np.ndarray:
+        for super_node, b in get_supernodes(network).items():
+            sign = np.sign(b.element.U)
+            opposite_node = b.node1
+            if super_node == b.node1: # voltage arrow points out of super node
+                sign *= -1
+                opposite_node = b.node2
+            Y[super_node-1, super_node-1] = sign
+            if opposite_node > 0:
+                Y[opposite_node-1, super_node-1] = -sign
+        return Y
+    def fill_non_supernode_part(Y: np.ndarray) -> np.ndarray:
+        non_supernode_indices = [node-1 for node in get_non_supernodes(network)]
+        Y_cna = cna.create_node_admittance_matrix_from_network(remove_ideal_voltage_sources(network))
+        Y[:, non_supernode_indices] = Y_cna[:, non_supernode_indices]
+        for cp, b in get_supernode_counterparts(network).items():
+            if b.node1 == cp:
+                Y[:,cp-1] += Y_cna[:,b.node2-1]
+            else:
+                Y[:,cp-1] += Y_cna[:,b.node1-1]
+        return Y
+    Y = np.zeros((network.number_of_nodes-1, network.number_of_nodes-1))
+    Y = fill_non_supernode_part(Y)
+    Y = fill_supernode_part(Y)
     return Y
 
 def signed_voltage(branch: Branch, node: int) -> complex:

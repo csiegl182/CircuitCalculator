@@ -81,7 +81,7 @@ def test_create_node_matrix_from_reference_network_5() -> None:
 
 def test_create_node_matrix_from_reference_network_8() -> None:
     R1, R2, R3, R4, R5 = 10, 20, 30, 40, 50
-    G3, G4, G5 = 1/R1, 1/R2, 1/R3, 1/R4, 1/R5
+    G3, G4, G5 = 1/R3, 1/R4, 1/R5
     U1, U2, I3 = 1, 2, 0.1
     network = Network(
         [
