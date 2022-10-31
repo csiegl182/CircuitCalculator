@@ -28,6 +28,16 @@ def calculate_branch_voltage(V_node : np.ndarray, node1 : int, node2 : int) -> c
     return V1 - V2
 
 def create_node_admittance_matrix_from_network(network : Network) -> np.ndarray:
+    def full_admittance_connected_to(node: int) -> complex:
+        return sum(b.element.Y for b in network.branches_connected_to(node))
+    Y = np.diag([full_admittance_connected_to(node) for node in range(1, network.number_of_nodes)])
+    for b in network.branches:
+        if b.node1 > 0 and b.node2 > 0:
+            Y[b.node1-1, b.node2-1] += -b.element.Y
+            Y[b.node2-1, b.node1-1] += -b.element.Y
+    return Y
+
+def create_node_admittance_matrix_from_network2(network : Network) -> np.ndarray:
     def full_admittance_between(node1: int, node2: int) -> complex:
         return sum(b.element.Y for b in network.branches_between(node1=node1, node2=node2))
     def full_admittance_connected_to(node: int) -> complex:
