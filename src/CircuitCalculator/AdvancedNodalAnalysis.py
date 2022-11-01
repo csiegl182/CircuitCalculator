@@ -5,17 +5,17 @@ from typing import Dict, List
 
 class AmbiguousElectricalPotential(Exception): pass
 
-def is_ideal_voltage_source(element: Element) -> bool:
-    return element.active and element.Z==0 and np.isfinite(element.U)
+def is_ideal_voltage_source(branch: Branch) -> bool:
+    return branch.element.active and branch.element.Z==0 and np.isfinite(branch.element.U)
 
-def is_ideal_current_source(element: Element) -> bool:
-    return element.active and element.Y==0 and np.isfinite(element.I)
+def is_ideal_current_source(branch: Branch) -> bool:
+    return branch.element.active and branch.element.Y==0 and np.isfinite(branch.element.I)
 
 def get_ideal_voltage_sources(network: Network) -> Network:
-    return Network([b for b in network.branches if is_ideal_voltage_source(b.element)])
+    return Network([b for b in network.branches if is_ideal_voltage_source(b)])
 
 def remove_ideal_voltage_sources(network: Network) -> Network:
-    return Network([b for b in network.branches if not is_ideal_voltage_source(b.element)])
+    return Network([b for b in network.branches if not is_ideal_voltage_source(b)])
 
 def get_supernodes(network: Network) -> Dict[int, Branch]:
     voltage_sources = get_ideal_voltage_sources(network)
@@ -54,58 +54,43 @@ def create_node_matrix_from_network(network: Network) -> np.ndarray:
             if opposite_node > 0:
                 Y[opposite_node-1, super_node-1] = -sign
         return Y
-    def fill_non_supernode_part2(Y: np.ndarray) -> np.ndarray:
+    def fill_non_supernode_part(Y: np.ndarray) -> np.ndarray:
         def branch_parallel_to_voltage_source(branch: Branch) -> bool:
             n1, n2 = branch.node1, branch.node2
-            return any([is_ideal_voltage_source(b.element) for b in network.branches_between(n1, n2)])
-        Y = np.zeros((network.number_of_nodes-1, network.number_of_nodes-1))
-        for b in network.branches:
-            n1, n2 = b.node1, b.node2
-            if not branch_parallel_to_voltage_source(b):
-                if n1 > 0:
-                    Y[n1-1, n1-1] += b.element.Y
-                if n2 > 0:
-                    Y[n2-1, n2-1] += b.element.Y
-        for b in network.branches:
-            not_connected_to_zero_node = b.node1 > 0 and b.node2 > 0
-            if not_connected_to_zero_node and not branch_parallel_to_voltage_source(b):
-                if b.node2 not in get_supernodes(network).keys():
-                    Y[b.node1-1, b.node2-1] += -b.element.Y
-                else:
-                    sn = get_supernodes(network)[b.node2]
-                    n1, n2 = sn.node1, sn.node2
-                    if b.node2 == n1:
-                        cp = n2
-                    else:
-                        cp = n1
-                    if cp > 0 and cp not in get_supernodes(network).keys():
-                        Y[b.node2-1, cp-1] += b.element.Y
-                        Y[b.node1-1, cp-1] += -b.element.Y
-                if b.node1 not in get_supernodes(network).keys():
-                    Y[b.node2-1, b.node1-1] += -b.element.Y
-                else:
-                    sn = get_supernodes(network)[b.node1]
-                    n1, n2 = sn.node1, sn.node2
-                    if b.node1 == n1:
-                        cp = n2
-                    else:
-                        cp = n1
-                    if cp > 0 and cp not in get_supernodes(network).keys():
-                        Y[b.node1-1, cp-1] += b.element.Y
-                        Y[b.node2-1, cp-1] += -b.element.Y
-        return Y
-    def fill_non_supernode_part(Y: np.ndarray) -> np.ndarray:
-        non_supernode_indices = [node-1 for node in get_non_supernodes(network)]
-        Y_cna = cna.create_node_admittance_matrix_from_network(remove_ideal_voltage_sources(network))
-        Y[:, non_supernode_indices] = Y_cna[:, non_supernode_indices]
-        for cp, b in get_supernode_counterparts(network).items():
-            if b.node1 == cp:
-                Y[:,cp-1] += Y_cna[:,b.node2-1]
+            return any([is_ideal_voltage_source(b) for b in network.branches_between(n1, n2)])
+        def is_supernode(node: int) -> bool:
+            return node in get_supernodes(network).keys()
+        def get_supernode_counterpart(supernode: int) -> int:
+            sn = get_supernodes(network)[supernode]
+            if supernode == sn.node1:
+                return sn.node2
             else:
-                Y[:,cp-1] += Y_cna[:,b.node1-1]
+                return sn.node2
+        valid_branches = [b for b in network.branches if not is_ideal_voltage_source(b) and not branch_parallel_to_voltage_source(b)]
+        for b in valid_branches:
+            i1, i2 = b.node1-1, b.node2-1
+            if b.node1 > 0:
+                Y[i1, i1] += b.element.Y
+            if b.node2 > 0:
+                Y[i2, i2] += b.element.Y
+            if b.node1 > 0 and b.node2 > 0:
+                if not is_supernode(b.node2):
+                    Y[i1, i2] += -b.element.Y
+                else:
+                    cp = get_supernode_counterpart(b.node2)
+                    if cp > 0 and not is_supernode(cp):
+                        Y[i2, cp-1] += b.element.Y
+                        Y[i1, cp-1] += -b.element.Y
+                if not is_supernode(b.node1):
+                    Y[i2, i1] += -b.element.Y
+                else:
+                    cp = get_supernode_counterpart(b.node1)
+                    if cp > 0 and not is_supernode(cp):
+                        Y[i1, cp-1] += b.element.Y
+                        Y[i2, cp-1] += -b.element.Y
         return Y
     Y = np.zeros((network.number_of_nodes-1, network.number_of_nodes-1))
-    Y = fill_non_supernode_part2(Y)
+    Y = fill_non_supernode_part(Y)
     Y = fill_supernode_part(Y)
     return Y
 
@@ -154,10 +139,10 @@ class NodalAnalysisSolution:
         return cna.calculate_branch_voltage(self.node_potentials, branch.node1, branch.node2)
 
     def get_current(self, branch: Branch) -> complex:
-        if is_ideal_voltage_source(branch.element):
+        if is_ideal_voltage_source(branch):
             sn = list(self.super_nodes.keys())[list(self.super_nodes.values()).index(branch)]
             return self.solution_vector[sn-1]
-        elif is_ideal_current_source(branch.element):
+        elif is_ideal_current_source(branch):
             return branch.element.I
         else:
             return self.get_voltage(branch)/branch.element.Z.real
