@@ -54,6 +54,46 @@ def create_node_matrix_from_network(network: Network) -> np.ndarray:
             if opposite_node > 0:
                 Y[opposite_node-1, super_node-1] = -sign
         return Y
+    def fill_non_supernode_part2(Y: np.ndarray) -> np.ndarray:
+        def branch_parallel_to_voltage_source(branch: Branch) -> bool:
+            n1, n2 = branch.node1, branch.node2
+            return any([is_ideal_voltage_source(b.element) for b in network.branches_between(n1, n2)])
+        Y = np.zeros((network.number_of_nodes-1, network.number_of_nodes-1))
+        for b in network.branches:
+            n1, n2 = b.node1, b.node2
+            if not branch_parallel_to_voltage_source(b):
+                if n1 > 0:
+                    Y[n1-1, n1-1] += b.element.Y
+                if n2 > 0:
+                    Y[n2-1, n2-1] += b.element.Y
+        for b in network.branches:
+            not_connected_to_zero_node = b.node1 > 0 and b.node2 > 0
+            if not_connected_to_zero_node and not branch_parallel_to_voltage_source(b):
+                if b.node2 not in get_supernodes(network).keys():
+                    Y[b.node1-1, b.node2-1] += -b.element.Y
+                else:
+                    sn = get_supernodes(network)[b.node2]
+                    n1, n2 = sn.node1, sn.node2
+                    if b.node2 == n1:
+                        cp = n2
+                    else:
+                        cp = n1
+                    if cp > 0 and cp not in get_supernodes(network).keys():
+                        Y[b.node2-1, cp-1] += b.element.Y
+                        Y[b.node1-1, cp-1] += -b.element.Y
+                if b.node1 not in get_supernodes(network).keys():
+                    Y[b.node2-1, b.node1-1] += -b.element.Y
+                else:
+                    sn = get_supernodes(network)[b.node1]
+                    n1, n2 = sn.node1, sn.node2
+                    if b.node1 == n1:
+                        cp = n2
+                    else:
+                        cp = n1
+                    if cp > 0 and cp not in get_supernodes(network).keys():
+                        Y[b.node1-1, cp-1] += b.element.Y
+                        Y[b.node2-1, cp-1] += -b.element.Y
+        return Y
     def fill_non_supernode_part(Y: np.ndarray) -> np.ndarray:
         non_supernode_indices = [node-1 for node in get_non_supernodes(network)]
         Y_cna = cna.create_node_admittance_matrix_from_network(remove_ideal_voltage_sources(network))
@@ -65,7 +105,7 @@ def create_node_matrix_from_network(network: Network) -> np.ndarray:
                 Y[:,cp-1] += Y_cna[:,b.node1-1]
         return Y
     Y = np.zeros((network.number_of_nodes-1, network.number_of_nodes-1))
-    Y = fill_non_supernode_part(Y)
+    Y = fill_non_supernode_part2(Y)
     Y = fill_supernode_part(Y)
     return Y
 
