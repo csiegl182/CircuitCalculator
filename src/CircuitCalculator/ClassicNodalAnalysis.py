@@ -36,18 +36,6 @@ def create_node_admittance_matrix_from_network(network : Network) -> np.ndarray:
             Y[b.node1-1, b.node2-1] += -b.element.Y
             Y[b.node2-1, b.node1-1] += -b.element.Y
     return Y
-
-def create_node_admittance_matrix_from_network2(network : Network) -> np.ndarray:
-    def full_admittance_between(node1: int, node2: int) -> complex:
-        return sum(b.element.Y for b in network.branches_between(node1=node1, node2=node2))
-    def full_admittance_connected_to(node: int) -> complex:
-        return sum(b.element.Y for b in network.branches_connected_to(node))
-    Y = np.diag([full_admittance_connected_to(node) for node in range(1, network.number_of_nodes)])
-    for n1 in range(1, network.number_of_nodes):
-        for n2 in range(n1+1, network.number_of_nodes):
-            Y[n1-1, n2-1] = -full_admittance_between(n1, n2)
-    Y += np.triu(Y,1).T
-    return Y
     
 def create_current_vector_from_network(network : Network) -> np.ndarray:
     I = np.zeros(network.number_of_nodes-1)
