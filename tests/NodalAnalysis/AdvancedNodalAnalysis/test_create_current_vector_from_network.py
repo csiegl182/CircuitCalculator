@@ -75,5 +75,5 @@ def test_create_current_vector_from_reference_network_8() -> None:
         ]
     )
     I = create_current_vector_from_network(network)
-    I_ref = np.array([-U1*(G1+G2)+(U1+U2)*G2, -U2*(G2+G4+G5)-U1*(G4+G5), -I4+(U1+U2)*G5, I4+(U1+U2)*G4])
+    I_ref = np.array([-U1*(G1+G2)+(U1+U2)*G2, -(U1+U2)*(G2+G4+G5)+U1*G2, -I4+(U1+U2)*G5, I4+(U1+U2)*G4])
     np.testing.assert_almost_equal(I, I_ref)

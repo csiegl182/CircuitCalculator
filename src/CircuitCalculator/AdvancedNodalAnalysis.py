@@ -1,6 +1,6 @@
 import CircuitCalculator.ClassicNodalAnalysis as cna
 import numpy as np
-from .Network import Network, Branch, Element, NetworkSolution
+from .Network import Network, Branch, NetworkSolution
 from typing import Dict, List
 
 class AmbiguousElectricalPotential(Exception): pass
@@ -11,15 +11,15 @@ def is_ideal_voltage_source(branch: Branch) -> bool:
 def is_ideal_current_source(branch: Branch) -> bool:
     return branch.element.active and branch.element.Y==0 and np.isfinite(branch.element.I)
 
-def get_ideal_voltage_sources(network: Network) -> Network:
+def ideal_voltage_sources(network: Network) -> Network:
     return Network([b for b in network.branches if is_ideal_voltage_source(b)])
 
 def remove_ideal_voltage_sources(network: Network) -> Network:
     return Network([b for b in network.branches if not is_ideal_voltage_source(b)])
 
 def get_supernodes(network: Network) -> Dict[int, Branch]:
-    voltage_sources = get_ideal_voltage_sources(network)
-    supernodes = {}
+    voltage_sources = ideal_voltage_sources(network)
+    supernodes : Dict[int, Branch] = {}
     for vs in voltage_sources.branches:
         node = vs.node1
         if node == 0 or node in supernodes.keys():
@@ -100,13 +100,21 @@ def signed_voltage(branch: Branch, node: int) -> complex:
     else:
         return +branch.element.U
 
-def create_current_vector_from_network(network: Network) -> np.ndarray:
+def create_current_vector_from_network2(network: Network) -> np.ndarray:
     def full_admittance_between(node1: int, node2: int) -> complex:
         return sum(b.element.Y for b in network.branches_between(node1=node1, node2=node2) if np.isfinite(b.element.Y))
     def full_admittance_connected_to(node: int) -> complex:
         return sum(b.element.Y for b in network.branches_connected_to(node) if np.isfinite(b.element.Y))
-    I = cna.create_current_vector_from_network(remove_ideal_voltage_sources(network))
-    voltage_sources = get_ideal_voltage_sources(network)
+    network2 = remove_ideal_voltage_sources(network)
+    I = np.zeros(network2.number_of_nodes-1)
+    for i in range(1, network2.number_of_nodes):
+        current_sources = [branch for branch in network2.branches_connected_to(node=i) if branch.element.active]
+        if len(current_sources) > 0:
+            I[i-1] = sum([cs.element.I if cs.node2 == i else -cs.element.I for cs in current_sources])
+        else:
+            I[i-1] = 0
+
+    voltage_sources = ideal_voltage_sources(network)
     if len(voltage_sources.branches) == 0:
         return I
     for sn, vs in get_supernodes(network).items():
@@ -114,6 +122,42 @@ def create_current_vector_from_network(network: Network) -> np.ndarray:
     for node in range(1,network.number_of_nodes):
         for connected_supernode in network.nodes_connected_to(node).intersection(get_supernodes(network)):
             I[node-1] += full_admittance_between(node, connected_supernode)*-signed_voltage(get_supernodes(network)[connected_supernode], connected_supernode)
+    return I
+
+def create_current_vector_from_network(network: Network) -> np.ndarray:
+    def full_admittance_between(node1: int, node2: int) -> complex:
+        return sum(b.element.Y for b in network.branches_between(node1=node1, node2=node2) if np.isfinite(b.element.Y))
+    def full_admittance_connected_to(node: int) -> complex:
+        return sum(b.element.Y for b in network.branches_connected_to(node) if np.isfinite(b.element.Y))
+    def is_supernode(node: int) -> bool:
+        return node in get_supernodes(network).keys()
+    def get_supernode_counterpart(supernode: int) -> int:
+        sn = get_supernodes(network)[supernode]
+        if supernode == sn.node1:
+            return sn.node2
+        else:
+            return sn.node1
+    def voltage_to_next_passive_node(node: int) -> complex:
+        V = 0+0j
+        while is_supernode(node):
+            V += get_supernodes(network)[node].element.U
+            node = get_supernode_counterpart(node)
+        return V
+    I = np.zeros(network.number_of_nodes-1)
+    current_sources = [b for b in network.branches if is_ideal_current_source(b)]
+    for cs in current_sources:
+        if cs.node1 > 0:
+            I[cs.node1-1] += -cs.element.I
+        if cs.node2 > 0:
+            I[cs.node2-1] += cs.element.I
+    for sn, vs in get_supernodes(network).items():
+        sign_phi = +1
+        if sn == vs.node2:
+            sign_phi = -1
+        I[sn-1] += -sign_phi*voltage_to_next_passive_node(sn)*full_admittance_connected_to(sn)
+        for connected_node in network.nodes_connected_to(sn):
+            if connected_node > 0:
+                I[connected_node-1] += sign_phi*voltage_to_next_passive_node(sn)*full_admittance_between(sn, connected_node)
     return I
 
 class NodalAnalysisSolution:
