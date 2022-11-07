@@ -1,6 +1,6 @@
 import CircuitCalculator.ClassicNodalAnalysis as cna
 import numpy as np
-from .Network import Network, Branch, NetworkSolution
+from .Network import Network, Branch, NetworkSolution, Element
 from typing import Dict, List
 
 class AmbiguousElectricalPotential(Exception): pass
@@ -11,16 +11,53 @@ def is_ideal_voltage_source(branch: Branch) -> bool:
 def is_ideal_current_source(branch: Branch) -> bool:
     return branch.element.active and branch.element.Y==0 and np.isfinite(branch.element.I)
 
-def ideal_voltage_sources(network: Network) -> Network:
-    return Network([b for b in network.branches if is_ideal_voltage_source(b)])
+def ideal_voltage_sources(network: Network) -> List[Branch]:
+    return [b for b in network.branches if is_ideal_voltage_source(b)]
+
+def passive_elements(network: Network) -> List[Branch]:
+    return [b for b in network.branches if not b.element.active]
 
 def remove_ideal_voltage_sources(network: Network) -> Network:
     return Network([b for b in network.branches if not is_ideal_voltage_source(b)])
 
+class Supernodes:
+    def __init__(self, network: Network) -> None:
+        self.voltage_sources: List[Element] = []
+        self.supernodes : List[int] = []
+        self.counterparts: List[int] = []
+        for voltage_source in ideal_voltage_sources(network):
+            node = voltage_source.node1
+            other_node = voltage_source.node2
+            if node == 0 or node in self.supernodes:
+                node = voltage_source.node2
+                other_node = voltage_source.node1
+            if node == 0 or node in self.supernodes:
+                raise AmbiguousElectricalPotential
+            self.voltage_sources.append(voltage_source.element)
+            self.supernodes.append(node)
+            self.counterparts.append(other_node)
+
+    def is_supernode(self, node: int) -> bool:
+        return node in self.supernodes
+
+    def is_active(self, node: int) -> bool:
+        return node in self.supernodes
+    
+    def is_passive(self, node: int) -> bool:
+        return not self.is_supernode(node)
+
+    def is_counterpart(self, node: int) -> bool:
+        return node in self.counterparts
+
+    def get_supernode(self, voltage_source: Element) -> int:
+        return self.supernodes[self.voltage_sources.index(voltage_source)]
+
+    def get_counterpart(self, supernode: int) -> int:
+        return self.counterparts[self.supernodes.index(supernode)]
+        
 def get_supernodes(network: Network) -> Dict[int, Branch]:
-    voltage_sources = ideal_voltage_sources(network)
     supernodes : Dict[int, Branch] = {}
-    for vs in voltage_sources.branches:
+    for vs in ideal_voltage_sources(network):
         node = vs.node1
         if node == 0 or node in supernodes.keys():
             node = vs.node2
@@ -42,7 +79,47 @@ def get_supernode_counterparts(network: Network) -> Dict[int, Branch]:
 def get_non_supernodes(network: Network) -> List[int]:
     return list(set(range(1, network.number_of_nodes)).difference(get_supernodes(network).keys()))
 
+def is_zero_node(node: int) -> bool:
+    return node == 0
+
 def create_node_matrix_from_network(network: Network) -> np.ndarray:
+    def branch_parallel_to_voltage_source(branch: Branch) -> bool:
+        n1, n2 = branch.node1, branch.node2
+        return any([is_ideal_voltage_source(b) for b in network.branches_between(n1, n2)])
+    supernodes = Supernodes(network)
+    A = np.zeros((network.number_of_nodes-1, network.number_of_nodes-1))
+    passive_non_parallel_elements = [b for b in passive_elements(network) if not branch_parallel_to_voltage_source(b)]
+    for b in passive_non_parallel_elements:
+        i, j = b.node1, b.node2
+        if is_zero_node(i) or supernodes.is_active(j):
+            i, j = j, i
+        if supernodes.is_passive(i):
+            A[i-1,i-1] += b.element.Y
+        if not is_zero_node(j):
+            A[j-1,j-1] += b.element.Y
+            if supernodes.is_active(i):
+                k = supernodes.get_counterpart(i)
+                if not is_zero_node(k) and supernodes.is_passive(k):
+                    A[i-1, k-1] += b.element.Y
+                    A[j-1, k-1] -= b.element.Y
+            else:
+                A[j-1, i-1] -= b.element.Y
+            if supernodes.is_active(j):
+                k = supernodes.get_counterpart(j)
+                if not is_zero_node(k) and supernodes.is_passive(k):
+                    A[j-1, k-1] += b.element.Y
+                    A[i-1, k-1] -= b.element.Y
+            else:
+                A[i-1, j-1] -= b.element.Y
+    for vs in ideal_voltage_sources(network):
+        i = supernodes.get_supernode(vs.element)
+        j = supernodes.get_counterpart(i)
+        A[i-1, i-1] = -1 if i == vs.node1 else +1
+        if not is_zero_node(j):
+            A[j-1, i-1] = +1 if i == vs.node1 else -1
+    return A
+
+def create_node_matrix_from_network3(network: Network) -> np.ndarray:
     def fill_supernode_part(Y: np.ndarray) -> np.ndarray:
         for super_node, b in get_supernodes(network).items():
             sign = np.sign(b.element.U)
