@@ -102,3 +102,9 @@ def test_network_8_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_current(U1), 0.075, decimal=3)
     np.testing.assert_almost_equal(solution.get_current(U2), 0.075, decimal=3)
     np.testing.assert_almost_equal(solution.get_current(I3), 0.10, decimal=3)
+
+def test_network_9_with_advanced_nodal_analysis() -> None:
+    network = load_network_from_json('./examples/example_network_9.json')
+    solution = advanced_nodal_analysis_solver(network)
+    I1, R1, R2, R3, Uq, R4 = tuple(network.branches)
+    np.testing.assert_almost_equal(solution.get_voltage(R4), 100, decimal=2)
