@@ -125,3 +125,55 @@ def test_get_supernode_counterparts_returns_zero_node() -> None:
     ])
     nodes = NodeTypes(network)
     assert nodes.get_counterpart(1) == 0
+    
+def test_get_counterparts_of_non_active_node_raises_value_error() -> None:
+    vs1 = voltage_source(1)
+    vs2 = voltage_source(2)
+    r1 = resistor(2)
+    r2 = resistor(2)
+    r3 = resistor(2)
+    network = Network([
+        Branch(0, 1, vs1),
+        Branch(1, 2, r1),
+        Branch(2, 3, r2),
+        Branch(3, 4, vs2),
+        Branch(4, 0, r3),
+    ])
+    nodes = NodeTypes(network)
+    with pytest.raises(ValueError):
+        nodes.get_counterpart(2)
+
+def test_defined_voltage_is_found() -> None:
+    vs1 = voltage_source(1)
+    vs2 = voltage_source(2)
+    r1 = resistor(2)
+    r2 = resistor(2)
+    r3 = resistor(2)
+    network = Network([
+        Branch(0, 1, vs1),
+        Branch(1, 2, r1),
+        Branch(2, 3, r2),
+        Branch(3, 4, vs2),
+        Branch(4, 0, r3),
+    ])
+    nodes = NodeTypes(network)
+    assert nodes.voltage_defined_between(0, 1) == True
+    assert nodes.voltage_defined_between(3, 4) == True
+
+def test_passive_branches_are_found() -> None:
+    vs1 = voltage_source(1)
+    vs2 = voltage_source(2)
+    r1 = resistor(2)
+    r2 = resistor(2)
+    r3 = resistor(2)
+    network = Network([
+        Branch(0, 1, vs1),
+        Branch(1, 2, r1),
+        Branch(2, 3, r2),
+        Branch(3, 4, vs2),
+        Branch(4, 0, r3),
+    ])
+    nodes = NodeTypes(network)
+    assert nodes.voltage_defined_between(1, 2) == False
+    assert nodes.voltage_defined_between(2, 3) == False
+    assert nodes.voltage_defined_between(4, 0) == False

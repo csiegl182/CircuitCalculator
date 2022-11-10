@@ -50,6 +50,15 @@ class NodeTypes:
     def get_voltage(self, active_node: int) -> complex:
         return self.voltages[self.active_nodes.index(active_node)]
 
+    def voltage_defined_between(self, node1: int, node2: int) -> bool:
+        if self.is_active(node1):
+            if self.get_counterpart(node1) == node2:
+                return True
+        if self.is_active(node2):
+            if self.get_counterpart(node2) == node1:
+                return True
+        return False
+
 def is_zero_node(node: int) -> bool:
     return node == 0
 
