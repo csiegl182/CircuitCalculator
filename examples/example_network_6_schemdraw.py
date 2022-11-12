@@ -27,5 +27,5 @@ if __name__ == '__main__':
         d += Resistor(R=7, name='R7').left()
         schemdraw_network = SchemdrawNetwork(d)
 
-R = calculate_total_impedeance(schemdraw_network.network, 1, 2)
+R = calculate_total_impedeance(schemdraw_network.network, '1', '2').real
 print(f'{R=}Ohm')

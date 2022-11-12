@@ -1,19 +1,29 @@
 from dataclasses import dataclass
 from .Network import NetworkSolver, Network, Branch, resistor, current_source, real_current_source, voltage_source, real_voltage_source
-from typing import Callable, Set, List, Tuple, Dict, Type, TypeVar 
+from typing import Callable, Set, Tuple, Dict, Type, TypeVar 
 import schemdraw
 from .Utils import scientific_float
 
-blue = [3/255, 70/255, 143/255]
-red = [210/255, 0, 0]
+blue = '#02468F'
+red = '#D20000'
 
 class UnknownElement(Exception): pass
 
-def print_current(I: float, precision: int = 3) -> str:
-    return scientific_float(I, precision=precision, use_exp_prefix=True, exp_prefixes={-6: 'u', -3: 'm', 3: 'k'})
+def print_current(I: complex, precision: int = 3) -> str:
+    real_part = scientific_float(I.real, precision=precision, use_exp_prefix=True, exp_prefixes={-6: 'u', -3: 'm', 3: 'k'})
+    if I.imag/precision < 1:
+        return real_part
+    else:
+        imag_part = scientific_float(I.imag, precision=precision, use_exp_prefix=True, exp_prefixes={-6: 'u', -3: 'm', 3: 'k'})
+        return f'{real_part} + j{imag_part}'
 
-def print_voltage(V: float, precision: int = 3) -> str:
-    return scientific_float(V, precision=precision, use_exp_prefix=True, exp_prefixes={-6: 'u', -3: 'm', 3: 'k'})
+def print_voltage(V: complex, precision: int = 3) -> str:
+    real_part = scientific_float(V.real, precision=precision, use_exp_prefix=True, exp_prefixes={-6: 'u', -3: 'm', 3: 'k'})
+    if V.imag/precision < 1:
+        return real_part
+    else:
+        imag_part = scientific_float(V.imag, precision=precision, use_exp_prefix=True, exp_prefixes={-6: 'u', -3: 'm', 3: 'k'})
+        return f'{real_part} + j{imag_part}'
 
 class VoltageSource(schemdraw.elements.sources.SourceV):
     def __init__(self, V: float, name: str, *args, reverse=False, precision=3, **kwargs):
@@ -206,29 +216,29 @@ class Ground(Node):
         return 'Ground'
         
 SchemdrawElement = TypeVar('SchemdrawElement', bound=schemdraw.elements.Element)
-SchemdrawElementTranslator = Callable[[SchemdrawElement, Callable[[schemdraw.util.Point], int]], Tuple[Branch, str]]
+SchemdrawElementTranslator = Callable[[SchemdrawElement, Callable[[schemdraw.util.Point], str]], Tuple[Branch, str]]
 
-def real_current_source_translator(element: RealCurrentSource, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Branch, str]:
+def real_current_source_translator(element: RealCurrentSource, node_mapper: Callable[[schemdraw.util.Point], str]) -> Tuple[Branch, str]:
     n1, n2 = get_nodes(element)
     return Branch(node_mapper(n1), node_mapper(n2), real_current_source(element.I, element.R)), element.name
 
-def line_translator(element: Line, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Branch, str]:
+def line_translator(element: Line, node_mapper: Callable[[schemdraw.util.Point], str]) -> Tuple[Branch, str]:
     n1, _ = get_nodes(element)
     return Branch(node_mapper(n1), node_mapper(n1), resistor(R=0)), element.name
 
-def resistor_translator(element: Resistor, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Branch, str]:
+def resistor_translator(element: Resistor, node_mapper: Callable[[schemdraw.util.Point], str]) -> Tuple[Branch, str]:
     n1, n2 = get_nodes(element)
     return Branch(node_mapper(n1), node_mapper(n2), resistor(element.R)), element.name
 
-def current_source_translator(element: CurrentSource, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Branch, str]:
+def current_source_translator(element: CurrentSource, node_mapper: Callable[[schemdraw.util.Point], str]) -> Tuple[Branch, str]:
     n1, n2 = get_nodes(element)
     return Branch(node_mapper(n1), node_mapper(n2), current_source(element.I)), element.name
 
-def real_voltage_source_translator(element: RealVoltageSource, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Branch, str]:
+def real_voltage_source_translator(element: RealVoltageSource, node_mapper: Callable[[schemdraw.util.Point], str]) -> Tuple[Branch, str]:
     n1, n2 = get_nodes(element)
     return Branch(node_mapper(n2), node_mapper(n1), real_voltage_source(element.V, element.R)), element.name
 
-def voltage_source_translator(element: VoltageSource, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Branch, str]:
+def voltage_source_translator(element: VoltageSource, node_mapper: Callable[[schemdraw.util.Point], str]) -> Tuple[Branch, str]:
     n1, n2 = get_nodes(element)
     return Branch(node_mapper(n2), node_mapper(n1), voltage_source(element.V)), element.name
 
@@ -270,19 +280,19 @@ class SchemdrawNetwork:
     drawing: schemdraw.Drawing
 
     @property
-    def elements(self) -> List[schemdraw.elements.Element]:
+    def elements(self) -> list[schemdraw.elements.Element]:
         return self.drawing.elements
 
     @property
-    def two_term_elements(self) -> List[schemdraw.elements.Element2Term]:
+    def two_term_elements(self) -> list[schemdraw.elements.Element2Term]:
         return [e for e in self.elements if isinstance(e, schemdraw.elements.Element2Term)]
 
     @property
-    def line_elements(self) -> List[Line]:
+    def line_elements(self) -> list[Line]:
         return [e for e in self.two_term_elements if type(e) is Line]
     
     @property
-    def node_elements(self) -> List[LabelNode]:
+    def node_elements(self) -> list[Node]:
         return [e for e in self.elements if isinstance(e, Node)]
 
     @property
@@ -302,7 +312,7 @@ class SchemdrawNetwork:
         return nodes
 
     @property
-    def ordered_unique_nodes(self) -> List[schemdraw.util.Point]:
+    def ordered_unique_nodes(self) -> list[schemdraw.util.Point]:
         indexed_nodes = self.node_elements
         ordered_nodes = list(self.unique_nodes)
         for x in indexed_nodes:
@@ -343,8 +353,8 @@ class SchemdrawNetwork:
                     equal_electrical_potential_nodes.add(n1)
         return equal_electrical_potential_nodes
 
-    def get_node_index(self, node: schemdraw.util.Point) -> int:
-        return self.ordered_unique_nodes.index(self.unique_node_mapping[node])
+    def get_node_index(self, node: schemdraw.util.Point) -> str:
+        return str(self.ordered_unique_nodes.index(self.unique_node_mapping[node]))
 
     def get_element_from_name(self, name: str) -> schemdraw.elements.Element:
         elements = [e for e in self.two_term_elements if e.name == name]

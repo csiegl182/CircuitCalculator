@@ -9,5 +9,5 @@ if __name__ == '__main__':
         print(f'{branch.node1}->{branch.node2} U={solution.get_voltage(branch):2.2f}V')
         print(f'{branch.node1}->{branch.node2} I={solution.get_current(branch):2.2f}A')
 
-    thevenin_source = TheveninEquivalentSource(network, node1=0, node2=3)
+    thevenin_source = TheveninEquivalentSource(network, node1='0', node2='3')
     
