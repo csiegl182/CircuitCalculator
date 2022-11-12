@@ -24,11 +24,11 @@ def test_all_passive_elements_are_kept() -> None:
     r2 = resistor(2)
     r3 = resistor(2)
     network = Network([
-        Branch(0, 1, cs1),
-        Branch(1, 2, r1),
-        Branch(2, 3, r2),
-        Branch(3, 4, cs2),
-        Branch(4, 0, r3),
+        Branch('0', '1', cs1),
+        Branch('1', '2', r1),
+        Branch('2', '3', r2),
+        Branch('3', '4', cs2),
+        Branch('4', '0', r3),
     ])
     network = remove_ideal_current_sources(network)
     assert r1 in [b.element for b in network.branches]

@@ -8,11 +8,11 @@ def test_all_ideal_voltage_sources_are_removed() -> None:
     r2 = resistor(2)
     r3 = resistor(2)
     network = Network([
-        Branch(0, 1, vs1),
-        Branch(1, 2, r1),
-        Branch(2, 3, r2),
-        Branch(3, 4, vs2),
-        Branch(4, 0, r3),
+        Branch('0', '1', vs1),
+        Branch('1', '2', r1),
+        Branch('2', '3', r2),
+        Branch('3', '4', vs2),
+        Branch('4', '0', r3),
     ])
     network = remove_ideal_voltage_sources(network)
     assert any([type(b.element)==type(vs1) for b in network.branches]) == False
