@@ -3,7 +3,7 @@ from .AdvancedNodalAnalysis import NodalAnalysisSolution, NodeTypes, create_node
 from numpy.linalg import inv as inverse_matrix
 
 def remove_ideal_current_sources(network: Network) -> Network:
-    return Network([b for b in network.branch_list if not is_ideal_current_source(b)])
+    return Network([b for b in network.branches if not is_ideal_current_source(b)])
 
 def remove_ideal_voltage_sources(network: Network) -> Network:
     nodes = NodeTypes(network)
