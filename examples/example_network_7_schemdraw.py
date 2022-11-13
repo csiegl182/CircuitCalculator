@@ -7,7 +7,7 @@ Uq1, Uq2, Uq3, Iq4 = 1, 2, 3, 0.1
 
 with sd.Drawing(unit=5) as d:
     d += sdw.VoltageSource(V=Uq1, name='Uq1', precision=1).up()
-    d += sdw.LabelNode(id=0, id_loc='W')
+    d += sdw.LabelNode(id='1', id_loc='W')
     d += sdw.VoltageSource(V=Uq2, name='Uq2', precision=1).up()
     d += (_R1:=sdw.Resistor(R=R1, name='R1').right())
     d += sdw.Line().down()
