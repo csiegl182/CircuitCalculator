@@ -6,6 +6,8 @@ from numpy import inf, nan
 
 class UnknownBranchResult(Exception): pass
 
+class FloatingGroundNode(Exception): pass
+
 class Element(Protocol):
     @property
     def Z(self) -> complex:
@@ -128,12 +130,19 @@ class Network:
     branches: List[Branch]
     zero_node_label: str = '0'
 
+    def __post_init__(self):
+        if self.zero_node_label not in self.node_labels:
+            raise FloatingGroundNode
+
     @property
-    def number_of_nodes(self) -> int:
+    def node_labels(self) -> set[str]:
         node1_set = {branch.node1 for branch in self.branches}
         node2_set = {branch.node2 for branch in self.branches}
-        node_set = node1_set.union(node2_set)
-        return len(node_set)
+        return node1_set.union(node2_set)
+
+    @property
+    def number_of_nodes(self) -> int:
+        return len(self.node_labels)
 
     def is_zero_node(self, node: str) -> bool:
         return node == self.zero_node_label
@@ -162,15 +171,8 @@ def node_index_mapping(network: Network) -> dict[str, int]:
             next_node_index += 1
     return node_mapping
 
-def switch_network_nodes(network: Network, new_node: str, old_node: str='0') -> Network:
-    def switch_node_labels(branch: Branch, i1: str, i2: str) -> Branch:
-        node1, node2 = branch.node1, branch.node2
-        if branch.node1 == i1: node1 = i2
-        if branch.node1 == i2: node1 = i1
-        if branch.node2 == i1: node2 = i2
-        if branch.node2 == i2: node2 = i1
-        return Branch(node1, node2, branch.element)
-    return Network([switch_node_labels(b, new_node, old_node) for b in network.branches])
+def switch_ground_node(network: Network, new_ground: str) -> Network:
+    return Network(network.branches, new_ground)
 
 class NetworkSolution(Protocol):
     def get_voltage(self, branch: Branch) -> complex: pass
