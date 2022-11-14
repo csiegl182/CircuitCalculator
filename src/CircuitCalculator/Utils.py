@@ -12,7 +12,7 @@ exp_prefixes = {
     12 : 'T'
 }
 
-def scientific_float(value: float, precision: int = 3, use_exp_prefix: bool = False, exp_prefixes=exp_prefixes) -> str:
+def scientific_float(value: float, precision: int = 3, use_exp_prefix: bool = False, exp_prefixes: dict[int, str]=exp_prefixes) -> str:
     def _floor3(value: float) -> int:
         return 3*np.floor(value/3)
     def _left_comma_valid_digits(value: float) -> int:
