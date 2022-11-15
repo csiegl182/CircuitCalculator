@@ -81,19 +81,22 @@ def create_node_matrix_from_network(network: Network) -> np.ndarray:
             A[i1-1,i1-1] += b.element.Y
         if not network.is_zero_node(n2):
             A[i2-1,i2-1] += b.element.Y
-            if node_type.is_active(n1):
-                cp = node_type.get_counterpart(n1)
-                if not network.is_zero_node(cp) and node_type.is_passive(cp):
-                    A[i1-1, node_mapping[cp]-1] += b.element.Y
+        if node_type.is_active(n1):
+            cp = node_type.get_counterpart(n1)
+            if not network.is_zero_node(cp) and node_type.is_passive(cp):
+                A[i1-1, node_mapping[cp]-1] += b.element.Y
+                if not network.is_zero_node(n2):
                     A[i2-1, node_mapping[cp]-1] -= b.element.Y
-            else:
+        else:
+            if not network.is_zero_node(n2):
                 A[i2-1, i1-1] -= b.element.Y
-            if node_type.is_active(n2):
-                cp = node_type.get_counterpart(n2)
-                if not network.is_zero_node(cp) and node_type.is_passive(cp):
-                    A[i2-1, node_mapping[cp]-1] += b.element.Y
-                    A[i1-1, node_mapping[cp]-1] -= b.element.Y
-            else:
+        if node_type.is_active(n2):
+            cp = node_type.get_counterpart(n2)
+            if not network.is_zero_node(cp) and node_type.is_passive(cp):
+                A[i2-1, node_mapping[cp]-1] += b.element.Y
+                A[i1-1, node_mapping[cp]-1] -= b.element.Y
+        else:
+            if not network.is_zero_node(n2):
                 A[i1-1, i2-1] -= b.element.Y
     for vs in ideal_voltage_sources(network):
         n1, n2 = node_type.get_active_node_and_counterpart(vs.element)

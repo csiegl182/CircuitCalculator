@@ -57,7 +57,7 @@ def test_create_node_matrix_from_reference_network_4() -> None:
     )
     Y = create_node_matrix_from_network(network)
     Y_ref = np.array([[-1, -G1, 0, 0], [0, G1+G2, 1, 0], [0, G4, -1, -G4], [0, -G4, 0, G4+G5]])
-    np.testing.assert_almost_equal(Y, Y_ref)
+    np.testing.assert_almost_equal(np.real(Y), Y_ref)
 
 def test_create_node_matrix_from_reference_network_5() -> None:
     R1, R2, R3, R4 = 10, 20, 30, 40
@@ -97,4 +97,23 @@ def test_create_node_matrix_from_reference_network_8() -> None:
     )
     Y = create_node_matrix_from_network(network)
     Y_ref = np.array([[-1, 1, 0, 0], [0, -1, -G5, -G4], [0, 0, G3+G5, 0], [0, 0, 0, G4]])
+    np.testing.assert_almost_equal(Y, Y_ref)
+
+def test_create_node_matrix_from_reference_network_9() -> None:
+    R1, R2, R3, R4 = 15, 5, 20, 20
+    G1, G2, G3, G4 = 1/R1, 1/R2, 1/R3, 1/R4
+    U, I = 120, 4
+    network = Network(
+        branches=[
+            Branch('0', '1', current_source(I=I)),
+            Branch('1', '0', resistor(R=R1)),
+            Branch('2', '1', resistor(R=R2)),
+            Branch('2', '0', resistor(R=R3)),
+            Branch('3', '2', voltage_source(U=U)),
+            Branch('3', '0', resistor(R=R4))
+        ],
+        zero_node_label='0'
+    )
+    Y = create_node_matrix_from_network(network)
+    Y_ref = np.array([[G1+G2, -G2, 0], [-G2, G2+G3, 1], [0, G4, -1]])
     np.testing.assert_almost_equal(Y, Y_ref)
