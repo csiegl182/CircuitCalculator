@@ -1,30 +1,44 @@
 [
     {
+        "type": "current_source",
+        "id": "Iq",
+        "N1": "0",
+        "N2": "1",
+        "I": 4
+    },
+    {
         "type": "resistor",
         "id": "R1",
         "N1": "1",
         "N2": "0",
-        "R": 10
+        "R": 15 
     },
     {
         "type": "resistor",
         "id": "R2",
         "N1": "1",
         "N2": "2",
-        "R": 20
+        "R": 5
     },
     {
         "type": "resistor",
         "id": "R3",
         "N1": "2",
         "N2": "0",
-        "R": 30
+        "R": 20
     },
     {
         "type": "voltage_source",
-        "id": "U1",
-        "N1": "1",
+        "id": "Uq",
+        "N1": "3",
+        "N2": "2",
+        "U": 120
+    },
+    {
+        "type": "resistor",
+        "id": "R4",
+        "N1": "3",
         "N2": "0",
-        "U": 1
+        "R": 20
     }
 ]

@@ -1,4 +1,4 @@
-from .Network import Network, Branch, NetworkSolution
+from .Network import Network, Branch, node_index_mapping, NetworkSolution
 import numpy as np
 
 class DimensionError(Exception): pass
@@ -28,41 +28,41 @@ def calculate_branch_voltage(V_node : np.ndarray, node1 : int, node2 : int) -> c
     return V1 - V2
 
 def create_node_admittance_matrix_from_network(network : Network) -> np.ndarray:
-    def full_admittance_between(node1: int, node2: int) -> complex:
-        return sum(b.element.Y for b in network.branches_between(node1=node1, node2=node2))
-    def full_admittance_connected_to(node: int) -> complex:
+    def full_admittance_connected_to(node: str) -> complex:
         return sum(b.element.Y for b in network.branches_connected_to(node))
-    Y = np.diag([full_admittance_connected_to(node) for node in range(1, network.number_of_nodes)])
-    for n1 in range(1, network.number_of_nodes):
-        for n2 in range(n1+1, network.number_of_nodes):
-            Y[n1-1, n2-1] = -full_admittance_between(n1, n2)
-    Y += np.triu(Y,1).T
+    node_mapping = node_index_mapping(network)
+    Y = np.diag([full_admittance_connected_to(node) for node in node_mapping.keys() if not network.is_zero_node(node)])
+    for b in network.branches:
+        if not network.is_zero_node(b.node1) and not network.is_zero_node(b.node2):
+            i1, i2 = map(lambda x: node_mapping[x], (b.node1, b.node2))
+            Y[i1-1, i2-1] += -b.element.Y
+            Y[i2-1, i1-1] += -b.element.Y
     return Y
     
 def create_current_vector_from_network(network : Network) -> np.ndarray:
+    node_mapping = node_index_mapping(network)
     I = np.zeros(network.number_of_nodes-1)
-    for i in range(1, network.number_of_nodes):
-        current_sources = [branch for branch in network.branches_connected_to(node=i) if branch.element.active]
+    for n, i in node_mapping.items():
+        current_sources = [branch for branch in network.branches_connected_to(node=n) if branch.element.active]
         if len(current_sources) > 0:
-            I[i-1] = sum([cs.element.I if cs.node2 == i else -cs.element.I for cs in current_sources])
+            I[i-1] = sum([cs.element.I if cs.node2 == n else -cs.element.I for cs in current_sources])
         else:
             I[i-1] = 0
     return I
 
-def calculate_node_voltages_from_network(network: Network) -> np.ndarray:
-    Y = create_node_admittance_matrix_from_network(network)
-    I = create_current_vector_from_network(network)
-    return calculate_node_voltages(Y, I)
-
 class NodalAnalysisSolution:
-    def __init__(self, node_voltages = np.ndarray) -> None:
-        self.node_voltages = node_voltages
+    def __init__(self, network: Network) -> None:
+        Y = create_node_admittance_matrix_from_network(network)
+        I = create_current_vector_from_network(network)
+        self._network = network
+        self._node_voltages = calculate_node_voltages(Y, I)
+        self._node_mapping = node_index_mapping(network)
     
     def get_voltage(self, branch: Branch) -> complex:
-        return calculate_branch_voltage(self.node_voltages, branch.node1, branch.node2)
+        return calculate_branch_voltage(self._node_voltages, self._node_mapping[branch.node1], self._node_mapping[branch.node2])
 
     def get_current(self, branch: Branch) -> complex:
         return self.get_voltage(branch)/branch.element.Z.real
         
 def nodal_analysis_solver(network) -> NetworkSolution:
-    return NodalAnalysisSolution(calculate_node_voltages_from_network(network))
+    return NodalAnalysisSolution(network)

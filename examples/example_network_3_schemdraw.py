@@ -1,5 +1,5 @@
-from SchemdrawWrapper import VoltageSource, Resistor, Line, Ground, SchemdrawNetwork, SchemdrawSolution
-from AdvancedNodalAnalysis import nodal_analysis_solver
+from CircuitCalculator.SchemdrawWrapper import VoltageSource, Resistor, Line, Ground, SchemdrawNetwork, SchemdrawSolution
+from CircuitCalculator.AdvancedNodalAnalysis import nodal_analysis_solver
 from schemdraw import Drawing
 
 if __name__ == '__main__':

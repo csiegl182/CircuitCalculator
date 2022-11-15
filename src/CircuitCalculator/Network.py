@@ -1,8 +1,12 @@
 from dataclasses import dataclass, field
-from typing import Protocol, List, Dict, Callable, Any, Set
+from typing import Any, Callable, Dict, List, Protocol, Set
+
 from numpy import inf, nan
 
+
 class UnknownBranchResult(Exception): pass
+
+class FloatingGroundNode(Exception): pass
 
 class Element(Protocol):
     @property
@@ -117,46 +121,58 @@ branch_types : Dict[str, Callable[..., Element]] = {
 
 @dataclass(frozen=True)
 class Branch:
-    node1 : int
-    node2 : int
+    node1 : str
+    node2 : str
     element : Element
 
 @dataclass(frozen=True)
 class Network:
-    branch_list: List[Branch]
+    branches: List[Branch]
+    zero_node_label: str = '0'
+
+    def __post_init__(self):
+        if self.zero_node_label not in self.node_labels:
+            raise FloatingGroundNode
 
     @property
-    def branches(self) -> List[Branch]:
-        return self.branch_list
+    def node_labels(self) -> set[str]:
+        node1_set = {branch.node1 for branch in self.branches}
+        node2_set = {branch.node2 for branch in self.branches}
+        return node1_set.union(node2_set)
 
     @property
     def number_of_nodes(self) -> int:
-        node1_set = {branch.node1 for branch in self.branches}
-        node2_set = {branch.node2 for branch in self.branches}
-        node_set = node1_set.union(node2_set)
-        return max(node_set)+1
+        return len(self.node_labels)
 
-    def branches_connected_to(self, node: int) -> List[Branch]:
+    def is_zero_node(self, node: str) -> bool:
+        return node == self.zero_node_label
+
+    def branches_connected_to(self, node: str) -> list[Branch]:
         connected_branches = [branch for branch in self.branches if branch.node1 == node or branch.node2 == node]
         connected_branches.sort(key=lambda x: x.node1 if x.node1!=node else x.node2)
         return connected_branches
 
-    def nodes_connected_to(self, node: int) -> Set[int]:
+    def nodes_connected_to(self, node: str) -> set[str]:
         return {b.node1 if b.node1 != node else b.node2 for b in self.branches_connected_to(node=node)}
 
-    def branches_between(self, node1: int, node2: int) -> List[Branch]:
+    def branches_between(self, node1: str, node2: str) -> list[Branch]:
         if node1 == node2: raise ValueError(f'Cannot determine branch between equal nodes {node1=} and {node2=}.')
         return [branch for branch in self.branches if set((branch.node1, branch.node2)) == set((node1, node2))]
 
-def switch_network_nodes(network: Network, new_node: int, old_node: int=0) -> Network:
-    def switch_node_indices(branch: Branch, i1: int, i2: int) -> Branch:
-        node1, node2 = branch.node1, branch.node2
-        if branch.node1 == i1: node1 = i2
-        if branch.node1 == i2: node1 = i1
-        if branch.node2 == i1: node2 = i2
-        if branch.node2 == i2: node2 = i1
-        return Branch(node1, node2, branch.element)
-    return Network([switch_node_indices(b, new_node, old_node) for b in network.branches])
+def node_index_mapping(network: Network) -> dict[str, int]:
+    node_mapping = {network.zero_node_label: 0}
+    next_node_index = 1
+    for b in network.branches:
+        if b.node1 not in node_mapping.keys():
+            node_mapping.update({b.node1 : next_node_index})
+            next_node_index += 1
+        if b.node2 not in node_mapping.keys():
+            node_mapping.update({b.node2 : next_node_index})
+            next_node_index += 1
+    return node_mapping
+
+def switch_ground_node(network: Network, new_ground: str) -> Network:
+    return Network(network.branches, new_ground)
 
 class NetworkSolution(Protocol):
     def get_voltage(self, branch: Branch) -> complex: pass

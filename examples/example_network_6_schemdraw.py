@@ -4,7 +4,7 @@ from schemdraw import Drawing
 
 if __name__ == '__main__':
     with Drawing() as d:
-        d += LabelNode(id=1, id_loc='S')
+        d += LabelNode(id='1', id_loc='S')
         d += Line().up().length(4)
         d += Resistor(R=1, name='R1').right()
         d += Line().up().length(2)
@@ -23,9 +23,9 @@ if __name__ == '__main__':
         d += Resistor(R=6, name='R6').right()
         d += Line().right().length(1.5)
         d += Line().down().length(4)
-        d += LabelNode(id=2, id_loc='S')
+        d += LabelNode(id='2', id_loc='S')
         d += Resistor(R=7, name='R7').left()
         schemdraw_network = SchemdrawNetwork(d)
 
-R = calculate_total_impedeance(schemdraw_network.network, 1, 2)
+R = calculate_total_impedeance(schemdraw_network.network, '1', '2').real
 print(f'{R=}Ohm')

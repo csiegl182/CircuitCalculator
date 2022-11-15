@@ -1,19 +1,43 @@
 from dataclasses import dataclass
 from .Network import NetworkSolver, Network, Branch, resistor, current_source, real_current_source, voltage_source, real_voltage_source
-from typing import Callable, Set, List, Tuple, Dict, Type, TypeVar 
+from typing import Callable, Type, TypeVar 
 import schemdraw
+from .Utils import scientific_float
+
+blue = '#02468F'
+red = '#D20000'
 
 class UnknownElement(Exception): pass
+class MultipleGroundNodes(Exception): pass
+
+def print_current(I: complex, precision: int = 3) -> str:
+    real_part = scientific_float(I.real, precision=precision, use_exp_prefix=True, exp_prefixes={-6: 'u', -3: 'm', 3: 'k'})
+    if I.imag/precision < 1:
+        return real_part
+    else:
+        imag_part = scientific_float(I.imag, precision=precision, use_exp_prefix=True, exp_prefixes={-6: 'u', -3: 'm', 3: 'k'})
+        return f'{real_part} + j{imag_part}'
+
+def print_voltage(V: complex, precision: int = 3) -> str:
+    real_part = scientific_float(V.real, precision=precision, use_exp_prefix=True, exp_prefixes={-6: 'u', -3: 'm', 3: 'k'})
+    if V.imag/precision < 1:
+        return real_part
+    else:
+        imag_part = scientific_float(V.imag, precision=precision, use_exp_prefix=True, exp_prefixes={-6: 'u', -3: 'm', 3: 'k'})
+        return f'{real_part} + j{imag_part}'
 
 class VoltageSource(schemdraw.elements.sources.SourceV):
-    def __init__(self, V: float, name: str, *args, reverse=False, **kwargs):
+    def __init__(self, V: float, name: str, *args, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
         if reverse:
             self._V = -V
         else:
             self._V = V
         self._name = name
-        self.label(f'${self._name}={V}\\mathrm{{V}}$', rotate=True)
+        self.label(f'{self._name}={print_voltage(V, precision=precision)}V', rotate=True)
+
+        a, b = (1.5, 0.7), (-0.5, 0.7)
+        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=blue))
 
     @property
     def name(self) -> str:
@@ -23,11 +47,11 @@ class VoltageSource(schemdraw.elements.sources.SourceV):
     def V(self) -> float:
         return self._V
 
-    def values(self) -> Dict[str, float]:
+    def values(self) -> dict[str, float]:
         return {'U' : self.V}
 
 class RealVoltageSource(schemdraw.elements.sources.SourceV):
-    def __init__(self, V: float, R: float, name: str, *args, reverse=False, **kwargs):
+    def __init__(self, V: float, R: float, name: str, *args, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
         if reverse:
             self._V = -V
@@ -35,7 +59,7 @@ class RealVoltageSource(schemdraw.elements.sources.SourceV):
             self._V = V
         self._R = R
         self._name = name
-        self.label(f'${self._name}$\n ${V}\\mathrm{{V}} / {R}\\Omega$')
+        self.label(f'{self._name} {print_voltage(V, precision=precision)}V / {R}$\\Omega$')
 
     @property
     def name(self) -> str:
@@ -53,18 +77,21 @@ class RealVoltageSource(schemdraw.elements.sources.SourceV):
     def G(self) -> float:
         return 1/self._R
 
-    def values(self) -> Dict[str, float]:
+    def values(self) -> dict[str, float]:
         return {'U' : self.V, 'R' : self.R}
 
 class CurrentSource(schemdraw.elements.sources.SourceI):
-    def __init__(self, I: float, name: str, *args, reverse=False, **kwargs):
+    def __init__(self, I: float, name: str, *args, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
         if reverse:
             self._I = -I
         else:
             self._I = I
         self._name = name
-        self.label(f'${self._name}={I}\\mathrm{{A}}$', rotate=True)
+        self.label(f'{self._name}={print_current(I, precision=precision)}A', rotate=True)
+
+        a, b = (1.2, -0.3), (1.8, -0.3)
+        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=red))
 
     @property
     def name(self) -> str:
@@ -74,11 +101,11 @@ class CurrentSource(schemdraw.elements.sources.SourceI):
     def I(self) -> float:
         return self._I
 
-    def values(self) -> Dict[str, float]:
+    def values(self) -> dict[str, float]:
         return {'I' : self.I}
 
 class RealCurrentSource(schemdraw.elements.sources.SourceI):
-    def __init__(self, I: float, R: float, name: str, *args, reverse=False, **kwargs):
+    def __init__(self, I: float, R: float, name: str, *args, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
         if reverse:
             self._I = -I
@@ -86,7 +113,7 @@ class RealCurrentSource(schemdraw.elements.sources.SourceI):
             self._I = I
         self._R = R
         self._name = name
-        self.label(f'${self._name}$\n ${I}\\mathrm{{A}} / {R}\\Omega$')
+        self.label(f'{self._name} {print_current(I)}A / {R}$\\Omega$')
 
     @property
     def name(self) -> str:
@@ -104,7 +131,7 @@ class RealCurrentSource(schemdraw.elements.sources.SourceI):
     def G(self) -> float:
         return 1/self._R
 
-    def values(self) -> Dict[str, float]:
+    def values(self) -> dict[str, float]:
         return {'I' : self.I, 'R' : self.R}
 
 class Resistor(schemdraw.elements.twoterm.ResistorIEC):
@@ -112,7 +139,7 @@ class Resistor(schemdraw.elements.twoterm.ResistorIEC):
         super().__init__(*args, **kwargs)
         self._R = R
         self._name = name
-        self.label(f'${self._name}={self._R}\\Omega$', rotate=True)
+        self.label(f'{self._name}={self._R}$\\Omega$', rotate=True)
 
     @property
     def name(self) -> str:
@@ -126,7 +153,7 @@ class Resistor(schemdraw.elements.twoterm.ResistorIEC):
     def G(self) -> float:
         return 1/self._R
 
-    def values(self) -> Dict[str, float]:
+    def values(self) -> dict[str, float]:
         return {'R' : self._R}
 
 class Line(schemdraw.elements.lines.Line):
@@ -138,7 +165,7 @@ class Line(schemdraw.elements.lines.Line):
         return ''
 
 class Node(schemdraw.elements.Element):
-    def __init__(self, id=0, *args, **kwargs):
+    def __init__(self, id: str = '', *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.node_id = id
         self.params['theta'] = 0
@@ -152,10 +179,10 @@ class Node(schemdraw.elements.Element):
         return f'Node {self.node_id}'
 
 class LabelNode(Node):
-    def __init__(self, id=0, id_loc=None, *args, **kwargs):
-        super().__init__(id=id, *args, **kwargs)
+    def __init__(self, id : str = '', id_loc : str = '', *args, **kwargs):
+        super().__init__(id, *args, **kwargs)
         self.segments.append(schemdraw.SegmentCircle([0, 0], 0.12, fill='black'))
-        if id_loc is not None:
+        if id_loc != '':
             if id_loc == 'W':
                 label_param = {'loc': 'left', 'align': ['right', 'center']}
             elif id_loc == 'N':
@@ -172,8 +199,8 @@ class LabelNode(Node):
         return f'Node {self.node_id}'
 
 class Ground(Node):
-    def __init__(self, *args, **kwargs):
-        super().__init__(id=0, *args, **kwargs)
+    def __init__(self, id: str = '0', *args, **kwargs):
+        super().__init__(id, *args, **kwargs)
         gndgap = 0.12
         gnd_lead = 0.4
         resheight = schemdraw.elements.twoterm.resheight
@@ -190,33 +217,33 @@ class Ground(Node):
         return 'Ground'
         
 SchemdrawElement = TypeVar('SchemdrawElement', bound=schemdraw.elements.Element)
-SchemdrawElementTranslator = Callable[[SchemdrawElement, Callable[[schemdraw.util.Point], int]], Tuple[Branch, str]]
+SchemdrawElementTranslator = Callable[[SchemdrawElement, Callable[[schemdraw.util.Point], str]], tuple[Branch, str]]
 
-def real_current_source_translator(element: RealCurrentSource, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Branch, str]:
+def real_current_source_translator(element: RealCurrentSource, node_mapper: Callable[[schemdraw.util.Point], str]) -> tuple[Branch, str]:
     n1, n2 = get_nodes(element)
     return Branch(node_mapper(n1), node_mapper(n2), real_current_source(element.I, element.R)), element.name
 
-def line_translator(element: Line, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Branch, str]:
+def line_translator(element: Line, node_mapper: Callable[[schemdraw.util.Point], str]) -> tuple[Branch, str]:
     n1, _ = get_nodes(element)
     return Branch(node_mapper(n1), node_mapper(n1), resistor(R=0)), element.name
 
-def resistor_translator(element: Resistor, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Branch, str]:
+def resistor_translator(element: Resistor, node_mapper: Callable[[schemdraw.util.Point], str]) -> tuple[Branch, str]:
     n1, n2 = get_nodes(element)
     return Branch(node_mapper(n1), node_mapper(n2), resistor(element.R)), element.name
 
-def current_source_translator(element: CurrentSource, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Branch, str]:
+def current_source_translator(element: CurrentSource, node_mapper: Callable[[schemdraw.util.Point], str]) -> tuple[Branch, str]:
     n1, n2 = get_nodes(element)
     return Branch(node_mapper(n1), node_mapper(n2), current_source(element.I)), element.name
 
-def real_voltage_source_translator(element: RealVoltageSource, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Branch, str]:
+def real_voltage_source_translator(element: RealVoltageSource, node_mapper: Callable[[schemdraw.util.Point], str]) -> tuple[Branch, str]:
     n1, n2 = get_nodes(element)
     return Branch(node_mapper(n2), node_mapper(n1), real_voltage_source(element.V, element.R)), element.name
 
-def voltage_source_translator(element: VoltageSource, node_mapper: Callable[[schemdraw.util.Point], int]) -> Tuple[Branch, str]:
+def voltage_source_translator(element: VoltageSource, node_mapper: Callable[[schemdraw.util.Point], str]) -> tuple[Branch, str]:
     n1, n2 = get_nodes(element)
     return Branch(node_mapper(n2), node_mapper(n1), voltage_source(element.V)), element.name
 
-element_translator : Dict[Type[schemdraw.elements.Element], SchemdrawElementTranslator] = {
+element_translator : dict[Type[schemdraw.elements.Element], SchemdrawElementTranslator] = {
     RealCurrentSource : real_current_source_translator,
     Resistor : resistor_translator,
     Line : line_translator,
@@ -240,10 +267,10 @@ def round_node(node: schemdraw.util.Point) -> schemdraw.util.Point:
         return round(x, ndigits=2)
     return schemdraw.util.Point((local_round(node.x), local_round(node.y)))
 
-def get_nodes(element: schemdraw.elements.Element) -> Tuple[schemdraw.util.Point, schemdraw.util.Point]:
+def get_nodes(element: schemdraw.elements.Element) -> tuple[schemdraw.util.Point, schemdraw.util.Point]:
     return round_node(element.absanchors['start']), round_node(element.absanchors['end'])
 
-def get_node_direction(node1: schemdraw.util.Point, node2: schemdraw.util.Point) -> Tuple[int, int]:
+def get_node_direction(node1: schemdraw.util.Point, node2: schemdraw.util.Point) -> tuple[int, int]:
     delta = node2 - node1
     delta_x = +1 if delta.x >= 0 else -1
     delta_y = +1 if delta.y >= 0 else -1
@@ -254,29 +281,29 @@ class SchemdrawNetwork:
     drawing: schemdraw.Drawing
 
     @property
-    def elements(self) -> List[schemdraw.elements.Element]:
+    def elements(self) -> list[schemdraw.elements.Element]:
         return self.drawing.elements
 
     @property
-    def two_term_elements(self) -> List[schemdraw.elements.Element2Term]:
+    def two_term_elements(self) -> list[schemdraw.elements.Element2Term]:
         return [e for e in self.elements if isinstance(e, schemdraw.elements.Element2Term)]
 
     @property
-    def line_elements(self) -> List[Line]:
+    def line_elements(self) -> list[Line]:
         return [e for e in self.two_term_elements if type(e) is Line]
     
     @property
-    def node_elements(self) -> List[LabelNode]:
+    def node_elements(self) -> list[Node]:
         return [e for e in self.elements if isinstance(e, Node)]
 
     @property
-    def all_nodes(self) -> Set[schemdraw.util.Point]:
+    def all_nodes(self) -> set[schemdraw.util.Point]:
         nodes = {round_node(e.absanchors['start']) for e in self.two_term_elements}
         nodes = nodes.union({round_node(e.absanchors['end']) for e in self.two_term_elements})
         return nodes
 
     @property
-    def unique_nodes(self) -> Set[schemdraw.util.Point]:
+    def unique_nodes(self) -> set[schemdraw.util.Point]:
         nodes = self.all_nodes
         for node in self.all_nodes:
             if node in nodes:
@@ -286,18 +313,18 @@ class SchemdrawNetwork:
         return nodes
 
     @property
-    def ordered_unique_nodes(self) -> List[schemdraw.util.Point]:
-        indexed_nodes = self.node_elements
-        ordered_nodes = list(self.unique_nodes)
-        for x in indexed_nodes:
-            node = get_nodes(x)[0]
-            current_index = ordered_nodes.index(self.unique_node_mapping[node])
-            desired_index = x.node_id
-            ordered_nodes[desired_index], ordered_nodes[current_index] = ordered_nodes[current_index], ordered_nodes[desired_index]
-        return ordered_nodes
+    def node_label_mapping(self) -> dict[schemdraw.util.Point, str]:
+        node_labels = {self.unique_node_mapping[get_nodes(e)[0]] : e.node_id for e in self.node_elements}
+        node_index = len(node_labels)+1
+        unlabeled_nodes = [p for p in self.unique_nodes if p not in node_labels.keys()]
+        for p in unlabeled_nodes:
+            while str(node_index) in node_labels.values():
+                node_index += 1
+            node_labels.update({p : str(node_index)})
+        return node_labels
 
     @property
-    def unique_node_mapping(self) -> Dict[schemdraw.util.Point, schemdraw.util.Point]:
+    def unique_node_mapping(self) -> dict[schemdraw.util.Point, schemdraw.util.Point]:
         node_mapping = {}
         for n in self.all_nodes:
             identical_nodes = self.get_equal_electrical_potential_nodes(n)
@@ -310,11 +337,24 @@ class SchemdrawNetwork:
         return node_mapping
 
     @property
+    def ground(self) -> schemdraw.util.Point:
+        ground_nodes = [n for n in self.node_elements if type(n) == Ground]
+        if len(ground_nodes) > 1:
+            raise MultipleGroundNodes
+        if len(ground_nodes) == 0:
+            return list(self.unique_nodes)[0]
+        else:
+            return get_nodes(ground_nodes[0])[0]
+
+    @property
     def network(self) -> Network:
         translator = lambda e : element_translator[type(e)](e, self.get_node_index)[0]
-        return Network([translator(e) for e in self.two_term_elements if type(e) is not Line])
+        return Network(
+            branches=[translator(e) for e in self.two_term_elements if type(e) is not Line],
+            zero_node_label=self.get_node_index(self.ground)
+            )
 
-    def get_equal_electrical_potential_nodes(self, node: schemdraw.util.Point) -> Set[schemdraw.util.Point]:
+    def get_equal_electrical_potential_nodes(self, node: schemdraw.util.Point) -> set[schemdraw.util.Point]:
         equal_electrical_potential_nodes = set([node])
         old_length = 0
         while len(equal_electrical_potential_nodes) > old_length:
@@ -327,8 +367,8 @@ class SchemdrawNetwork:
                     equal_electrical_potential_nodes.add(n1)
         return equal_electrical_potential_nodes
 
-    def get_node_index(self, node: schemdraw.util.Point) -> int:
-        return self.ordered_unique_nodes.index(self.unique_node_mapping[node])
+    def get_node_index(self, node: schemdraw.util.Point) -> str:
+        return self.node_label_mapping[self.unique_node_mapping[node]]
 
     def get_element_from_name(self, name: str) -> schemdraw.elements.Element:
         elements = [e for e in self.two_term_elements if e.name == name]
@@ -347,7 +387,7 @@ class SchemdrawSolution:
         self.schemdraw_network = schemdraw_network
         self.network_solution = solver(self.schemdraw_network.network)
 
-    def draw_voltage(self, element_name: str, reverse: bool = False) -> schemdraw.Drawing:
+    def draw_voltage(self, element_name: str, reverse: bool = False, precision = 3) -> schemdraw.Drawing:
         element = self.schemdraw_network.get_element_from_name(element_name)
         branch = self.schemdraw_network.get_branch_from_name(element_name)
         V_branch = self.network_solution.get_voltage(branch)
@@ -361,9 +401,9 @@ class SchemdrawSolution:
         dx, dy = get_node_direction(n1, n2)
         if dx < 0 or dy < 0:
             reverse = not reverse
-        return schemdraw.elements.CurrentLabel(top=False, reverse=reverse).at(element).label(f'{V_branch:2.2f}V')
+        return schemdraw.elements.CurrentLabel(top=False, reverse=reverse, color=blue).at(element).label(f'{print_voltage(V_branch, precision=precision)}V')
 
-    def draw_current(self, element_name: str, reverse: bool = False, start: bool = True) -> schemdraw.Drawing:
+    def draw_current(self, element_name: str, reverse: bool = False, start: bool = True, ofst: float = 0.8, precision=3) -> schemdraw.Drawing:
         element = self.schemdraw_network.get_element_from_name(element_name)
         branch = self.schemdraw_network.get_branch_from_name(element_name)
         I_branch = self.network_solution.get_current(branch)
@@ -372,4 +412,4 @@ class SchemdrawSolution:
             start = False
         if start is False:
             reverse = not reverse
-        return schemdraw.elements.CurrentLabelInline(reverse=reverse, start=start).at(element).label(f'{I_branch:2.2f}A')
+        return schemdraw.elements.CurrentLabelInline(reverse=reverse, start=start, color=red, ofst=ofst).at(element).label(f'{print_current(I_branch, precision=precision)}A')

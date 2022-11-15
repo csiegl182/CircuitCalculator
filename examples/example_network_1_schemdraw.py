@@ -1,5 +1,5 @@
-from SchemdrawWrapper import RealCurrentSource, Resistor, Line, Ground, SchemdrawNetwork, SchemdrawSolution
-from ClassicNodalAnalysis import nodal_analysis_solver
+from CircuitCalculator.SchemdrawWrapper import RealCurrentSource, Resistor, Line, Ground, SchemdrawNetwork, SchemdrawSolution
+from CircuitCalculator.ClassicNodalAnalysis import nodal_analysis_solver
 from schemdraw import Drawing
 
 if __name__ == '__main__':
