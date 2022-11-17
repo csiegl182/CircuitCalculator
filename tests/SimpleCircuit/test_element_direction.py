@@ -1,4 +1,4 @@
-from CircuitCalculator.SchemdrawWrapper import get_node_direction
+from CircuitCalculator.SimpleCircuit.Network import get_node_direction
 import schemdraw
 
 def test_node_direction_identifies_positive_x_direction() -> None:

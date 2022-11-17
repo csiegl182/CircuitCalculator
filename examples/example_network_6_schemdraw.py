@@ -1,4 +1,5 @@
-from CircuitCalculator.SchemdrawWrapper import Resistor, Line, SchemdrawNetwork, LabelNode, Ground
+from CircuitCalculator.SimpleCircuit.Elements import Resistor, Line, LabelNode
+from CircuitCalculator.SimpleCircuit.Network import SchemdrawNetwork
 from CircuitCalculator.EquivalentSources import calculate_total_impedeance
 from schemdraw import Drawing
 

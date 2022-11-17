@@ -1,6 +1,7 @@
-from CircuitCalculator.SchemdrawWrapper import SchemdrawNetwork, round_node
-from CircuitCalculator.SchemdrawWrapper import RealCurrentSource, Resistor, Ground, Line
-from CircuitCalculator.SchemdrawWrapper import UnknownElement
+import matplotlib # type: ignore
+matplotlib.use('Agg')
+from CircuitCalculator.SimpleCircuit.Network import SchemdrawNetwork, round_node, UnknownElement
+from CircuitCalculator.SimpleCircuit.Elements import RealCurrentSource, Resistor, Line
 import pytest
 import schemdraw
 

@@ -1,4 +1,5 @@
-from CircuitCalculator.SchemdrawWrapper import VoltageSource, Resistor, Line, Ground, SchemdrawNetwork, SchemdrawSolution
+from CircuitCalculator.SimpleCircuit.Elements import VoltageSource, Resistor, Line, Ground
+from CircuitCalculator.SimpleCircuit.Network import SchemdrawNetwork, SchemdrawSolution
 from CircuitCalculator.AdvancedNodalAnalysis import nodal_analysis_solver
 from schemdraw import Drawing
 
