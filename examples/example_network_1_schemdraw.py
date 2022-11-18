@@ -1,10 +1,10 @@
+from CircuitCalculator.SimpleCircuit.Schematics import Schematic
 from CircuitCalculator.SimpleCircuit.Elements import RealCurrentSource, Resistor, Line, Ground
-from CircuitCalculator.SimpleCircuit.Network import SchemdrawNetwork, SchemdrawSolution
+from CircuitCalculator.SimpleCircuit.NetworkParser import SchemdrawNetwork, SchemdrawSolution
 from CircuitCalculator.ClassicNodalAnalysis import nodal_analysis_solver
-from schemdraw import Drawing
 
 if __name__ == '__main__':
-    with Drawing() as d:
+    with Schematic() as d:
         d += RealCurrentSource(I=1, R=100, name='I1').up()
         d += (R1:=Resistor(R=10, name='R1').right())
         d += Resistor(R=20, name='R2').down()

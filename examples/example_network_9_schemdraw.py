@@ -1,6 +1,6 @@
 import schemdraw as sd
 from CircuitCalculator.SimpleCircuit.Elements import VoltageSource, CurrentSource, Resistor, Line
-from CircuitCalculator.SimpleCircuit.Network import SchemdrawNetwork, SchemdrawSolution
+from CircuitCalculator.SimpleCircuit.NetworkParser import SchemdrawNetwork, SchemdrawSolution
 from CircuitCalculator.AdvancedNodalAnalysis import nodal_analysis_solver
 
 R1, R2, R3, R4 = 15, 5, 20, 20

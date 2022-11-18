@@ -125,7 +125,7 @@ class SchemdrawSolution:
         self.schemdraw_network = schemdraw_network
         self.network_solution = solver(self.schemdraw_network.network)
 
-    def draw_voltage(self, element_name: str, reverse: bool = False, precision: int = 3, top: bool = False) -> schemdraw.Drawing:
+    def draw_voltage(self, element_name: str, reverse: bool = False, precision: int = 3, top: bool = False) -> schemdraw.elements.Element:
         element = self.schemdraw_network.get_element_from_name(element_name)
         branch = self.schemdraw_network.get_branch_from_name(element_name)
         V_branch = self.network_solution.get_voltage(branch)
@@ -141,7 +141,7 @@ class SchemdrawSolution:
             reverse = not reverse
         return schemdraw.elements.CurrentLabel(reverse=reverse, color=blue, top=top).at(element).label(f'{print_voltage(V_branch, precision=precision)}V')
 
-    def draw_current(self, element_name: str, reverse: bool = False, start: bool = True, ofst: float = 0.8, precision=3) -> schemdraw.Drawing:
+    def draw_current(self, element_name: str, reverse: bool = False, start: bool = True, ofst: float = 0.8, precision=3) -> schemdraw.elements.Element:
         element = self.schemdraw_network.get_element_from_name(element_name)
         branch = self.schemdraw_network.get_branch_from_name(element_name)
         I_branch = self.network_solution.get_current(branch)
