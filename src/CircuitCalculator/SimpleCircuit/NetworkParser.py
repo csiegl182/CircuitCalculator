@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import schemdraw
 from . import Elements as elm
+from .Schematics import Schematic
 from .ElementTranslators import element_translator, round_node, get_nodes
 from .Display import red, blue, print_voltage, print_current
 from ..Network import NetworkSolver, Network, Branch
@@ -16,7 +17,7 @@ def get_node_direction(node1: schemdraw.util.Point, node2: schemdraw.util.Point)
 
 @dataclass(frozen=True)
 class SchemdrawNetwork:
-    drawing: schemdraw.Drawing
+    drawing: Schematic
 
     @property
     def elements(self) -> list[schemdraw.elements.Element]:
@@ -125,7 +126,7 @@ class SchemdrawSolution:
         self.schemdraw_network = schemdraw_network
         self.network_solution = solver(self.schemdraw_network.network)
 
-    def draw_voltage(self, element_name: str, reverse: bool = False, precision: int = 3, top: bool = False) -> schemdraw.elements.Element:
+    def draw_voltage(self, element_name: str, reverse: bool = False, precision: int = 3, top: bool = False) -> elm.VoltageLabel:
         element = self.schemdraw_network.get_element_from_name(element_name)
         branch = self.schemdraw_network.get_branch_from_name(element_name)
         V_branch = self.network_solution.get_voltage(branch)
@@ -139,9 +140,9 @@ class SchemdrawSolution:
         dx, dy = get_node_direction(n1, n2)
         if dx < 0 or dy < 0:
             reverse = not reverse
-        return schemdraw.elements.CurrentLabel(reverse=reverse, color=blue, top=top).at(element).label(f'{print_voltage(V_branch, precision=precision)}V')
+        return elm.VoltageLabel(reverse=reverse, color=blue, top=top).at(element).label(f'{print_voltage(V_branch, precision=precision)}V')
 
-    def draw_current(self, element_name: str, reverse: bool = False, start: bool = True, ofst: float = 0.8, precision=3) -> schemdraw.elements.Element:
+    def draw_current(self, element_name: str, reverse: bool = False, start: bool = True, ofst: float = 0.8, precision=3) -> elm.CurrentLabel:
         element = self.schemdraw_network.get_element_from_name(element_name)
         branch = self.schemdraw_network.get_branch_from_name(element_name)
         I_branch = self.network_solution.get_current(branch)
@@ -150,4 +151,4 @@ class SchemdrawSolution:
             start = False
         if start is False:
             reverse = not reverse
-        return schemdraw.elements.CurrentLabelInline(reverse=reverse, start=start, color=red, ofst=ofst).at(element).label(f'{print_current(I_branch, precision=precision)}A')
+        return elm.CurrentLabel(reverse=reverse, start=start, color=red, ofst=ofst).at(element).label(f'{print_current(I_branch, precision=precision)}A')

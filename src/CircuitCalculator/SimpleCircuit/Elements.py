@@ -229,3 +229,12 @@ class Ground(Node):
     def name(self) -> str:
         return 'Ground'
         
+
+class CircuitLabel(ABC):
+    ...
+
+class CurrentLabel(CircuitLabel, schemdraw.elements.CurrentLabelInline):
+    pass
+
+class VoltageLabel(CircuitLabel, schemdraw.elements.CurrentLabel):
+    pass
