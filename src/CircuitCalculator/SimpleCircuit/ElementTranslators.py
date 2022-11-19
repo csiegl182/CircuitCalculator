@@ -18,10 +18,6 @@ def real_current_source_translator(element: elm.RealCurrentSource, node_mapper: 
     n1, n2 = get_nodes(element)
     return ntw.Branch(node_mapper(n1), node_mapper(n2), ntw.real_current_source(element.I, element.R)), element.name
 
-def line_translator(element: elm.Line, node_mapper: Callable[[schemdraw.util.Point], str]) -> tuple[ntw.Branch, str]:
-    n1, _ = get_nodes(element)
-    return ntw.Branch(node_mapper(n1), node_mapper(n1), ntw.resistor(R=0)), element.name
-
 def resistor_translator(element: elm.Resistor, node_mapper: Callable[[schemdraw.util.Point], str]) -> tuple[ntw.Branch, str]:
     n1, n2 = get_nodes(element)
     return ntw.Branch(node_mapper(n1), node_mapper(n2), ntw.resistor(element.R)), element.name
@@ -41,8 +37,10 @@ def voltage_source_translator(element: elm.VoltageSource, node_mapper: Callable[
 element_translator : dict[Type[schemdraw.elements.Element], SchemdrawElementTranslator] = {
     elm.RealCurrentSource : real_current_source_translator,
     elm.Resistor : resistor_translator,
-    elm.Line : line_translator,
     elm.CurrentSource: current_source_translator,
     elm.RealVoltageSource : real_voltage_source_translator,
     elm.VoltageSource: voltage_source_translator,
 }
+
+def translator_available(element: schemdraw.elements.Element) -> bool:
+    return type(element) in element_translator.keys()

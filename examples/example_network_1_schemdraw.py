@@ -1,5 +1,4 @@
-from CircuitCalculator.SimpleCircuit.Schematics import Schematic
-from CircuitCalculator.SimpleCircuit.Elements import RealCurrentSource, Resistor, Line, Ground
+from CircuitCalculator.SimpleCircuit.Elements import Schematic, RealCurrentSource, Resistor, Line, Ground
 from CircuitCalculator.SimpleCircuit.NetworkParser import SchemdrawNetwork, SchemdrawSolution
 from CircuitCalculator.ClassicNodalAnalysis import nodal_analysis_solver
 

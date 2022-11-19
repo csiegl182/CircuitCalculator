@@ -2,10 +2,13 @@ import schemdraw
 from .Display import red, blue, print_voltage, print_current
 from abc import ABC
 
-class CircuitElement(ABC):
+class Schematic(schemdraw.Drawing):
     pass
 
-class VoltageSource(CircuitElement, schemdraw.elements.sources.SourceV):
+class TwoTermElements:
+    pass
+
+class VoltageSource(TwoTermElements, schemdraw.elements.sources.SourceV):
     def __init__(self, V: float, name: str, *args, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
         if reverse:
@@ -30,7 +33,7 @@ class VoltageSource(CircuitElement, schemdraw.elements.sources.SourceV):
     def values(self) -> dict[str, float]:
         return {'U' : self.V}
 
-class RealVoltageSource(CircuitElement, schemdraw.elements.sources.SourceV):
+class RealVoltageSource(TwoTermElements, schemdraw.elements.sources.SourceV):
     def __init__(self, V: float, R: float, name: str, *args, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
         if reverse:
@@ -60,7 +63,7 @@ class RealVoltageSource(CircuitElement, schemdraw.elements.sources.SourceV):
     def values(self) -> dict[str, float]:
         return {'U' : self.V, 'R' : self.R}
 
-class CurrentSource(CircuitElement, schemdraw.elements.sources.SourceI):
+class CurrentSource(TwoTermElements, schemdraw.elements.sources.SourceI):
     def __init__(self, I: float, name: str, *args, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
         if reverse:
@@ -112,7 +115,7 @@ def DrawVoltageSource() -> list[schemdraw.segments.SegmentType]:
         schemdraw.segments.Segment([(0.5, -0.5), (0.5, 0.5)])
     ]
 
-class RealCurrentSource(CircuitElement, schemdraw.elements.sources.SourceI):
+class RealCurrentSource(TwoTermElements, schemdraw.elements.sources.SourceI):
     def __init__(self, I: float, R: float, name: str, *args, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
         if reverse:
@@ -147,7 +150,7 @@ class RealCurrentSource(CircuitElement, schemdraw.elements.sources.SourceI):
     def values(self) -> dict[str, float]:
         return {'I' : self.I, 'R' : self.R}
 
-class Resistor(CircuitElement, schemdraw.elements.twoterm.ResistorIEC):
+class Resistor(TwoTermElements, schemdraw.elements.twoterm.ResistorIEC):
     def __init__(self, R: float, name: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._R = R
@@ -169,7 +172,7 @@ class Resistor(CircuitElement, schemdraw.elements.twoterm.ResistorIEC):
     def values(self) -> dict[str, float]:
         return {'R' : self._R}
 
-class Line(CircuitElement, schemdraw.elements.lines.Line):
+class Line(TwoTermElements, schemdraw.elements.lines.Line):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -177,7 +180,7 @@ class Line(CircuitElement, schemdraw.elements.lines.Line):
     def name(self) -> str:
         return ''
 
-class Node(CircuitElement, schemdraw.elements.Element):
+class Node(schemdraw.elements.Element):
     def __init__(self, id: str = '', *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.node_id = id
@@ -229,7 +232,6 @@ class Ground(Node):
     def name(self) -> str:
         return 'Ground'
         
-
 class CircuitLabel(ABC):
     ...
 
@@ -238,3 +240,5 @@ class CurrentLabel(CircuitLabel, schemdraw.elements.CurrentLabelInline):
 
 class VoltageLabel(CircuitLabel, schemdraw.elements.CurrentLabel):
     pass
+
+# def is_two_term(elment: )

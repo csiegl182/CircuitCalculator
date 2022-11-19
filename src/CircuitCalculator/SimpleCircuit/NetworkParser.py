@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 import schemdraw
 from . import Elements as elm
-from .Schematics import Schematic
-from .ElementTranslators import element_translator, round_node, get_nodes
+from .ElementTranslators import element_translator, round_node, get_nodes, translator_available
 from .Display import red, blue, print_voltage, print_current
 from ..Network import NetworkSolver, Network, Branch
 
@@ -17,14 +16,14 @@ def get_node_direction(node1: schemdraw.util.Point, node2: schemdraw.util.Point)
 
 @dataclass(frozen=True)
 class SchemdrawNetwork:
-    drawing: Schematic
+    drawing: elm.Schematic
 
     @property
     def elements(self) -> list[schemdraw.elements.Element]:
         return self.drawing.elements
 
     @property
-    def two_term_elements(self) -> list[schemdraw.elements.Element2Term]:
+    def two_term_elements(self) -> list[schemdraw.elements.Element]:
         return [e for e in self.elements if isinstance(e, schemdraw.elements.Element2Term)]
 
     @property
@@ -89,7 +88,7 @@ class SchemdrawNetwork:
     def network(self) -> Network:
         translator = lambda e : element_translator[type(e)](e, self.get_node_index)[0]
         return Network(
-            branches=[translator(e) for e in self.two_term_elements if type(e) is not elm.Line],
+            branches=[translator(e) for e in self.elements if translator_available(e)],
             zero_node_label=self.get_node_index(self.ground)
             )
 
