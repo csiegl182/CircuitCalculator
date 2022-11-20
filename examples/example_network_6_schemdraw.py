@@ -1,5 +1,5 @@
 from CircuitCalculator.SimpleCircuit.Elements import Resistor, Line, LabelNode
-from CircuitCalculator.SimpleCircuit.NetworkParser import SchemdrawNetwork
+from CircuitCalculator.SimpleCircuit.NetworkParser import NetworkDiagramParser
 from CircuitCalculator.EquivalentSources import calculate_total_impedeance
 from schemdraw import Drawing
 
@@ -26,7 +26,7 @@ if __name__ == '__main__':
         d += Line().down().length(4)
         d += LabelNode(id='2', id_loc='S')
         d += Resistor(R=7, name='R7').left()
-        schemdraw_network = SchemdrawNetwork(d)
+        schemdraw_network = NetworkDiagramParser(d)
 
 R = calculate_total_impedeance(schemdraw_network.network, '1', '2').real
 print(f'{R=}Ohm')

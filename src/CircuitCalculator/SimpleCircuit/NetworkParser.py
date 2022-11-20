@@ -15,29 +15,29 @@ def get_node_direction(node1: schemdraw.util.Point, node2: schemdraw.util.Point)
     return delta_x, delta_y
 
 @dataclass(frozen=True)
-class SchemdrawNetwork:
+class NetworkDiagramParser:
     drawing: elm.Schematic
 
     @property
-    def elements(self) -> list[schemdraw.elements.Element]:
+    def all_elements(self) -> list[schemdraw.elements.Element]:
         return self.drawing.elements
 
     @property
-    def two_term_elements(self) -> list[schemdraw.elements.Element]:
-        return [e for e in self.elements if isinstance(e, schemdraw.elements.Element2Term)]
+    def circuit_elements(self) -> list[schemdraw.elements.Element]:
+        return [e for e in self.all_elements if isinstance(e, schemdraw.elements.Element2Term)]
 
     @property
     def line_elements(self) -> list[elm.Line]:
-        return [e for e in self.two_term_elements if type(e) is elm.Line]
+        return [e for e in self.circuit_elements if type(e) is elm.Line]
     
     @property
     def node_elements(self) -> list[elm.Node]:
-        return [e for e in self.elements if isinstance(e, elm.Node)]
+        return [e for e in self.all_elements if isinstance(e, elm.Node)]
 
     @property
     def all_nodes(self) -> set[schemdraw.util.Point]:
-        nodes = {round_node(e.absanchors['start']) for e in self.two_term_elements}
-        nodes = nodes.union({round_node(e.absanchors['end']) for e in self.two_term_elements})
+        nodes = {round_node(e.absanchors['start']) for e in self.circuit_elements}
+        nodes = nodes.union({round_node(e.absanchors['end']) for e in self.circuit_elements})
         return nodes
 
     @property
@@ -45,7 +45,7 @@ class SchemdrawNetwork:
         nodes = self.all_nodes
         for node in self.all_nodes:
             if node in nodes:
-                for n in self.get_equal_electrical_potential_nodes(node).intersection(nodes):
+                for n in self._get_equal_electrical_potential_nodes(node).intersection(nodes):
                     nodes.remove(n)
                 nodes.add(node)
         return nodes
@@ -65,7 +65,7 @@ class SchemdrawNetwork:
     def unique_node_mapping(self) -> dict[schemdraw.util.Point, schemdraw.util.Point]:
         node_mapping = {}
         for n in self.all_nodes:
-            identical_nodes = self.get_equal_electrical_potential_nodes(n)
+            identical_nodes = self._get_equal_electrical_potential_nodes(n)
             identical_nodes.remove(n)
             current_unique_node = self.unique_nodes.intersection(identical_nodes)
             if len(current_unique_node) > 0:
@@ -86,13 +86,13 @@ class SchemdrawNetwork:
 
     @property
     def network(self) -> Network:
-        translator = lambda e : element_translator[type(e)](e, self.get_node_index)[0]
+        translator = lambda e : element_translator[type(e)](e, self._get_node_index)[0]
         return Network(
-            branches=[translator(e) for e in self.elements if translator_available(e)],
-            zero_node_label=self.get_node_index(self.ground)
+            branches=[translator(e) for e in self.all_elements if translator_available(e)],
+            zero_node_label=self._get_node_index(self.ground)
             )
 
-    def get_equal_electrical_potential_nodes(self, node: schemdraw.util.Point) -> set[schemdraw.util.Point]:
+    def _get_equal_electrical_potential_nodes(self, node: schemdraw.util.Point) -> set[schemdraw.util.Point]:
         equal_electrical_potential_nodes = set([node])
         old_length = 0
         while len(equal_electrical_potential_nodes) > old_length:
@@ -105,29 +105,39 @@ class SchemdrawNetwork:
                     equal_electrical_potential_nodes.add(n1)
         return equal_electrical_potential_nodes
 
-    def get_node_index(self, node: schemdraw.util.Point) -> str:
+    def _get_node_index(self, node: schemdraw.util.Point) -> str:
         return self.node_label_mapping[self.unique_node_mapping[node]]
 
-    def get_element_from_name(self, name: str) -> schemdraw.elements.Element:
-        elements = [e for e in self.two_term_elements if e.name == name]
+    def get_element(self, name: str) -> schemdraw.elements.Element:
+        elements = [e for e in self.circuit_elements if e.name == name]
         if len(elements) == 0:
             raise UnknownElement
         else:
             return elements[0]
 
-    def get_branch_from_name(self, id: str) -> Branch:
-        element = self.get_element_from_name(id)
-        return element_translator[type(element)](element, self.get_node_index)[0]
+    def get_branch(self, id: str) -> Branch:
+        element = self.get_element(id)
+        return element_translator[type(element)](element, self._get_node_index)[0]
+
+class VoltageLabel(schemdraw.elements.CurrentLabel):
+    @property
+    def name(self) -> str:
+        return ''
+
+class CurrentLabel(schemdraw.elements.CurrentLabelInline):
+    @property
+    def name(self) -> str:
+        return ''
 
 class SchemdrawSolution:
 
-    def __init__(self, schemdraw_network: SchemdrawNetwork, solver: NetworkSolver):
+    def __init__(self, schemdraw_network: NetworkDiagramParser, solver: NetworkSolver):
         self.schemdraw_network = schemdraw_network
         self.network_solution = solver(self.schemdraw_network.network)
 
-    def draw_voltage(self, element_name: str, reverse: bool = False, precision: int = 3, top: bool = False) -> schemdraw.elements.CurrentLabel:
-        element = self.schemdraw_network.get_element_from_name(element_name)
-        branch = self.schemdraw_network.get_branch_from_name(element_name)
+    def draw_voltage(self, name: str, reverse: bool = False, precision: int = 3, top: bool = False) -> VoltageLabel:
+        element = self.schemdraw_network.get_element(name)
+        branch = self.schemdraw_network.get_branch(name)
         V_branch = self.network_solution.get_voltage(branch)
         if reverse:
             V_branch *= -1
@@ -139,15 +149,15 @@ class SchemdrawSolution:
         dx, dy = get_node_direction(n1, n2)
         if dx < 0 or dy < 0:
             reverse = not reverse
-        return schemdraw.elements.CurrentLabel(reverse=reverse, color=blue, top=top).at(element).label(f'{print_voltage(V_branch, precision=precision)}V')
+        return VoltageLabel(reverse=reverse, color=blue, top=top).at(element).label(f'{print_voltage(V_branch, precision=precision)}V')
 
-    def draw_current(self, element_name: str, reverse: bool = False, start: bool = True, ofst: float = 0.8, precision=3) -> schemdraw.elements.CurrentLabelInline:
-        element = self.schemdraw_network.get_element_from_name(element_name)
-        branch = self.schemdraw_network.get_branch_from_name(element_name)
+    def draw_current(self, element_name: str, reverse: bool = False, start: bool = True, ofst: float = 0.8, precision=3) -> CurrentLabel:
+        element = self.schemdraw_network.get_element(element_name)
+        branch = self.schemdraw_network.get_branch(element_name)
         I_branch = self.network_solution.get_current(branch)
         # adjust counting arrow system of voltage sources for display
         if type(element) is elm.VoltageSource or type(element) is elm.RealVoltageSource:
             start = False
         if start is False:
             reverse = not reverse
-        return schemdraw.elements.CurrentLabelInline(reverse=reverse, start=start, color=red, ofst=ofst).at(element).label(f'{print_current(I_branch, precision=precision)}A')
+        return CurrentLabel(reverse=reverse, start=start, color=red, ofst=ofst).at(element).label(f'{print_current(I_branch, precision=precision)}A')
