@@ -29,36 +29,6 @@ class VoltageSource(schemdraw.elements.sources.SourceV):
     def values(self) -> dict[str, float]:
         return {'U' : self.V}
 
-class RealVoltageSource(schemdraw.elements.sources.SourceV):
-    def __init__(self, V: float, R: float, name: str, *args, reverse=False, precision=3, **kwargs):
-        super().__init__(*args, reverse=reverse, **kwargs)
-        if reverse:
-            self._V = -V
-        else:
-            self._V = V
-        self._R = R
-        self._name = name
-        self.label(f'{self._name} {print_voltage(V, precision=precision)}V / {R}$\\Omega$')
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def V(self) -> float:
-        return self._V
-
-    @property
-    def R(self) -> float:
-        return self._R
-
-    @property
-    def G(self) -> float:
-        return 1/self._R
-
-    def values(self) -> dict[str, float]:
-        return {'U' : self.V, 'R' : self.R}
-
 class CurrentSource(schemdraw.elements.sources.SourceI):
     def __init__(self, I: float, name: str, *args, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
@@ -108,43 +78,8 @@ def DrawRealCurrentSource() -> list[schemdraw.segments.SegmentType]:
 
 def DrawVoltageSource() -> list[schemdraw.segments.SegmentType]:
     return DrawSource() + [
-        schemdraw.segments.Segment([(0.5, -0.5), (0.5, 0.5)])
+        schemdraw.segments.Segment([(0, 0), (1, 0)])
     ]
-
-class RealCurrentSource(schemdraw.elements.sources.SourceI):
-    def __init__(self, I: float, R: float, name: str, *args, reverse=False, precision=3, **kwargs):
-        super().__init__(*args, reverse=reverse, **kwargs)
-        if reverse:
-            self._I = -I
-        else:
-            self._I = I
-        self._R = R
-        self._name = name
-        self.segments = DrawRealCurrentSource()
-
-        a, b = (1, -0.3), (1.5, -0.3)
-        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.2, arrowlength=.3, color=red))
-        self.label(f'{self._name}={print_current(I, precision=precision)}A', rotate=True, ofst=(0, -2.1))
-        self.label(f'{print_current(R, precision=precision)}$\\Omega$', rotate=True, ofst=(0, .2))
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def I(self) -> float:
-        return self._I
-
-    @property
-    def R(self) -> float:
-        return self._R
-
-    @property
-    def G(self) -> float:
-        return 1/self._R
-
-    def values(self) -> dict[str, float]:
-        return {'I' : self.I, 'R' : self.R}
 
 class Resistor(schemdraw.elements.twoterm.ResistorIEC):
     def __init__(self, R: float, name: str, *args, **kwargs):
@@ -167,6 +102,86 @@ class Resistor(schemdraw.elements.twoterm.ResistorIEC):
 
     def values(self) -> dict[str, float]:
         return {'R' : self._R}
+
+class RealCurrentSource(schemdraw.elements.compound.ElementCompound):
+    def __init__(self, current_source: CurrentSource, resistor: Resistor, *args, d:str = 'up', **kwargs):
+        super().__init__(*args, **kwargs)
+        if d == 'left':
+            self.add(current_source.left())
+            self.add(Line('up'))
+            self.add(resistor.right())
+            self.add(Line('down'))
+        elif d == 'down':
+            self.add(current_source.down())
+            self.add(Line('right'))
+            self.add(resistor.up())
+            self.add(Line('left'))
+        elif d == 'right':
+            self.add(current_source.right())
+            self.add(Line('up'))
+            self.add(resistor.left())
+            self.add(Line('down'))
+        else:
+            self.add(current_source)
+            self.add(Line('right'))
+            self.add(resistor.down())
+            self.add(Line('left'))
+        self.anchors['start'] = current_source.start
+        self.anchors['end'] = current_source.end
+        self.drop(current_source.end)
+        self._name = current_source.name
+        self._I = current_source.I
+        self._R = resistor.R
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def I(self) -> float:
+        return self._I
+
+    @property
+    def R(self) -> float:
+        return self._R
+
+    @property
+    def G(self) -> float:
+        return 1/self._R
+
+    def values(self) -> dict[str, float]:
+        return {'I' : self.I, 'R' : self.R}
+
+class RealVoltageSource(schemdraw.elements.compound.ElementCompound):
+    def __init__(self, voltage_source: VoltageSource, resistor: Resistor, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.add(voltage_source)
+        self.add(resistor)
+        self.anchors['start'] = voltage_source.start
+        self.anchors['end'] = resistor.end
+        self.drop(resistor.end)
+        self._name = voltage_source.name
+        self._V = voltage_source.V
+        self._R = resistor.R
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def V(self) -> float:
+        return self._V
+
+    @property
+    def R(self) -> float:
+        return self._R
+
+    @property
+    def G(self) -> float:
+        return 1/self._R
+
+    def values(self) -> dict[str, float]:
+        return {'I' : self.I, 'R' : self.R}
 
 class Line(schemdraw.elements.lines.Line):
     def __init__(self, *args, **kwargs):

@@ -1,14 +1,14 @@
 import matplotlib # type: ignore
 matplotlib.use('Agg')
 from CircuitCalculator.SimpleCircuit.NetworkParser import NetworkDiagramParser, round_node, UnknownElement
-from CircuitCalculator.SimpleCircuit.Elements import RealCurrentSource, Resistor, Line
+from CircuitCalculator.SimpleCircuit.Elements import CurrentSource, Resistor, Line
 import pytest
 import schemdraw
 
 class SimpleDrawing:
     def __init__(self, show: bool = False) -> None:
         with schemdraw.Drawing(show=show) as d:
-            d += (I1:=RealCurrentSource(I=1, R=100, name='I1').up())
+            d += (I1:=CurrentSource(I=1, name='I1').up())
             d += (R1:=Resistor(R=10, name='R1').right())
             d += (R2:=Resistor(R=20, name='R2').down())
             d += (R3:=Resistor(R=30, name='R3').at(R1.end).right())
@@ -24,11 +24,11 @@ class SimpleDrawing:
         self.L2 = L2
         self.L3 = L3
 
-def test_all_two_term_elements_can_be_accessed() -> None:
+def test_all_circuit_elements_can_be_accessed() -> None:
     sd = SimpleDrawing()
     schemdraw_network = NetworkDiagramParser(sd.drawing)
-    two_term_elements = schemdraw_network.circuit_elements
-    assert two_term_elements == [sd.I1, sd.R1, sd.R2, sd.R3, sd.L1, sd.L2, sd.L3]
+    circuit_elements = schemdraw_network.circuit_elements
+    assert circuit_elements == [sd.I1, sd.R1, sd.R2, sd.R3]
 
 def test_all_lines_can_be_accessed() -> None:
     sd = SimpleDrawing()

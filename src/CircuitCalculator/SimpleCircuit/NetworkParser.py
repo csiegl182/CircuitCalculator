@@ -24,11 +24,11 @@ class NetworkDiagramParser:
 
     @property
     def circuit_elements(self) -> list[schemdraw.elements.Element]:
-        return [e for e in self.all_elements if isinstance(e, schemdraw.elements.Element2Term)]
+        return [e for e in self.all_elements if translator_available(e)]
 
     @property
     def line_elements(self) -> list[elm.Line]:
-        return [e for e in self.circuit_elements if type(e) is elm.Line]
+        return [e for e in self.all_elements if type(e) is elm.Line]
     
     @property
     def node_elements(self) -> list[elm.Node]:
@@ -38,6 +38,8 @@ class NetworkDiagramParser:
     def all_nodes(self) -> set[schemdraw.util.Point]:
         nodes = {round_node(e.absanchors['start']) for e in self.circuit_elements}
         nodes = nodes.union({round_node(e.absanchors['end']) for e in self.circuit_elements})
+        nodes = nodes.union({round_node(e.absanchors['start']) for e in self.line_elements})
+        nodes = nodes.union({round_node(e.absanchors['end']) for e in self.line_elements})
         return nodes
 
     @property
