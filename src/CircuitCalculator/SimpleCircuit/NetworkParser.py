@@ -121,23 +121,13 @@ class NetworkDiagramParser:
         element = self.get_element(id)
         return element_translator[type(element)](element, self._get_node_index)[0]
 
-class VoltageLabel(schemdraw.elements.CurrentLabel):
-    @property
-    def name(self) -> str:
-        return ''
-
-class CurrentLabel(schemdraw.elements.CurrentLabelInline):
-    @property
-    def name(self) -> str:
-        return ''
-
 class SchemdrawSolution:
 
     def __init__(self, schemdraw_network: NetworkDiagramParser, solver: NetworkSolver):
         self.schemdraw_network = schemdraw_network
         self.network_solution = solver(self.schemdraw_network.network)
 
-    def draw_voltage(self, name: str, reverse: bool = False, precision: int = 3, top: bool = False) -> VoltageLabel:
+    def draw_voltage(self, name: str, reverse: bool = False, precision: int = 3, top: bool = False) -> elm.VoltageLabel:
         element = self.schemdraw_network.get_element(name)
         branch = self.schemdraw_network.get_branch(name)
         V_branch = self.network_solution.get_voltage(branch)
@@ -151,15 +141,17 @@ class SchemdrawSolution:
         dx, dy = get_node_direction(n1, n2)
         if dx < 0 or dy < 0:
             reverse = not reverse
-        return VoltageLabel(reverse=reverse, color=blue, top=top).at(element).label(f'{print_voltage(V_branch, precision=precision)}V')
+        return elm.VoltageLabel(element, label=f'{print_voltage(V_branch, precision=precision)}V', reverse=reverse, color=blue, top=top)
 
-    def draw_current(self, element_name: str, reverse: bool = False, start: bool = True, ofst: float = 0.8, precision=3) -> CurrentLabel:
+    def draw_current(self, element_name: str, reverse: bool = False, start: bool = True, ofst: float = 0, precision=3) -> elm.CurrentLabel:
         element = self.schemdraw_network.get_element(element_name)
         branch = self.schemdraw_network.get_branch(element_name)
         I_branch = self.network_solution.get_current(branch)
+        if reverse:
+            I_branch *= -1
         # adjust counting arrow system of voltage sources for display
-        if type(element) is elm.VoltageSource or type(element) is elm.RealVoltageSource:
-            start = False
-        if start is False:
-            reverse = not reverse
-        return CurrentLabel(reverse=reverse, start=start, color=red, ofst=ofst).at(element).label(f'{print_current(I_branch, precision=precision)}A')
+        # if type(element) is elm.VoltageSource or type(element) is elm.RealVoltageSource:
+        #     start = False
+        # if start is False:
+        #     reverse = not reverse
+        return elm.CurrentLabel(element, label=f'{print_current(I_branch, precision=precision)}A', reverse=reverse, start=start, color=red, ofst=ofst)
