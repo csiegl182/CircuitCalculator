@@ -3,7 +3,10 @@ from .Display import red, blue, print_voltage, print_current
 from typing import Any
 
 class Schematic(schemdraw.Drawing):
-    pass
+    def save_copy(self, fname: str, **kwargs) -> None:
+        import copy
+        cpy = copy.deepcopy(self)
+        cpy.save(fname, **kwargs)
 
 class VoltageSource(schemdraw.elements.sources.SourceV):
     def __init__(self, V: float, name: str, *args, reverse=False, precision=3, **kwargs):
@@ -232,23 +235,25 @@ class Node(schemdraw.elements.Element):
 class LabelNode(Node):
     def __init__(self, id : str = '', id_loc : str | dict[str, Any] = '', *args, show=True, **kwargs):
         super().__init__(id, *args, **kwargs)
+        locations = {
+            'W': {'loc': 'left', 'align': ['right', 'center']},
+            'N': {'loc': 'top', 'align': ['center', 'bottom']},
+            'E': {'loc': 'right', 'align': ['left', 'center']},
+            'S': {'loc': 'bottom', 'align': ['center', 'top']}
+        }
+        self.segments.append(schemdraw.SegmentCircle([0, 0], 0.12, fill='black'))
+        self.id_loc = {}
+        if isinstance(id_loc, str):
+            self.id_loc.update(locations.get(id_loc, {}))
+        else:
+            self.id_loc.update(id_loc)
         if show:
-            self.segments.append(schemdraw.SegmentCircle([0, 0], 0.12, fill='black'))
-            if isinstance(id_loc, str):
-                if id_loc == 'W':
-                    loc = {'loc': 'left', 'align': ['right', 'center']}
-                elif id_loc == 'N':
-                    loc = {'loc': 'top', 'align': ['center', 'bottom']}
-                elif id_loc == 'E':
-                    loc = {'loc': 'right', 'align': ['left', 'center']}
-                elif id_loc == 'S':
-                    loc = {'loc': 'bottom', 'align': ['center', 'top']}
-                else:
-                    loc = {}
-            else:
-                loc = id_loc
-            self.bbox = self.get_bbox(includetext=False)
-            self.add_label(f'{self.node_id}', **loc)
+            self.show()
+
+    def show(self):
+        self.segments.append(schemdraw.SegmentCircle([0, 0], 0.12, fill='black'))
+        self.bbox = self.get_bbox(includetext=False)
+        self.add_label(f'{self.node_id}', **self.id_loc)
 
     @property
     def name(self) -> str:
