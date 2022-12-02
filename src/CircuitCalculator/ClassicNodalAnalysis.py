@@ -59,7 +59,10 @@ class NodalAnalysisSolution:
         self._node_mapping = node_index_mapping(network)
     
     def get_voltage(self, branch: Branch) -> complex:
-        return calculate_branch_voltage(self._node_voltages, self._node_mapping[branch.node1], self._node_mapping[branch.node2])
+        branch_voltage = calculate_branch_voltage(self._node_voltages, self._node_mapping[branch.node1], self._node_mapping[branch.node2])
+        if branch.element.active:
+            branch_voltage += branch.element.U
+        return branch_voltage
 
     def get_current(self, branch: Branch) -> complex:
         return self.get_voltage(branch)/branch.element.Z.real
