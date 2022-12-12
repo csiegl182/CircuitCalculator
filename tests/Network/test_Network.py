@@ -20,14 +20,13 @@ def test_Network_returns_branches_between_nodes() -> None:
     network = Network([branchA, branchB, branchC, branchD])
     assert network.branches_between(node1='0', node2='2') == [branchB, branchD]
 
-def test_Network_raises_ValueError_when_asking_for_branches_between_equal_nodes() -> None:
+def test_Network_returns_empty_list_when_asking_for_branches_between_equal_nodes() -> None:
     branchA = Branch('0', '1', resistor(10))
     branchB = Branch('0', '2', resistor(20))
     branchC = Branch('1', '2', resistor(30))
     branchD = Branch('0', '2', resistor(30))
     network = Network([branchA, branchB, branchC, branchD])
-    with pytest.raises(ValueError):
-        network.branches_between(node1='2', node2='2')
+    assert network.branches_between(node1='2', node2='2') == []
 
 def test_Network_returns_branches_between_nodes_in_reverse_direction() -> None:
     branchA = Branch('0', '1', resistor(10))
@@ -69,3 +68,41 @@ def test_switching_unknown_ground_node_leads_to_error() -> None:
     network = Network([branchA, branchB, branchC, branchD])
     with pytest.raises(FloatingGroundNode):
         switch_ground_node(network, '7')
+
+def test_zero_node_label_matches_index_zero() -> None:
+    R1, R2, R3, R4 = 10, 20, 30, 40
+    branchA = Branch('0', '1', resistor(R1))
+    branchB = Branch('0', '2', resistor(R2))
+    branchC = Branch('1', '2', resistor(R3))
+    branchD = Branch('0', '2', resistor(R4))
+    network = Network([branchA, branchB, branchC, branchD], zero_node_label='2')
+    assert network.node_label(0) == network.zero_node_label
+
+def test_index_zero_matches_zero_node_label() -> None:
+    R1, R2, R3, R4 = 10, 20, 30, 40
+    branchA = Branch('0', '1', resistor(R1))
+    branchB = Branch('0', '2', resistor(R2))
+    branchC = Branch('1', '2', resistor(R3))
+    branchD = Branch('0', '2', resistor(R4))
+    network = Network([branchA, branchB, branchC, branchD], zero_node_label='2')
+    assert network.node_index(network.zero_node_label) == 0
+
+def test_node_labels_match_node_list() -> None:
+    R1, R2, R3, R4 = 10, 20, 30, 40
+    branchA = Branch('0', '1', resistor(R1))
+    branchB = Branch('0', '2', resistor(R2))
+    branchC = Branch('1', '2', resistor(R3))
+    branchD = Branch('0', '2', resistor(R4))
+    network = Network([branchA, branchB, branchC, branchD], zero_node_label='2')
+    assert network.node_index('0') == 1
+    assert network.node_index('1') == 2
+
+def test_node_indices_match_node_list() -> None:
+    R1, R2, R3, R4 = 10, 20, 30, 40
+    branchA = Branch('0', '1', resistor(R1))
+    branchB = Branch('0', '2', resistor(R2))
+    branchC = Branch('1', '2', resistor(R3))
+    branchD = Branch('0', '2', resistor(R4))
+    network = Network([branchA, branchB, branchC, branchD], zero_node_label='2')
+    assert network.node_label(1) == '0'
+    assert network.node_label(2) == '1'

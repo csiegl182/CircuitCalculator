@@ -1,18 +1,6 @@
-from .Network import Network, Branch, node_index_mapping, switch_ground_node
-from .AdvancedNodalAnalysis import NodalAnalysisSolution, NodeTypes, create_node_matrix_from_network, is_ideal_current_source
+from .Network import Network, node_index_mapping, switch_ground_node, remove_ideal_current_sources, remove_ideal_voltage_sources
+from .AdvancedNodalAnalysis import NodalAnalysisSolution, create_node_matrix_from_network
 from numpy.linalg import inv as inverse_matrix
-
-def remove_ideal_current_sources(network: Network) -> Network:
-    return Network([b for b in network.branches if not is_ideal_current_source(b)], zero_node_label=network.zero_node_label)
-
-def remove_ideal_voltage_sources(network: Network) -> Network:
-    nodes = NodeTypes(network)
-    branches = network.branches
-    for an, cp in zip(nodes.active_nodes, nodes.counterparts):
-        branches = [Branch(cp, b.node2, b.element) if b.node1 == an else b for b in branches]
-        branches = [Branch(b.node1, cp, b.element) if b.node2 == an else b for b in branches]
-        branches = [b for b in branches if b.node1 != b.node2]
-    return Network(branches, zero_node_label=network.zero_node_label)
         
 def calculate_total_impedeance(network: Network, node1: str, node2: str) -> complex:
     if node1 == node2:

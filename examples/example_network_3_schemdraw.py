@@ -23,3 +23,6 @@ if __name__ == '__main__':
         d += schemdraw_solution.draw_current('R1')
         d += schemdraw_solution.draw_voltage('R2')
         d += schemdraw_solution.draw_current('R2')
+        d += schemdraw_solution.draw_current('U2')
+        d += schemdraw_solution.draw_current('R4')
+        d += schemdraw_solution.draw_current('R5')

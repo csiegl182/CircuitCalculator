@@ -1,13 +1,14 @@
 import schemdraw as sd
-from CircuitCalculator.SimpleCircuit.Elements import VoltageSource, CurrentSource, Resistor, Line, LabelNode
+from CircuitCalculator.SimpleCircuit.Elements import VoltageSource, CurrentSource, Resistor, Line, LabelNode, Ground
 from CircuitCalculator.SimpleCircuit.NetworkParser import NetworkDiagramParser, SchemdrawSolution
 from CircuitCalculator.AdvancedNodalAnalysis import nodal_analysis_solver
 
 R1, R2, R3, R4, R5 = 10, 20, 30, 40, 50
-Uq1, Uq2, Uq3, Iq1 = 1, 2, 3, 0.1
+Uq1, Uq2, Iq1 = 1, 2, 0.1
 
 with sd.Drawing(unit=5) as d:
-    d += (N0 := LabelNode(id='0', id_loc='S'))
+    # d += (N0 := LabelNode(id='0', id_loc='S'))
+    d += (N0 := Ground())
     d += VoltageSource(V=Uq1, name='Uq1', precision=1).up().length(2*d.unit)
     d += (N1 := LabelNode(id='1', id_loc='N'))
     d += Line().right()

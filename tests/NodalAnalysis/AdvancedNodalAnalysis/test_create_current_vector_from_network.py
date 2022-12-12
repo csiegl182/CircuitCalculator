@@ -35,8 +35,8 @@ def test_create_current_vector_from_reference_network_4() -> None:
         ]
     )
     I = create_current_vector_from_network(network)
-    I_ref = np.array([-U1*G1, U1*G1+U2*G3, -U2*(G4+G3), U2*G4])
-    np.testing.assert_almost_equal(I, I_ref)
+    I_ref = np.array([-U1*G1, U1*G1-U2*G4, -U2*(G4+G3), U2*G4])
+    np.testing.assert_almost_equal(I.real, I_ref.real)
 
 def test_create_current_vector_from_reference_network_5() -> None:
     R1, R2, R3, R4 = 10, 20, 30, 40
@@ -55,8 +55,8 @@ def test_create_current_vector_from_reference_network_5() -> None:
         ]
     )
     I = create_current_vector_from_network(network)
-    I_ref = np.array([0, -(U1+U2)*G3, -I4, -(U1+U3)*G4, I4+U1*(G3+G4)+U2*G3+U3*G4])
-    np.testing.assert_almost_equal(I, I_ref)
+    I_ref = np.array([-(U1+U2)*G3, -(U1+U2)*G3, -I4-(U1+U3)*G4, -(U1+U3)*G4, I4+G3*(U1+U2)+G4*(U1+U3)])
+    np.testing.assert_almost_equal(I.real, I_ref.real)
 
 def test_create_current_vector_from_reference_network_8() -> None:
     R1, R2, R3, R4, R5 = 10, 20, 30, 40, 50
@@ -75,5 +75,5 @@ def test_create_current_vector_from_reference_network_8() -> None:
         ]
     )
     I = create_current_vector_from_network(network)
-    I_ref = np.array([-U1*(G1+G2)+(U1+U2)*G2, -(U1+U2)*(G2+G4+G5)+U1*G2, -I4+(U1+U2)*G5, I4+(U1+U2)*G4])
-    np.testing.assert_almost_equal(I, I_ref)
+    I_ref = np.array([-U1*G1+U2*G2, -(U1+U2)*(G4+G5)-U2*G2, -I4+(U1+U2)*G5, I4+(U1+U2)*G4])
+    np.testing.assert_almost_equal(I.real, I_ref.real)
