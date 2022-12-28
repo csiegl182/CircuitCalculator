@@ -19,31 +19,36 @@ def alphabetic_mapper(network: Network) -> dict[str, int]:
 def create_node_matrix_from_network(network: Network, node_index_mapper: NodeIndexMapper = alphabetic_mapper) -> np.ndarray:
     super_nodes = SuperNodes(network)
     passive_net = passive_network(network)
+    node_mapping = node_index_mapper(network)
     A = np.zeros((network.number_of_nodes-1, network.number_of_nodes-1), dtype=complex)
     def passive_node_pair(node1: str, node2: str) -> bool:
         return not super_nodes.is_active(node1) and not super_nodes.is_active(node2)
-    node_mapping = node_index_mapper(network)
-    for (i_label, i), (j_label, j) in itertools.product(node_mapping.items(), repeat=2):
-        if passive_node_pair(i_label, j_label):
-            if i_label == j_label:
-                A[i, i] = admittance_connected_to(passive_net, i_label)
-            else:
-                A[i, j] = -admittance_between(passive_net, i_label, j_label)
+    def both_active(node1: str, node2: str) -> bool:
+        return super_nodes.is_active(node1) and super_nodes.is_active(node2)
+    def passive_matrix_element(node1: str, node2: str) -> complex:
+        if node1 == node2:
+            return admittance_connected_to(passive_net, node1)
         else:
-            if i_label == j_label:
-                A[i,i] = -super_nodes.sign(i_label)
-            else:
-                if not super_nodes.is_active(j_label):
-                    if not super_nodes.belong_to_same(i_label, j_label):
-                        A[i,j] = -admittance_between(network, i_label, j_label)
-                    else:
-                        A[i,j] = admittance_connected_to(network, i_label) - admittance_between(network, i_label, j_label)
-                    
-                    if super_nodes.is_reference(j_label):
-                        A[i,j] -= admittance_between(network, i_label, super_nodes.get_active_node(j_label))
-                else:
-                    if super_nodes.belong_to_same(i_label, j_label):
-                        A[j,i] = super_nodes.sign(i_label)
+            return -admittance_between(passive_net, node1, node2)
+    def non_active_j_label() -> complex:
+        Aij = -admittance_between(network, i_label, j_label)
+        if super_nodes.is_reference(j_label):
+            Aij -= admittance_between(network, i_label, super_nodes.get_active_node(j_label))
+        if super_nodes.belong_to_same(i_label, j_label):
+            Aij += admittance_connected_to(network, i_label)
+        return Aij
+    def matrix_element(i_label: str, j_label: str) -> complex:
+        if passive_node_pair(i_label, j_label):
+            return passive_matrix_element(i_label, j_label)
+        if i_label == j_label:
+            return -super_nodes.sign(i_label)
+        if both_active(i_label, j_label) and super_nodes.belong_to_same(j_label, i_label):
+            return super_nodes.sign(j_label)
+        if not super_nodes.is_active(j_label):
+            return non_active_j_label()
+        return 0+0j
+    for (i_label, i), (j_label, j) in itertools.product(node_mapping.items(), repeat=2):
+        A[i, j] = matrix_element(i_label, j_label)
     return A
 
 def create_current_vector_from_network(network: Network, node_index_mapper: NodeIndexMapper = alphabetic_mapper) -> np.ndarray:
