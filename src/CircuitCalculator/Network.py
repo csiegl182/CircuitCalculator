@@ -144,20 +144,6 @@ class Network:
     def number_of_nodes(self) -> int:
         return len(self.node_labels)
 
-    def node_label(self, node_index: int) -> str: # deprecated?
-        if node_index == 0:
-            return self.zero_node_label
-        labels = self.node_labels
-        labels.remove(self.zero_node_label)
-        return labels[node_index-1]
-    
-    def node_index(self, node_label: str) -> int: # deprecated?
-        if node_label == self.zero_node_label:
-            return 0
-        labels = self.node_labels
-        labels.remove(self.zero_node_label)
-        return labels.index(node_label)+1
-
     def is_zero_node(self, node: str) -> bool:
         return node == self.zero_node_label
 
@@ -208,9 +194,9 @@ def remove_ideal_current_sources(network: Network, keep: list[Element] = []) -> 
 def remove_ideal_voltage_sources(network: Network, keep: list[Element] = []) -> Network:
     branches = network.branches
     super_nodes = SuperNodes(network)
-    voltage_sources = [b.element for b in network.branches if is_ideal_voltage_source(b.element)]
-    voltage_sources = [vs for vs in voltage_sources if vs not in keep]
-    short_circuit_nodes = [super_nodes.get_active_node_and_counterpart(vs) for vs in voltage_sources]
+    voltage_sources = [b for b in network.branches if is_ideal_voltage_source(b.element)]
+    voltage_sources = [vs for vs in voltage_sources if vs.element not in keep]
+    short_circuit_nodes = [(vs.node1, vs.node2) if super_nodes.is_active(vs.node1) else (vs.node2, vs.node1) for vs in voltage_sources]
     for an, rn in short_circuit_nodes:
         branches = [Branch(rn, b.node2, b.element) if b.node1 == an else b for b in branches]
         branches = [Branch(b.node1, rn, b.element) if b.node2 == an else b for b in branches]
@@ -265,43 +251,35 @@ class SuperNodes:
     def is_reference(self, node: str) -> bool:
         return node in self.reference_nodes
 
-    def is_super_node(self, node: str) -> bool:
-        return self.is_active(node) or self.is_reference(node)
-
     def belong_to_same(self, active_node: str, reference_node: str) -> bool:
         if self.is_active(active_node):
             if self.is_reference(reference_node):
-                return self.get_counterpart(active_node) == reference_node
+                return self.get_reference_node(active_node) == reference_node
         return False
 
-    def get_active_node(self, voltage_source: Element) -> str:
-        return self.active_nodes[self.voltage_sources.index(voltage_source)]
-
-    def get_active_node_and_counterpart(self, voltage_source: Element) -> tuple[str, str]:
-        active_node = self.active_nodes[self.voltage_sources.index(voltage_source)]
-        counterpart = self.reference_nodes[self.active_nodes.index(active_node)]
-        return (active_node, counterpart)
-
-    def get_counterpart(self, active_node: str) -> str:
-        return self.reference_nodes[self.active_nodes.index(active_node)]
-
-    def get_active_node2(self, reference_node: str) ->str:
+    def get_active_node(self, reference_node: str) -> str:
         return self.active_nodes[self.reference_nodes.index(reference_node)]
+
+    def get_reference_node(self, active_node: str) -> str:
+        return self.reference_nodes[self.active_nodes.index(active_node)]
 
     def get_voltage(self, active_node: str) -> complex:
         return self.voltages[self.active_nodes.index(active_node)]
 
-    def voltage_source_between(self, node1: str, node2: str) -> bool:
-        if self.is_active(node1):
-            if self.get_counterpart(node1) == node2:
-                return True
-        if self.is_active(node2):
-            if self.get_counterpart(node2) == node1:
-                return True
-        return False
+    def sign(self, active_node: str) -> int:
+        return np.sign(self.voltages[self.active_nodes.index(active_node)])
 
-    def get_voltage_source(self, active_node: str) -> Element:
-        return self._super_nodes[self.active_nodes.index(active_node)].voltage_source
+    def voltage_to_next_reference(self, active_node: str) -> complex:
+        V = 0+0j
+        while self.is_active(active_node):
+            V += self.voltages[self.active_nodes.index(active_node)]
+            active_node = self.get_reference_node(active_node)
+        return V
+
+    def next_reference(self, active_node: str) -> str:
+        while self.is_active(active_node):
+            active_node = self.get_reference_node(active_node)
+        return active_node
 
 class NetworkSolution(Protocol):
     def get_voltage(self, branch: Branch) -> complex: pass
