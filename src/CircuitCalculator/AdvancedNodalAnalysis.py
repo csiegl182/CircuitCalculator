@@ -16,13 +16,13 @@ def alphabetic_mapper(network: Network) -> dict[str, int]:
     node_labels_without_zero = [label for label in sorted(network.node_labels) if label != network.zero_node_label] 
     return {k: v for v, k in enumerate(node_labels_without_zero)}
 
-def create_node_matrix_from_network(network: Network, node_index_mapping: NodeIndexMapper = alphabetic_mapper) -> np.ndarray:
+def create_node_matrix_from_network(network: Network, node_index_mapper: NodeIndexMapper = alphabetic_mapper) -> np.ndarray:
     super_nodes = SuperNodes(network)
     passive_net = passive_network(network)
     A = np.zeros((network.number_of_nodes-1, network.number_of_nodes-1), dtype=complex)
     def passive_node_pair(node1: str, node2: str) -> bool:
         return not super_nodes.is_active(node1) and not super_nodes.is_active(node2)
-    node_mapping = node_index_mapping(network)
+    node_mapping = node_index_mapper(network)
     for (i_label, i), (j_label, j) in itertools.product(node_mapping.items(), repeat=2):
         if passive_node_pair(i_label, j_label):
             if i_label == j_label:
@@ -75,8 +75,8 @@ def create_current_vector_from_network(network: Network, node_index_mapper: Node
 
 class NodalAnalysisSolution:
     def __init__(self, network : Network, node_mapper: NodeIndexMapper = alphabetic_mapper) -> None:
-        Y = create_node_matrix_from_network(network)
-        I = create_current_vector_from_network(network)
+        Y = create_node_matrix_from_network(network, node_index_mapper=node_mapper)
+        I = create_current_vector_from_network(network, node_index_mapper=node_mapper)
         self._network = network
         self._solution_vector = cna.calculate_node_voltages(Y, I)
         self._super_nodes = SuperNodes(network)
