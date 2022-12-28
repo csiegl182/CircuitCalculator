@@ -1,5 +1,4 @@
-from CircuitCalculator.AdvancedNodalAnalysis import ideal_voltage_sources
-from CircuitCalculator.Network import Network, Branch, resistor, voltage_source, real_voltage_source, current_source, real_current_source
+from CircuitCalculator.Network import Network, Branch, resistor, voltage_source, real_voltage_source, current_source, real_current_source, ideal_voltage_sources
 
 def test_ideal_voltage_sources_are_selected_from_network() -> None:
     vs1 = Branch('2', '3', voltage_source(1))
