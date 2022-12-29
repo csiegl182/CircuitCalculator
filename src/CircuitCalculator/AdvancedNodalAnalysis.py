@@ -56,26 +56,33 @@ def create_current_vector_from_network(network: Network, node_index_mapper: Node
     b = np.zeros(network.number_of_nodes-1, dtype=complex)
     node_mapping = node_index_mapper(network)
     active_node_labels = [l for l in node_mapping.keys() if super_nodes.is_active(l)]
+    def current_sources(node: str) -> complex:
+        current_sources = [b for b in network.branches_connected_to(node) if is_ideal_current_source(b.element)]
+        return sum([-cs.element.I if cs.node1 == node else cs.element.I for cs in current_sources])
+    def connected_active_nodes(active_node: str) -> list[str]:
+        return [n for n in network.nodes_connected_to(active_node) if super_nodes.is_active(n)]
+    def active_node_current(active_node: str) -> complex:
+        I_connected_admittances = super_nodes.voltage_to_next_reference(active_node)*admittance_connected_to(network, active_node)
+        reference_node = super_nodes.get_reference_node(active_node)
+        if super_nodes.is_active(reference_node):
+            I_parallel_admittance = super_nodes.voltage_to_next_reference(reference_node)*admittance_between(network, active_node, reference_node)
+            return I_parallel_admittance-I_connected_admittances
+        return sum([super_nodes.voltage_to_next_reference(cn)*admittance_between(network, active_node, cn) for cn in connected_active_nodes(active_node)])-I_connected_admittances
+    def passive_node_current(passive_node: str) -> complex:
+        I_parallel_admittances = sum([super_nodes.voltage_to_next_reference(an)*admittance_between(network, an, passive_node) for an in active_node_labels if super_nodes.get_reference_node(an) != passive_node])
+        if super_nodes.is_reference(passive_node):
+            active_node = super_nodes.get_active_node(passive_node)
+            I_connected_admittances = super_nodes.voltage_to_next_reference(active_node)*admittance_connected_to(network, active_node)
+            I_parallel_to_active_nodes = sum([super_nodes.voltage_to_next_reference(cn)*admittance_between(network, active_node, cn) for cn in connected_active_nodes(active_node)])
+            I_parallel_to_passive_nodes = super_nodes.voltage_to_next_reference(active_node)*admittance_between(network, active_node, passive_node)
+            return I_parallel_admittances+I_parallel_to_active_nodes+I_parallel_to_passive_nodes-I_connected_admittances
+        return I_parallel_admittances
+    def current_of_voltage_sources(node: str) -> complex:
+        if super_nodes.is_active(node):
+            return active_node_current(node)
+        return passive_node_current(node)
     for i_label, i in node_mapping.items():
-        current_sources = [b for b in network.branches_connected_to(i_label) if is_ideal_current_source(b.element)]
-        b[i] += sum([-cs.element.I if cs.node1 == i_label else cs.element.I for cs in current_sources])
-    for i_label, i in node_mapping.items():
-        if super_nodes.is_active(i_label):
-            b[i] -= super_nodes.voltage_to_next_reference(i_label)*admittance_connected_to(network, i_label)
-            if super_nodes.is_active(super_nodes.get_reference_node(i_label)):
-                b[i] += super_nodes.voltage_to_next_reference(super_nodes.get_reference_node(i_label))*admittance_between(network, i_label, super_nodes.get_reference_node(i_label))
-            else:
-                connected_active_nodes = [n for n in network.nodes_connected_to(i_label) if super_nodes.is_active(n)]
-                for cn in connected_active_nodes:
-                    b[i] += super_nodes.voltage_to_next_reference(cn)*admittance_between(network, i_label, cn)
-        else:
-            b[i] += sum([super_nodes.voltage_to_next_reference(an)*admittance_between(network, i_label, an) for an in active_node_labels if super_nodes.get_reference_node(an) != i_label])
-            if super_nodes.is_reference(i_label):
-                b[i] -= super_nodes.voltage_to_next_reference(super_nodes.get_active_node(i_label))*admittance_connected_to(network, super_nodes.get_active_node(i_label))
-                b[i] += super_nodes.voltage_to_next_reference(super_nodes.get_active_node(i_label))*admittance_between(network, i_label, super_nodes.get_active_node(i_label))
-                connected_active_nodes = [n for n in network.nodes_connected_to(super_nodes.get_active_node(i_label)) if super_nodes.is_active(n)]
-                for cn in connected_active_nodes:
-                    b[i] += super_nodes.voltage_to_next_reference(cn)*admittance_between(network, super_nodes.get_active_node(i_label), cn)
+        b[i] = current_sources(i_label) + current_of_voltage_sources(i_label)
     return b
 
 class NodalAnalysisSolution:
