@@ -1,4 +1,5 @@
-from CircuitCalculator.Network import Network, Branch, resistor
+from CircuitCalculator.Network.network import Network, Branch
+from CircuitCalculator.Network.elements import resistor
 from CircuitCalculator.EquivalentSources import calculate_total_impedeance
 from numpy.testing import assert_almost_equal
 

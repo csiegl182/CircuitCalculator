@@ -1,6 +1,10 @@
 import numpy as np
-from .Network import Branch, Network, SuperNodes, NetworkSolution, is_ideal_current_source, is_ideal_voltage_source, passive_network, is_current_source
-from typing import Callable
+from .Network.network import Branch, Network
+from .Network.elements import is_ideal_current_source, is_ideal_voltage_source, is_current_source
+from .Network.transformers import passive_network
+from .Network.supernodes import SuperNodes
+from .Network import labelmapper as map
+from .Network.solution import NetworkSolution
 import itertools
 
 class DimensionError(Exception): pass
@@ -11,13 +15,7 @@ def admittance_connected_to(network: Network, node: str) -> complex:
 def admittance_between(network: Network, node1: str, node2: str) -> complex:
     return sum([b.element.Y for b in network.branches_between(node1, node2) if np.isfinite(b.element.Y)])
 
-NodeIndexMapper = Callable[[Network], dict[str, int]]
-
-def alphabetic_mapper(network: Network) -> dict[str, int]:
-    node_labels_without_zero = [label for label in sorted(network.node_labels) if label != network.zero_node_label] 
-    return {k: v for v, k in enumerate(node_labels_without_zero)}
-
-def create_node_matrix_from_network(network: Network, node_index_mapper: NodeIndexMapper = alphabetic_mapper) -> np.ndarray:
+def create_node_matrix_from_network(network: Network, node_index_mapper: map.NodeIndexMapper = map.default) -> np.ndarray:
     super_nodes = SuperNodes(network)
     passive_net = passive_network(network)
     node_mapping = node_index_mapper(network)
@@ -52,7 +50,7 @@ def create_node_matrix_from_network(network: Network, node_index_mapper: NodeInd
         A[i, j] = matrix_element(i_label, j_label)
     return A
 
-def create_current_vector_from_network(network: Network, node_index_mapper: NodeIndexMapper = alphabetic_mapper) -> np.ndarray:
+def create_current_vector_from_network(network: Network, node_index_mapper: map.NodeIndexMapper = map.default) -> np.ndarray:
     super_nodes = SuperNodes(network)
     b = np.zeros(network.number_of_nodes-1, dtype=complex)
     node_mapping = node_index_mapper(network)
@@ -101,7 +99,7 @@ def calculate_node_voltages(Y : np.ndarray, I : np.ndarray) -> np.ndarray:
     return np.linalg.solve(Y, I)
 
 class NodalAnalysisSolution:
-    def __init__(self, network : Network, node_mapper: NodeIndexMapper = alphabetic_mapper) -> None:
+    def __init__(self, network : Network, node_mapper: map.NodeIndexMapper = map.default) -> None:
         Y = create_node_matrix_from_network(network, node_index_mapper=node_mapper)
         I = create_current_vector_from_network(network, node_index_mapper=node_mapper)
         self._network = network

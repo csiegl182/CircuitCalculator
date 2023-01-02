@@ -1,19 +1,20 @@
-from .Network import Network, node_index_mapping, switch_ground_node, remove_ideal_current_sources, remove_ideal_voltage_sources
+from .Network.network import Network
+from .Network.transformers import switch_ground_node, passive_network
+from .Network import labelmapper as map
 from .NodalAnalysis import NodalAnalysisSolution, create_node_matrix_from_network
 from numpy.linalg import inv as inverse_matrix
         
-def calculate_total_impedeance(network: Network, node1: str, node2: str) -> complex:
+def calculate_total_impedeance(network: Network, node1: str, node2: str, node_index_mapper: map.NodeIndexMapper = map.default) -> complex:
     if node1 == node2:
         return 0
     if network.is_zero_node(node1):
         node1, node2 = node2, node1
     network = switch_ground_node(network=network, new_ground=node2)
-    network = remove_ideal_current_sources(network)
-    network = remove_ideal_voltage_sources(network)
-    Y = create_node_matrix_from_network(network)
+    network = passive_network(network)
+    Y = create_node_matrix_from_network(network, node_index_mapper=node_index_mapper)
     Z = inverse_matrix(Y)
-    i1 = node_index_mapping(network)[node1]
-    return Z[i1-1][i1-1]
+    i1 = node_index_mapper(network)[node1]
+    return Z[i1][i1]
 
 def calculate_open_circuit_voltage(network: Network, node1: str, node2: str) -> complex:
     if node1 == node2:

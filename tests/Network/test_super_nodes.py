@@ -1,5 +1,7 @@
 import pytest
-from CircuitCalculator.Network import SuperNodes, AmbiguousElectricalPotential, Network, Branch, voltage_source, resistor
+from CircuitCalculator.Network.supernodes import SuperNodes, AmbiguousElectricalPotential
+from CircuitCalculator.Network.network import Network, Branch
+from CircuitCalculator.Network.elements import voltage_source, resistor
 
 def test_parallel_voltage_sources_attached_to_node_zero_lead_to_error() -> None:
     network = Network([

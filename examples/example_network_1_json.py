@@ -1,4 +1,4 @@
-from CircuitCalculator.Network import load_network_from_json
+from CircuitCalculator.Network.loaders import load_network_from_json
 from CircuitCalculator.NodalAnalysis import nodal_analysis_solver
 from CircuitCalculator.EquivalentSources import TheveninEquivalentSource, NortenEquivalentSource
 
