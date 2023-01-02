@@ -1,5 +1,5 @@
 from CircuitCalculator.AdvancedNodalAnalysis import create_node_matrix_from_network
-from CircuitCalculator.Network import Network, Branch, voltage_source, resistor, current_source, conductor, real_current_source
+from CircuitCalculator.Network import Network, Branch, voltage_source, resistor, current_source, conductor, real_current_source, real_voltage_source
 import numpy as np
 
 def test_ideal_voltage_sources_are_ignored_but_matrix_is_finite() -> None:
@@ -133,4 +133,19 @@ def test_create_node_matrix_from_reference_network_9() -> None:
     )
     Y = create_node_matrix_from_network(network)
     Y_ref = np.array([[G1+G2, -G2, 0], [-G2, G2+G3+G4, 0], [0, G4, -1]])
+    np.testing.assert_almost_equal(Y.real, Y_ref.real)
+
+def test_create_node_matrix_from_reference_network_11() -> None:
+    R, Ri = 2, 1
+    G, Gi = 1/R, 1/Ri
+    Uq = 9
+    network = Network(
+        branches=[
+            Branch('1', '0', real_voltage_source(U=Uq, R=Ri)),
+            Branch('1', '0', resistor(R=R))
+        ],
+        zero_node_label='0'
+    )
+    Y = create_node_matrix_from_network(network)
+    Y_ref = np.array([[G+Gi]])
     np.testing.assert_almost_equal(Y.real, Y_ref.real)

@@ -1,5 +1,5 @@
 from CircuitCalculator.AdvancedNodalAnalysis import create_current_vector_from_network
-from CircuitCalculator.Network import Network, Branch, resistor, voltage_source, current_source, real_current_source
+from CircuitCalculator.Network import Network, Branch, resistor, voltage_source, current_source, real_current_source, real_voltage_source
 import numpy as np
 
 def test_create_current_vector_from_reference_network_1() -> None:
@@ -90,4 +90,18 @@ def test_create_current_vector_from_reference_network_8() -> None:
     )
     I = create_current_vector_from_network(network)
     I_ref = np.array([-U1*G1+U2*G2, -(U1+U2)*(G4+G5)-U2*G2, -I4+(U1+U2)*G5, I4+(U1+U2)*G4])
+    np.testing.assert_almost_equal(I.real, I_ref.real)
+
+def test_create_current_vektor_from_reference_network_11() -> None:
+    R, Ri = 2, 2
+    Uq = 9
+    network = Network(
+        branches=[
+            Branch('1', '0', real_voltage_source(U=Uq, R=Ri)),
+            Branch('1', '0', resistor(R=R))
+        ],
+        zero_node_label='0'
+    )
+    I = create_current_vector_from_network(network)
+    I_ref = np.array([-Uq/Ri])
     np.testing.assert_almost_equal(I.real, I_ref.real)
