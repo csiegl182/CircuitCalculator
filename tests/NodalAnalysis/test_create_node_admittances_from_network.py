@@ -1,5 +1,5 @@
-from CircuitCalculator.ClassicNodalAnalysis import create_node_admittance_matrix_from_network
-from CircuitCalculator.Network import Network, Branch, conductor, voltage_source
+from CircuitCalculator.NodalAnalysis import create_node_matrix_from_network
+from CircuitCalculator.Network import Network, Branch, conductor
 import numpy as np
 
 def test_node_admittance_matrix_is_correct() -> None:
@@ -13,7 +13,7 @@ def test_node_admittance_matrix_is_correct() -> None:
         Branch('3', '4', conductor(Y_34)),
         Branch('4', '0', conductor(Y_40))
     ])
-    Y = create_node_admittance_matrix_from_network(network)
+    Y = create_node_matrix_from_network(network)
 
     np.testing.assert_almost_equal(Y, Y_ref)
 
@@ -26,6 +26,6 @@ def test_node_admittance_matrix_sorts_node_indices() -> None:
         Branch('2', '0', conductor(Y_20)),
         Branch('2', '1', conductor(Y_12))
     ])
-    Y = create_node_admittance_matrix_from_network(network)
+    Y = create_node_matrix_from_network(network)
 
     np.testing.assert_almost_equal(Y, Y_ref)

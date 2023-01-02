@@ -1,7 +1,7 @@
 import schemdraw as sd
 from CircuitCalculator.SimpleCircuit.Elements import VoltageSource, CurrentSource, Resistor, Line, LabelNode, Ground
 from CircuitCalculator.SimpleCircuit.NetworkParser import NetworkDiagramParser, SchemdrawSolution
-from CircuitCalculator.AdvancedNodalAnalysis import nodal_analysis_solver
+from CircuitCalculator.NodalAnalysis import nodal_analysis_solver
 
 R1, R2, R3, R4, R5 = 10, 20, 30, 40, 50
 Uq1, Uq2, Iq1 = 1, 2, 0.1

@@ -1,6 +1,6 @@
 from CircuitCalculator.SimpleCircuit.Elements import Schematic, Resistor, Line, Ground, CurrentSource, RealCurrentSource
 from CircuitCalculator.SimpleCircuit.NetworkParser import NetworkDiagramParser, SchemdrawSolution
-from CircuitCalculator.ClassicNodalAnalysis import nodal_analysis_solver
+from CircuitCalculator.NodalAnalysis import nodal_analysis_solver
 
 if __name__ == '__main__':
     with Schematic() as d:

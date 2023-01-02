@@ -1,5 +1,5 @@
 from CircuitCalculator.Network import load_network_from_json
-from CircuitCalculator.AdvancedNodalAnalysis import nodal_analysis_solver
+from CircuitCalculator.NodalAnalysis import nodal_analysis_solver
 
 if __name__ == '__main__':
     network = load_network_from_json('./examples/example_network_3.json')

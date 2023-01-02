@@ -1,5 +1,5 @@
 from CircuitCalculator.Network import load_network_from_json
-from CircuitCalculator.AdvancedNodalAnalysis import nodal_analysis_solver
+from CircuitCalculator.NodalAnalysis import nodal_analysis_solver
 from CircuitCalculator.EquivalentSources import NortenEquivalentSource, TheveninEquivalentSource
 from CircuitCalculator.PlottingTemplates import plot_norten_source, plot_thevenin_source
 

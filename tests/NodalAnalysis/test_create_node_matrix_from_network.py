@@ -1,4 +1,4 @@
-from CircuitCalculator.AdvancedNodalAnalysis import create_node_matrix_from_network
+from CircuitCalculator.NodalAnalysis import create_node_matrix_from_network
 from CircuitCalculator.Network import Network, Branch, voltage_source, resistor, current_source, conductor, real_current_source, real_voltage_source
 import numpy as np
 

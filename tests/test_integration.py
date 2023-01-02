@@ -1,7 +1,6 @@
 import pytest
 from CircuitCalculator.Network import load_network_from_json
-from CircuitCalculator.ClassicNodalAnalysis import nodal_analysis_solver as classic_nodal_analysis_solver
-from CircuitCalculator.AdvancedNodalAnalysis import nodal_analysis_solver as advanced_nodal_analysis_solver
+from CircuitCalculator.NodalAnalysis import nodal_analysis_solver as advanced_nodal_analysis_solver
 import numpy as np
 
 def test_network_1_with_advanced_nodal_analysis() -> None:
@@ -14,11 +13,6 @@ def test_network_1_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_current(R1), 0.77, decimal=2)
     np.testing.assert_almost_equal(solution.get_current(R2), 0.77, decimal=2)
     np.testing.assert_almost_equal(solution.get_current(I1), -0.23, decimal=2)
-
-def test_network_2_with_classic_nodal_analysis() -> None:
-    network = load_network_from_json('./examples/example_network_2.json')
-    with pytest.raises(ValueError):
-        classic_nodal_analysis_solver(network)
 
 def test_network_2_with_advanced_nodal_analysis() -> None:
     network = load_network_from_json('./examples/example_network_2.json')

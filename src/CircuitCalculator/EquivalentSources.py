@@ -1,5 +1,5 @@
 from .Network import Network, node_index_mapping, switch_ground_node, remove_ideal_current_sources, remove_ideal_voltage_sources
-from .AdvancedNodalAnalysis import NodalAnalysisSolution, create_node_matrix_from_network
+from .NodalAnalysis import NodalAnalysisSolution, create_node_matrix_from_network
 from numpy.linalg import inv as inverse_matrix
         
 def calculate_total_impedeance(network: Network, node1: str, node2: str) -> complex:

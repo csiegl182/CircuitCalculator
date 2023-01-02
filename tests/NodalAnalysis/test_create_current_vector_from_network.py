@@ -1,4 +1,4 @@
-from CircuitCalculator.AdvancedNodalAnalysis import create_current_vector_from_network
+from CircuitCalculator.NodalAnalysis import create_current_vector_from_network
 from CircuitCalculator.Network import Network, Branch, resistor, voltage_source, current_source, real_current_source, real_voltage_source
 import numpy as np
 
