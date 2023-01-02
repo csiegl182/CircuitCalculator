@@ -1,5 +1,6 @@
 from CircuitCalculator.EquivalentSources import remove_ideal_current_sources
-from CircuitCalculator.Network import Network, Branch, current_source, resistor
+from CircuitCalculator.Network.network import Network, Branch
+from CircuitCalculator.Network.elements import current_source, resistor
 
 def test_all_ideal_current_sources_are_removed() -> None:
     cs1 = current_source(1)

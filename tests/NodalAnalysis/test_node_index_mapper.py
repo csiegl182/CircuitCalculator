@@ -1,5 +1,6 @@
 from CircuitCalculator.NodalAnalysis import alphabetic_mapper
-from CircuitCalculator.Network import Network, Branch, resistor
+from CircuitCalculator.Network.network import Network, Branch
+from CircuitCalculator.Network.elements import resistor
 
 def test_alphabetic_mapper_returns_mapping_in_alphabetic_order() -> None:
     network = Network(

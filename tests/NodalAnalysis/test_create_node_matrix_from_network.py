@@ -1,5 +1,6 @@
 from CircuitCalculator.NodalAnalysis import create_node_matrix_from_network
-from CircuitCalculator.Network import Network, Branch, voltage_source, resistor, current_source, conductor, real_current_source, real_voltage_source
+from CircuitCalculator.Network.network import Network, Branch
+from CircuitCalculator.Network.elements import resistor, voltage_source, current_source, real_current_source, real_voltage_source, conductor
 import numpy as np
 
 def test_ideal_voltage_sources_are_ignored_but_matrix_is_finite() -> None:

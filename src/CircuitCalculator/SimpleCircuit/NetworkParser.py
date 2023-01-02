@@ -3,7 +3,7 @@ import schemdraw
 from . import Elements as elm
 from .ElementTranslators import element_translator, round_node, get_nodes, translator_available
 from .Display import red, blue, print_voltage, print_current
-from ..Network import NetworkSolver, Network, Branch
+from ..Network.network import NetworkSolver, Network, Branch
 
 class UnknownElement(Exception): pass
 class MultipleGroundNodes(Exception): pass

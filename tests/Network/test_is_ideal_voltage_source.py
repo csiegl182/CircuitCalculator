@@ -1,4 +1,5 @@
-from CircuitCalculator.Network import Branch, voltage_source, real_voltage_source, resistor, is_ideal_voltage_source
+from CircuitCalculator.Network.network import Branch
+from CircuitCalculator.Network.elements import voltage_source, real_voltage_source, resistor, is_ideal_voltage_source
 
 def test_ideal_voltage_source_is_ideal_voltage_source() -> None:
     b = Branch('1', '0', voltage_source(U=1))

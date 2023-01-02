@@ -1,4 +1,5 @@
-from CircuitCalculator.Network import node_index_mapping, Network, Branch, resistor
+from CircuitCalculator.Network.network import node_index_mapping, Network, Branch
+from CircuitCalculator.Network.elements import resistor
 
 def test_node_mapping_has_unique_set_of_node_indices() -> None:
     network = Network(

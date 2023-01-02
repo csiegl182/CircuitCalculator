@@ -1,4 +1,6 @@
-from CircuitCalculator.Network import Network, Branch, voltage_source, current_source, resistor, remove_ideal_current_sources, is_ideal_current_source
+from CircuitCalculator.Network.network import Network, Branch
+from CircuitCalculator.Network.elements import voltage_source, current_source, resistor, is_ideal_current_source
+from CircuitCalculator.Network.transformers import remove_ideal_current_sources
 
 def test_remove_ideal_current_sources_removes_all_voltage_sources() -> None:
     network = Network(

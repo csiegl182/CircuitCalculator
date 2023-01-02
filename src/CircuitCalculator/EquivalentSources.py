@@ -1,4 +1,5 @@
-from .Network import Network, node_index_mapping, switch_ground_node, remove_ideal_current_sources, remove_ideal_voltage_sources
+from .Network.network import Network, node_index_mapping
+from .Network.transformers import switch_ground_node, remove_ideal_current_sources, remove_ideal_voltage_sources
 from .NodalAnalysis import NodalAnalysisSolution, create_node_matrix_from_network
 from numpy.linalg import inv as inverse_matrix
         

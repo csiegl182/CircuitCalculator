@@ -1,5 +1,7 @@
 import numpy as np
-from .Network import Branch, Network, SuperNodes, NetworkSolution, is_ideal_current_source, is_ideal_voltage_source, passive_network, is_current_source
+from .Network.network import Branch, Network, SuperNodes, NetworkSolution
+from .Network.elements import is_ideal_current_source, is_ideal_voltage_source, is_current_source
+from .Network.transformers import passive_network
 from typing import Callable
 import itertools
 

@@ -1,5 +1,6 @@
 from CircuitCalculator.EquivalentSources import remove_ideal_voltage_sources
-from CircuitCalculator.Network import Network, Branch, voltage_source, resistor
+from CircuitCalculator.Network.network import Network, Branch
+from CircuitCalculator.Network.elements import voltage_source, resistor
 
 def test_all_ideal_voltage_sources_are_removed() -> None:
     vs1 = voltage_source(1)
