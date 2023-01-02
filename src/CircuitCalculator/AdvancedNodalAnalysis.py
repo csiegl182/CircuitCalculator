@@ -1,165 +1,112 @@
 import numpy as np
 import CircuitCalculator.ClassicNodalAnalysis as cna
-from .Network import Branch, Element, Network, node_index_mapping, NetworkSolution
+from .Network import Branch, Network, SuperNodes, NetworkSolution, is_ideal_current_source, is_ideal_voltage_source, passive_network
+from typing import Callable
+import itertools
 
-class AmbiguousElectricalPotential(Exception): pass
+def admittance_connected_to(network: Network, node: str) -> complex:
+    return sum(b.element.Y for b in network.branches_connected_to(node) if np.isfinite(b.element.Y))
 
-def is_ideal_voltage_source(branch: Branch) -> bool:
-    return branch.element.active and branch.element.Z==0 and np.isfinite(branch.element.U)
+def admittance_between(network: Network, node1: str, node2: str) -> complex:
+    return sum([b.element.Y for b in network.branches_between(node1, node2) if np.isfinite(b.element.Y)])
 
-def is_ideal_current_source(branch: Branch) -> bool:
-    return branch.element.active and branch.element.Y==0 and np.isfinite(branch.element.I)
+NodeIndexMapper = Callable[[Network], dict[str, int]]
 
-def ideal_voltage_sources(network: Network) -> list[Branch]:
-    return [b for b in network.branches if is_ideal_voltage_source(b)]
+def alphabetic_mapper(network: Network) -> dict[str, int]:
+    node_labels_without_zero = [label for label in sorted(network.node_labels) if label != network.zero_node_label] 
+    return {k: v for v, k in enumerate(node_labels_without_zero)}
 
-def passive_elements(network: Network) -> list[Branch]:
-    return [b for b in network.branches if not b.element.active]
-
-class NodeTypes:
-    def __init__(self, network: Network) -> None:
-        self.voltage_sources: list[Element] = []
-        self.active_nodes : list[str] = []
-        self.counterparts: list[str] = []
-        self.voltages: list[complex] = []
-        for voltage_source in ideal_voltage_sources(network):
-            node, other_node = voltage_source.node1, voltage_source.node2
-            if network.is_zero_node(node) or node in self.active_nodes:
-                node, other_node = other_node, node
-            if network.is_zero_node(node) or node in self.active_nodes:
-                raise AmbiguousElectricalPotential
-            self.voltage_sources.append(voltage_source.element)
-            self.active_nodes.append(node)
-            self.counterparts.append(other_node)
-            V = voltage_source.element.U if node == voltage_source.node1 else -voltage_source.element.U
-            self.voltages.append(V)
-
-    def is_active(self, node: str) -> bool:
-        return node in self.active_nodes
-    
-    def is_passive(self, node: str) -> bool:
-        return not self.is_active(node)
-
-    def get_active_node(self, voltage_source: Element) -> str:
-        return self.active_nodes[self.voltage_sources.index(voltage_source)]
-
-    def get_active_node_and_counterpart(self, voltage_source: Element) -> tuple[str, str]:
-        active_node = self.active_nodes[self.voltage_sources.index(voltage_source)]
-        counterpart = self.counterparts[self.active_nodes.index(active_node)]
-        return (active_node, counterpart)
-
-    def get_counterpart(self, active_node: str) -> str:
-        return self.counterparts[self.active_nodes.index(active_node)]
-
-    def get_voltage(self, active_node: str) -> complex:
-        return self.voltages[self.active_nodes.index(active_node)]
-
-    def voltage_source_between(self, node1: str, node2: str) -> bool:
-        if self.is_active(node1):
-            if self.get_counterpart(node1) == node2:
-                return True
-        if self.is_active(node2):
-            if self.get_counterpart(node2) == node1:
-                return True
-        return False
-            
-def create_node_matrix_from_network(network: Network) -> np.ndarray:
-    def branch_parallel_to_voltage_source(branch: Branch) -> bool:
-        n1, n2 = branch.node1, branch.node2
-        return any([is_ideal_voltage_source(b) for b in network.branches_between(n1, n2)])
-    node_type = NodeTypes(network)
-    node_mapping = node_index_mapping(network)
+def create_node_matrix_from_network(network: Network, node_index_mapper: NodeIndexMapper = alphabetic_mapper) -> np.ndarray:
+    super_nodes = SuperNodes(network)
+    passive_net = passive_network(network)
+    node_mapping = node_index_mapper(network)
     A = np.zeros((network.number_of_nodes-1, network.number_of_nodes-1), dtype=complex)
-    passive_non_parallel_elements = [b for b in passive_elements(network) if not branch_parallel_to_voltage_source(b)]
-    for b in passive_non_parallel_elements:
-        n1, n2 = b.node1, b.node2
-        i1, i2 = map(lambda n: node_mapping[n], (n1, n2))
-        if network.is_zero_node(n1) or node_type.is_active(n2):
-            n1, n2 = n2, n1
-            i1, i2 = i2, i1
-        if node_type.is_passive(n1):
-            A[i1-1,i1-1] += b.element.Y
-        if not network.is_zero_node(n2):
-            A[i2-1,i2-1] += b.element.Y
-        if node_type.is_active(n1):
-            cp = node_type.get_counterpart(n1)
-            if not network.is_zero_node(cp) and node_type.is_passive(cp):
-                A[i1-1, node_mapping[cp]-1] += b.element.Y
-                if not network.is_zero_node(n2):
-                    A[i2-1, node_mapping[cp]-1] -= b.element.Y
+    def passive_node_pair(node1: str, node2: str) -> bool:
+        return not super_nodes.is_active(node1) and not super_nodes.is_active(node2)
+    def both_active(node1: str, node2: str) -> bool:
+        return super_nodes.is_active(node1) and super_nodes.is_active(node2)
+    def passive_matrix_element(node1: str, node2: str) -> complex:
+        if node1 == node2:
+            return admittance_connected_to(passive_net, node1)
         else:
-            if not network.is_zero_node(n2):
-                A[i2-1, i1-1] -= b.element.Y
-        if node_type.is_active(n2):
-            cp = node_type.get_counterpart(n2)
-            if not network.is_zero_node(cp) and node_type.is_passive(cp):
-                A[i2-1, node_mapping[cp]-1] += b.element.Y
-                A[i1-1, node_mapping[cp]-1] -= b.element.Y
-        else:
-            if not network.is_zero_node(n2):
-                A[i1-1, i2-1] -= b.element.Y
-    for vs in ideal_voltage_sources(network):
-        n1, n2 = node_type.get_active_node_and_counterpart(vs.element)
-        i1, i2 = map(lambda n: node_mapping[n], (n1, n2))
-        A[i1-1, i1-1] = -1 if n1 == vs.node1 else +1
-        if not network.is_zero_node(n2):
-            A[i2-1, i1-1] = +1 if n1 == vs.node1 else -1
+            return -admittance_between(passive_net, node1, node2)
+    def non_active_j_label() -> complex:
+        Aij = -admittance_between(network, i_label, j_label)
+        if super_nodes.is_reference(j_label):
+            Aij -= admittance_between(network, i_label, super_nodes.get_active_node(j_label))
+        if super_nodes.belong_to_same(i_label, j_label):
+            Aij += admittance_connected_to(network, i_label)
+        return Aij
+    def matrix_element(i_label: str, j_label: str) -> complex:
+        if passive_node_pair(i_label, j_label):
+            return passive_matrix_element(i_label, j_label)
+        if i_label == j_label:
+            return -super_nodes.sign(i_label)
+        if both_active(i_label, j_label) and super_nodes.belong_to_same(j_label, i_label):
+            return super_nodes.sign(j_label)
+        if not super_nodes.is_active(j_label):
+            return non_active_j_label()
+        return 0+0j
+    for (i_label, i), (j_label, j) in itertools.product(node_mapping.items(), repeat=2):
+        A[i, j] = matrix_element(i_label, j_label)
     return A
 
-def create_current_vector_from_network(network: Network) -> np.ndarray:
-    def full_admittance_between(node1: str, node2: str) -> complex:
-        return sum(b.element.Y for b in network.branches_between(node1=node1, node2=node2) if np.isfinite(b.element.Y))
-    def full_admittance_connected_to(node: str) -> complex:
-        return sum(b.element.Y for b in network.branches_connected_to(node) if np.isfinite(b.element.Y))
-    def voltage_to_next_passive_node(node: str) -> complex:
-        V = 0+0j
-        while node_type.is_active(node):
-            V += node_type.get_voltage(node)
-            node = node_type.get_counterpart(node)
-        return V
-    node_type = NodeTypes(network)
-    node_mapping = node_index_mapping(network)
+def create_current_vector_from_network(network: Network, node_index_mapper: NodeIndexMapper = alphabetic_mapper) -> np.ndarray:
+    super_nodes = SuperNodes(network)
     b = np.zeros(network.number_of_nodes-1, dtype=complex)
-    current_sources = [b for b in network.branches if is_ideal_current_source(b)]
-    for cs in current_sources:
-        i1, i2 = node_mapping[cs.node1], node_mapping[cs.node2]
-        if i1 > 0:
-            b[i1-1] += -cs.element.I
-        if i2 > 0:
-            b[i2-1] += cs.element.I
-    for vs in ideal_voltage_sources(network):
-        sn = node_type.get_active_node(vs.element)
-        b[node_mapping[sn]-1] += -voltage_to_next_passive_node(sn)*full_admittance_connected_to(sn)
-        connected_nodes = [n for n in network.nodes_connected_to(sn) if not network.is_zero_node(n)]
-        for cn in connected_nodes:
-            b[node_mapping[cn]-1] += voltage_to_next_passive_node(sn)*full_admittance_between(sn, cn)
+    node_mapping = node_index_mapper(network)
+    active_node_labels = [l for l in node_mapping.keys() if super_nodes.is_active(l)]
+    def current_sources(node: str) -> complex:
+        current_sources = [b for b in network.branches_connected_to(node) if is_ideal_current_source(b.element)]
+        return sum([-cs.element.I if cs.node1 == node else cs.element.I for cs in current_sources])
+    def connected_active_nodes(active_node: str) -> list[str]:
+        return [n for n in network.nodes_connected_to(active_node) if super_nodes.is_active(n)]
+    def active_node_current(active_node: str) -> complex:
+        I_connected_admittances = super_nodes.voltage_to_next_reference(active_node)*admittance_connected_to(network, active_node)
+        reference_node = super_nodes.get_reference_node(active_node)
+        if super_nodes.is_active(reference_node):
+            I_parallel_admittance = super_nodes.voltage_to_next_reference(reference_node)*admittance_between(network, active_node, reference_node)
+            return I_parallel_admittance-I_connected_admittances
+        return sum([super_nodes.voltage_to_next_reference(cn)*admittance_between(network, active_node, cn) for cn in connected_active_nodes(active_node)])-I_connected_admittances
+    def passive_node_current(passive_node: str) -> complex:
+        I_parallel_admittances = sum([super_nodes.voltage_to_next_reference(an)*admittance_between(network, an, passive_node) for an in active_node_labels if super_nodes.get_reference_node(an) != passive_node])
+        if super_nodes.is_reference(passive_node):
+            active_node = super_nodes.get_active_node(passive_node)
+            I_connected_admittances = super_nodes.voltage_to_next_reference(active_node)*admittance_connected_to(network, active_node)
+            I_parallel_to_active_nodes = sum([super_nodes.voltage_to_next_reference(cn)*admittance_between(network, active_node, cn) for cn in connected_active_nodes(active_node)])
+            I_parallel_to_passive_nodes = super_nodes.voltage_to_next_reference(active_node)*admittance_between(network, active_node, passive_node)
+            return I_parallel_admittances+I_parallel_to_active_nodes+I_parallel_to_passive_nodes-I_connected_admittances
+        return I_parallel_admittances
+    def current_of_voltage_sources(node: str) -> complex:
+        if super_nodes.is_active(node):
+            return active_node_current(node)
+        return passive_node_current(node)
+    for i_label, i in node_mapping.items():
+        b[i] = current_sources(i_label) + current_of_voltage_sources(i_label)
     return b
 
 class NodalAnalysisSolution:
-    def __init__(self, network : Network) -> None:
-        Y = create_node_matrix_from_network(network)
-        I = create_current_vector_from_network(network)
+    def __init__(self, network : Network, node_mapper: NodeIndexMapper = alphabetic_mapper) -> None:
+        Y = create_node_matrix_from_network(network, node_index_mapper=node_mapper)
+        I = create_current_vector_from_network(network, node_index_mapper=node_mapper)
         self._network = network
         self._solution_vector = cna.calculate_node_voltages(Y, I)
-        self._node_type = NodeTypes(network)
-        self._node_mapping = node_index_mapping(network)
-
-    def _calculate_potential_of_active_node(self, node: str) -> complex:
-        phi = 0+0j
-        while self._node_type.is_active(node):
-            phi += self._node_type.get_voltage(node)
-            node = self._node_type.get_counterpart(node)
-        if not self._network.is_zero_node(node):
-            phi += self._solution_vector[self._node_mapping[node]-1]
-        return phi
+        self._super_nodes = SuperNodes(network)
+        self._node_mapping = node_mapper(network)
 
     def _calculate_potential_of_node(self, node: str) -> complex:
+        V_active = 0+0j
+        if self._super_nodes.is_active(node):
+            V_active = self._super_nodes.voltage_to_next_reference(node)
+            node = self._super_nodes.next_reference(node)
         if self._network.is_zero_node(node):
-            return 0+0j
-        elif self._node_type.is_passive(node):
-            return self._solution_vector[self._node_mapping[node]-1]
-        else:
-            return self._calculate_potential_of_active_node(node)
+            return V_active
+        return self._solution_vector[self._node_mapping[node]] + V_active
+
+    def _select_active_node(self, branch: Branch) -> str:
+        if self._super_nodes.is_active(branch.node1):
+            return branch.node1
+        return branch.node2
     
     def get_voltage(self, branch: Branch) -> complex:
         phi1 = self._calculate_potential_of_node(branch.node1)
@@ -167,12 +114,11 @@ class NodalAnalysisSolution:
         return phi1-phi2
 
     def get_current(self, branch: Branch) -> complex:
-        if is_ideal_voltage_source(branch):
-            return self._solution_vector[self._node_mapping[self._node_type.get_active_node(branch.element)]-1]
-        elif is_ideal_current_source(branch):
+        if is_ideal_current_source(branch.element):
             return branch.element.I
-        else:
-            return self.get_voltage(branch)/branch.element.Z.real
+        if is_ideal_voltage_source(branch.element):
+            return self._solution_vector[self._node_mapping[self._select_active_node(branch)]]
+        return self.get_voltage(branch)/branch.element.Z.real
 
 def nodal_analysis_solver(network) -> NetworkSolution:
     return NodalAnalysisSolution(network)

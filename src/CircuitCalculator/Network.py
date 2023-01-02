@@ -1,12 +1,12 @@
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Protocol, Set
-
-from numpy import inf, nan
-
+import numpy as np
 
 class UnknownBranchResult(Exception): pass
 
 class FloatingGroundNode(Exception): pass
+
+class AmbiguousElectricalPotential(Exception): pass
 
 class Element(Protocol):
     @property
@@ -28,15 +28,15 @@ class Element(Protocol):
 @dataclass(frozen=True)
 class Impedeance:
     Z : complex
-    I : complex = field(default=nan, init=False)
-    U : complex = field(default=nan, init=False)
+    I : complex = field(default=np.nan, init=False)
+    U : complex = field(default=np.nan, init=False)
     active: bool = field(default=False, init=False)
     @property
     def Y(self) -> complex:
         try:
             return 1/self.Z
         except ZeroDivisionError:
-            return inf
+            return np.inf
 
 @dataclass(frozen=True)
 class RealCurrentSource:
@@ -48,20 +48,20 @@ class RealCurrentSource:
         try:
             return 1/self.Z
         except ZeroDivisionError:
-            return inf
+            return np.inf
     @property
     def U(self) -> complex:
         try:
             return self.I/self.Y
         except ZeroDivisionError:
-            return nan
+            return np.nan
 
 @dataclass(frozen=True)
 class CurrentSource:
-    Z : complex = field(default=inf, init=False)
+    Z : complex = field(default=np.inf, init=False)
     Y : complex = field(default=0, init=False)
     I : complex
-    U : complex = field(default=nan, init=False)
+    U : complex = field(default=np.nan, init=False)
     active: bool = field(default=True, init=False)
 
 @dataclass(frozen=True)
@@ -74,20 +74,20 @@ class RealVoltageSource:
         try:
             return 1/self.Z
         except ZeroDivisionError:
-            return inf
+            return np.inf
     @property
     def I(self) -> complex:
         try:
             return self.U/self.Z
         except ZeroDivisionError:
-            return nan
+            return np.nan
 
 @dataclass(frozen=True)
 class VoltageSource:
     Z : complex = field(default=0, init=False)
-    Y : complex = field(default=inf, init=False)
+    Y : complex = field(default=np.inf, init=False)
     U : complex
-    I : complex = field(default=nan, init=False)
+    I : complex = field(default=np.nan, init=False)
     active: bool = field(default=True, init=False)
 
 def resistor(R : float, **_) -> Element:
@@ -97,7 +97,7 @@ def conductor(G : float, **_) -> Element:
     try:
         return Impedeance(Z=1/G)
     except ZeroDivisionError:
-        return Impedeance(Z=inf)
+        return Impedeance(Z=np.inf)
 
 def real_current_source(I : float, R : float, **_) -> Element:
     return RealCurrentSource(I=I, Z=R)
@@ -135,10 +135,10 @@ class Network:
             raise FloatingGroundNode
 
     @property
-    def node_labels(self) -> set[str]:
+    def node_labels(self) -> list[str]:
         node1_set = {branch.node1 for branch in self.branches}
         node2_set = {branch.node2 for branch in self.branches}
-        return node1_set.union(node2_set)
+        return sorted(list(node1_set.union(node2_set)))
 
     @property
     def number_of_nodes(self) -> int:
@@ -156,10 +156,9 @@ class Network:
         return {b.node1 if b.node1 != node else b.node2 for b in self.branches_connected_to(node=node)}
 
     def branches_between(self, node1: str, node2: str) -> list[Branch]:
-        if node1 == node2: raise ValueError(f'Cannot determine branch between equal nodes {node1=} and {node2=}.')
         return [branch for branch in self.branches if set((branch.node1, branch.node2)) == set((node1, node2))]
 
-def node_index_mapping(network: Network) -> dict[str, int]:
+def node_index_mapping(network: Network) -> dict[str, int]: # deprecated?
     node_mapping = {network.zero_node_label: 0}
     next_node_index = 1
     for b in network.branches:
@@ -171,8 +170,116 @@ def node_index_mapping(network: Network) -> dict[str, int]:
             next_node_index += 1
     return node_mapping
 
+def is_ideal_voltage_source(element: Element) -> bool:
+    return element.active and element.Z==0 and np.isfinite(element.U)
+
+def is_ideal_current_source(element: Element) -> bool:
+    return element.active and element.Y==0 and np.isfinite(element.I)
+
+def ideal_voltage_sources(network: Network) -> list[Branch]:
+    return [b for b in network.branches if is_ideal_voltage_source(b.element)]
+
+def ideal_current_sources(network: Network) -> list[Branch]:
+    return [b for b in network.branches if is_ideal_current_source(b.element)]
+
+def passive_elements(network: Network) -> list[Branch]:
+    return [b for b in network.branches if not b.element.active]
+
 def switch_ground_node(network: Network, new_ground: str) -> Network:
     return Network(network.branches, new_ground)
+
+def remove_ideal_current_sources(network: Network, keep: list[Element] = []) -> Network:
+    return Network([b for b in network.branches if not is_ideal_current_source(b.element) or b.element in keep], zero_node_label=network.zero_node_label)
+
+def remove_ideal_voltage_sources(network: Network, keep: list[Element] = []) -> Network:
+    branches = network.branches
+    super_nodes = SuperNodes(network)
+    voltage_sources = [b for b in network.branches if is_ideal_voltage_source(b.element)]
+    voltage_sources = [vs for vs in voltage_sources if vs.element not in keep]
+    short_circuit_nodes = [(vs.node1, vs.node2) if super_nodes.is_active(vs.node1) else (vs.node2, vs.node1) for vs in voltage_sources]
+    for an, rn in short_circuit_nodes:
+        branches = [Branch(rn, b.node2, b.element) if b.node1 == an else b for b in branches]
+        branches = [Branch(b.node1, rn, b.element) if b.node2 == an else b for b in branches]
+        branches = [b for b in branches if b.node1 != b.node2]
+    return Network(branches, zero_node_label=network.zero_node_label)
+
+def passive_network(network: Network, keep: list[Element] = []) -> Network:
+    return remove_ideal_voltage_sources(remove_ideal_current_sources(network, keep=keep), keep=keep)
+
+@dataclass(frozen=True)
+class SuperNode:
+    reference_node: str
+    active_node: str
+    voltage: complex
+    voltage_source: Element
+
+class SuperNodes:
+    def __init__(self, network: Network) -> None:
+        self._super_nodes : list[SuperNode] = []
+        self.voltage_sources: list[Element] = []
+        for voltage_source in ideal_voltage_sources(network):
+            node, other_node = voltage_source.node1, voltage_source.node2
+            if network.is_zero_node(node) or node in self.active_nodes:
+                node, other_node = other_node, node
+            if network.is_zero_node(node) or node in self.active_nodes:
+                raise AmbiguousElectricalPotential
+            self.voltage_sources.append(voltage_source.element)
+            self._super_nodes.append(
+                SuperNode(
+                    reference_node=other_node,
+                    active_node=node,
+                    voltage=voltage_source.element.U if node == voltage_source.node1 else -voltage_source.element.U,
+                    voltage_source=voltage_source.element
+                )
+            )
+
+    @property
+    def active_nodes(self) -> list[str]:
+        return [sn.active_node for sn in self._super_nodes]
+
+    @property
+    def reference_nodes(self) -> list[str]:
+        return [sn.reference_node for sn in self._super_nodes]
+
+    @property
+    def voltages(self) -> list[complex]:
+        return [sn.voltage for sn in self._super_nodes]
+
+    def is_active(self, node: str) -> bool:
+        return node in self.active_nodes
+    
+    def is_reference(self, node: str) -> bool:
+        return node in self.reference_nodes
+
+    def belong_to_same(self, active_node: str, reference_node: str) -> bool:
+        if self.is_active(active_node):
+            if self.is_reference(reference_node):
+                return self.get_reference_node(active_node) == reference_node
+        return False
+
+    def get_active_node(self, reference_node: str) -> str:
+        return self.active_nodes[self.reference_nodes.index(reference_node)]
+
+    def get_reference_node(self, active_node: str) -> str:
+        return self.reference_nodes[self.active_nodes.index(active_node)]
+
+    def get_voltage(self, active_node: str) -> complex:
+        return self.voltages[self.active_nodes.index(active_node)]
+
+    def sign(self, active_node: str) -> int:
+        return np.sign(self.voltages[self.active_nodes.index(active_node)])
+
+    def voltage_to_next_reference(self, active_node: str) -> complex:
+        V = 0+0j
+        while self.is_active(active_node):
+            V += self.voltages[self.active_nodes.index(active_node)]
+            active_node = self.get_reference_node(active_node)
+        return V
+
+    def next_reference(self, active_node: str) -> str:
+        while self.is_active(active_node):
+            active_node = self.get_reference_node(active_node)
+        return active_node
 
 class NetworkSolution(Protocol):
     def get_voltage(self, branch: Branch) -> complex: pass
