@@ -1,8 +1,6 @@
 from . import elements as elm
 from dataclasses import dataclass
 
-class UnknownBranchResult(Exception): pass
-
 class FloatingGroundNode(Exception): pass
 
 @dataclass(frozen=True)
@@ -43,18 +41,6 @@ class Network:
 
     def branches_between(self, node1: str, node2: str) -> list[Branch]:
         return [branch for branch in self.branches if set((branch.node1, branch.node2)) == set((node1, node2))]
-
-def node_index_mapping(network: Network) -> dict[str, int]: # deprecated?
-    node_mapping = {network.zero_node_label: 0}
-    next_node_index = 1
-    for b in network.branches:
-        if b.node1 not in node_mapping.keys():
-            node_mapping.update({b.node1 : next_node_index})
-            next_node_index += 1
-        if b.node2 not in node_mapping.keys():
-            node_mapping.update({b.node2 : next_node_index})
-            next_node_index += 1
-    return node_mapping
 
 def ideal_voltage_sources(network: Network) -> list[Branch]:
     return [b for b in network.branches if elm.is_ideal_voltage_source(b.element)]
