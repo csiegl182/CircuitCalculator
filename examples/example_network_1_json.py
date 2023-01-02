@@ -1,5 +1,5 @@
 from CircuitCalculator.Network import load_network_from_json
-from CircuitCalculator.ClassicNodalAnalysis import nodal_analysis_solver
+from CircuitCalculator.NodalAnalysis import nodal_analysis_solver
 from CircuitCalculator.EquivalentSources import TheveninEquivalentSource, NortenEquivalentSource
 
 if __name__ == '__main__':

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Protocol, Set
+from typing import Any, Callable, Dict, List, Protocol
 import numpy as np
 
 class UnknownBranchResult(Exception): pass
@@ -169,6 +169,9 @@ def node_index_mapping(network: Network) -> dict[str, int]: # deprecated?
             node_mapping.update({b.node2 : next_node_index})
             next_node_index += 1
     return node_mapping
+
+def is_current_source(element: Element) -> bool:
+    return element.active and np.isfinite(element.I)
 
 def is_ideal_voltage_source(element: Element) -> bool:
     return element.active and element.Z==0 and np.isfinite(element.U)
