@@ -1,6 +1,6 @@
 import numpy as np
 import CircuitCalculator.ClassicNodalAnalysis as cna
-from .Network import Branch, Network, SuperNodes, NetworkSolution, is_ideal_current_source, is_ideal_voltage_source, passive_network
+from .Network import Branch, Network, SuperNodes, NetworkSolution, is_ideal_current_source, is_ideal_voltage_source, passive_network, is_current_source
 from typing import Callable
 import itertools
 
@@ -57,7 +57,7 @@ def create_current_vector_from_network(network: Network, node_index_mapper: Node
     node_mapping = node_index_mapper(network)
     active_node_labels = [l for l in node_mapping.keys() if super_nodes.is_active(l)]
     def current_sources(node: str) -> complex:
-        current_sources = [b for b in network.branches_connected_to(node) if is_ideal_current_source(b.element)]
+        current_sources = [b for b in network.branches_connected_to(node) if is_current_source(b.element)]
         return sum([-cs.element.I if cs.node1 == node else cs.element.I for cs in current_sources])
     def connected_active_nodes(active_node: str) -> list[str]:
         return [n for n in network.nodes_connected_to(active_node) if super_nodes.is_active(n)]

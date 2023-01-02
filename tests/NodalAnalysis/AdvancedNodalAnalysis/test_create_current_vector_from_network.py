@@ -1,6 +1,20 @@
 from CircuitCalculator.AdvancedNodalAnalysis import create_current_vector_from_network
-from CircuitCalculator.Network import Network, Branch, resistor, voltage_source, current_source
+from CircuitCalculator.Network import Network, Branch, resistor, voltage_source, current_source, real_current_source
 import numpy as np
+
+def test_create_current_vector_from_reference_network_1() -> None:
+    R1, R2, Ri = 10, 20, 100
+    Iq = 1
+    network = Network(
+        [
+            Branch('0', '1', real_current_source(I=Iq, R=Ri)),
+            Branch('1', '2', resistor(R=R1)),
+            Branch('2', '0', resistor(R=R2))
+        ]
+    )
+    I = create_current_vector_from_network(network)
+    I_ref = np.array([Iq, 0])
+    np.testing.assert_almost_equal(I, I_ref)
 
 def test_create_current_vector_from_reference_network_3() -> None:
     R1, R4, R5 = 10, 40, 50

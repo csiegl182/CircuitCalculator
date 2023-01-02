@@ -4,9 +4,9 @@ from CircuitCalculator.ClassicNodalAnalysis import nodal_analysis_solver as clas
 from CircuitCalculator.AdvancedNodalAnalysis import nodal_analysis_solver as advanced_nodal_analysis_solver
 import numpy as np
 
-def test_network_1_with_classic_nodal_analysis() -> None:
+def test_network_1_with_advanced_nodal_analysis() -> None:
     network = load_network_from_json('./examples/example_network_1.json')
-    solution = classic_nodal_analysis_solver(network)
+    solution = advanced_nodal_analysis_solver(network)
     R1, R2, I1 = tuple(network.branches)
     np.testing.assert_almost_equal(solution.get_voltage(R1), 7.69, decimal=2)
     np.testing.assert_almost_equal(solution.get_voltage(R2), 15.38, decimal=2)

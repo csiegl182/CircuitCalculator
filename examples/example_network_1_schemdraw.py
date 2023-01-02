@@ -6,7 +6,7 @@ if __name__ == '__main__':
     with Schematic() as d:
         d += (I:=RealCurrentSource(
             current_source=CurrentSource(I=1, R=100, name='Ix'),
-            resistor=Resistor(R=100, name='Ri'), d='down'))
+            resistor=Resistor(R=100, name='Ri'), d='up'))
         d += Line().right()
         d += (R1:=Resistor(R=10, name='R1')).right()
         d += Resistor(R=20, name='R2').down()
