@@ -29,6 +29,8 @@ jobs:
         --wheel
         --outdir dist/
         .
+      run: ls -al
+      run: ls -al dist
     - name: Publish distribution 📦 to Test PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
