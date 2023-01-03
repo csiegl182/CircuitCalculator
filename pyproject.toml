@@ -9,8 +9,14 @@ requires = [
 
 [project]
 name = "CircuitCalculator"
+description = "blabla"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy"
+]
 
 [tool.pytest.ini_options]
 addopts = [
     "--import-mode=importlib",
-]
+e
