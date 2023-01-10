@@ -1,0 +1,26 @@
+[
+    {
+        "type": "impedance",
+        "id": "R",
+        "N1": "1",
+        "N2": "2",
+        "absZ": 10,
+        "phi": 45,
+        "degree": true
+    },
+    {
+        "type": "impedance",
+        "id": "Z",
+        "N1": "2",
+        "N2": "0",
+        "R": 20,
+        "X": -20
+    },
+    {
+        "type": "current_source",
+        "id": "I",
+        "N1": "0",
+        "N2": "1",
+        "I": 1
+    }
+]

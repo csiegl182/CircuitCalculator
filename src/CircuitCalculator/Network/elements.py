@@ -93,6 +93,13 @@ def conductor(G : float, **_) -> Element:
     except ZeroDivisionError:
         return Impedeance(Z=np.inf)
 
+def impedance(R : float = 0.0, X : float = 0.0, absZ : float = -1.0, phi : float = 0.0, degree : bool = False, **_) -> Element:
+    if degree:
+        phi *= np.pi/180
+    if absZ > 0:
+        return Impedeance(Z=complex(absZ*np.cos(phi), absZ*np.sin(phi)))
+    return Impedeance(Z=complex(R, X))
+
 def real_current_source(I : float, R : float, **_) -> Element:
     return RealCurrentSource(I=I, Z=R)
 

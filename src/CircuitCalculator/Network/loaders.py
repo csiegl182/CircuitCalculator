@@ -5,6 +5,7 @@ from . import elements as elm
 
 branch_types : dict[str, Callable[..., Element]] = {
     "resistor" : elm.resistor,
+    "impedance" : elm.impedance,
     "real_current_source" : elm.real_current_source,
     "current_source" : elm.current_source,
     "real_voltage_source" : elm.real_voltage_source,
