@@ -6,9 +6,9 @@ from . import elements as elm
 branch_types : dict[str, Callable[..., Element]] = {
     "resistor" : elm.resistor,
     "impedance" : elm.impedance,
-    "real_current_source" : elm.real_current_source,
+    "linear_current_source" : elm.linear_current_source,
     "current_source" : elm.current_source,
-    "real_voltage_source" : elm.real_voltage_source,
+    "linear_voltage_source" : elm.linear_voltage_source,
     "voltage_source" : elm.voltage_source,
 }
 

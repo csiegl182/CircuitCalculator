@@ -1,6 +1,6 @@
 from CircuitCalculator.NodalAnalysis import create_current_vector_from_network
 from CircuitCalculator.Network.network import Network, Branch
-from CircuitCalculator.Network.elements import resistor, voltage_source, current_source, real_current_source, real_voltage_source
+from CircuitCalculator.Network.elements import resistor, voltage_source, current_source, linear_current_source, linear_voltage_source
 import numpy as np
 
 def test_create_current_vector_from_reference_network_1() -> None:
@@ -8,7 +8,7 @@ def test_create_current_vector_from_reference_network_1() -> None:
     Iq = 1
     network = Network(
         [
-            Branch('0', '1', real_current_source(I=Iq, R=Ri)),
+            Branch('0', '1', linear_current_source(I=Iq, R=Ri)),
             Branch('1', '2', resistor(R=R1)),
             Branch('2', '0', resistor(R=R2))
         ]
@@ -98,7 +98,7 @@ def test_create_current_vektor_from_reference_network_11() -> None:
     Uq = 9
     network = Network(
         branches=[
-            Branch('1', '0', real_voltage_source(U=Uq, R=Ri)),
+            Branch('1', '0', linear_voltage_source(U=Uq, R=Ri)),
             Branch('1', '0', resistor(R=R))
         ],
         zero_node_label='0'

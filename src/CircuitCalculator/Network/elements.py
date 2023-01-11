@@ -20,7 +20,7 @@ class Element(Protocol):
         """Whether or not the branch is active"""
 
 @dataclass(frozen=True)
-class Impedeance:
+class Impedance:
     Z : complex
     I : complex = field(default=np.nan, init=False)
     U : complex = field(default=np.nan, init=False)
@@ -33,7 +33,7 @@ class Impedeance:
             return np.inf
 
 @dataclass(frozen=True)
-class RealCurrentSource:
+class LinearCurrentSource:
     Z : complex
     I : complex
     active: bool = field(default=True, init=False)
@@ -59,7 +59,7 @@ class CurrentSource:
     active: bool = field(default=True, init=False)
 
 @dataclass(frozen=True)
-class RealVoltageSource:
+class LinearVoltageSource:
     Z : complex
     U : complex
     active: bool = field(default=True, init=False)
@@ -85,29 +85,29 @@ class VoltageSource:
     active: bool = field(default=True, init=False)
 
 def resistor(R : float, **_) -> Element:
-    return Impedeance(Z=R)
+    return Impedance(Z=R)
 
 def conductor(G : float, **_) -> Element:
     try:
-        return Impedeance(Z=1/G)
+        return Impedance(Z=1/G)
     except ZeroDivisionError:
-        return Impedeance(Z=np.inf)
+        return Impedance(Z=np.inf)
 
 def impedance(R : float = 0.0, X : float = 0.0, absZ : float = -1.0, phi : float = 0.0, degree : bool = False, **_) -> Element:
     if degree:
         phi *= np.pi/180
     if absZ > 0:
-        return Impedeance(Z=complex(absZ*np.cos(phi), absZ*np.sin(phi)))
-    return Impedeance(Z=complex(R, X))
+        return Impedance(Z=complex(absZ*np.cos(phi), absZ*np.sin(phi)))
+    return Impedance(Z=complex(R, X))
 
-def real_current_source(I : float, R : float, **_) -> Element:
-    return RealCurrentSource(I=I, Z=R)
+def linear_current_source(I : float, R : float, **_) -> Element:
+    return LinearCurrentSource(I=I, Z=R)
 
 def current_source(I : float, **_) -> Element:
     return CurrentSource(I=I)
 
-def real_voltage_source(U : float, R : float, **_) -> Element:
-    return RealVoltageSource(U=U, Z=R)
+def linear_voltage_source(U : float, R : float, **_) -> Element:
+    return LinearVoltageSource(U=U, Z=R)
 
 def voltage_source(U : float, **_) -> Element:
     return VoltageSource(U=U)

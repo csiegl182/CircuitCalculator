@@ -14,7 +14,7 @@
         "R": 20
     },
     {
-        "type": "real_current_source",
+        "type": "linear_current_source",
         "id": "I1",
         "N1": "0",
         "N2": "1",
