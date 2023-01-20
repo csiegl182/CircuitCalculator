@@ -5,28 +5,28 @@ from CircuitCalculator.Network.transformers import remove_ideal_current_sources,
 def test_remove_ideal_current_sources_removes_all_voltage_sources() -> None:
     network = Network(
         branches=[
-            Branch('0', '1', voltage_source(U=1)),
-            Branch('1', '2', resistor(R=1)),
-            Branch('2', '3', resistor(R=2)),
-            Branch('3', '4', current_source(I=1)),
-            Branch('4', '5', current_source(I=2)),
-            Branch('5', '0', resistor(R=4))
+            Branch('0', '1', voltage_source('Us1', U=1)),
+            Branch('1', '2', resistor('R1', R=1)),
+            Branch('2', '3', resistor('R2', R=2)),
+            Branch('3', '4', current_source('Is1', I=1)),
+            Branch('4', '5', current_source('Is2', I=2)),
+            Branch('5', '0', resistor('R3', R=4))
         ]
     )
     network = remove_ideal_current_sources(network)
     assert any([is_ideal_current_source(b.element) for b in network.branches]) == False
 
 def test_remove_ideal_current_sources_keeps_desired_current_sources() -> None:
-    cs1 = current_source(I=1)
-    cs2 = current_source(I=2)
+    cs1 = current_source('Is1', I=1)
+    cs2 = current_source('Is2', I=2)
     network = Network(
         branches=[
-            Branch('0', '1', voltage_source(U=1)),
-            Branch('1', '2', resistor(R=1)),
-            Branch('2', '3', resistor(R=2)),
+            Branch('0', '1', voltage_source('Us1', U=1)),
+            Branch('1', '2', resistor('R1', R=1)),
+            Branch('2', '3', resistor('R2', R=2)),
             Branch('3', '4', cs1),
             Branch('4', '5', cs2),
-            Branch('5', '0', resistor(R=4))
+            Branch('5', '0', resistor('R3', R=4))
         ]
     )
     network = remove_ideal_current_sources(network, keep=[cs1])
@@ -34,17 +34,17 @@ def test_remove_ideal_current_sources_keeps_desired_current_sources() -> None:
     assert cs2 not in [b.element for b in network.branches]
 
 def test_remove_ideal_current_sources_ignores_other_elements_in_keep_elements() -> None:
-    cs1 = current_source(I=1)
-    cs2 = current_source(I=2)
-    r1 = resistor(R=1)
+    cs1 = current_source('Is1', I=1)
+    cs2 = current_source('Is2', I=2)
+    r1 = resistor('R1', R=1)
     network = Network(
         branches=[
-            Branch('0', '1', voltage_source(U=1)),
+            Branch('0', '1', voltage_source('Us1', U=1)),
             Branch('1', '2', r1),
-            Branch('2', '3', resistor(R=2)),
+            Branch('2', '3', resistor('R2', R=2)),
             Branch('3', '4', cs1),
             Branch('4', '5', cs2),
-            Branch('5', '0', resistor(R=4))
+            Branch('5', '0', resistor('R3', R=4))
         ]
     )
     network = remove_ideal_current_sources(network, keep=[cs1, r1])
@@ -55,28 +55,28 @@ def test_remove_ideal_current_sources_ignores_other_elements_in_keep_elements() 
 def test_remove_ideal_voltage_sources_removes_all_voltage_sources() -> None:
     network = Network(
         branches=[
-            Branch('0', '1', current_source(I=1)),
-            Branch('1', '2', resistor(R=1)),
-            Branch('2', '3', resistor(R=2)),
-            Branch('3', '4', voltage_source(U=1)),
-            Branch('4', '5', voltage_source(U=2)),
-            Branch('5', '0', resistor(R=4))
+            Branch('0', '1', current_source('Is1', I=1)),
+            Branch('1', '2', resistor('R1', R=1)),
+            Branch('2', '3', resistor('R2', R=2)),
+            Branch('3', '4', voltage_source('Us1', U=1)),
+            Branch('4', '5', voltage_source('Us2', U=2)),
+            Branch('5', '0', resistor('R3', R=4))
         ]
     )
     network = remove_ideal_voltage_sources(network)
     assert any([is_ideal_voltage_source(b.element) for b in network.branches]) == False
 
 def test_remove_ideal_voltage_sources_keeps_desired_voltage_sources() -> None:
-    vs1 = voltage_source(U=1)
-    vs2 = voltage_source(U=2)
+    vs1 = voltage_source('Us1', U=1)
+    vs2 = voltage_source('Us2', U=2)
     network = Network(
         branches=[
-            Branch('0', '1', current_source(I=1)),
-            Branch('1', '2', resistor(R=1)),
-            Branch('2', '3', resistor(R=2)),
+            Branch('0', '1', current_source('Is1', I=1)),
+            Branch('1', '2', resistor('R1', R=1)),
+            Branch('2', '3', resistor('R2', R=2)),
             Branch('3', '4', vs1),
             Branch('4', '5', vs2),
-            Branch('5', '0', resistor(R=4))
+            Branch('5', '0', resistor('R3', R=4))
         ]
     )
     network = remove_ideal_voltage_sources(network, keep=[vs1])
@@ -84,17 +84,17 @@ def test_remove_ideal_voltage_sources_keeps_desired_voltage_sources() -> None:
     assert vs2 not in [b.element for b in network.branches]
 
 def test_remove_ideal_voltage_sources_ignores_other_elements_in_keep_elements() -> None:
-    vs1 = voltage_source(U=1)
-    vs2 = voltage_source(U=2)
-    r1 = resistor(R=1)
+    vs1 = voltage_source('Us1', U=1)
+    vs2 = voltage_source('Us2', U=2)
+    r1 = resistor('R1', R=1)
     network = Network(
         branches=[
-            Branch('0', '1', voltage_source(U=1)),
+            Branch('0', '1', voltage_source('Us3', U=1)),
             Branch('1', '2', r1),
-            Branch('2', '3', resistor(R=2)),
+            Branch('2', '3', resistor('R2', R=2)),
             Branch('3', '4', vs1),
             Branch('4', '5', vs2),
-            Branch('5', '0', resistor(R=4))
+            Branch('5', '0', resistor('R3', R=4))
         ]
     )
     network = remove_ideal_voltage_sources(network, keep=[vs1, r1])
@@ -103,10 +103,10 @@ def test_remove_ideal_voltage_sources_ignores_other_elements_in_keep_elements() 
     assert vs2 not in [b.element for b in network.branches]
 
 def test_remove_ideal_voltage_sources_keeps_passives_connected_to_keep_elements() -> None:
-    vs1 = voltage_source(U=1)
-    vs2 = voltage_source(U=2)
-    r1 = resistor(R=1)
-    r2 = resistor(R=2)
+    vs1 = voltage_source('Us1', U=1)
+    vs2 = voltage_source('Us2', U=2)
+    r1 = resistor('R1', R=1)
+    r2 = resistor('R2', R=2)
     network = Network(
         branches=[
             Branch('0', '1', vs1),

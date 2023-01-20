@@ -4,23 +4,27 @@ import numpy as np
 
 class Element(Protocol):
     @property
+    def name(self) -> str:
+        """ID of element"""
+    @property
     def Z(self) -> complex:
-        """Impedance of Branch"""
+        """Impedance value of element"""
     @property
     def Y(self) -> complex:
-        """Admittance of Branch"""
+        """Admittance value of element"""
     @property
     def I(self) -> complex:
-        """Current of Branch"""
+        """Current value of element"""
     @property
     def U(self) -> complex:
-        """Voltage of Branch"""
+        """Voltage value of element"""
     @property
     def active(self) -> bool:
-        """Whether or not the branch is active"""
+        """Whether or not the element is active"""
 
 @dataclass(frozen=True)
 class Impedance:
+    name : str
     Z : complex
     I : complex = field(default=np.nan, init=False)
     U : complex = field(default=np.nan, init=False)
@@ -34,6 +38,7 @@ class Impedance:
 
 @dataclass(frozen=True)
 class LinearCurrentSource:
+    name : str
     Z : complex
     I : complex
     active: bool = field(default=True, init=False)
@@ -52,6 +57,7 @@ class LinearCurrentSource:
 
 @dataclass(frozen=True)
 class CurrentSource:
+    name : str
     Z : complex = field(default=np.inf, init=False)
     Y : complex = field(default=0, init=False)
     I : complex
@@ -60,6 +66,7 @@ class CurrentSource:
 
 @dataclass(frozen=True)
 class LinearVoltageSource:
+    name : str
     Z : complex
     U : complex
     active: bool = field(default=True, init=False)
@@ -78,39 +85,40 @@ class LinearVoltageSource:
 
 @dataclass(frozen=True)
 class VoltageSource:
+    name : str
     Z : complex = field(default=0, init=False)
     Y : complex = field(default=np.inf, init=False)
     U : complex
     I : complex = field(default=np.nan, init=False)
     active: bool = field(default=True, init=False)
 
-def resistor(R : float, **_) -> Element:
-    return Impedance(Z=R)
+def resistor(name : str, R : float, **_) -> Element:
+    return Impedance(Z=R, name=name)
 
-def conductor(G : float, **_) -> Element:
+def conductor(name : str, G : float, **_) -> Element:
     try:
-        return Impedance(Z=1/G)
+        return Impedance(Z=1/G, name=name)
     except ZeroDivisionError:
-        return Impedance(Z=np.inf)
+        return Impedance(Z=np.inf, name=name)
 
-def impedance(R : float = 0.0, X : float = 0.0, absZ : float = -1.0, phi : float = 0.0, degree : bool = False, **_) -> Element:
+def impedance(name : str, R : float = 0.0, X : float = 0.0, absZ : float = -1.0, phi : float = 0.0, degree : bool = False, **_) -> Element:
     if degree:
         phi *= np.pi/180
     if absZ > 0:
-        return Impedance(Z=complex(absZ*np.cos(phi), absZ*np.sin(phi)))
-    return Impedance(Z=complex(R, X))
+        return Impedance(Z=complex(absZ*np.cos(phi), absZ*np.sin(phi)), name=name)
+    return Impedance(Z=complex(R, X), name=name)
 
-def linear_current_source(I : float, R : float, **_) -> Element:
-    return LinearCurrentSource(I=I, Z=R)
+def linear_current_source(name : str, I : float, R : float, **_) -> Element:
+    return LinearCurrentSource(I=I, Z=R, name=name)
 
-def current_source(I : float, **_) -> Element:
-    return CurrentSource(I=I)
+def current_source(name : str, I : float, **_) -> Element:
+    return CurrentSource(I=I, name=name)
 
-def linear_voltage_source(U : float, R : float, **_) -> Element:
-    return LinearVoltageSource(U=U, Z=R)
+def linear_voltage_source(name : str, U : float, R : float, **_) -> Element:
+    return LinearVoltageSource(U=U, Z=R, name=name)
 
-def voltage_source(U : float, **_) -> Element:
-    return VoltageSource(U=U)
+def voltage_source(name : str, U : float, **_) -> Element:
+    return VoltageSource(U=U, name=name)
 
 def is_current_source(element: Element) -> bool:
     return element.active and np.isfinite(element.I)

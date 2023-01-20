@@ -5,14 +5,14 @@ from CircuitCalculator.Network.elements import resistor
 def test_alphabetic_mapper_returns_mapping_in_alphabetic_order() -> None:
     network = Network(
         [
-            Branch('4', '8', resistor(1)),
-            Branch('2', '1', resistor(1)),
-            Branch('1', '3', resistor(1)),
-            Branch('0', '1', resistor(1)),
-            Branch('3', '8', resistor(1)),
-            Branch('4', '3', resistor(1)),
-            Branch('2', '8', resistor(1)),
-            Branch('0', '8', resistor(1))
+            Branch('4', '8', resistor('R1', 1)),
+            Branch('2', '1', resistor('R2', 1)),
+            Branch('1', '3', resistor('R3', 1)),
+            Branch('0', '1', resistor('R4', 1)),
+            Branch('3', '8', resistor('R5', 1)),
+            Branch('4', '3', resistor('R6', 1)),
+            Branch('2', '8', resistor('R7', 1)),
+            Branch('0', '8', resistor('R8', 1))
         ]
     )
     mapping = alphabetic_mapper(network)
@@ -25,14 +25,14 @@ def test_alphabetic_mapper_returns_mapping_in_alphabetic_order() -> None:
 def test_alphabetic_mapper_has_no_mapping_for_zero_node() -> None:
     network = Network(
         [
-            Branch('0', '1', resistor(1)),
-            Branch('4', '5', resistor(1)),
-            Branch('2', '1', resistor(1)),
-            Branch('1', '3', resistor(1)),
-            Branch('3', '5', resistor(1)),
-            Branch('4', '3', resistor(1)),
-            Branch('2', '5', resistor(1)),
-            Branch('0', '5', resistor(1))
+            Branch('0', '1', resistor('R1', 1)),
+            Branch('4', '5', resistor('R2', 1)),
+            Branch('2', '1', resistor('R3', 1)),
+            Branch('1', '3', resistor('R4', 1)),
+            Branch('3', '5', resistor('R5', 1)),
+            Branch('4', '3', resistor('R6', 1)),
+            Branch('2', '5', resistor('R7', 1)),
+            Branch('0', '5', resistor('R8', 1))
         ],
         zero_node_label='2'
     )

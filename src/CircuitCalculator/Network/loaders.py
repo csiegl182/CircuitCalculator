@@ -17,6 +17,7 @@ def load_network(network_dict: list[dict[str, Any]]) -> Network:
     for branch in network_dict:
         n1 = branch.pop('N1')
         n2 = branch.pop('N2')
+        branch['name'] = branch.pop('id')
         element_factory = branch_types[branch.pop('type')]
         element = element_factory(**branch)
         branches.append(Branch(n1, n2, element))
