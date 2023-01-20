@@ -53,7 +53,7 @@ def test_create_node_matrix_from_reference_network_3() -> None:
         ]
     )
     Y = create_node_matrix_from_network(network)
-    Y_ref = np.array([[-1, -G1, 0, 0], [0, G1+G2+G3, -G3, 0], [0, -G3, G3+G4, 0], [0, 0, -G4, 1]])
+    Y_ref = np.array([[-1, -G1, 0, 0], [0, G1+G2+G3, -G3, 0], [0, -G3, G3+G4, 0], [0, 0, -G4, 1]], np.double)
     np.testing.assert_almost_equal(Y.real, Y_ref.real)
 
 def test_create_node_matrix_from_reference_network_4() -> None:
@@ -72,7 +72,7 @@ def test_create_node_matrix_from_reference_network_4() -> None:
         ]
     )
     Y = create_node_matrix_from_network(network)
-    Y_ref = np.array([[-1, -G1, 0, 0], [0, G1+G2+G4, 0, -G4], [0, G4, -1, -G4], [0, -G4, 0, G4+G5]])
+    Y_ref = np.array([[-1, -G1, 0, 0], [0, G1+G2+G4, 0, -G4], [0, G4, -1, -G4], [0, -G4, 0, G4+G5]], np.double)
     np.testing.assert_almost_equal(Y.real, Y_ref.real)
 
 def test_create_node_matrix_from_reference_network_5() -> None:
@@ -93,7 +93,7 @@ def test_create_node_matrix_from_reference_network_5() -> None:
     )
     Y = create_node_matrix_from_network(network)
     print(Y.real)
-    Y_ref = np.array([[G1+G2+G3, 0, -G2, 0, 0], [G3, -1, 0, 0, 0], [-G2, 0, G2+G4, 0, 0], [0, 0, G4, -1, 0], [-G3, 0, -G4, 0, 1]])
+    Y_ref = np.array([[G1+G2+G3, 0, -G2, 0, 0], [G3, -1, 0, 0, 0], [-G2, 0, G2+G4, 0, 0], [0, 0, G4, -1, 0], [-G3, 0, -G4, 0, 1]], np.double)
     print(Y_ref.real)
     np.testing.assert_almost_equal(Y.real, Y_ref.real)
 
@@ -114,7 +114,7 @@ def test_create_node_matrix_from_reference_network_8() -> None:
         ]
     )
     Y = create_node_matrix_from_network(network)
-    Y_ref = np.array([[-1, 1, 0, 0], [0, -1, -G5, -G4], [0, 0, G3+G5, 0], [0, 0, 0, G4]])
+    Y_ref = np.array([[-1, 1, 0, 0], [0, -1, -G5, -G4], [0, 0, G3+G5, 0], [0, 0, 0, G4]], np.double)
     np.testing.assert_almost_equal(Y.real, Y_ref.real)
 
 def test_create_node_matrix_from_reference_network_9() -> None:
@@ -133,7 +133,7 @@ def test_create_node_matrix_from_reference_network_9() -> None:
         zero_node_label='0'
     )
     Y = create_node_matrix_from_network(network)
-    Y_ref = np.array([[G1+G2, -G2, 0], [-G2, G2+G3+G4, 0], [0, G4, -1]])
+    Y_ref = np.array([[G1+G2, -G2, 0], [-G2, G2+G3+G4, 0], [0, G4, -1]], np.double)
     np.testing.assert_almost_equal(Y.real, Y_ref.real)
 
 def test_create_node_matrix_from_reference_network_11() -> None:

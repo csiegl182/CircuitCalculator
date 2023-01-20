@@ -54,6 +54,9 @@ class Network:
     def branches_between(self, node1: str, node2: str) -> list[Branch]:
         return [branch for branch in self.branches if set((branch.node1, branch.node2)) == set((node1, node2))]
 
+    def __getitem__(self, id: str) -> Branch:
+        return {b.id: b for b in self.branches}[id]
+
 def ideal_voltage_sources(network: Network) -> list[Branch]:
     return [b for b in network.branches if elm.is_ideal_voltage_source(b.element)]
 
