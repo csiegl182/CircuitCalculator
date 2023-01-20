@@ -6,21 +6,27 @@ class Element(Protocol):
     @property
     def name(self) -> str:
         """ID of element"""
+        ...
     @property
     def Z(self) -> complex:
         """Impedance value of element"""
+        ...
     @property
     def Y(self) -> complex:
         """Admittance value of element"""
+        ...
     @property
     def I(self) -> complex:
         """Current value of element"""
+        ...
     @property
     def U(self) -> complex:
         """Voltage value of element"""
+        ...
     @property
     def active(self) -> bool:
         """Whether or not the element is active"""
+        ...
 
 @dataclass(frozen=True)
 class Impedance:
