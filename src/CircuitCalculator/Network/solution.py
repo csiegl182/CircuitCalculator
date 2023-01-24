@@ -1,4 +1,4 @@
-from .network import Network, Branch
+from .network import Network
 from typing import Callable, Protocol
 
 class NetworkSolution(Protocol):
