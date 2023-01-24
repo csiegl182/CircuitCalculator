@@ -33,11 +33,11 @@ class PointerDiagram:
         self.pointer_drawers.append(partial(complex_pointer, self.ax, z0, z0+z, **kwargs))
 
 class VoltagePointerDiagram(PointerDiagram):
-    def __init__(self, solution: NetworkSolution, conductor: float = 1.0, layout: Layout = grid_layout):
+    def __init__(self, solution: NetworkSolution, resistor: float = 1.0, **kwargs):
         self._solution = solution
-        self._conductor = conductor
+        self._resistor = resistor
         self._pointer_heads = {}
-        super().__init__(layout=layout)
+        super().__init__(**kwargs)
 
     def _set_reference(self, ref_id: str, z: complex, z0: complex) -> None:
         self._pointer_heads.update({ref_id: z+z0})
@@ -53,8 +53,35 @@ class VoltagePointerDiagram(PointerDiagram):
         self._set_reference(id, z, z0)
         self.add_pointer(z=z, z0=z0, color=color, label=f'$V({id})$')
 
-    def add_current_pointer(self, id: str, color=color['red'], conductor: float = 0) -> None:
+    def add_current_pointer(self, id: str, color=color['red'], resistor: float = 0) -> None:
+        if resistor == 0:
+            resistor = self._resistor
+        z = self._solution.get_current(id)*resistor
+        self.add_pointer(z=z, color=color, label=f'$I({id})\cdot{resistor}\Omega$')
+
+class CurrentPointerDiagram(PointerDiagram):
+    def __init__(self, solution: NetworkSolution, conductor: float = 1.0, **kwargs):
+        self._solution = solution
+        self._conductor = conductor
+        self._pointer_heads = {}
+        super().__init__(**kwargs)
+
+    def _set_reference(self, ref_id: str, z: complex, z0: complex) -> None:
+        self._pointer_heads.update({ref_id: z+z0})
+
+    def _get_reference(self, ref_id: str) -> complex:
+        if ref_id == '':
+            return 0
+        return self._pointer_heads.get(ref_id, self._solution.get_current(ref_id))
+
+    def add_current_pointer(self, id: str, origin: str='', color=color['red']) -> None:
+        z = self._solution.get_voltage(id)
+        z0 = self._get_reference(origin)
+        self._set_reference(id, z, z0)
+        self.add_pointer(z=z, z0=z0, color=color, label=f'$I({id})$')
+
+    def add_voltage_pointer(self, id: str, color=color['blue'], conductor: float = 0) -> None:
         if conductor == 0:
             conductor = self._conductor
-        z = self._solution.get_current(id)*conductor
-        self.add_pointer(z=z, color=color, label=f'$I({id})/{conductor}\Omega$')
+        z = self._solution.get_voltage(id)*conductor
+        self.add_pointer(z=z, color=color, label=f'$V({id})\cdot{conductor}\mathrm{{S}}$')
