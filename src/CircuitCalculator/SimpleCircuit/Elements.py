@@ -1,4 +1,5 @@
 import schemdraw
+import schemdraw.elements
 from .Display import red, blue, print_voltage, print_current
 from typing import Any
 
@@ -265,7 +266,7 @@ class Ground(Node):
         gndgap = 0.12
         gnd_lead = 0.4
         resheight = schemdraw.elements.twoterm.resheight
-        gap = schemdraw.elements.twoterm.gap
+        gap = schemdraw.elements.elements.gap
         self.segments.append(schemdraw.Segment(
             [(0, 0), (0, -gnd_lead), (-resheight, -gnd_lead),
              (resheight, -gnd_lead), gap, (-resheight*.7, -gndgap-gnd_lead),
