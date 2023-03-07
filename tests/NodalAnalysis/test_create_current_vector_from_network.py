@@ -8,7 +8,7 @@ def test_create_current_vector_from_reference_network_1() -> None:
     Iq = 1
     network = Network(
         [
-            Branch('0', '1', linear_current_source('Is1', I=Iq, R=Ri)),
+            Branch('0', '1', linear_current_source('Is1', I=Iq, Y=1/Ri)),
             Branch('1', '2', resistor('R1', R=R1)),
             Branch('2', '0', resistor('R2', R=R2))
         ]
@@ -98,7 +98,7 @@ def test_create_current_vektor_from_reference_network_11() -> None:
     Uq = 9
     network = Network(
         branches=[
-            Branch('1', '0', linear_voltage_source('Us1', U=Uq, R=Ri)),
+            Branch('1', '0', linear_voltage_source('Us1', U=Uq, Z=Ri)),
             Branch('1', '0', resistor('R1', R=R))
         ],
         zero_node_label='0'

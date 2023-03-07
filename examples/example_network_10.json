@@ -1,6 +1,6 @@
 [
     {
-        "type": "current_source",
+        "type": "real_current_source",
         "id": "Iq",
         "N1": "3",
         "N2": "2",
@@ -28,7 +28,7 @@
         "R": 20
     },
     {
-        "type": "voltage_source",
+        "type": "real_voltage_source",
         "id": "Uq",
         "N1": "0",
         "N2": "1",

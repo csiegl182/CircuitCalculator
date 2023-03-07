@@ -1,5 +1,5 @@
 from .network import Network, ideal_voltage_sources
-from .elements import Element
+from .elements import NortenTheveninElement
 from dataclasses import dataclass
 import numpy as np
 
@@ -10,12 +10,12 @@ class SuperNode:
     reference_node: str
     active_node: str
     voltage: complex
-    voltage_source: Element
+    voltage_source: NortenTheveninElement
 
 class SuperNodes:
     def __init__(self, network: Network) -> None:
         self._super_nodes : list[SuperNode] = []
-        self.voltage_sources: list[Element] = []
+        self.voltage_sources: list[NortenTheveninElement] = []
         for voltage_source in ideal_voltage_sources(network):
             node, other_node = voltage_source.node1, voltage_source.node2
             if network.is_zero_node(node) or node in self.active_nodes:

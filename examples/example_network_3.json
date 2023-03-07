@@ -35,14 +35,14 @@
         "R": 50
     },
     {
-        "type": "voltage_source",
+        "type": "real_voltage_source",
         "id": "U1",
         "N1": "1",
         "N2": "0",
         "U": 1
     },
     {
-        "type": "voltage_source",
+        "type": "real_voltage_source",
         "id": "U2",
         "N1": "0",
         "N2": "4",

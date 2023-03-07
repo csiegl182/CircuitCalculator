@@ -1,5 +1,5 @@
 import numpy as np
-from .Network.network import Branch, Network
+from .Network.network import Network
 from .Network.elements import is_ideal_current_source, is_ideal_voltage_source, is_current_source
 from .Network.transformers import passive_network
 from .Network.supernodes import SuperNodes

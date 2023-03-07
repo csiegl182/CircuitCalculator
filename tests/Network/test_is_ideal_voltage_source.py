@@ -6,7 +6,7 @@ def test_ideal_voltage_source_is_ideal_voltage_source() -> None:
     assert is_ideal_voltage_source(b.element) == True
 
 def test_linear_voltage_source_is_not_ideal_voltage_source() -> None:
-    b = Branch('1', '0', linear_voltage_source('Us1', U=1, R=1))
+    b = Branch('1', '0', linear_voltage_source('Us1', U=1, Z=1))
     assert is_ideal_voltage_source(b.element) == False
 
 def test_resistor_is_not_ideal_voltage_source() -> None:

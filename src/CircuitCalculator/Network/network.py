@@ -9,7 +9,7 @@ class AmbiguousBranchIDs(Exception): pass
 class Branch:
     node1 : str
     node2 : str
-    element : elm.Element
+    element : elm.NortenTheveninElement
 
     @property
     def id(self) -> str:
@@ -64,4 +64,4 @@ def ideal_current_sources(network: Network) -> list[Branch]:
     return [b for b in network.branches if elm.is_ideal_current_source(b.element)]
 
 def passive_elements(network: Network) -> list[Branch]:
-    return [b for b in network.branches if not b.element.active]
+    return [b for b in network.branches if not elm.is_active(b.element)]
