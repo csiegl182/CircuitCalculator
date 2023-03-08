@@ -110,12 +110,14 @@ def admittance_value(G : float = 0.0, B : float = 0.0, absY : float = -1.0, phi 
         return complex(absY*np.cos(phi), absY*np.sin(phi))
     return complex(G, B)
 
-def complex_value(X : float, phi : float = 0.0, rms: bool = False, degree: bool = False):
+def complex_value(X : float, phi : float = 0.0, rms: bool = False, deg: bool = False):
     if rms:
         X *= np.sqrt(2)
-    if degree:
-        phi *= np.pi/180
-    return complex(np.cos(phi), np.sin(phi))
+    if deg:
+        phi = np.radians(phi)
+    if not np.isfinite(X):
+        return complex(np.inf, 0)
+    return X*complex(np.cos(phi), np.sin(phi))
 
 def is_voltage_source(element: NortenTheveninElement) -> bool:
     return np.abs(element.U) > 0
