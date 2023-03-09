@@ -1,10 +1,9 @@
-from CircuitCalculator.SimpleCircuit.Elements import VoltageSource, Resistor, Line, Ground
-from CircuitCalculator.SimpleCircuit.NetworkParser import NetworkDiagramParser, SchemdrawSolution
+from CircuitCalculator.SimpleCircuit.Elements import Schematic, VoltageSource, Resistor, Line, Ground
+from CircuitCalculator.SimpleCircuit.DiagramParser import SchematicDiagramAnalyzer, SchematicDiagramSolution
 from CircuitCalculator.NodalAnalysis import nodal_analysis_solver
-from schemdraw import Drawing
 
 if __name__ == '__main__':
-    with Drawing() as d:
+    with Schematic() as d:
         d += (U1:=VoltageSource(V=1, R=0, name='U1').up())
         d += (R1:=Resistor(R=10, name='R1').right())
         d += (R2:=Resistor(R=20, name='R2').down())
@@ -17,8 +16,8 @@ if __name__ == '__main__':
         d += Line().at(R1.end).up()
         d += (U2:=VoltageSource(V=2, R=0, name='U2').right())
         d += Line().down()
-        schemdraw_network = NetworkDiagramParser(d)
-        schemdraw_solution = SchemdrawSolution(schemdraw_network, nodal_analysis_solver)
+        schemdraw_network = SchematicDiagramAnalyzer(d)
+        schemdraw_solution = SchematicDiagramSolution(schemdraw_network, nodal_analysis_solver)
         d += schemdraw_solution.draw_voltage('R1')
         d += schemdraw_solution.draw_current('R1')
         d += schemdraw_solution.draw_voltage('R2')

@@ -1,12 +1,11 @@
-import schemdraw as sd
-from CircuitCalculator.SimpleCircuit.Elements import VoltageSource, CurrentSource, Resistor, Line, LabelNode, Ground
-from CircuitCalculator.SimpleCircuit.NetworkParser import NetworkDiagramParser, SchemdrawSolution
+from CircuitCalculator.SimpleCircuit.Elements import Schematic, VoltageSource, CurrentSource, Resistor, Line, LabelNode, Ground
+from CircuitCalculator.SimpleCircuit.DiagramParser import SchematicDiagramAnalyzer, SchematicDiagramSolution
 from CircuitCalculator.NodalAnalysis import nodal_analysis_solver
 
 R1, R2, R3, R4, R5 = 10, 20, 30, 40, 50
 Uq1, Uq2, Iq1 = 1, 2, 0.1
 
-with sd.Drawing(unit=5) as d:
+with Schematic(unit=5) as d:
     # d += (N0 := LabelNode(id='0', id_loc='S'))
     d += (N0 := Ground())
     d += VoltageSource(V=Uq1, name='Uq1', precision=1).up().length(2*d.unit)
@@ -25,8 +24,8 @@ with sd.Drawing(unit=5) as d:
     d += Resistor(R=R5, name='R5').down().length(2*d.unit)
     d += Line().left()
     d += Line().at(N0.start).right()
-    schemdraw_network = NetworkDiagramParser(d)
-    schemdraw_solution = SchemdrawSolution(schemdraw_network, nodal_analysis_solver)
+    schemdraw_network = SchematicDiagramAnalyzer(d)
+    schemdraw_solution = SchematicDiagramSolution(schemdraw_network, nodal_analysis_solver)
     d += schemdraw_solution.draw_voltage('R1', precision=5)
     d += schemdraw_solution.draw_voltage('R2', precision=5)
     d += schemdraw_solution.draw_voltage('R3', precision=5)

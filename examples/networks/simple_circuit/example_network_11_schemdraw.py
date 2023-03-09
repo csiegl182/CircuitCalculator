@@ -1,5 +1,5 @@
 from CircuitCalculator.SimpleCircuit.Elements import Schematic, Resistor, Line, Ground, VoltageSource, RealVoltageSource
-from CircuitCalculator.SimpleCircuit.NetworkParser import NetworkDiagramParser, SchemdrawSolution
+from CircuitCalculator.SimpleCircuit.DiagramParser import SchematicDiagramAnalyzer, SchematicDiagramSolution
 from CircuitCalculator.NodalAnalysis import nodal_analysis_solver
 
 if __name__ == '__main__':
@@ -12,7 +12,7 @@ if __name__ == '__main__':
         d += Line().left()
         d += Line().left()
         d += Ground()
-        schemdraw_network = NetworkDiagramParser(d)
-        schemdraw_solution = SchemdrawSolution(schemdraw_network, nodal_analysis_solver)
+        schemdraw_network = SchematicDiagramAnalyzer(d)
+        schemdraw_solution = SchematicDiagramSolution(schemdraw_network, nodal_analysis_solver)
         d += schemdraw_solution.draw_voltage('R')
         d += schemdraw_solution.draw_current('R')
