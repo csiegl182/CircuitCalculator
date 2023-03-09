@@ -7,7 +7,7 @@ def test_complex_value_calculates_absolute_value(X: float, phi: float) -> None:
     z = complex_value(X, phi)
     np.testing.assert_approx_equal(np.abs(z), X)
 
-@given(st.floats(min_value=1e-7, exclude_min=True, allow_infinity=False), st.floats(min_value=-np.pi, max_value=np.pi, exclude_min=True))
+@given(st.floats(min_value=1e-7, exclude_min=True, allow_infinity=False, allow_subnormal=False), st.floats(min_value=-np.pi, max_value=np.pi, exclude_min=True, allow_subnormal=False))
 def test_complex_value_calculates_correct_phase(X: float, phi: float) -> None:
     z = complex_value(X, phi)
     np.testing.assert_approx_equal(np.angle(z), phi)

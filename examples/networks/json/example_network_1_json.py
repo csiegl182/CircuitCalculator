@@ -3,7 +3,7 @@ from CircuitCalculator.NodalAnalysis import nodal_analysis_solver
 from CircuitCalculator.EquivalentSources import TheveninEquivalentSource, NortenEquivalentSource
 
 if __name__ == '__main__':
-    network = load_network_from_json('./examples/example_network_1.json')
+    network = load_network_from_json('./examples/networks/json/example_network_1.json')
     solution = nodal_analysis_solver(network)
     for branch in network.branches:
         print(f'{branch.node1}->{branch.node2} U={solution.get_voltage(branch.id):2.2f}V')

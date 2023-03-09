@@ -100,6 +100,9 @@ transformers : dict[Type[Component], CircuitComponentTranslator] = {
 
 Circuit = list[Component]
 
+def w(f: float) -> float:
+    return 2*np.pi*f
+
 def transform(circuit: Circuit, w: float = 0, w_resolution: float = 1e-3) -> Network:
     ground_nodes = [component for component in circuit if component.type == 'ground']
     return Network(
