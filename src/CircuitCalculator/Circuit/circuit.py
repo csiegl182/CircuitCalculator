@@ -1,7 +1,7 @@
 import numpy as np
 from dataclasses import dataclass, field
-from . import elements
-from .network import Branch, Network
+from ..Network import elements
+from ..Network.network import Branch, Network
 from typing import Callable, Type, TypeVar
 from abc import ABC
     

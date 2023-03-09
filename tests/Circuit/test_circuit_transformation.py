@@ -1,4 +1,4 @@
-from CircuitCalculator.Network.circuit import Resistor, VoltageSource, Ground, transform
+from CircuitCalculator.Circuit.circuit import Resistor, VoltageSource, Ground, transform
 
 def test_list_of_circuit_elements_can_be_transformed_into_network_with_same_node_labels() -> None:
     elem1_nodes = ('1', '0')

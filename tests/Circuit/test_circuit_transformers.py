@@ -1,8 +1,8 @@
-from CircuitCalculator.Network.circuit import Resistor, transform_resistor
-from CircuitCalculator.Network.circuit import VoltageSource, transform_voltage_source
-from CircuitCalculator.Network.circuit import CurrentSource, transform_current_source
-from CircuitCalculator.Network.circuit import Capacitor, transform_capacitor
-from CircuitCalculator.Network.circuit import Inductance, transform_inductance
+from CircuitCalculator.Circuit.circuit import Resistor, transform_resistor
+from CircuitCalculator.Circuit.circuit import VoltageSource, transform_voltage_source
+from CircuitCalculator.Circuit.circuit import CurrentSource, transform_current_source
+from CircuitCalculator.Circuit.circuit import Capacitor, transform_capacitor
+from CircuitCalculator.Circuit.circuit import Inductance, transform_inductance
 import numpy as np
 
 def test_resistor_transformer() -> None:

@@ -1,4 +1,4 @@
-import CircuitCalculator.Network.circuit as cct
+import CircuitCalculator.Circuit.circuit as cct
 from CircuitCalculator.NodalAnalysis import nodal_analysis_solver
 
 if __name__ == '__main__':
