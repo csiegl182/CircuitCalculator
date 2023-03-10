@@ -2,6 +2,7 @@ import schemdraw
 import schemdraw.elements
 from .Display import red, blue, print_voltage, print_current
 from typing import Any
+from ..Utils import ScientificFloat
 
 class Schematic(schemdraw.Drawing):
     def save_copy(self, fname: str, **kwargs) -> None:
@@ -33,6 +34,32 @@ class VoltageSource(schemdraw.elements.sources.SourceV):
 
     def values(self) -> dict[str, float]:
         return {'U' : self.V}
+
+class ACVoltageSource(VoltageSource):
+    def __init__(self, V: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
+        super().__init__(V, name, *args, reverse=reverse, precision=precision, **kwargs)
+        self._w = w
+        self._phi = phi
+        self._deg = deg
+        self._sin = sin
+        label = '$' + f'{self._V:4.2f}' + '\\mathrm{V}\\cdot\\cos(' + f'{self._w:4.2g}' + '\\cdot t + ' + f'{self._phi:4.2f}' + ')$'
+        self.label(label, rotate=True, ofst=label_offset)
+
+    @property
+    def w(self) -> float:
+        return self._w
+
+    @property
+    def phi(self) -> float:
+        return self._phi
+
+    @property
+    def sin(self) -> bool:
+        return self._sin
+
+    @property
+    def deg(self) -> bool:
+        return self._deg
 
 class CurrentSource(schemdraw.elements.sources.SourceI):
     def __init__(self, I: float, name: str, *args, reverse=False, precision=3, **kwargs):
@@ -94,7 +121,7 @@ class Resistor(schemdraw.elements.twoterm.ResistorIEC):
         label = ''
         label += f'{self._name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
-        label += f'{self.R}$\\Omega$' if show_value else ''
+        label += str(ScientificFloat(value=self.R, unit='$\\Omega$', use_exp_prefix=True)) if show_value else ''
         self.label(label, rotate=True, ofst=label_offset)
 
     @property
@@ -111,6 +138,66 @@ class Resistor(schemdraw.elements.twoterm.ResistorIEC):
 
     def values(self) -> dict[str, float]:
         return {'R' : self._R}
+
+    def _place_label(self, *args, **kwargs):
+        delta = self.end-self.start
+        if abs(delta[1]) > abs(delta[0]): # portrait placing of resistor
+            if delta[1] < 0:
+                kwargs.update({'rotation': 90})
+
+        super()._place_label(*args, **kwargs)
+
+class Capacitor(schemdraw.elements.twoterm.Capacitor):
+    def __init__(self, C: float, name: str, *args, show_name: bool = True, show_value: bool = True, label_offset: float = 0.2, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._C = C
+        self._name = name
+        label = ''
+        label += f'{self._name}' if show_name else ''
+        label += '=' if  show_name and show_value else ''
+        label += str(ScientificFloat(value=self.C, unit='$\\mathrm{F}$', use_exp_prefix=True)) if show_value else ''
+        self.label(label, rotate=True, ofst=label_offset)
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def C(self) -> float:
+        return self._C
+
+    def values(self) -> dict[str, float]:
+        return {'C' : self._C}
+
+    def _place_label(self, *args, **kwargs):
+        delta = self.end-self.start
+        if abs(delta[1]) > abs(delta[0]): # portrait placing of resistor
+            if delta[1] < 0:
+                kwargs.update({'rotation': 90})
+
+        super()._place_label(*args, **kwargs)
+
+class Inductance(schemdraw.elements.twoterm.Inductor):
+    def __init__(self, L: float, name: str, *args, show_name: bool = True, show_value: bool = True, label_offset: float = 0.2, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._L = L
+        self._name = name
+        label = ''
+        label += f'{self._name}' if show_name else ''
+        label += '=' if  show_name and show_value else ''
+        label += str(ScientificFloat(value=self.L, unit='$\\mathrm{H}$', use_exp_prefix=True)) if show_value else ''
+        self.label(label, rotate=True, ofst=label_offset)
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def L(self) -> float:
+        return self._L
+
+    def values(self) -> dict[str, float]:
+        return {'L$' : self._L}
 
     def _place_label(self, *args, **kwargs):
         delta = self.end-self.start

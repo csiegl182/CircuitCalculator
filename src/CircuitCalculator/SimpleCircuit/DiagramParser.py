@@ -2,10 +2,12 @@ from dataclasses import dataclass
 import schemdraw.elements, schemdraw.util
 from . import Elements as elm
 from .NetworkBranchTranslators import network_translator_map
+from .CircuitComponentTranslators import circuit_translator_map
 from .Display import red, blue, print_voltage, print_current
 from ..Network.network import Network
 from ..Network.solution import NetworkSolution
 from .SchemdrawTranslatorTypes import ElementTranslatorMap
+from ..Circuit.circuit import Circuit
 from typing import Any
 
 class UnknownElement(Exception): pass
@@ -111,7 +113,7 @@ class SchematicDiagramAnalyzer:
         def translate(element: schemdraw.elements.Element) -> Any:
             return translator_map[type(element)](element, tuple(map(self._get_node_index, get_nodes(element))))
         def translator_available(element: schemdraw.elements.Element) -> bool:
-            return type(element) in network_translator_map.keys()
+            return type(element) in translator_map.keys()
         return [translate(e) for e in self.all_elements if translator_available(e)]
 
     def _get_equal_electrical_potential_nodes(self, node: schemdraw.util.Point) -> set[schemdraw.util.Point]:
@@ -144,6 +146,10 @@ def network_parser(schematic: elm.Schematic) -> Network:
         zero_node_label=schematic_diagram.ground_label
     )
 
+def circuit_parser(schematic: elm.Schematic) -> Circuit:
+    schematic_diagram = SchematicDiagramAnalyzer(schematic)
+    return schematic_diagram.translate_elements(circuit_translator_map)
+
 @dataclass
 class SchematicDiagramSolution:
     diagram_parser: SchematicDiagramAnalyzer
@@ -162,11 +168,11 @@ class SchematicDiagramSolution:
         dx, dy = get_node_direction(n1, n2)
         if dx < 0 or dy < 0:
             reverse = not reverse
-        return elm.VoltageLabel(element, label=f'{print_voltage(V_branch, precision=precision)}V', reverse=reverse, color=blue, top=top)
+        return elm.VoltageLabel(element, label=f'{print_voltage(V_branch, precision=precision)}', reverse=reverse, color=blue, top=top)
 
     def draw_current(self, name: str, reverse: bool = False, start: bool = True, ofst: float = 0, precision=3) -> elm.CurrentLabel:
         element = self.diagram_parser.get_element(name)
         I_branch = self.solution.get_current(name)
         if reverse:
             I_branch *= -1
-        return elm.CurrentLabel(element, label=f'{print_current(I_branch, precision=precision)}A', reverse=reverse, start=start, color=red, ofst=ofst)
+        return elm.CurrentLabel(element, label=f'{print_current(I_branch, precision=precision)}', reverse=reverse, start=start, color=red, ofst=ofst)

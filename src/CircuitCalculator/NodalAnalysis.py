@@ -133,7 +133,7 @@ class NodalAnalysisSolution:
             return branch_element.I
         if is_ideal_voltage_source(branch_element):
             return self._solution_vector[self._node_mapping[self._select_active_node(branch_id)]]
-        return self.get_voltage(branch_id)/branch_element.Z.real
+        return self.get_voltage(branch_id)/branch_element.Z
 
 def nodal_analysis_solver(network) -> NetworkSolution:
     return NodalAnalysisSolution(network)
