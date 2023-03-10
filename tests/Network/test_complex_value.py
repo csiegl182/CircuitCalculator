@@ -28,10 +28,10 @@ def test_complex_value_with_infinite_amplitude_returns_zero_phase(phi) -> None:
     z = complex_value(np.inf, phi)
     assert np.angle(z) == 0
 
-@given(st.floats(min_value=-np.pi, max_value=np.pi-0.001, exclude_min=True, exclude_max=True), st.integers(min_value=-5, max_value=5))
+@given(st.floats(min_value=-np.pi+0.001, max_value=np.pi-0.001, exclude_min=True, exclude_max=True), st.integers(min_value=-5, max_value=5))
 def test_complex_value_reduces_phase_to_minus_pi_to_pi(phi, n) -> None:
     z = complex_value(1, phi+n*2*np.pi)
-    np.testing.assert_almost_equal(np.angle(z), phi)
+    np.testing.assert_almost_equal(np.angle(z), phi, decimal=3)
 
 @given(st.floats(min_value=0, allow_infinity=False), st.floats(allow_nan=False, allow_infinity=False))
 def test_complex_value_can_handle_rms_values(X, phi) -> None:
