@@ -4,6 +4,9 @@ from .Display import red, blue, print_voltage, print_current
 from typing import Any
 from ..Utils import ScientificFloat
 
+def segments_of(element: schemdraw.elements.Element) -> list[schemdraw.segments.SegmentType]:
+    return element.segments
+
 class Schematic(schemdraw.Drawing):
     def save_copy(self, fname: str, **kwargs) -> None:
         import copy
@@ -69,11 +72,11 @@ class CurrentSource(schemdraw.elements.sources.SourceI):
         else:
             self._I = I
         self._name = name
-        self.label(f'{self._name}={print_current(I, precision=precision)}A', rotate=True)
         self.segments = DrawCurrentSource()
-
-        a, b = (1.2, -0.3), (1.8, -0.3)
+        a, b = (1.2, 0.3), (1.8, 0.3)
         self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=red))
+        self.anchors['I_label'] = a
+        self.label(f'{self._name}={print_current(self._I)}', loc='I_label', ofst=(0, 0.4), rotate=True, color=red)
 
     @property
     def name(self) -> str:
@@ -122,7 +125,12 @@ class Resistor(schemdraw.elements.twoterm.ResistorIEC):
         label += f'{self._name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
         label += str(ScientificFloat(value=self.R, unit='$\\Omega$', use_exp_prefix=True)) if show_value else ''
-        self.label(label, rotate=True, ofst=label_offset)
+        self.anchors['R_label'] = (0.5, 0.3)
+        self.label(label, rotate=True, loc='R_label', halign='center')
+
+    def down(self) -> schemdraw.elements.Element:
+        self.anchors['R_label'] = (0.5, -0.9)
+        return super().down()
 
     @property
     def name(self) -> str:
@@ -207,35 +215,23 @@ class Inductance(schemdraw.elements.twoterm.Inductor):
 
         super()._place_label(*args, **kwargs)
 
-class RealCurrentSource(schemdraw.elements.compound.ElementCompound):
-    def __init__(self, current_source: CurrentSource, resistor: Resistor, *args, d:str = 'up', **kwargs):
+class RealCurrentSource(schemdraw.elements.Element2Term):
+    def __init__(self, current_source: CurrentSource, resistor: Resistor, *args, zoom_resistor=0.7, **kwargs):
         super().__init__(*args, **kwargs)
-        if d == 'left':
-            self.add(current_source.left())
-            self.add(Line('up'))
-            self.add(resistor.right())
-            self.add(Line('down'))
-        elif d == 'down':
-            self.add(current_source.down())
-            self.add(Line('right'))
-            self.add(resistor.up())
-            self.add(Line('left'))
-        elif d == 'right':
-            self.add(current_source.right())
-            self.add(Line('up'))
-            self.add(resistor.left())
-            self.add(Line('down'))
-        else:
-            self.add(current_source)
-            self.add(Line('right'))
-            self.add(resistor.down())
-            self.add(Line('left'))
-        self.anchors['start'] = current_source.start
-        self.anchors['end'] = current_source.end
-        self.drop(current_source.end)
+        self.segments += segments_of(current_source)
+        transform = schemdraw.transform.Transform(theta = 0, globalshift=((1-zoom_resistor)/2,-1), localshift=(0, 0), zoom=zoom_resistor)
+        self.segments += [s.xform(transform) for s in segments_of(resistor)]
+        left_line = schemdraw.Segment([(-1, 0), (-1, -1), ((1-zoom_resistor)/2, -1)])
+        right_line = schemdraw.Segment([(2, 0), (2, -1), ((1+zoom_resistor)/2, -1)])
+        self.segments += [left_line, right_line]
+        self.anchors.update(current_source.anchors)
+        self.anchors.update({k:(v[0]+0, v[1]-2.2) for k, v in resistor.anchors.items()})
+        self._userlabels += current_source._userlabels
+        self._userlabels += resistor._userlabels
         self._name = current_source.name
         self._I = current_source.I
         self._R = resistor.R
+        self.anchors['v_label'] = (0.5,1.9)
 
     @property
     def name(self) -> str:
@@ -367,19 +363,20 @@ class Ground(Node):
 
 class VoltageLabel(schemdraw.elements.CurrentLabel):
     def __init__(self, at: schemdraw.elements.Element, label: str = '', **kwargs):
-        kwargs['top'] = kwargs.get('top', False)
-        kwargs['ofst'] = kwargs.get('ofst', 0.6)
         kwargs['color'] = kwargs.get('color', blue)
         if isinstance(at, RealVoltageSource):
             kwargs['d'] = at.resistor_d
             kwargs['reverse'] = not kwargs.get('reverse', False)
         super().__init__(**kwargs)
-        self.params['lblofst'] = 0.1
         if isinstance(at, RealVoltageSource):
             self.at(at.center)
         else:
-            self.at(at)
-        self.label(label, rotate=kwargs.get('rotate', False))
+            try:
+                self.at(at.v_label)
+                self.theta(at.transform.theta)
+            except AttributeError:
+                self.at(at)
+        self.label(label, rotate=kwargs.get('rotate', True), loc='top', ofst=(0, 0.1))
 
 class CurrentLabel(schemdraw.elements.CurrentLabelInline):
     def __init__(self, at: schemdraw.elements.Element, label: str = '', **kwargs):
