@@ -69,3 +69,8 @@ def test_complex_value_hides_small_angles_in_deg() -> None:
     z = 1+0.00001j
     str_repr = str(ScientificComplex(z, polar=True, deg=True))
     assert str_repr == '1.00'
+
+def test_complex_value_hides_zero_imaginary_part() -> None:
+    z = 1
+    str_repr = str(ScientificComplex(z))
+    assert str_repr == '1.00'

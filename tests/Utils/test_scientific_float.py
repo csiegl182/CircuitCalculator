@@ -17,10 +17,10 @@ def test_ScientificFloat_returns_correct_value() -> None:
     assert_almost_equal(float(ScientificFloat(value, precision=precision).__str__()), value, decimal=precision)
 
 def test_ScientificFloat_fills_with_trailing_zeros() -> None:
-    value = 1.1
+    value = 1.4
     precision = 3
     str_repr = str(ScientificFloat(value, precision=precision))
-    assert str_repr == '1.10'
+    assert str_repr == '1.40'
 
 def test_small_values_are_zoomed_with_exp_factors() -> None:
     value = 0.001
@@ -112,3 +112,8 @@ def test_scaled_value_at_rounding_edge_with_exp_prefix() -> None:
     value = 0.999800059980007
     str_repr = str(ScientificFloat(value, use_exp_prefix=True))
     assert str_repr == '1.00'
+
+def test_zero() -> None:
+    value = 0
+    str_repr = str(ScientificFloat(value))
+    assert str_repr == '0.000'
