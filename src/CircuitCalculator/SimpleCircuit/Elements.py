@@ -8,6 +8,9 @@ def segments_of(element: schemdraw.elements.Element) -> list[schemdraw.segments.
     return element.segments
 
 class Schematic(schemdraw.Drawing):
+    def __init__(self, unit=7, **kwargs):
+        super().__init__(unit=unit, **kwargs)
+
     def save_copy(self, fname: str, **kwargs) -> None:
         import copy
         cpy = copy.deepcopy(self)
@@ -231,7 +234,6 @@ class RealCurrentSource(schemdraw.elements.Element2Term):
         self._name = current_source.name
         self._I = current_source.I
         self._R = resistor.R
-        self.anchors['v_label'] = (0.5,1.9)
 
     @property
     def name(self) -> str:
@@ -362,7 +364,7 @@ class Ground(Node):
         return 'Ground'
 
 class VoltageLabel(schemdraw.elements.CurrentLabel):
-    def __init__(self, at: schemdraw.elements.Element, label: str = '', **kwargs):
+    def __init__(self, at: schemdraw.elements.Element, label: str = '', label_loc: str = 'bottom', **kwargs):
         kwargs['color'] = kwargs.get('color', blue)
         if isinstance(at, RealVoltageSource):
             kwargs['d'] = at.resistor_d
@@ -376,7 +378,7 @@ class VoltageLabel(schemdraw.elements.CurrentLabel):
                 self.theta(at.transform.theta)
             except AttributeError:
                 self.at(at)
-        self.label(label, rotate=kwargs.get('rotate', True), loc='top', ofst=(0, 0.1))
+        self.label(label, rotate=kwargs.get('rotate', True), loc=label_loc, ofst=(0, -0.1))
 
 class CurrentLabel(schemdraw.elements.CurrentLabelInline):
     def __init__(self, at: schemdraw.elements.Element, label: str = '', **kwargs):
@@ -388,16 +390,20 @@ class CurrentLabel(schemdraw.elements.CurrentLabelInline):
         kwargs['ofst'] = totlen/4-0.15+kwargs.get('ofst', 0)
         start = kwargs.get('start', True)
         reverse = kwargs.get('reverse', False)
-        if not start and reverse:
-            reverse = not reverse
         kwargs.update({'start' : start, 'reverse' : reverse})
         super().__init__(**kwargs)
-        if isinstance(at, RealVoltageSource):
-            self.at(at.center)
-        else:
-            self.at(at)
+        self.at(at)
         self.label(label)
 
     @property
     def name(self) -> str:
         return ''
+
+v_label_args : dict[Any, dict[str, Any]]= {
+    Resistor : {'ofst' : -0.6},
+    RealCurrentSource : {'ofst' : 1.5, 'label_loc': 'top'}
+}
+
+i_label_args : dict[Any, dict[str, Any]]= {
+    Resistor : {'ofst' : 1.4}
+}

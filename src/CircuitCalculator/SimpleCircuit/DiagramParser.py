@@ -155,7 +155,7 @@ class SchematicDiagramSolution:
     diagram_parser: SchematicDiagramAnalyzer
     solution: NetworkSolution
 
-    def draw_voltage(self, name: str, reverse: bool = False, precision: int = 3, top: bool = False) -> elm.VoltageLabel:
+    def draw_voltage(self, name: str, reverse: bool = False, precision: int = 3) -> elm.VoltageLabel:
         element = self.diagram_parser.get_element(name)
         V_branch = self.solution.get_voltage(name)
         if reverse:
@@ -168,11 +168,15 @@ class SchematicDiagramSolution:
         dx, dy = get_node_direction(n1, n2)
         if dx < 0 or dy < 0:
             reverse = not reverse
-        return elm.VoltageLabel(element, label=f'{print_voltage(V_branch, precision=precision)}', reverse=reverse, color=blue, top=top)
+        v_label_args = elm.v_label_args.get(type(element), {})
+        return elm.VoltageLabel(element, label=f'{print_voltage(V_branch, precision=precision)}', reverse=reverse, color=blue, **v_label_args)
 
-    def draw_current(self, name: str, reverse: bool = False, start: bool = True, ofst: float = 0, precision=3) -> elm.CurrentLabel:
+    def draw_current(self, name: str, reverse: bool = False, end: bool = False, precision=3) -> elm.CurrentLabel:
         element = self.diagram_parser.get_element(name)
         I_branch = self.solution.get_current(name)
         if reverse:
             I_branch *= -1
-        return elm.CurrentLabel(element, label=f'{print_current(I_branch, precision=precision)}', reverse=reverse, start=start, color=red, ofst=ofst)
+        if end:
+            reverse = not reverse
+        i_label_args = elm.i_label_args.get(type(element), {})
+        return elm.CurrentLabel(element, label=f'{print_current(I_branch, precision=precision)}', reverse=reverse, start=not end, color=red, **i_label_args)
