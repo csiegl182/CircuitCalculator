@@ -135,6 +135,10 @@ class Resistor(schemdraw.elements.twoterm.ResistorIEC):
         self.anchors['R_label'] = (0.5, -0.9)
         return super().down()
 
+    def left(self) -> schemdraw.elements.Element:
+        self.anchors['R_label'] = (0.5, -1)
+        return super().left()
+
     @property
     def name(self) -> str:
         return self._name
