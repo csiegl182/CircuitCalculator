@@ -24,7 +24,7 @@ class VoltageSource(schemdraw.elements.sources.SourceV):
         else:
             self._V = V
         self._name = name
-        self.label(f'{self._name}={print_voltage(V, precision=precision)}V', rotate=True)
+        self.label(f'{self._name}={print_voltage(V, precision=precision)}', rotate=True, color=blue)
         self.segments = DrawVoltageSource()
 
         a, b = (1.5, 0.7), (-0.5, 0.7)
@@ -405,5 +405,6 @@ v_label_args : dict[Any, dict[str, Any]]= {
 }
 
 i_label_args : dict[Any, dict[str, Any]]= {
-    Resistor : {'ofst' : 1.4}
+    Resistor : {'ofst' : 1.4},
+    VoltageSource : {'ofst' : -2.8}
 }
