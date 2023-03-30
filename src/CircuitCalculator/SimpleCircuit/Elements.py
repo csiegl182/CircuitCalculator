@@ -16,7 +16,7 @@ class Schematic(schemdraw.Drawing):
         cpy = copy.deepcopy(self)
         cpy.save(fname, **kwargs)
 
-class VoltageSource(schemdraw.elements.sources.SourceV):
+class VoltageSource(schemdraw.elements.sources.Source):
     def __init__(self, V: float, name: str, *args, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
         if reverse:
@@ -26,7 +26,7 @@ class VoltageSource(schemdraw.elements.sources.SourceV):
         self._name = name
         self.anchors['V_label'] = (0.5, 1.1)
         self.label(f'{self._name}={print_voltage(V, precision=precision)}', rotate=True, color=blue, loc='V_label', halign='center', valign='center')
-        self.segments = DrawVoltageSource()
+        self.segments.append(schemdraw.segments.Segment([(0, 0), (1, 0)]))
 
         a, b = (1.5, 0.7), (-0.5, 0.7)
         self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=blue))
@@ -259,28 +259,21 @@ class RealCurrentSource(schemdraw.elements.Element2Term):
     def values(self) -> dict[str, float]:
         return {'I' : self.I, 'R' : self.R}
 
-class RealVoltageSource(schemdraw.elements.compound.ElementCompound):
+class RealVoltageSource(schemdraw.elements.Element2Term):
     def __init__(self, voltage_source: VoltageSource, resistor: Resistor, *args, reverse=False, **kwargs):
-        super().__init__(*args, d='right', **kwargs)
-        if reverse:
-            self.add(resistor)
-            self.add(voltage_source)
-            start = resistor.start
-            end = voltage_source.end
-        else:
-            self.add(voltage_source)
-            self.add(resistor)
-            start = voltage_source.start
-            end = resistor.end
-        self.anchors['start'] = start
-        self.anchors['end'] = end
-        self.anchors['center'] = (resistor.end-resistor.start)/2 + resistor.start
-        self.drop(end)
+        super().__init__(*args, **kwargs)
+        self.segments.append(schemdraw.segments.Segment([(0, 0), (0, 0), schemdraw.elements.elements.gap, (4, 0), (4, 0)]))
+        self.segments.extend(segments_of(voltage_source))
+        self.segments.append(schemdraw.segments.Segment([(1, 0), (3, 0)]))
+        transform = schemdraw.transform.Transform(theta = 0, globalshift=(3, 0))
+        self.segments.extend([s.xform(transform) for s in segments_of(resistor)])
+        self.anchors.update(voltage_source.anchors)
+        self.anchors.update({k:(v[0]+3, v[1]) for k, v in resistor.anchors.items()})
+        self._userlabels += voltage_source._userlabels
+        self._userlabels += resistor._userlabels
         self._name = voltage_source.name
         self._V = voltage_source.V
         self._R = resistor.R
-        self.resistor_length = resistor._userparams.get('l', resistor._userparams.get('unit', 3))
-        self.resistor_d = resistor._userparams.get('d', 'right')
 
     @property
     def name(self) -> str:
@@ -379,9 +372,9 @@ class Ground(Node):
 class VoltageLabel(schemdraw.elements.CurrentLabel):
     def __init__(self, at: schemdraw.elements.Element, label: str = '', label_loc: str = 'bottom', **kwargs):
         kwargs['color'] = kwargs.get('color', blue)
-        if isinstance(at, RealVoltageSource):
-            kwargs['d'] = at.resistor_d
-            kwargs['reverse'] = not kwargs.get('reverse', False)
+        # if isinstance(at, RealVoltageSource):
+        #     kwargs['d'] = at.resistor_d
+        #     kwargs['reverse'] = not kwargs.get('reverse', False)
         super().__init__(**kwargs)
         if isinstance(at, RealVoltageSource):
             self.at(at.center)
@@ -397,9 +390,9 @@ class CurrentLabel(schemdraw.elements.CurrentLabelInline):
     def __init__(self, at: schemdraw.elements.Element, label: str = '', **kwargs):
         kwargs['color'] = kwargs.get('color', red)
         totlen = at._userparams.get('l', at._userparams.get('unit', 3))
-        if isinstance(at, RealVoltageSource):
-            kwargs['d'] = at.resistor_d
-            totlen = at.resistor_length
+        # if isinstance(at, RealVoltageSource):
+        #     kwargs['d'] = at.resistor_d
+        #     totlen = at.resistor_length
         kwargs['ofst'] = totlen/4-0.15+kwargs.get('ofst', 0)
         start = kwargs.get('start', True)
         reverse = kwargs.get('reverse', False)
@@ -420,5 +413,6 @@ v_label_args : dict[Any, dict[str, Any]]= {
 
 i_label_args : dict[Any, dict[str, Any]]= {
     Resistor : {'ofst' : 1.4},
-    VoltageSource : {'ofst' : -2.8}
+    VoltageSource : {'ofst' : -2.8},
+    RealVoltageSource: {'ofst' : -0.8}
 }
