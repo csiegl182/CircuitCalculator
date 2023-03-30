@@ -318,6 +318,10 @@ class Node(schemdraw.elements.Element):
         self.anchors['start'] = (0, 0)
         self.anchors['center'] = (0, 0)
         self.anchors['end'] = (0, 0)
+        self.anchors['NE'] = (0.5, 0.1)
+        self.anchors['NW'] = (-0.5, 0.1)
+        self.anchors['SE'] = (0.5, -0.3)
+        self.anchors['SW'] = (-0.5, -0.3)
 
     @property
     def name(self) -> str:
@@ -329,8 +333,12 @@ class LabelNode(Node):
         locations = {
             'W': {'loc': 'left', 'align': ['right', 'center']},
             'N': {'loc': 'top', 'align': ['center', 'bottom']},
+            'NE': {'loc': 'NE', 'align': ['left', 'bottom']},
+            'NW': {'loc': 'NW', 'align': ['right', 'bottom']},
             'E': {'loc': 'right', 'align': ['left', 'center']},
-            'S': {'loc': 'bottom', 'align': ['center', 'top']}
+            'S': {'loc': 'bottom', 'align': ['center', 'top']},
+            'SW': {'loc': 'SW', 'align': ['left', 'top']},
+            'SE': {'loc': 'SE', 'align': ['right', 'top']}
         }
         self.segments.append(schemdraw.SegmentCircle([0, 0], 0.12, fill='black'))
         self.id_loc = {}
@@ -406,6 +414,7 @@ class CurrentLabel(schemdraw.elements.CurrentLabelInline):
 
 v_label_args : dict[Any, dict[str, Any]]= {
     Resistor : {'ofst' : -0.6},
+    CurrentSource : {'ofst' : 1.5, 'label_loc': 'top'},
     RealCurrentSource : {'ofst' : 1.5, 'label_loc': 'top'}
 }
 
