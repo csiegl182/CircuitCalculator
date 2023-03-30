@@ -117,3 +117,8 @@ def test_zero() -> None:
     value = 0
     str_repr = str(ScientificFloat(value))
     assert str_repr == '0.000'
+
+def test_scaled_value_with_low_precision() -> None:
+    value = 120
+    str_repr = str(ScientificFloat(value, precision=1))
+    assert str_repr == '100'

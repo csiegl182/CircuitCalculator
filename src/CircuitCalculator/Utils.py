@@ -97,7 +97,7 @@ class ScientificFloat:
 
     def __str__(self) -> str:
         pre_decimal_positions = 0 if np.abs(self.value3.mantissa) < 1 else len(str(abs(self.value3.mantissa)).split('.')[0])
-        post_decimal_positions = self.precision - pre_decimal_positions
+        post_decimal_positions = max(self.precision - pre_decimal_positions, 0)
         pre_decimal = int(self.value3.mantissa)
         pre_decimal_str = f'{pre_decimal:d}'
         post_decimal = int(np.round(self.value3.mantissa % 1 * 10**(post_decimal_positions)))
