@@ -24,8 +24,8 @@ class VoltageSource(schemdraw.elements.sources.SourceV):
         else:
             self._V = V
         self._name = name
-        self.anchors['V_label'] = (0.5, 0.9)
-        self.label(f'{self._name}={print_voltage(V, precision=precision)}', rotate=True, color=blue, loc='V_label')
+        self.anchors['V_label'] = (0.5, 1.1)
+        self.label(f'{self._name}={print_voltage(V, precision=precision)}', rotate=True, color=blue, loc='V_label', halign='center', valign='center')
         self.segments = DrawVoltageSource()
 
         a, b = (1.5, 0.7), (-0.5, 0.7)
