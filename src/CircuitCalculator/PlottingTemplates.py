@@ -1,16 +1,18 @@
 
-import matplotlib.pyplot as plt # type: ignore
+import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 import numpy as np
 from functools import partial
 from CircuitCalculator.Utils import scientific_float
 from CircuitCalculator.EquivalentSources import NortenEquivalentSource, TheveninEquivalentSource
 
-def plot_equivalent_source_diagram(x0: float, y0: float, xlabel: str, ylabel: str, m2: float = 0, title: str = '', x0label: str = '', y0label: str = '') -> tuple[plt.Figure, plt.Axes]:
+def plot_equivalent_source_diagram(x0: float, y0: float, xlabel: str, ylabel: str, m2: float = 0, title: str = '', x0label: str = '', y0label: str = '') -> tuple[Figure, Axes]:
     fig, ax = plt.subplots()
     ax.plot([0, x0], [y0, 0], linewidth=2)
-    ax.grid('on')
-    ax.set_xlim([0, ax.get_xticks()[-1]])
-    ax.set_ylim([0, ax.get_yticks()[-1]])
+    ax.grid(visible=True)
+    ax.set_xlim(left=0, right=ax.get_xticks()[-1])
+    ax.set_ylim(bottom=0, top=ax.get_yticks()[-1])
     ax.set_xlabel(f'${xlabel} \\rightarrow$')
     ax.set_ylabel(f'${ylabel} \\rightarrow$')
     ax.set_title(title)
@@ -27,11 +29,11 @@ def plot_equivalent_source_diagram(x0: float, y0: float, xlabel: str, ylabel: st
     axes_text(
         x=x0,
         s=x0label,
-        y=1/2*np.diff(ax.get_yticks()[:2]),
+        y=1/2*np.diff(ax.get_yticks()[:2])[0],
         rotation='vertical'
     )
     axes_text(
-        x=1/2*np.diff(ax.get_xticks()[:2]),
+        x=1/2*np.diff(ax.get_xticks()[:2])[0],
         y=y0,
         s=y0label
     )
@@ -46,7 +48,7 @@ def plot_equivalent_source_diagram(x0: float, y0: float, xlabel: str, ylabel: st
     fig.show()
     return fig, ax
 
-def plot_thevenin_source(source: TheveninEquivalentSource, xlabel: str = 'I', ylabel: str = 'U', title: str = 'Thevenin Equivalent Source', R_load: float = 0) -> tuple[plt.Figure, plt.Axes]:
+def plot_thevenin_source(source: TheveninEquivalentSource, xlabel: str = 'I', ylabel: str = 'U', title: str = 'Thevenin Equivalent Source', R_load: float = 0) -> tuple[Figure, Axes]:
     UL = np.real(source.U)
     Ri = np.real(source.Z)
     IK = UL/Ri
@@ -64,7 +66,7 @@ def plot_thevenin_source(source: TheveninEquivalentSource, xlabel: str = 'I', yl
     fig.show()
     return fig, ax
 
-def plot_norten_source(source: NortenEquivalentSource, xlabel: str = 'U', ylabel: str = 'I', title: str = 'Norten Equivalent Source', R_load: float = 0) -> tuple[plt.Figure, plt.Axes]:
+def plot_norten_source(source: NortenEquivalentSource, xlabel: str = 'U', ylabel: str = 'I', title: str = 'Norten Equivalent Source', R_load: float = 0) -> tuple[Figure, Axes]:
     IK = np.real(source.I)
     Ri = 1/np.real(source.Y)
     UL = Ri*IK

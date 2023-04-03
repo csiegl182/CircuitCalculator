@@ -1,5 +1,5 @@
 import numpy as np
-from .Network.network import Branch, Network
+from .Network.network import Network
 from .Network.elements import is_ideal_current_source, is_ideal_voltage_source, is_current_source
 from .Network.transformers import passive_network
 from .Network.supernodes import SuperNodes
@@ -116,22 +116,24 @@ class NodalAnalysisSolution:
             return V_active
         return self._solution_vector[self._node_mapping[node]] + V_active
 
-    def _select_active_node(self, branch: Branch) -> str:
+    def _select_active_node(self, branch_id: str) -> str:
+        branch = self._network[branch_id]
         if self._super_nodes.is_active(branch.node1):
             return branch.node1
         return branch.node2
     
-    def get_voltage(self, branch: Branch) -> complex:
-        phi1 = self._calculate_potential_of_node(branch.node1)
-        phi2 = self._calculate_potential_of_node(branch.node2)
+    def get_voltage(self, branch_id: str) -> complex:
+        phi1 = self._calculate_potential_of_node(self._network[branch_id].node1)
+        phi2 = self._calculate_potential_of_node(self._network[branch_id].node2)
         return phi1-phi2
 
-    def get_current(self, branch: Branch) -> complex:
-        if is_ideal_current_source(branch.element):
-            return branch.element.I
-        if is_ideal_voltage_source(branch.element):
-            return self._solution_vector[self._node_mapping[self._select_active_node(branch)]]
-        return self.get_voltage(branch)/branch.element.Z.real
+    def get_current(self, branch_id: str) -> complex:
+        branch_element = self._network[branch_id].element
+        if is_ideal_current_source(branch_element):
+            return branch_element.I
+        if is_ideal_voltage_source(branch_element):
+            return self._solution_vector[self._node_mapping[self._select_active_node(branch_id)]]
+        return self.get_voltage(branch_id)/branch_element.Z
 
 def nodal_analysis_solver(network) -> NetworkSolution:
     return NodalAnalysisSolution(network)

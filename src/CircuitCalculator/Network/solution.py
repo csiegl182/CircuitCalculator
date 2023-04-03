@@ -1,9 +1,9 @@
-from .network import Network, Branch
+from .network import Network
 from typing import Callable, Protocol
 
 class NetworkSolution(Protocol):
-    def get_voltage(self, branch: Branch) -> complex: pass
+    def get_voltage(self, branch_id: str) -> complex: ...
 
-    def get_current(self, branch: Branch) -> complex: pass
+    def get_current(self, branch_id: str) -> complex: ...
 
 NetworkSolver = Callable[[Network], NetworkSolution]

@@ -1,6 +1,6 @@
 from CircuitCalculator.NodalAnalysis import create_current_vector_from_network
 from CircuitCalculator.Network.network import Network, Branch
-from CircuitCalculator.Network.elements import resistor, voltage_source, current_source, real_current_source, real_voltage_source
+from CircuitCalculator.Network.elements import resistor, voltage_source, current_source, linear_current_source, linear_voltage_source
 import numpy as np
 
 def test_create_current_vector_from_reference_network_1() -> None:
@@ -8,9 +8,9 @@ def test_create_current_vector_from_reference_network_1() -> None:
     Iq = 1
     network = Network(
         [
-            Branch('0', '1', real_current_source(I=Iq, R=Ri)),
-            Branch('1', '2', resistor(R=R1)),
-            Branch('2', '0', resistor(R=R2))
+            Branch('0', '1', linear_current_source('Is1', I=Iq, Y=1/Ri)),
+            Branch('1', '2', resistor('R1', R=R1)),
+            Branch('2', '0', resistor('R2', R=R2))
         ]
     )
     I = create_current_vector_from_network(network)
@@ -23,11 +23,11 @@ def test_create_current_vector_from_reference_network_3() -> None:
     U1, U2 = 1, 2
     network = Network(
         [
-            Branch('1', '0', voltage_source(U=U1)),
-            Branch('1', '2', resistor(R=R1)),
-            Branch('3', '4', resistor(R=R4)),
-            Branch('4', '0', resistor(R=R5)),
-            Branch('0', '4', voltage_source(U=U2))
+            Branch('1', '0', voltage_source('Us1', U=U1)),
+            Branch('1', '2', resistor('R1', R=R1)),
+            Branch('3', '4', resistor('R2', R=R4)),
+            Branch('4', '0', resistor('R3', R=R5)),
+            Branch('0', '4', voltage_source('Us2', U=U2))
         ]
     )
     I = create_current_vector_from_network(network)
@@ -40,13 +40,13 @@ def test_create_current_vector_from_reference_network_4() -> None:
     U1, U2 = 1, 2
     network = Network(
         [
-            Branch('1', '0', voltage_source(U=U1)),
-            Branch('1', '2', resistor(R=R1)),
-            Branch('2', '0', resistor(R=R2)),
-            Branch('2', '3', resistor(R=R3)),
-            Branch('3', '4', resistor(R=R4)),
-            Branch('4', '0', resistor(R=R5)),
-            Branch('3', '2', voltage_source(U=U2))
+            Branch('1', '0', voltage_source('Us1', U=U1)),
+            Branch('1', '2', resistor('R1', R=R1)),
+            Branch('2', '0', resistor('R2', R=R2)),
+            Branch('2', '3', resistor('R3', R=R3)),
+            Branch('3', '4', resistor('R4', R=R4)),
+            Branch('4', '0', resistor('R5', R=R5)),
+            Branch('3', '2', voltage_source('Us2', U=U2))
         ]
     )
     I = create_current_vector_from_network(network)
@@ -59,14 +59,14 @@ def test_create_current_vector_from_reference_network_5() -> None:
     U1, U2, U3, I4 = 1, 2, 3, 0.1
     network = Network(
         [
-            Branch('0', '1', resistor(R=R1)),
-            Branch('2', '1', voltage_source(U=U2)),
-            Branch('1', '3', resistor(R=R2)),
-            Branch('4', '3', voltage_source(U=U3)),
-            Branch('2', '5', resistor(R=R3)),
-            Branch('4', '5', resistor(R=R4)),
-            Branch('3', '5', current_source(I=I4)),
-            Branch('0', '5', voltage_source(U=U1))
+            Branch('0', '1', resistor('R1', R=R1)),
+            Branch('2', '1', voltage_source('Us2', U=U2)),
+            Branch('1', '3', resistor('R2', R=R2)),
+            Branch('4', '3', voltage_source('Us3', U=U3)),
+            Branch('2', '5', resistor('R3', R=R3)),
+            Branch('4', '5', resistor('R4', R=R4)),
+            Branch('3', '5', current_source('Is4', I=I4)),
+            Branch('0', '5', voltage_source('Us1', U=U1))
         ]
     )
     I = create_current_vector_from_network(network)
@@ -79,14 +79,14 @@ def test_create_current_vector_from_reference_network_8() -> None:
     U1, U2, I4 = 1, 2, 0.1
     network = Network(
         [
-            Branch('1', '0', voltage_source(U=U1)),
-            Branch('1', '0', resistor(R=R1)),
-            Branch('2', '1', voltage_source(U=U2)),
-            Branch('2', '1', resistor(R=R2)),
-            Branch('0', '3', resistor(R=R3)),
-            Branch('3', '4', current_source(I=I4)),
-            Branch('4', '2', resistor(R=R4)),
-            Branch('2', '3', resistor(R=R5)),
+            Branch('1', '0', voltage_source('Us1', U=U1)),
+            Branch('1', '0', resistor('R1', R=R1)),
+            Branch('2', '1', voltage_source('Us2', U=U2)),
+            Branch('2', '1', resistor('R2', R=R2)),
+            Branch('0', '3', resistor('R3', R=R3)),
+            Branch('3', '4', current_source('Is4', I=I4)),
+            Branch('4', '2', resistor('R4', R=R4)),
+            Branch('2', '3', resistor('R5', R=R5)),
         ]
     )
     I = create_current_vector_from_network(network)
@@ -98,8 +98,8 @@ def test_create_current_vektor_from_reference_network_11() -> None:
     Uq = 9
     network = Network(
         branches=[
-            Branch('1', '0', real_voltage_source(U=Uq, R=Ri)),
-            Branch('1', '0', resistor(R=R))
+            Branch('1', '0', linear_voltage_source('Us1', U=Uq, Z=Ri)),
+            Branch('1', '0', resistor('R1', R=R))
         ],
         zero_node_label='0'
     )

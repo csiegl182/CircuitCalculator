@@ -3,11 +3,17 @@ from dataclasses import dataclass
 
 class FloatingGroundNode(Exception): pass
 
+class AmbiguousBranchIDs(Exception): pass
+
 @dataclass(frozen=True)
 class Branch:
     node1 : str
     node2 : str
-    element : elm.Element
+    element : elm.NortenTheveninElement
+
+    @property
+    def id(self) -> str:
+        return self.element.name
 
 @dataclass(frozen=True)
 class Network:
@@ -17,6 +23,12 @@ class Network:
     def __post_init__(self):
         if self.zero_node_label not in self.node_labels:
             raise FloatingGroundNode
+        if len(set(self.branch_ids)) != len(self.branches):
+            raise AmbiguousBranchIDs
+        
+    @property
+    def branch_ids(self) -> list[str]:
+        return [b.id for b in self.branches]
 
     @property
     def node_labels(self) -> list[str]:
@@ -42,6 +54,9 @@ class Network:
     def branches_between(self, node1: str, node2: str) -> list[Branch]:
         return [branch for branch in self.branches if set((branch.node1, branch.node2)) == set((node1, node2))]
 
+    def __getitem__(self, id: str) -> Branch:
+        return {b.id: b for b in self.branches}[id]
+
 def ideal_voltage_sources(network: Network) -> list[Branch]:
     return [b for b in network.branches if elm.is_ideal_voltage_source(b.element)]
 
@@ -49,4 +64,4 @@ def ideal_current_sources(network: Network) -> list[Branch]:
     return [b for b in network.branches if elm.is_ideal_current_source(b.element)]
 
 def passive_elements(network: Network) -> list[Branch]:
-    return [b for b in network.branches if not b.element.active]
+    return [b for b in network.branches if not elm.is_active(b.element)]

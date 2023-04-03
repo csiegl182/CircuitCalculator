@@ -22,9 +22,9 @@ def calculate_open_circuit_voltage(network: Network, node1: str, node2: str) -> 
     solution = NodalAnalysisSolution(network)
     open_circuit_branch = network.branches_between(node1, node2)[0]
     if open_circuit_branch.node1 == node1:
-        return solution.get_voltage(open_circuit_branch)
+        return solution.get_voltage(open_circuit_branch.id)
     else:
-        return -solution.get_voltage(open_circuit_branch)
+        return -solution.get_voltage(open_circuit_branch.id)
 
 class TheveninEquivalentSource:
     def __init__(self, network: Network, node1: str, node2: str) -> None:
