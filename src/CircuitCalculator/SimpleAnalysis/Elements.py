@@ -23,7 +23,7 @@ def arrow_head(ax: Axes, xy0, height, width, angle, color='black', **kwargs):
     def create_patch(polygon, color, **kwargs):
         if 'linewidth' in kwargs.keys():
             kwargs.pop('linewidth')
-        return Polygon(polygon.T, color=color, linewidth=0, **kwargs)
+        return Polygon(polygon.T, color=color, linewidth=0, zorder=100, **kwargs)
     triangular = A(angle)*triangular_shape(width, height)+offset(xy0[0], xy0[1])
     patch = create_patch(triangular, color, **kwargs)
     ax.add_patch(patch)

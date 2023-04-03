@@ -26,5 +26,5 @@ def default_layout(**kwargs) -> tuple[Figure, Axes]:
 
 def grid_layout(grid: bool = True, **kwargs) -> tuple[Figure, Axes]:
     fig, ax = default_layout(**kwargs)
-    ax.grid(visible=grid)
+    ax.grid(visible=grid, zorder=-1)
     return fig, ax
