@@ -5,10 +5,12 @@ from functools import partial
 from CircuitCalculator.Network.solution import NetworkSolution
 
 class PointerDiagram:
-    def __init__(self, layout: Layout = grid_layout):
+    def __init__(self, layout: Layout = grid_layout, arrow_base: float = 0.05, arrow_length: float = 0.05):
         self.pointer_drawers = []
         self._max_length = 0
         self.fig, self.ax = layout()
+        self._arrow_base = arrow_base
+        self._arrow_length = arrow_length
         self.ax.set_aspect('equal', 'box')
         self.ax.set_xlabel(r'$\mathrm{Re}\,\{U\}$')
         self.ax.set_ylabel(r'$\mathrm{Im}\,\{U\}$')
@@ -18,7 +20,7 @@ class PointerDiagram:
 
     def __exit__(self, type, value, traceback):
         for draw_pointer in self.pointer_drawers:
-            draw_pointer(height=0.05*self._max_length, width=0.05*self._max_length)
+            draw_pointer(height=self._arrow_base*self._max_length, width=self._arrow_length*self._max_length)
         self.ax.legend(
             handles=[line for line in self.ax.lines],
             ncols=len(self.ax.lines),
@@ -26,7 +28,6 @@ class PointerDiagram:
             bbox_to_anchor=(0.5, 1.1),
             frameon=False
         )
-        self.fig.show()
 
     def add_pointer(self, z: complex, z0: complex = 0, **kwargs):
         self._max_length = max(self._max_length, np.abs(z))
@@ -75,7 +76,7 @@ class CurrentPointerDiagram(PointerDiagram):
         return self._pointer_heads.get(ref_id, self._solution.get_current(ref_id))
 
     def add_current_pointer(self, id: str, origin: str='', color=color['red']) -> None:
-        z = self._solution.get_voltage(id)
+        z = self._solution.get_current(id)
         z0 = self._get_reference(origin)
         self._set_reference(id, z, z0)
         self.add_pointer(z=z, z0=z0, color=color, label=f'$I({id})$')

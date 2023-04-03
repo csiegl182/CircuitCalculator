@@ -2,7 +2,7 @@ import schemdraw
 import schemdraw.elements
 from .Display import red, blue, print_voltage, print_current
 from typing import Any
-from ..Utils import ScientificFloat
+from ..Utils import ScientificFloat, ScientificComplex
 
 def segments_of(element: schemdraw.elements.Element) -> list[schemdraw.segments.SegmentType]:
     return element.segments
@@ -120,8 +120,51 @@ def DrawVoltageSource() -> list[schemdraw.segments.SegmentType]:
         schemdraw.segments.Segment([(0, 0), (1, 0)])
     ]
 
+class Impedance(schemdraw.elements.twoterm.ResistorIEC):
+    def __init__(self, Z: complex, name: str, *args, show_name: bool = True, show_value: bool = True, precision: int = 3, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._Z = Z
+        self._name = name
+        label = ''
+        label += f'{self._name}' if show_name else ''
+        label += '=' if  show_name and show_value else ''
+        label += str(ScientificComplex(value=self.Z, unit='$\\Omega$', use_exp_prefix=True, precision=precision)) if show_value else ''
+        self.anchors['Z_label'] = (0.5, 0.3)
+        self.label(label, rotate=True, loc='Z_label', halign='center')
+
+    def down(self) -> schemdraw.elements.Element:
+        self.anchors['Z_label'] = (0.5, -0.9)
+        return super().down()
+
+    def left(self) -> schemdraw.elements.Element:
+        self.anchors['Z_label'] = (0.5, -1)
+        return super().left()
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def Z(self) -> complex:
+        return self._Z
+
+    @property
+    def Y(self) -> complex:
+        return 1/self._Z
+
+    def values(self) -> dict[str, complex]:
+        return {'Z' : self._Z}
+
+    def _place_label(self, *args, **kwargs):
+        delta = self.end-self.start
+        if abs(delta[1]) > abs(delta[0]): # portrait placing of resistor
+            if delta[1] < 0:
+                kwargs.update({'rotation': 90})
+
+        super()._place_label(*args, **kwargs)
+
 class Resistor(schemdraw.elements.twoterm.ResistorIEC):
-    def __init__(self, R: float, name: str, *args, show_name: bool = True, show_value: bool = True, label_offset: float = 0.2, **kwargs):
+    def __init__(self, R: float, name: str, *args, show_name: bool = True, show_value: bool = True, **kwargs):
         super().__init__(*args, **kwargs)
         self._R = R
         self._name = name
@@ -260,7 +303,7 @@ class RealCurrentSource(schemdraw.elements.Element2Term):
         return {'I' : self.I, 'R' : self.R}
 
 class RealVoltageSource(schemdraw.elements.Element2Term):
-    def __init__(self, voltage_source: VoltageSource, resistor: Resistor, *args, reverse=False, **kwargs):
+    def __init__(self, voltage_source: VoltageSource, resistor: Resistor, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.segments.append(schemdraw.segments.Segment([(0, 0), (0, 0), schemdraw.elements.elements.gap, (4, 0), (4, 0)]))
         self.segments.extend(segments_of(voltage_source))
@@ -333,7 +376,7 @@ class LabelNode(Node):
             'SW': {'loc': 'SW', 'align': ['left', 'top']},
             'SE': {'loc': 'SE', 'align': ['right', 'top']}
         }
-        self.segments.append(schemdraw.SegmentCircle([0, 0], 0.12, fill='black'))
+        self.segments.append(schemdraw.SegmentCircle((0, 0), 0.12, fill='black'))
         self.id_loc = {}
         if isinstance(id_loc, str):
             self.id_loc.update(locations.get(id_loc, {}))
@@ -343,7 +386,7 @@ class LabelNode(Node):
             self.show()
 
     def show(self):
-        self.segments.append(schemdraw.SegmentCircle([0, 0], 0.12, fill='black'))
+        self.segments.append(schemdraw.SegmentCircle((0, 0), 0.12, fill='black'))
         self.bbox = self.get_bbox(includetext=False)
         self.add_label(f'{self.node_id}', **self.id_loc)
 
@@ -372,9 +415,6 @@ class Ground(Node):
 class VoltageLabel(schemdraw.elements.CurrentLabel):
     def __init__(self, at: schemdraw.elements.Element, label: str = '', label_loc: str = 'bottom', **kwargs):
         kwargs['color'] = kwargs.get('color', blue)
-        # if isinstance(at, RealVoltageSource):
-        #     kwargs['d'] = at.resistor_d
-        #     kwargs['reverse'] = not kwargs.get('reverse', False)
         super().__init__(**kwargs)
         if isinstance(at, RealVoltageSource):
             self.at(at.center)
@@ -390,9 +430,6 @@ class CurrentLabel(schemdraw.elements.CurrentLabelInline):
     def __init__(self, at: schemdraw.elements.Element, label: str = '', **kwargs):
         kwargs['color'] = kwargs.get('color', red)
         totlen = at._userparams.get('l', at._userparams.get('unit', 3))
-        # if isinstance(at, RealVoltageSource):
-        #     kwargs['d'] = at.resistor_d
-        #     totlen = at.resistor_length
         kwargs['ofst'] = totlen/4-0.15+kwargs.get('ofst', 0)
         start = kwargs.get('start', True)
         reverse = kwargs.get('reverse', False)
@@ -407,12 +444,14 @@ class CurrentLabel(schemdraw.elements.CurrentLabelInline):
 
 v_label_args : dict[Any, dict[str, Any]]= {
     Resistor : {'ofst' : -0.6},
+    Impedance : {'ofst' : -0.6},
     CurrentSource : {'ofst' : 1.5, 'label_loc': 'top'},
     RealCurrentSource : {'ofst' : 1.5, 'label_loc': 'top'}
 }
 
 i_label_args : dict[Any, dict[str, Any]]= {
     Resistor : {'ofst' : 1.4},
+    Impedance : {'ofst' : 1.4},
     VoltageSource : {'ofst' : -2.8},
     RealVoltageSource: {'ofst' : -0.8}
 }

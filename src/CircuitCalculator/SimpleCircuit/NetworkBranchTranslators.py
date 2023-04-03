@@ -11,6 +11,9 @@ def linear_current_source_translator(element: elm.RealCurrentSource, nodes: tupl
 def resistor_translator(element: elm.Resistor, nodes: tuple[str, str]) -> Branch:
     return Branch(nodes[0], nodes[1], network_elmements.resistor(R=element.R, name=element.name))
 
+def impedance_translator(element: elm.Resistor, nodes: tuple[str, str]) -> Branch:
+    return Branch(nodes[0], nodes[1], network_elmements.impedance(Z=element.Z, name=element.name))
+
 def current_source_translator(element: elm.CurrentSource, nodes: tuple[str, str]) -> Branch:
     return Branch(nodes[0], nodes[1], network_elmements.current_source(I=element.I, name=element.name))
 
@@ -22,6 +25,7 @@ def voltage_source_translator(element: elm.VoltageSource, nodes: tuple[str, str]
 
 network_translator_map : ElementTranslatorMap = {
     elm.Resistor : resistor_translator,
+    elm.Impedance : impedance_translator,
     elm.CurrentSource: current_source_translator,
     elm.VoltageSource: voltage_source_translator,
     elm.RealCurrentSource: linear_current_source_translator,
