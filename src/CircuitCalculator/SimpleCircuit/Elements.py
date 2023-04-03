@@ -17,7 +17,7 @@ class Schematic(schemdraw.Drawing):
         cpy.save(fname, **kwargs)
 
 class VoltageSource(schemdraw.elements.sources.Source):
-    def __init__(self, V: float, name: str, *args, reverse=False, precision=3, **kwargs):
+    def __init__(self, V: complex, name: str, *args, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
         if reverse:
             self._V = -V
@@ -36,10 +36,10 @@ class VoltageSource(schemdraw.elements.sources.Source):
         return self._name
 
     @property
-    def V(self) -> float:
+    def V(self) -> complex:
         return self._V
 
-    def values(self) -> dict[str, float]:
+    def values(self) -> dict[str, complex]:
         return {'U' : self.V}
 
 class ACVoltageSource(VoltageSource):
@@ -69,7 +69,7 @@ class ACVoltageSource(VoltageSource):
         return self._deg
 
 class CurrentSource(schemdraw.elements.sources.SourceI):
-    def __init__(self, I: float, name: str, *args, reverse=False, precision=3, **kwargs):
+    def __init__(self, I: complex, name: str, *args, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
         if reverse:
             self._I = -I
@@ -87,10 +87,10 @@ class CurrentSource(schemdraw.elements.sources.SourceI):
         return self._name
 
     @property
-    def I(self) -> float:
+    def I(self) -> complex:
         return self._I
 
-    def values(self) -> dict[str, float]:
+    def values(self) -> dict[str, complex]:
         return {'I' : self.I}
 
 def DrawSource() -> list[schemdraw.segments.SegmentType]:
@@ -288,7 +288,7 @@ class RealCurrentSource(schemdraw.elements.Element2Term):
         return self._name
 
     @property
-    def I(self) -> float:
+    def I(self) -> complex:
         return self._I
 
     @property
@@ -299,7 +299,7 @@ class RealCurrentSource(schemdraw.elements.Element2Term):
     def G(self) -> float:
         return 1/self._R
 
-    def values(self) -> dict[str, float]:
+    def values(self) -> dict[str, complex]:
         return {'I' : self.I, 'R' : self.R}
 
 class RealVoltageSource(schemdraw.elements.Element2Term):
@@ -323,7 +323,7 @@ class RealVoltageSource(schemdraw.elements.Element2Term):
         return self._name
 
     @property
-    def V(self) -> float:
+    def V(self) -> complex:
         return self._V
 
     @property

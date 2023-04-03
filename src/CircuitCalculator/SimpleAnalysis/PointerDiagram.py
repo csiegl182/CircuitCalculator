@@ -21,6 +21,10 @@ class PointerDiagram:
     def __exit__(self, type, value, traceback):
         for draw_pointer in self.pointer_drawers:
             draw_pointer(height=self._arrow_base*self._max_length, width=self._arrow_length*self._max_length)
+        x_min, x_max = self.ax.get_xlim()
+        y_min, y_max = self.ax.get_ylim()
+        self.ax.set_xlim(xmin=min(x_min, y_min), xmax=max(x_max, y_max))
+        self.ax.set_ylim(ymin=min(x_min, y_min), ymax=max(x_max, y_max))
         self.ax.legend(
             handles=[line for line in self.ax.lines],
             ncols=len(self.ax.lines),
