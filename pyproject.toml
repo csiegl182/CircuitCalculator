@@ -6,14 +6,14 @@ requires = [
 
 [project]
 name = "CircuitCalculator"
-version = "0.0.3"
+version = "0.0.4"
 description = "Library for analysing and calculating electric networks."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "numpy",
     "matplotlib",
-    "schemdraw==0.15"
+    "schemdraw==0.16"
 ]
 
 [tool.pytest.ini_options]
