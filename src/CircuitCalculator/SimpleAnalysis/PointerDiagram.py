@@ -27,7 +27,7 @@ class PointerDiagram:
         self.ax.set_ylim(ymin=min(x_min, y_min), ymax=max(x_max, y_max))
         self.ax.legend(
             handles=[line for line in self.ax.lines],
-            ncols=len(self.ax.lines),
+            ncol=len(self.ax.lines),
             loc='upper center',
             bbox_to_anchor=(0.5, 1.1),
             frameon=False
