@@ -6,12 +6,12 @@ requires = [
 
 [project]
 name = "CircuitCalculator"
-version = "0.0.7"
+version = "0.0.8"
 description = "Library for analysing and calculating electric networks."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "numpy>=1.24.0",
+    "numpy",
     "matplotlib>=3.6.0",
     "schemdraw==0.16"
 ]
