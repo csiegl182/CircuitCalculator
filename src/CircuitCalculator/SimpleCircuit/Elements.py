@@ -367,14 +367,14 @@ class LabelNode(Node):
     def __init__(self, id : str = '', id_loc : str | dict[str, Any] = '', *args, show=True, **kwargs):
         super().__init__(id, *args, **kwargs)
         locations = {
-            'W': {'loc': 'left', 'align': ['right', 'center']},
-            'N': {'loc': 'top', 'align': ['center', 'bottom']},
-            'NE': {'loc': 'NE', 'align': ['left', 'bottom']},
-            'NW': {'loc': 'NW', 'align': ['right', 'bottom']},
-            'E': {'loc': 'right', 'align': ['left', 'center']},
-            'S': {'loc': 'bottom', 'align': ['center', 'top']},
-            'SW': {'loc': 'SW', 'align': ['left', 'top']},
-            'SE': {'loc': 'SE', 'align': ['right', 'top']}
+            'W': {'loc': 'left', 'halign': 'right', 'valign': 'center'},
+            'N': {'loc': 'top', 'halign': 'center', 'valign': 'bottom'},
+            'NE': {'loc': 'NE', 'halign': 'left', 'valign': 'bottom'},
+            'NW': {'loc': 'NW', 'halign': 'right', 'valign': 'bottom'},
+            'E': {'loc': 'right', 'halign': 'left', 'valign': 'center'},
+            'S': {'loc': 'bottom', 'halign': 'center', 'valign': 'top'},
+            'SW': {'loc': 'SW', 'halign': 'left', 'valign': 'top'},
+            'SE': {'loc': 'SE', 'halign': 'right', 'valign': 'top'}
         }
         self.segments.append(schemdraw.SegmentCircle((0, 0), 0.12, fill='black'))
         self.id_loc = {}
@@ -388,7 +388,7 @@ class LabelNode(Node):
     def show(self):
         self.segments.append(schemdraw.SegmentCircle((0, 0), 0.12, fill='black'))
         self.bbox = self.get_bbox(includetext=False)
-        self.add_label(f'{self.node_id}', **self.id_loc)
+        self.label(f'{self.node_id}', **self.id_loc)
 
     @property
     def name(self) -> str:
