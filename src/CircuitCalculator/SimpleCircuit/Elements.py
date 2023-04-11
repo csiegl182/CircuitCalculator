@@ -3,6 +3,7 @@ import schemdraw.elements
 from .Display import red, blue, print_voltage, print_current
 from typing import Any
 from ..Utils import ScientificFloat, ScientificComplex
+from .SchemdrawDIN import elements as din_elements
 
 def segments_of(element: schemdraw.elements.Element) -> list[schemdraw.segments.SegmentType]:
     return element.segments
@@ -16,7 +17,7 @@ class Schematic(schemdraw.Drawing):
         cpy = copy.deepcopy(self)
         cpy.save(fname, **kwargs)
 
-class VoltageSource(schemdraw.elements.sources.Source):
+class VoltageSource(din_elements.SourceUDIN):
     def __init__(self, V: complex, name: str, *args, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
         if reverse:
@@ -26,7 +27,6 @@ class VoltageSource(schemdraw.elements.sources.Source):
         self._name = name
         self.anchors['V_label'] = (0.5, 1.1)
         self.label(f'{self._name}={print_voltage(V, precision=precision)}', rotate=True, color=blue, loc='V_label', halign='center', valign='center')
-        self.segments.append(schemdraw.segments.Segment([(0, 0), (1, 0)]))
 
         a, b = (1.5, 0.7), (-0.5, 0.7)
         self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=blue))
@@ -41,84 +41,6 @@ class VoltageSource(schemdraw.elements.sources.Source):
 
     def values(self) -> dict[str, complex]:
         return {'U' : self.V}
-
-class ACVoltageSource(VoltageSource):
-    def __init__(self, V: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
-        super().__init__(V, name, *args, reverse=reverse, precision=precision, **kwargs)
-        self._w = w
-        self._phi = phi
-        self._deg = deg
-        self._sin = sin
-        label = '$' + f'{self._V:4.2f}' + '\\mathrm{V}\\cdot\\cos(' + f'{self._w:4.2g}' + '\\cdot t + ' + f'{self._phi:4.2f}' + ')$'
-        self.label(label, rotate=True, ofst=label_offset)
-
-    @property
-    def w(self) -> float:
-        return self._w
-
-    @property
-    def phi(self) -> float:
-        return self._phi
-
-    @property
-    def sin(self) -> bool:
-        return self._sin
-
-    @property
-    def deg(self) -> bool:
-        return self._deg
-
-class CurrentSource(schemdraw.elements.sources.SourceI):
-    def __init__(self, I: complex, name: str, *args, reverse=False, precision=3, **kwargs):
-        super().__init__(*args, reverse=reverse, **kwargs)
-        if reverse:
-            self._I = -I
-        else:
-            self._I = I
-        self._name = name
-        self.segments = DrawCurrentSource()
-        a, b = (1.2, 0.3), (1.8, 0.3)
-        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=red))
-        self.anchors['I_label'] = a
-        self.label(f'{self._name}={print_current(self._I)}', loc='I_label', ofst=(0, 0.4), rotate=True, color=red)
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def I(self) -> complex:
-        return self._I
-
-    def values(self) -> dict[str, complex]:
-        return {'I' : self.I}
-
-def DrawSource() -> list[schemdraw.segments.SegmentType]:
-    return [
-        schemdraw.segments.Segment([(0, 0), (0, 0), schemdraw.elements.elements.gap, (1, 0), (1, 0)]),
-        schemdraw.segments.SegmentCircle((0.5, 0), 0.5,)
-    ]
-
-def DrawCurrentSource() -> list[schemdraw.segments.SegmentType]:
-    return DrawSource() + [
-        schemdraw.segments.Segment([(0.5, -0.5), (0.5, 0.5)])
-    ]
-
-def DrawRealCurrentSource() -> list[schemdraw.segments.SegmentType]:
-    return DrawCurrentSource() + [
-        schemdraw.segments.SegmentCircle((-0.5, 0), 0.07, fill='black'),
-        schemdraw.segments.SegmentCircle((1.5, 0), 0.07, fill='black'),
-        schemdraw.segments.Segment([(-0.5, 0), (-0.5, 1)]),
-        schemdraw.segments.Segment([(1.5, 0), (1.5, 1)]),
-        schemdraw.segments.Segment([(-0.5, 1), (0, 1)]),
-        schemdraw.segments.Segment([(1, 1), (1.5, 1)]),
-        schemdraw.segments.Segment([(0, 0.8), (1, 0.8), (1, 1.2), (0, 1.2), (0, 0.8)])
-    ]
-
-def DrawVoltageSource() -> list[schemdraw.segments.SegmentType]:
-    return DrawSource() + [
-        schemdraw.segments.Segment([(0, 0), (1, 0)])
-    ]
 
 class Impedance(schemdraw.elements.twoterm.ResistorIEC):
     def __init__(self, Z: complex, name: str, *args, show_name: bool = True, show_value: bool = True, precision: int = 3, **kwargs):
@@ -163,6 +85,30 @@ class Impedance(schemdraw.elements.twoterm.ResistorIEC):
 
         super()._place_label(*args, **kwargs)
 
+class CurrentSource(din_elements.SourceIDIN):
+    def __init__(self, I: complex, name: str, *args, reverse=False, precision=3, **kwargs):
+        super().__init__(*args, reverse=reverse, **kwargs)
+        if reverse:
+            self._I = -I
+        else:
+            self._I = I
+        self._name = name
+        a, b = (1.2, 0.3), (1.8, 0.3)
+        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=red))
+        self.anchors['I_label'] = a
+        self.label(f'{self._name}={print_current(self._I)}', loc='I_label', ofst=(0, 0.4), rotate=True, color=red)
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def I(self) -> complex:
+        return self._I
+
+    def values(self) -> dict[str, complex]:
+        return {'I' : self.I}
+
 class Resistor(schemdraw.elements.twoterm.ResistorIEC):
     def __init__(self, R: float, name: str, *args, show_name: bool = True, show_value: bool = True, **kwargs):
         super().__init__(*args, **kwargs)
@@ -205,6 +151,32 @@ class Resistor(schemdraw.elements.twoterm.ResistorIEC):
                 kwargs.update({'rotation': 90})
 
         super()._place_label(*args, **kwargs)
+
+class ACVoltageSource(VoltageSource):
+    def __init__(self, V: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
+        super().__init__(V, name, *args, reverse=reverse, precision=precision, **kwargs)
+        self._w = w
+        self._phi = phi
+        self._deg = deg
+        self._sin = sin
+        label = '$' + f'{self._V:4.2f}' + '\\mathrm{V}\\cdot\\cos(' + f'{self._w:4.2g}' + '\\cdot t + ' + f'{self._phi:4.2f}' + ')$'
+        self.label(label, rotate=True, ofst=label_offset)
+
+    @property
+    def w(self) -> float:
+        return self._w
+
+    @property
+    def phi(self) -> float:
+        return self._phi
+
+    @property
+    def sin(self) -> bool:
+        return self._sin
+
+    @property
+    def deg(self) -> bool:
+        return self._deg
 
 class Capacitor(schemdraw.elements.twoterm.Capacitor):
     def __init__(self, C: float, name: str, *args, show_name: bool = True, show_value: bool = True, label_offset: float = 0.2, **kwargs):
