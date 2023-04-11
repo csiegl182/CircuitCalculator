@@ -168,8 +168,7 @@ class SchematicDiagramSolution:
         dx, dy = get_node_direction(n1, n2)
         if dx < 0 or dy < 0:
             reverse = not reverse
-        v_label_args = elm.v_label_args.get(type(element), {})
-        return elm.VoltageLabel(element, label=f'{print_voltage(V_branch, precision=precision)}', reverse=reverse, color=blue, **v_label_args)
+        return elm.VoltageLabel(element, label=f'{print_voltage(V_branch, precision=precision)}', reverse=reverse, color=blue)
 
     def draw_current(self, name: str, reverse: bool = False, end: bool = False, precision=3) -> elm.CurrentLabel:
         element = self.diagram_parser.get_element(name)
@@ -178,5 +177,4 @@ class SchematicDiagramSolution:
             I_branch *= -1
         if end:
             reverse = not reverse
-        i_label_args = elm.i_label_args.get(type(element), {})
-        return elm.CurrentLabel(element, label=f'{print_current(I_branch, precision=precision)}', reverse=reverse, start=not end, color=red, **i_label_args)
+        return elm.CurrentLabel(element, label=f'{print_current(I_branch, precision=precision)}', reverse=reverse, start=not end, color=red)

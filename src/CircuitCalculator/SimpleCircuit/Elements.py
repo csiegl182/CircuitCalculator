@@ -336,7 +336,7 @@ class Node(schemdraw.elements.Element):
         return f'Node {self.node_id}'
 
 class LabelNode(Node):
-    def __init__(self, id : str = '', id_loc : str | dict[str, Any] = '', *args, show=True, **kwargs):
+    def __init__(self, id : str = '', id_loc : str | dict[str, str] = '', *args, show=True, **kwargs):
         super().__init__(id, *args, **kwargs)
         locations = {
             'W': {'loc': 'left', 'halign': 'right', 'valign': 'center'},
@@ -386,7 +386,8 @@ class Ground(Node):
 
 class VoltageLabel(schemdraw.elements.CurrentLabel):
     def __init__(self, at: schemdraw.elements.Element, label: str = '', label_loc: str = 'bottom', **kwargs):
-        kwargs['color'] = kwargs.get('color', blue)
+        kwargs.update(v_label_args.get(type(at), {}))
+        kwargs.update({'color': kwargs.get('color', blue)})
         super().__init__(**kwargs)
         if isinstance(at, RealVoltageSource):
             self.at(at.center)
@@ -400,9 +401,10 @@ class VoltageLabel(schemdraw.elements.CurrentLabel):
 
 class CurrentLabel(schemdraw.elements.CurrentLabelInline):
     def __init__(self, at: schemdraw.elements.Element, label: str = '', **kwargs):
-        kwargs['color'] = kwargs.get('color', red)
+        kwargs.update(i_label_args.get(type(at), {}))
+        kwargs.update({'color': kwargs.get('color', red)})
         totlen = at._userparams.get('l', at._userparams.get('unit', 3))
-        kwargs['ofst'] = totlen/4-0.15+kwargs.get('ofst', 0)
+        kwargs.update({'ofst': totlen/4-0.15+kwargs.get('ofst', 0)})
         start = kwargs.get('start', True)
         reverse = kwargs.get('reverse', False)
         kwargs.update({'start' : start, 'reverse' : reverse})
@@ -410,18 +412,14 @@ class CurrentLabel(schemdraw.elements.CurrentLabelInline):
         self.at(at)
         self.label(label)
 
-    @property
-    def name(self) -> str:
-        return ''
-
-v_label_args : dict[Any, dict[str, Any]]= {
+v_label_args : dict[Any, dict[str, float | str ]] = {
     Resistor : {'ofst' : -0.6},
     Impedance : {'ofst' : -0.6},
     CurrentSource : {'ofst' : 1.5, 'label_loc': 'top'},
-    RealCurrentSource : {'ofst' : 1.5, 'label_loc': 'top'}
+    RealCurrentSource : {'ofst' : -2.1, 'label_loc': 'top'}
 }
 
-i_label_args : dict[Any, dict[str, Any]]= {
+i_label_args : dict[Any, dict[str, float]] = {
     Resistor : {'ofst' : 1.4},
     Impedance : {'ofst' : 1.4},
     VoltageSource : {'ofst' : -2.8},
