@@ -415,6 +415,7 @@ class CurrentLabel(schemdraw.elements.CurrentLabelInline):
 v_label_args : dict[Any, dict[str, float | str ]] = {
     Resistor : {'ofst' : -0.6},
     Impedance : {'ofst' : -0.6},
+    Capacitor : {'ofst' : -0.6},
     CurrentSource : {'ofst' : 1.5, 'label_loc': 'top'},
     RealCurrentSource : {'ofst' : -2.1, 'label_loc': 'top'}
 }
@@ -422,6 +423,7 @@ v_label_args : dict[Any, dict[str, float | str ]] = {
 i_label_args : dict[Any, dict[str, float]] = {
     Resistor : {'ofst' : 1.4},
     Impedance : {'ofst' : 1.4},
+    Capacitor : {'ofst' : 1.4},
     VoltageSource : {'ofst' : -2.8},
     RealVoltageSource: {'ofst' : -0.8}
 }
