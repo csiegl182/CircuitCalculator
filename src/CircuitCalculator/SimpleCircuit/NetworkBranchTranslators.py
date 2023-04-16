@@ -23,11 +23,18 @@ def linear_voltage_source_translator(element: elm.RealVoltageSource, nodes: tupl
 def voltage_source_translator(element: elm.VoltageSource, nodes: tuple[str, str]) -> Branch:
     return Branch(nodes[0], nodes[1], network_elmements.voltage_source(U=-element.V, name=element.name))
 
+def none_translator(*_) -> None:
+    return None
+
 network_translator_map : ElementTranslatorMap = {
     elm.Resistor : resistor_translator,
     elm.Impedance : impedance_translator,
     elm.CurrentSource: current_source_translator,
     elm.VoltageSource: voltage_source_translator,
     elm.RealCurrentSource: linear_current_source_translator,
-    elm.RealVoltageSource: linear_voltage_source_translator
+    elm.RealVoltageSource: linear_voltage_source_translator,
+    elm.Line: none_translator,
+    elm.Node: none_translator,
+    elm.LabelNode: none_translator,
+    elm.Ground: none_translator,
 }

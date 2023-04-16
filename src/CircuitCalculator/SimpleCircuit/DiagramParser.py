@@ -12,6 +12,7 @@ from typing import Any
 
 class UnknownElement(Exception): pass
 class MultipleGroundNodes(Exception): pass
+class UnknownTranslator(Exception): pass
 
 def get_node_direction(node1: schemdraw.util.Point, node2: schemdraw.util.Point) -> tuple[int, int]:
     delta = node2 - node1
@@ -111,10 +112,11 @@ class SchematicDiagramAnalyzer:
 
     def translate_elements(self, translator_map : ElementTranslatorMap) -> list[Any]:
         def translate(element: schemdraw.elements.Element) -> Any:
-            return translator_map[type(element)](element, tuple(map(self._get_node_index, get_nodes(element))))
-        def translator_available(element: schemdraw.elements.Element) -> bool:
-            return type(element) in translator_map.keys()
-        return [translate(e) for e in self.all_elements if translator_available(e)]
+            try:
+                return translator_map[type(element)](element, tuple(map(self._get_node_index, get_nodes(element))))
+            except KeyError:
+                raise UnknownTranslator(f"Network element '{type(element).__name__}' cannot be translated.")
+        return [translate(e) for e in self.all_elements if translate(e) is not None]
 
     def _get_equal_electrical_potential_nodes(self, node: schemdraw.util.Point) -> set[schemdraw.util.Point]:
         equal_electrical_potential_nodes = set([node])
