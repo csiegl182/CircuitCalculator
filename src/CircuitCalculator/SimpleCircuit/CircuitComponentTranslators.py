@@ -10,9 +10,6 @@ def resistor_translator(element: elm.Resistor, nodes: tuple[str, str]) -> compon
 def current_source_translator(element: elm.CurrentSource, nodes: tuple[str, str]) -> components.CurrentSource:
     return components.CurrentSource(nodes=nodes, id=element.name, I=element.I)
 
-def voltage_source_translator(element: elm.VoltageSource, nodes: tuple[str, str]) -> components.VoltageSource:
-    return components.VoltageSource(nodes=nodes, id=element.name, V=element.V)
-
 def capacitor_translator(element: elm.Capacitor, nodes: tuple[str, str]) -> components.Capacitor:
     return components.Capacitor(nodes=nodes, id=element.name, C=element.C)
 
@@ -37,7 +34,7 @@ def none_translator(*_) -> None:
 circuit_translator_map : ElementTranslatorMap = {
     elm.Resistor : resistor_translator,
     elm.CurrentSource : current_source_translator,
-    elm.VoltageSource : voltage_source_translator,
+    elm.ACVoltageSource : ac_voltage_source_translator,
     elm.Capacitor : capacitor_translator,
     elm.Inductance : inductance_translator,
     elm.Ground : ground_translator,

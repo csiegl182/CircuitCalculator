@@ -1,6 +1,6 @@
 import schemdraw
 import schemdraw.elements
-from .Display import red, blue, print_voltage, print_current
+from .Display import red, blue, print_voltage, print_current, print_phase, print_omega
 from typing import Any
 from ..Utils import ScientificFloat, ScientificComplex
 from .SchemdrawDIN import elements as din_elements
@@ -26,7 +26,7 @@ class VoltageSource(din_elements.SourceUDIN):
             self._V = V
         self._name = name
         self.anchors['V_label'] = (0.5, 1.1)
-        self.label(f'{self._name}={print_voltage(V, precision=precision)}', rotate=True, color=blue, loc='V_label', halign='center', valign='center')
+        self.label(f'{self._name}={print_voltage(self.V, precision=precision)}', rotate=True, color=blue, loc='V_label', halign='center', valign='center')
 
         a, b = (1.5, 0.7), (-0.5, 0.7)
         self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=blue))
@@ -152,15 +152,30 @@ class Resistor(schemdraw.elements.twoterm.ResistorIEC):
 
         super()._place_label(*args, **kwargs)
 
-class ACVoltageSource(VoltageSource):
+class ACVoltageSource(din_elements.SourceUDIN):
     def __init__(self, V: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
-        super().__init__(V, name, *args, reverse=reverse, precision=precision, **kwargs)
+        super().__init__(*args, reverse=reverse, **kwargs)
+        if reverse:
+            self._V = -V
+        else:
+            self._V = V
+        self._name = name
         self._w = w
         self._phi = phi
         self._deg = deg
         self._sin = sin
-        label = '$' + f'{self._V:4.2f}' + '\\mathrm{V}\\cdot\\cos(' + f'{self._w:4.2g}' + '\\cdot t + ' + f'{self._phi:4.2f}' + ')$'
-        self.label(label, rotate=True, ofst=label_offset)
+        label = '$'
+        label+= str(ScientificFloat(self.V, '\\mathrm{V}', use_exp_prefix=True, exp_prefixes={-6: 'u', -3: 'm', 3: 'k'}))
+        label+= '\\cdot\\cos('
+        label+= str(ScientificFloat(self.w, '\\frac{1}{\\mathrm{s}}'))
+        label+= f'+{self.phi:1.4f}' if self.phi > 1e-5 else ''
+        label+= ')'
+        label+= '$'
+        self.anchors['V_label'] = (0.5, 1.1)
+        self.label(f'{self._name}={label}', rotate=True, color=blue, loc='V_label', halign='center', valign='center')
+
+        a, b = (1.5, 0.7), (-0.5, 0.7)
+        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=blue))
 
     @property
     def w(self) -> float:
@@ -177,6 +192,17 @@ class ACVoltageSource(VoltageSource):
     @property
     def deg(self) -> bool:
         return self._deg
+
+    @property
+    def V(self) -> float:
+        return self._V
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    def values(self) -> dict[str, complex]:
+        return {'U' : self.V}
 
 class Capacitor(schemdraw.elements.twoterm.Capacitor):
     def __init__(self, C: float, name: str, *args, show_name: bool = True, show_value: bool = True, label_offset: float = 0.2, **kwargs):
