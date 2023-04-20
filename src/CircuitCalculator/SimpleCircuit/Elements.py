@@ -1,6 +1,6 @@
 import schemdraw
 import schemdraw.elements
-from .Display import red, blue, print_voltage, print_current, print_phase, print_omega
+from .Display import red, blue, print_complex, print_sinosoidal
 from typing import Any
 from ..Utils import ScientificFloat, ScientificComplex
 from .SchemdrawDIN import elements as din_elements
@@ -26,7 +26,8 @@ class VoltageSource(din_elements.SourceUDIN):
             self._V = V
         self._name = name
         self.anchors['V_label'] = (0.5, 1.1)
-        self.label(f'{self._name}={print_voltage(self.V, precision=precision)}', rotate=True, color=blue, loc='V_label', halign='center', valign='center')
+        label = print_complex(self.V, unit='V', precision=precision)
+        self.label(f'{self._name}={label}', rotate=True, color=blue, loc='V_label', halign='center', valign='center')
 
         a, b = (1.5, 0.7), (-0.5, 0.7)
         self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=blue))
@@ -96,7 +97,8 @@ class CurrentSource(din_elements.SourceIDIN):
         a, b = (1.2, 0.3), (1.8, 0.3)
         self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=red))
         self.anchors['I_label'] = a
-        self.label(f'{self._name}={print_current(self._I)}', loc='I_label', ofst=(0, 0.4), rotate=True, color=red)
+        label = print_complex(self._I, unit='A', precision=precision)
+        self.label(f'{self._name}={label}', loc='I_label', ofst=(0, 0.4), rotate=True, color=red)
 
     @property
     def name(self) -> str:
@@ -164,13 +166,14 @@ class ACVoltageSource(din_elements.SourceUDIN):
         self._phi = phi
         self._deg = deg
         self._sin = sin
-        label = '$'
-        label+= str(ScientificFloat(self.V, '\\mathrm{V}', use_exp_prefix=True, exp_prefixes={-6: 'u', -3: 'm', 3: 'k'}))
-        label+= '\\cdot\\cos('
-        label+= str(ScientificFloat(self.w, '\\frac{1}{\\mathrm{s}}'))
-        label+= f'+{self.phi:1.4f}' if self.phi > 1e-5 else ''
-        label+= ')'
-        label+= '$'
+        label = print_sinosoidal(self._V, unit='V', precision=precision, w=w, deg=deg)
+        # label = '$'
+        # label+= str(ScientificFloat(self.V, '\\mathrm{V}', use_exp_prefix=True, exp_prefixes={-6: 'u', -3: 'm', 3: 'k'}))
+        # label+= '\\cdot\\cos('
+        # label+= str(ScientificFloat(self.w, '\\frac{1}{\\mathrm{s}}'))
+        # label+= f'+{self.phi:1.4f}' if self.phi > 1e-5 else ''
+        # label+= ')'
+        # label+= '$'
         self.anchors['V_label'] = (0.5, 1.1)
         self.label(f'{self._name}={label}', rotate=True, color=blue, loc='V_label', halign='center', valign='center')
 

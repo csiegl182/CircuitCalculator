@@ -3,12 +3,13 @@ import schemdraw.elements, schemdraw.util
 from . import Elements as elm
 from .NetworkBranchTranslators import network_translator_map
 from .CircuitComponentTranslators import circuit_translator_map
-from .Display import red, blue, print_voltage, print_current
+from .Display import red, blue, print_complex, print_sinosoidal
 from ..Network.network import Network
 from ..Network.solution import NetworkSolution
 from .SchemdrawTranslatorTypes import ElementTranslatorMap
 from ..Circuit.circuit import Circuit
-from typing import Any
+from typing import Any, Callable
+from functools import partial
 
 class UnknownElement(Exception): pass
 class MultipleGroundNodes(Exception): pass
@@ -156,8 +157,10 @@ def circuit_parser(schematic: elm.Schematic) -> Circuit:
 class SchematicDiagramSolution:
     diagram_parser: SchematicDiagramAnalyzer
     solution: NetworkSolution
+    voltage_display: Callable[[complex], str]
+    current_display: Callable[[complex], str]
 
-    def draw_voltage(self, name: str, reverse: bool = False, precision: int = 3) -> elm.VoltageLabel:
+    def draw_voltage(self, name: str, reverse: bool = False) -> elm.VoltageLabel:
         element = self.diagram_parser.get_element(name)
         V_branch = self.solution.get_voltage(name)
         if reverse:
@@ -170,13 +173,29 @@ class SchematicDiagramSolution:
         dx, dy = get_node_direction(n1, n2)
         if dx < 0 or dy < 0:
             reverse = not reverse
-        return elm.VoltageLabel(element, label=f'{print_voltage(V_branch, precision=precision)}', reverse=reverse, color=blue)
+        return elm.VoltageLabel(element, label=self.voltage_display(V_branch), reverse=reverse, color=blue)
 
-    def draw_current(self, name: str, reverse: bool = False, end: bool = False, precision=3) -> elm.CurrentLabel:
+    def draw_current(self, name: str, reverse: bool = False, end: bool = False) -> elm.CurrentLabel:
         element = self.diagram_parser.get_element(name)
         I_branch = self.solution.get_current(name)
         if reverse:
             I_branch *= -1
         if end:
             reverse = not reverse
-        return elm.CurrentLabel(element, label=f'{print_current(I_branch, precision=precision)}', reverse=reverse, start=not end, color=red)
+        return elm.CurrentLabel(element, label=self.current_display(I_branch), reverse=reverse, start=not end, color=red)
+
+def time_domain_solution(digagram_parser: SchematicDiagramAnalyzer, solution: NetworkSolution, w: float = 0, sin: bool = False, deg: bool = False, hertz: bool = False) -> SchematicDiagramSolution:
+    return SchematicDiagramSolution(
+        diagram_parser=digagram_parser,
+        solution=solution,
+        voltage_display=partial(print_sinosoidal, unit='V', w=w, sin=sin, deg=deg, hertz=hertz),
+        current_display=partial(print_sinosoidal, unit='A', w=w, sin=sin, deg=deg, hertz=hertz),
+    )
+
+def complex_solution(digagram_parser: SchematicDiagramAnalyzer, solution: NetworkSolution, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
+    return SchematicDiagramSolution(
+        diagram_parser=digagram_parser,
+        solution=solution,
+        voltage_display=partial(print_complex, unit='V', precision=precision, polar=polar, deg=deg),
+        current_display=partial(print_complex, unit='A', precision=precision, polar=polar, deg=deg),
+    )
