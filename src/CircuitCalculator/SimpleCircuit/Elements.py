@@ -200,6 +200,52 @@ class ACVoltageSource(din_elements.SourceUDIN):
     def values(self) -> dict[str, complex]:
         return {'U' : self.V}
 
+class ACCurrentSource(din_elements.SourceIDIN):
+    def __init__(self, I: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
+        super().__init__(*args, reverse=reverse, **kwargs)
+        if reverse:
+            self._I = -I
+        else:
+            self._I = I
+        self._name = name
+        self._w = w
+        self._phi = phi
+        self._deg = deg
+        self._sin = sin
+        label = print_sinosoidal(self._I, unit='A', precision=precision, w=w, deg=deg)
+        self.anchors['I_label'] = (0.5, 1.1)
+        self.label(f'{self._name}={label}', rotate=True, color=blue, loc='I_label', halign='center', valign='center')
+
+        a, b = (1.5, 0.7), (-0.5, 0.7)
+        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=blue))
+
+    @property
+    def w(self) -> float:
+        return self._w
+
+    @property
+    def phi(self) -> float:
+        return self._phi
+
+    @property
+    def sin(self) -> bool:
+        return self._sin
+
+    @property
+    def deg(self) -> bool:
+        return self._deg
+
+    @property
+    def I(self) -> float:
+        return self._I
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    def values(self) -> dict[str, complex]:
+        return {'I' : self.I}
+
 class Capacitor(schemdraw.elements.twoterm.Capacitor):
     def __init__(self, C: float, name: str, *args, show_name: bool = True, show_value: bool = True, label_offset: float = 0.2, **kwargs):
         super().__init__(*args, **kwargs)
@@ -438,6 +484,7 @@ v_label_args : dict[Any, dict[str, float | str ]] = {
     Resistor : {'ofst' : -0.6},
     Impedance : {'ofst' : -0.6},
     Capacitor : {'ofst' : -0.6},
+    Inductance : {'ofst' : -0.6},
     CurrentSource : {'ofst' : 1.5, 'label_loc': 'top'},
     RealCurrentSource : {'ofst' : -2.1, 'label_loc': 'top'}
 }
@@ -446,6 +493,7 @@ i_label_args : dict[Any, dict[str, float]] = {
     Resistor : {'ofst' : 1.4},
     Impedance : {'ofst' : 1.4},
     Capacitor : {'ofst' : 1.4},
+    Inductance : {'ofst' : 1.4},
     VoltageSource : {'ofst' : -2.8},
     RealVoltageSource: {'ofst' : -0.8}
 }

@@ -28,6 +28,15 @@ def ac_voltage_source_translator(element: elm.ACVoltageSource, nodes: tuple[str,
         phi=element.phi*np.pi/180 if element.deg else element.phi
     )
 
+def ac_current_source_translator(element: elm.ACCurrentSource, nodes: tuple[str, str]) -> components.CurrentSource:
+    return components.CurrentSource(
+        nodes=nodes,
+        id=element.name,
+        I=element.I,
+        w=element.w,
+        phi=element.phi*np.pi/180 if element.deg else element.phi
+    )
+
 def none_translator(*_) -> None:
     return None
 
@@ -35,6 +44,7 @@ circuit_translator_map : ElementTranslatorMap = {
     elm.Resistor : resistor_translator,
     elm.CurrentSource : current_source_translator,
     elm.ACVoltageSource : ac_voltage_source_translator,
+    elm.ACCurrentSource : ac_current_source_translator,
     elm.Capacitor : capacitor_translator,
     elm.Inductance : inductance_translator,
     elm.Ground : ground_translator,
