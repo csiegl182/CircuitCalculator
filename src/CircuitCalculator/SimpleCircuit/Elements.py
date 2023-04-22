@@ -167,13 +167,6 @@ class ACVoltageSource(din_elements.SourceUDIN):
         self._deg = deg
         self._sin = sin
         label = print_sinosoidal(self._V, unit='V', precision=precision, w=w, deg=deg)
-        # label = '$'
-        # label+= str(ScientificFloat(self.V, '\\mathrm{V}', use_exp_prefix=True, exp_prefixes={-6: 'u', -3: 'm', 3: 'k'}))
-        # label+= '\\cdot\\cos('
-        # label+= str(ScientificFloat(self.w, '\\frac{1}{\\mathrm{s}}'))
-        # label+= f'+{self.phi:1.4f}' if self.phi > 1e-5 else ''
-        # label+= ')'
-        # label+= '$'
         self.anchors['V_label'] = (0.5, 1.1)
         self.label(f'{self._name}={label}', rotate=True, color=blue, loc='V_label', halign='center', valign='center')
 
