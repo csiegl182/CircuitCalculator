@@ -7,9 +7,6 @@ import numpy as np
 def resistor_translator(element: elm.Resistor, nodes: tuple[str, str]) -> components.Resistor:
     return components.Resistor(nodes=nodes, id=element.name, R=element.R)
 
-def current_source_translator(element: elm.CurrentSource, nodes: tuple[str, str]) -> components.CurrentSource:
-    return components.CurrentSource(nodes=nodes, id=element.name, I=element.I)
-
 def capacitor_translator(element: elm.Capacitor, nodes: tuple[str, str]) -> components.Capacitor:
     return components.Capacitor(nodes=nodes, id=element.name, C=element.C)
 
@@ -42,7 +39,6 @@ def none_translator(*_) -> None:
 
 circuit_translator_map : ElementTranslatorMap = {
     elm.Resistor : resistor_translator,
-    elm.CurrentSource : current_source_translator,
     elm.ACVoltageSource : ac_voltage_source_translator,
     elm.ACCurrentSource : ac_current_source_translator,
     elm.Capacitor : capacitor_translator,
