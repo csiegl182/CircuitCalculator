@@ -135,5 +135,8 @@ class NodalAnalysisSolution:
             return self._solution_vector[self._node_mapping[self._select_active_node(branch_id)]]
         return self.get_voltage(branch_id)/branch_element.Z
 
+    def get_power(self, branch_id: str) -> complex:
+        return self.get_voltage(branch_id)*np.conj(self.get_current(branch_id))
+
 def nodal_analysis_solver(network) -> NetworkSolution:
     return NodalAnalysisSolution(network)
