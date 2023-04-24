@@ -1,6 +1,6 @@
 import schemdraw
 import schemdraw.elements
-from .Display import red, blue, print_complex, print_sinosoidal
+from .Display import red, blue, green, print_complex, print_sinosoidal
 from typing import Any
 from ..Utils import ScientificFloat, ScientificComplex
 from .SchemdrawDIN import elements as din_elements
@@ -26,6 +26,7 @@ class VoltageSource(din_elements.SourceUDIN):
             self._V = V
         self._name = name
         self.anchors['V_label'] = (0.5, 1.1)
+        self.anchors['S_label'] = (0.5, 1.1)
         label = print_complex(self.V, unit='V', precision=precision)
         self.label(f'{self._name}={label}', rotate=True, color=blue, loc='V_label', halign='center', valign='center')
 
@@ -121,6 +122,7 @@ class Resistor(schemdraw.elements.twoterm.ResistorIEC):
         label += '=' if  show_name and show_value else ''
         label += str(ScientificFloat(value=self.R, unit='$\\Omega$', use_exp_prefix=True)) if show_value else ''
         self.anchors['R_label'] = (0.5, 0.3)
+        self.anchors['S_label'] = (2.8, 0.3)
         self.label(label, rotate=True, loc='R_label', halign='center')
 
     def down(self) -> schemdraw.elements.Element:
@@ -168,6 +170,7 @@ class ACVoltageSource(din_elements.SourceUDIN):
         self._sin = sin
         label = print_sinosoidal(self._V, unit='V', precision=precision, w=w, deg=deg)
         self.anchors['V_label'] = (0.5, 1.1)
+        self.anchors['S_label'] = (1.8, -1.5)
         self.label(f'{self._name}={label}', rotate=True, color=blue, loc='V_label', halign='center', valign='center')
 
         a, b = (1.5, 0.7), (-0.5, 0.7)
@@ -247,7 +250,7 @@ class ACCurrentSource(din_elements.SourceIDIN):
         return {'I' : self.I}
 
 class Capacitor(schemdraw.elements.twoterm.Capacitor):
-    def __init__(self, C: float, name: str, *args, show_name: bool = True, show_value: bool = True, label_offset: float = 0.2, **kwargs):
+    def __init__(self, C: float, name: str, *args, show_name: bool = True, show_value: bool = True, **kwargs):
         super().__init__(*args, **kwargs)
         self._C = C
         self._name = name
@@ -255,7 +258,9 @@ class Capacitor(schemdraw.elements.twoterm.Capacitor):
         label += f'{self._name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
         label += str(ScientificFloat(value=self.C, unit='$\\mathrm{F}$', use_exp_prefix=True)) if show_value else ''
-        self.label(label, rotate=True, ofst=label_offset)
+        self.anchors['C_label'] = (0.0, -0.9)
+        self.anchors['S_label'] = (1.8, -1.9)
+        self.label(label, rotate=True, loc='C_label', halign='center')
 
     @property
     def name(self) -> str:
@@ -478,6 +483,17 @@ class CurrentLabel(schemdraw.elements.CurrentLabelInline):
         kwargs.update({'start' : start, 'reverse' : reverse})
         super().__init__(**kwargs)
         self.at(at)
+        self.label(label)
+
+class PowerLabel(schemdraw.elements.Label):
+    def __init__(self, at: schemdraw.elements.Element, label: str = '', **kwargs):
+        kwargs.update({'color': kwargs.get('color', green)})
+        super().__init__(**kwargs)
+        try:
+            self.at(at.S_label)
+            self.theta(at.transform.theta)
+        except AttributeError:
+            self.at(at.center)
         self.label(label)
 
 v_label_args : dict[Any, dict[str, float | str ]] = {

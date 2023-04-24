@@ -4,6 +4,7 @@ from cmath import phase
 
 blue = '#02468F'
 red = '#D20000'
+green = '#007355'
 
 def print_complex(value: complex, unit: str = '', precision: int = 3, polar: bool = False, deg: bool = False) -> str:
     return str(ScientificComplex(
@@ -35,4 +36,13 @@ def print_sinosoidal(value: complex, unit: str = '', precision: int = 3, w: floa
         label+= '+' if phase_value > 0 else '-'
         label+= str(abs_phase_value)
     label+= ')'
+    return label
+
+def print_active_reactive_power(value: complex, precision: int = 3):
+    P = ScientificFloat(value=abs(value.real), unit='W', precision=precision, use_exp_prefix=True)
+    Q = ScientificFloat(value=abs(value.imag), unit='var', precision=precision, use_exp_prefix=True)
+    P_sign = '↑' if value.real > 0 else '↓'
+    Q_sign = '↑' if value.imag > 0 else '↓'
+    label = f'P: {P_sign}{P}'
+    label+= f'\nQ: {Q_sign}{Q}' if Q.value > 1e-4 else ''
     return label

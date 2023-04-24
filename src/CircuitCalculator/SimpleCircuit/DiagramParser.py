@@ -3,7 +3,7 @@ import schemdraw.elements, schemdraw.util
 from . import Elements as elm
 from .NetworkBranchTranslators import network_translator_map
 from .CircuitComponentTranslators import circuit_translator_map
-from .Display import red, blue, print_complex, print_sinosoidal
+from .Display import red, blue, green, print_complex, print_sinosoidal, print_active_reactive_power
 from ..Network.network import Network
 from ..Network.solution import NetworkSolution
 from .SchemdrawTranslatorTypes import ElementTranslatorMap
@@ -159,6 +159,7 @@ class SchematicDiagramSolution:
     solution: NetworkSolution
     voltage_display: Callable[[complex], str]
     current_display: Callable[[complex], str]
+    power_display: Callable[[complex], str]
 
     def draw_voltage(self, name: str, reverse: bool = False) -> elm.VoltageLabel:
         element = self.diagram_parser.get_element(name)
@@ -184,12 +185,18 @@ class SchematicDiagramSolution:
             reverse = not reverse
         return elm.CurrentLabel(element, label=self.current_display(I_branch), reverse=reverse, start=not end, color=red)
 
+    def draw_power(self, name: str, reverse: bool = False) -> elm.PowerLabel:
+        element = self.diagram_parser.get_element(name)
+        P_branch = self.solution.get_power(name)
+        return elm.PowerLabel(element, label=self.power_display(P_branch), color=green)
+
 def time_domain_solution(digagram_parser: SchematicDiagramAnalyzer, solution: NetworkSolution, w: float = 0, sin: bool = False, deg: bool = False, hertz: bool = False) -> SchematicDiagramSolution:
     return SchematicDiagramSolution(
         diagram_parser=digagram_parser,
         solution=solution,
         voltage_display=partial(print_sinosoidal, unit='V', w=w, sin=sin, deg=deg, hertz=hertz),
         current_display=partial(print_sinosoidal, unit='A', w=w, sin=sin, deg=deg, hertz=hertz),
+        power_display=print_active_reactive_power
     )
 
 def complex_solution(digagram_parser: SchematicDiagramAnalyzer, solution: NetworkSolution, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
@@ -198,4 +205,5 @@ def complex_solution(digagram_parser: SchematicDiagramAnalyzer, solution: Networ
         solution=solution,
         voltage_display=partial(print_complex, unit='V', precision=precision, polar=polar, deg=deg),
         current_display=partial(print_complex, unit='A', precision=precision, polar=polar, deg=deg),
+        power_display=partial(print_complex, unit='VA', precision=precision, polar=polar, deg=deg)
     )
