@@ -1,37 +1,37 @@
 from . import Elements as elm
-from ..Circuit import components
+from ..Circuit import components as cct_cmp
 from .SchemdrawTranslatorTypes import ElementTranslatorMap
-import numpy as np
+from math import pi
 
 
-def resistor_translator(element: elm.Resistor, nodes: tuple[str, str]) -> components.Resistor:
-    return components.Resistor(nodes=nodes, id=element.name, R=element.R)
+def resistor_translator(element: elm.Resistor, nodes: tuple[str, str]) -> cct_cmp.Resistor:
+    return cct_cmp.Resistor(nodes=nodes, id=element.name, R=element.R)
 
-def capacitor_translator(element: elm.Capacitor, nodes: tuple[str, str]) -> components.Capacitor:
-    return components.Capacitor(nodes=nodes, id=element.name, C=element.C)
+def capacitor_translator(element: elm.Capacitor, nodes: tuple[str, str]) -> cct_cmp.Capacitor:
+    return cct_cmp.Capacitor(nodes=nodes, id=element.name, C=element.C)
 
-def inductance_translator(element: elm.Inductance, nodes: tuple[str, str]) -> components.Inductance:
-    return components.Inductance(nodes=nodes, id=element.name, L=element.L)
+def inductance_translator(element: elm.Inductance, nodes: tuple[str, str]) -> cct_cmp.Inductance:
+    return cct_cmp.Inductance(nodes=nodes, id=element.name, L=element.L)
 
-def ground_translator(element: elm.Ground, nodes: tuple[str]) -> components.Ground:
-    return components.Ground(nodes=nodes, id=element.name)
+def ground_translator(element: elm.Ground, nodes: tuple[str]) -> cct_cmp.Ground:
+    return cct_cmp.Ground(nodes=nodes, id=element.name)
 
-def ac_voltage_source_translator(element: elm.ACVoltageSource, nodes: tuple[str, str]) -> components.VoltageSource:
-    return components.VoltageSource(
+def ac_voltage_source_translator(element: elm.ACVoltageSource, nodes: tuple[str, str]) -> cct_cmp.VoltageSource:
+    return cct_cmp.VoltageSource(
         nodes=nodes,
         id=element.name,
         V=element.V,
         w=element.w,
-        phi=element.phi*np.pi/180 if element.deg else element.phi
+        phi=element.phi*pi/180 if element.deg else element.phi
     )
 
-def ac_current_source_translator(element: elm.ACCurrentSource, nodes: tuple[str, str]) -> components.CurrentSource:
-    return components.CurrentSource(
+def ac_current_source_translator(element: elm.ACCurrentSource, nodes: tuple[str, str]) -> cct_cmp.CurrentSource:
+    return cct_cmp.CurrentSource(
         nodes=nodes,
         id=element.name,
         I=element.I,
         w=element.w,
-        phi=element.phi*np.pi/180 if element.deg else element.phi
+        phi=element.phi*pi/180 if element.deg else element.phi
     )
 
 def none_translator(*_) -> None:

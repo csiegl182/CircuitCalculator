@@ -1,4 +1,4 @@
-from typing import Protocol, TypedDict
+from typing import Protocol
 from dataclasses import dataclass
 import numpy as np
 

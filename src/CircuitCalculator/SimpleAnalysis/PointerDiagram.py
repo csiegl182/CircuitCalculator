@@ -1,8 +1,10 @@
-import numpy as np
 from .Elements import complex_pointer
 from .Layout import Layout, color, grid_layout
+
+from ..Network.solution import NetworkSolution
+
 from functools import partial
-from CircuitCalculator.Network.solution import NetworkSolution
+import numpy as np
 
 class PointerDiagram:
     def __init__(self, layout: Layout = grid_layout, arrow_base: float = 0.05, arrow_length: float = 0.05):

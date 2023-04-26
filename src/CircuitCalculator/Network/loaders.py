@@ -1,6 +1,5 @@
 from typing import Any, Callable
 from .network import Network, Branch
-from .elements import NortenTheveninElement
 from . import elements as elm
 import numpy as np
 
@@ -24,7 +23,7 @@ def translate_to_complex(keys : list[str], **kwargs):
         kwargs.update({value : to_complex(kwargs[value])})
     return kwargs
 
-network_branch_translators : dict[str, Callable[..., NortenTheveninElement]] = {
+network_branch_translators : dict[str, Callable[..., elm.NortenTheveninElement]] = {
     "resistor" : elm.resistor,
     "conductor" : elm.conductor,
     "impedance" : lambda **kwargs: elm.impedance(Z=to_complex(kwargs['Z']), **kwargs),

@@ -1,9 +1,9 @@
+from .Layout import Layout, grid_layout
+
+from ..Network.solution import NetworkSolution
+
+from typing import Any
 import numpy as np
-from .Elements import complex_pointer
-from .Layout import Layout, color, grid_layout
-from functools import partial
-from CircuitCalculator.Network.solution import NetworkSolution
-from typing import Any, Callable
 
 class TimeSeriesSignalPlot:
     def __init__(self, solution: NetworkSolution, w: float, tmax: float, tmin: float = 0, signal_label: str = '', layout: Layout = grid_layout):

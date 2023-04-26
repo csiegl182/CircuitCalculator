@@ -1,9 +1,11 @@
-import schemdraw
-import schemdraw.elements
-from .Display import red, blue, green, print_complex, print_sinosoidal
-from typing import Any
+import schemdraw, schemdraw.elements
+
 from ..Utils import ScientificFloat, ScientificComplex
+
 from .SchemdrawDIN import elements as din_elements
+from . import Display as dsp
+
+from typing import Any
 
 def segments_of(element: schemdraw.elements.Element) -> list[schemdraw.segments.SegmentType]:
     return element.segments
@@ -27,11 +29,11 @@ class VoltageSource(din_elements.SourceUDIN):
         self._name = name
         self.anchors['V_label'] = (0.5, 1.1)
         self.anchors['S_label'] = (0.5, 1.1)
-        label = print_complex(self.V, unit='V', precision=precision)
-        self.label(f'{self._name}={label}', rotate=True, color=blue, loc='V_label', halign='center', valign='center')
+        label = dsp.print_complex(self.V, unit='V', precision=precision)
+        self.label(f'{self._name}={label}', rotate=True, color=dsp.blue, loc='V_label', halign='center', valign='center')
 
         a, b = (1.5, 0.7), (-0.5, 0.7)
-        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=blue))
+        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.blue))
 
     @property
     def name(self) -> str:
@@ -96,10 +98,10 @@ class CurrentSource(din_elements.SourceIDIN):
             self._I = I
         self._name = name
         a, b = (1.2, 0.3), (1.8, 0.3)
-        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=red))
+        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.red))
         self.anchors['I_label'] = a
-        label = print_complex(self._I, unit='A', precision=precision)
-        self.label(f'{self._name}={label}', loc='I_label', ofst=(0, 0.4), rotate=True, color=red)
+        label = dsp.print_complex(self._I, unit='A', precision=precision)
+        self.label(f'{self._name}={label}', loc='I_label', ofst=(0, 0.4), rotate=True, color=dsp.red)
 
     @property
     def name(self) -> str:
@@ -168,13 +170,13 @@ class ACVoltageSource(din_elements.SourceUDIN):
         self._phi = phi
         self._deg = deg
         self._sin = sin
-        label = print_sinosoidal(self._V, unit='V', precision=precision, w=w, deg=deg)
+        label = dsp.print_sinosoidal(self._V, unit='V', precision=precision, w=w, deg=deg)
         self.anchors['V_label'] = (0.5, 1.1)
         self.anchors['S_label'] = (1.8, -1.5)
-        self.label(f'{self._name}={label}', rotate=True, color=blue, loc='V_label', halign='center', valign='center')
+        self.label(f'{self._name}={label}', rotate=True, color=dsp.blue, loc='V_label', halign='center', valign='center')
 
         a, b = (1.5, 0.7), (-0.5, 0.7)
-        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=blue))
+        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.blue))
 
     @property
     def w(self) -> float:
@@ -215,12 +217,12 @@ class ACCurrentSource(din_elements.SourceIDIN):
         self._phi = phi
         self._deg = deg
         self._sin = sin
-        label = print_sinosoidal(self._I, unit='A', precision=precision, w=w, deg=deg)
+        label = dsp.print_sinosoidal(self._I, unit='A', precision=precision, w=w, deg=deg)
         self.anchors['I_label'] = (0.5, 1.1)
-        self.label(f'{self._name}={label}', rotate=True, color=blue, loc='I_label', halign='center', valign='center')
+        self.label(f'{self._name}={label}', rotate=True, color=dsp.blue, loc='I_label', halign='center', valign='center')
 
         a, b = (1.5, 0.7), (-0.5, 0.7)
-        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=blue))
+        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.blue))
 
     @property
     def w(self) -> float:
@@ -460,7 +462,7 @@ class Ground(Node):
 class VoltageLabel(schemdraw.elements.CurrentLabel):
     def __init__(self, at: schemdraw.elements.Element, label: str = '', label_loc: str = 'bottom', **kwargs):
         kwargs.update(v_label_args.get(type(at), {}))
-        kwargs.update({'color': kwargs.get('color', blue)})
+        kwargs.update({'color': kwargs.get('color', dsp.blue)})
         super().__init__(**kwargs)
         if isinstance(at, RealVoltageSource):
             self.at(at.center)
@@ -475,7 +477,7 @@ class VoltageLabel(schemdraw.elements.CurrentLabel):
 class CurrentLabel(schemdraw.elements.CurrentLabelInline):
     def __init__(self, at: schemdraw.elements.Element, label: str = '', **kwargs):
         kwargs.update(i_label_args.get(type(at), {}))
-        kwargs.update({'color': kwargs.get('color', red)})
+        kwargs.update({'color': kwargs.get('color', dsp.red)})
         totlen = at._userparams.get('l', at._userparams.get('unit', 3))
         kwargs.update({'ofst': totlen/4-0.15+kwargs.get('ofst', 0)})
         start = kwargs.get('start', True)
@@ -487,7 +489,7 @@ class CurrentLabel(schemdraw.elements.CurrentLabelInline):
 
 class PowerLabel(schemdraw.elements.Label):
     def __init__(self, at: schemdraw.elements.Element, label: str = '', **kwargs):
-        kwargs.update({'color': kwargs.get('color', green)})
+        kwargs.update({'color': kwargs.get('color', dsp.green)})
         super().__init__(**kwargs)
         try:
             self.at(at.S_label)
