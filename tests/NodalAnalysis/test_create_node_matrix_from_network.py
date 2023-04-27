@@ -1,4 +1,4 @@
-from CircuitCalculator.NodalAnalysis import create_node_matrix_from_network
+from CircuitCalculator.Network.NodalAnalysis import create_node_matrix_from_network
 from CircuitCalculator.Network.network import Network, Branch
 from CircuitCalculator.Network.elements import resistor, voltage_source, current_source, linear_current_source, linear_voltage_source, conductor
 import numpy as np
@@ -130,7 +130,7 @@ def test_create_node_matrix_from_reference_network_9() -> None:
             Branch('3', '2', voltage_source('Us', U=U)),
             Branch('3', '0', resistor('R4', R=R4))
         ],
-        zero_node_label='0'
+        node_zero_label='0'
     )
     Y = create_node_matrix_from_network(network)
     Y_ref = np.array([[G1+G2, -G2, 0], [-G2, G2+G3+G4, 0], [0, G4, -1]], np.double)
@@ -145,7 +145,7 @@ def test_create_node_matrix_from_reference_network_11() -> None:
             Branch('1', '0', linear_voltage_source('Us', U=Uq, Z=Ri)),
             Branch('1', '0', resistor('R', R=R))
         ],
-        zero_node_label='0'
+        node_zero_label='0'
     )
     Y = create_node_matrix_from_network(network)
     Y_ref = np.array([[G+Gi]])

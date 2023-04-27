@@ -6,6 +6,8 @@ class Component(ABC):
     nodes : tuple[str]
     type : str
     id : str
+    is_active: bool = field(default=False, init=False)
+    w: float = field(default=0, init=False)
 
 @dataclass(frozen=True)
 class TwoPoleComponent(Component):
@@ -28,6 +30,7 @@ class Inductance(TwoPoleComponent):
 
 @dataclass(frozen=True)
 class Source(TwoPoleComponent):
+    is_active : bool = field(default=True, init=False)
     w : float = field(default=0.0)
     phi : float = field(default=0.0)
 

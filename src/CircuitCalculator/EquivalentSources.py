@@ -1,7 +1,7 @@
 from .Network.network import Network
 from .Network.transformers import switch_ground_node, passive_network
 from .Network import labelmapper as map
-from .NodalAnalysis import NodalAnalysisSolution, create_node_matrix_from_network
+from .Network.NodalAnalysis import NodalAnalysisSolution, create_node_matrix_from_network
 from numpy.linalg import inv as inverse_matrix
         
 def calculate_total_impedeance(network: Network, node1: str, node2: str, node_index_mapper: map.NodeIndexMapper = map.default) -> complex:

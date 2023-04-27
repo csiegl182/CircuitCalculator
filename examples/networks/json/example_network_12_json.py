@@ -1,5 +1,5 @@
 from CircuitCalculator.Network.loaders import load_network_from_json
-from CircuitCalculator.NodalAnalysis import nodal_analysis_solver
+from CircuitCalculator.Network.NodalAnalysis import nodal_analysis_solver
 from CircuitCalculator.SimpleAnalysis.PointerDiagram import VoltagePointerDiagram
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ def switch_ground_node(network: Network, new_ground: str) -> Network:
     return Network(network.branches, new_ground)
 
 def remove_ideal_current_sources(network: Network, keep: list[NortenTheveninElement] = []) -> Network:
-    return Network([b for b in network.branches if not is_ideal_current_source(b.element) or b.element in keep], zero_node_label=network.zero_node_label)
+    return Network([b for b in network.branches if not is_ideal_current_source(b.element) or b.element in keep], node_zero_label=network.node_zero_label)
 
 def remove_ideal_voltage_sources(network: Network, keep: list[NortenTheveninElement] = []) -> Network:
     branches = network.branches
@@ -18,7 +18,7 @@ def remove_ideal_voltage_sources(network: Network, keep: list[NortenTheveninElem
         branches = [Branch(rn, b.node2, b.element) if b.node1 == an else b for b in branches]
         branches = [Branch(b.node1, rn, b.element) if b.node2 == an else b for b in branches]
         branches = [b for b in branches if b.node1 != b.node2]
-    return Network(branches, zero_node_label=network.zero_node_label)
+    return Network(branches, node_zero_label=network.node_zero_label)
 
 def passive_network(network: Network, keep: list[NortenTheveninElement] = []) -> Network:
     return remove_ideal_voltage_sources(remove_ideal_current_sources(network, keep=keep), keep=keep)

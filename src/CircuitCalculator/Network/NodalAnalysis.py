@@ -1,10 +1,10 @@
 import numpy as np
-from .Network.network import Network
-from .Network.elements import is_ideal_current_source, is_ideal_voltage_source, is_current_source
-from .Network.transformers import passive_network
-from .Network.supernodes import SuperNodes
-from .Network import labelmapper as map
-from .Network.solution import NetworkSolution
+from .network import Network
+from .elements import is_ideal_current_source, is_ideal_voltage_source, is_current_source
+from .transformers import passive_network
+from .supernodes import SuperNodes
+from . import labelmapper as map
+from .solution import NetworkSolution
 import itertools
 
 class DimensionError(Exception): pass
@@ -138,5 +138,5 @@ class NodalAnalysisSolution:
     def get_power(self, branch_id: str) -> complex:
         return self.get_voltage(branch_id)*np.conj(self.get_current(branch_id))
 
-def nodal_analysis_solver(network) -> NetworkSolution:
+def nodal_analysis_solver(network: Network) -> NetworkSolution:
     return NodalAnalysisSolution(network)

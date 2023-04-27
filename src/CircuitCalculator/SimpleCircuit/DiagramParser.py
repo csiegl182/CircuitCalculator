@@ -1,18 +1,16 @@
 import schemdraw.elements, schemdraw.util
 
 from ..Network.network import Network
-from ..Network.solution import NetworkSolution
-from ..Circuit.circuit import Circuit
+from ..Circuit.circuit import Circuit, transform
+from ..Circuit import components as cmp
+
 
 from . import Elements as elm
 from .SchemdrawTranslatorTypes import ElementTranslatorMap
-from .NetworkBranchTranslators import network_translator_map
 from .CircuitComponentTranslators import circuit_translator_map
-from . import Display as dsp
 
 from dataclasses import dataclass
-from typing import Any, Callable
-from functools import partial
+from typing import List
 
 class UnknownElement(Exception): pass
 class MultipleGroundNodes(Exception): pass
@@ -114,13 +112,13 @@ class SchematicDiagramAnalyzer:
     def ground_label(self) -> str:
         return self._get_node_index(self.ground)
 
-    def translate_elements(self, translator_map : ElementTranslatorMap) -> list[Any]:
-        def translate(element: schemdraw.elements.Element) -> Any:
+    def translate_elements(self, translator_map : ElementTranslatorMap) -> Circuit:
+        def translate(element: schemdraw.elements.Element) -> cmp.Component:
             try:
                 return translator_map[type(element)](element, tuple(map(self._get_node_index, get_nodes(element))))
             except KeyError:
                 raise UnknownTranslator(f"Network element '{type(element).__name__}' cannot be translated.")
-        return [translate(e) for e in self.all_elements if translate(e) is not None]
+        return Circuit([translate(e) for e in self.all_elements if translate(e) is not None])
 
     def _get_equal_electrical_potential_nodes(self, node: schemdraw.util.Point) -> set[schemdraw.util.Point]:
         equal_electrical_potential_nodes = set([node])
@@ -145,68 +143,12 @@ class SchematicDiagramAnalyzer:
         else:
             return elements[0]
 
-def network_parser(schematic: elm.Schematic) -> Network:
-    schematic_diagram = SchematicDiagramAnalyzer(schematic)
-    return Network(
-        branches=schematic_diagram.translate_elements(network_translator_map),
-        zero_node_label=schematic_diagram.ground_label
-    )
-
 def circuit_parser(schematic: elm.Schematic) -> Circuit:
     schematic_diagram = SchematicDiagramAnalyzer(schematic)
     return schematic_diagram.translate_elements(circuit_translator_map)
 
-@dataclass
-class SchematicDiagramSolution:
-    diagram_parser: SchematicDiagramAnalyzer
-    solution: NetworkSolution
-    voltage_display: Callable[[complex], str]
-    current_display: Callable[[complex], str]
-    power_display: Callable[[complex], str]
-
-    def draw_voltage(self, name: str, reverse: bool = False) -> elm.VoltageLabel:
-        element = self.diagram_parser.get_element(name)
-        V_branch = self.solution.get_voltage(name)
-        if reverse:
-            V_branch *= -1
-        # adjust counting arrow system of voltage sources for display
-        if type(element) is elm.VoltageSource or type(element) is elm.RealVoltageSource:
-            reverse = not reverse
-        # adjust missing direction information of CurrentLabel() method
-        n1, n2 = get_nodes(element)
-        dx, dy = get_node_direction(n1, n2)
-        if dx < 0 or dy < 0:
-            reverse = not reverse
-        return elm.VoltageLabel(element, label=self.voltage_display(V_branch), reverse=reverse, color=dsp.blue)
-
-    def draw_current(self, name: str, reverse: bool = False, end: bool = False) -> elm.CurrentLabel:
-        element = self.diagram_parser.get_element(name)
-        I_branch = self.solution.get_current(name)
-        if reverse:
-            I_branch *= -1
-        if end:
-            reverse = not reverse
-        return elm.CurrentLabel(element, label=self.current_display(I_branch), reverse=reverse, start=not end, color=dsp.red)
-
-    def draw_power(self, name: str, reverse: bool = False) -> elm.PowerLabel:
-        element = self.diagram_parser.get_element(name)
-        P_branch = self.solution.get_power(name)
-        return elm.PowerLabel(element, label=self.power_display(P_branch), color=dsp.green)
-
-def time_domain_solution(digagram_parser: SchematicDiagramAnalyzer, solution: NetworkSolution, w: float = 0, sin: bool = False, deg: bool = False, hertz: bool = False) -> SchematicDiagramSolution:
-    return SchematicDiagramSolution(
-        diagram_parser=digagram_parser,
-        solution=solution,
-        voltage_display=partial(dsp.print_sinosoidal, unit='V', w=w, sin=sin, deg=deg, hertz=hertz),
-        current_display=partial(dsp.print_sinosoidal, unit='A', w=w, sin=sin, deg=deg, hertz=hertz),
-        power_display=dsp.print_active_reactive_power
-    )
-
-def complex_solution(digagram_parser: SchematicDiagramAnalyzer, solution: NetworkSolution, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
-    return SchematicDiagramSolution(
-        diagram_parser=digagram_parser,
-        solution=solution,
-        voltage_display=partial(dsp.print_complex, unit='V', precision=precision, polar=polar, deg=deg),
-        current_display=partial(dsp.print_complex, unit='A', precision=precision, polar=polar, deg=deg),
-        power_display=partial(dsp.print_complex, unit='VA', precision=precision, polar=polar, deg=deg)
-    )
+def network_parser(schematic: elm.Schematic, w: List[float] = []) -> List[Network]:
+    circuit = circuit_parser(schematic)
+    if len(w) == 0:
+        w = circuit.w
+    return transform(circuit=circuit, w=w)

@@ -1,6 +1,6 @@
 from CircuitCalculator.Circuit.circuit import transform, w
 import CircuitCalculator.Circuit.components as cmp
-from CircuitCalculator.NodalAnalysis import nodal_analysis_solver
+from CircuitCalculator.Network.NodalAnalysis import nodal_analysis_solver
 
 if __name__ == '__main__':
     circuit = [

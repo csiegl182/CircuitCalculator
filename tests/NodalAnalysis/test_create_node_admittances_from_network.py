@@ -1,4 +1,4 @@
-from CircuitCalculator.NodalAnalysis import create_node_matrix_from_network
+from CircuitCalculator.Network.NodalAnalysis import create_node_matrix_from_network
 from CircuitCalculator.Network.network import Network, Branch
 from CircuitCalculator.Network.elements import conductor
 import numpy as np

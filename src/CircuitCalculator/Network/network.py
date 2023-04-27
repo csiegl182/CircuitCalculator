@@ -18,10 +18,10 @@ class Branch:
 @dataclass(frozen=True)
 class Network:
     branches: list[Branch]
-    zero_node_label: str = '0'
+    node_zero_label: str = '0'
 
     def __post_init__(self):
-        if self.zero_node_label not in self.node_labels:
+        if self.node_zero_label not in self.node_labels:
             raise FloatingGroundNode
         if len(set(self.branch_ids)) != len(self.branches):
             raise AmbiguousBranchIDs
@@ -41,7 +41,7 @@ class Network:
         return len(self.node_labels)
 
     def is_zero_node(self, node: str) -> bool:
-        return node == self.zero_node_label
+        return node == self.node_zero_label
 
     def branches_connected_to(self, node: str) -> list[Branch]:
         connected_branches = [branch for branch in self.branches if branch.node1 == node or branch.node2 == node]
