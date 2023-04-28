@@ -35,7 +35,10 @@ def ac_current_source_translator(element: elm.ACCurrentSource, nodes: tuple[str,
     )
 
 def linear_current_source_translator(element: elm.RealCurrentSource, nodes: tuple[str, str]) -> cct_cmp.LinearCurrentSource:
-    return cct_cmp.LinearCurrentSource(nodes=nodes, id=element.name, I=element.I.real, R=element.R)
+    return cct_cmp.LinearCurrentSource(nodes=nodes, id=element.name, I=element.I.real, G=element.G)
+
+def linear_voltage_source_translator(element: elm.RealVoltageSource, nodes: tuple[str, str]) -> cct_cmp.LinearVoltageSource:
+    return cct_cmp.LinearVoltageSource(nodes=nodes, id=element.name, V=element.V.real, R=element.R)
 
 def none_translator(*_) -> None:
     return None
@@ -52,4 +55,5 @@ circuit_translator_map : ElementTranslatorMap = {
     elm.Node: none_translator,
     elm.LabelNode: none_translator,
     elm.RealCurrentSource: linear_current_source_translator,
+    elm.RealVoltageSource: linear_voltage_source_translator,
 }

@@ -44,12 +44,22 @@ def voltage_source(voltage_source: cmp.VoltageSource, w: float = 0, w_resolution
     )
 
 def linear_current_source(current_source: cmp.LinearCurrentSource, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
-    element = elm.linear_current_source(current_source.id, elm.complex_value(current_source.I, 0), elm.complex_value(1/current_source.R, 0))
+    element = elm.linear_current_source(current_source.id, elm.complex_value(current_source.I, 0), elm.complex_value(current_source.G, 0))
     if np.abs(w-current_source.w) > w_resolution:
         element = elm.open_circuit(current_source.id)
     return ntw.Branch(
         current_source.nodes[0],
         current_source.nodes[1],
+        element
+    )
+
+def linear_voltage_source(voltage_source: cmp.LinearVoltageSource, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
+    element = elm.linear_voltage_source(voltage_source.id, elm.complex_value(voltage_source.V, 0), elm.complex_value(voltage_source.R, 0))
+    if np.abs(w-voltage_source.w) > w_resolution:
+        element = elm.short_cicruit(voltage_source.id)
+    return ntw.Branch(
+        voltage_source.nodes[0],
+        voltage_source.nodes[1],
         element
     )
 
