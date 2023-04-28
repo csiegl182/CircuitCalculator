@@ -2,7 +2,7 @@ from ..Network.solution import NetworkSolution
 
 from . import Elements as elm
 from . import Display as dsp
-from .DiagramParser import SchematicDiagramAnalyzer, get_nodes, get_node_direction
+from .DiagramParser import SchematicDiagramParser, get_nodes, get_node_direction
 
 from dataclasses import dataclass
 from typing import Callable
@@ -14,7 +14,7 @@ class UnknownTranslator(Exception): pass
 
 @dataclass
 class SchematicDiagramSolution:
-    diagram_parser: SchematicDiagramAnalyzer
+    diagram_parser: SchematicDiagramParser
     solution: NetworkSolution
     voltage_display: Callable[[complex], str]
     current_display: Callable[[complex], str]
@@ -28,8 +28,8 @@ class SchematicDiagramSolution:
         # adjust counting arrow system of voltage sources for display
         if type(element) is elm.VoltageSource or type(element) is elm.RealVoltageSource:
             reverse = not reverse
-        # adjust missing direction information of CurrentLabel() method
-        n1, n2 = get_nodes(element)
+        # adjust missing direction information of CurrentLabel() method | TODO: Diese Funktion muss in VoltageLabel rein
+        n1, n2 = get_nodes(element) # TODO: Nach Elements
         dx, dy = get_node_direction(n1, n2)
         if dx < 0 or dy < 0:
             reverse = not reverse
@@ -49,7 +49,7 @@ class SchematicDiagramSolution:
         P_branch = self.solution.get_power(name)
         return elm.PowerLabel(element, label=self.power_display(P_branch), color=dsp.green)
 
-def time_domain_solution(digagram_parser: SchematicDiagramAnalyzer, solution: NetworkSolution, w: float = 0, sin: bool = False, deg: bool = False, hertz: bool = False) -> SchematicDiagramSolution:
+def time_domain_solution(digagram_parser: SchematicDiagramParser, solution: NetworkSolution, w: float = 0, sin: bool = False, deg: bool = False, hertz: bool = False) -> SchematicDiagramSolution:
     return SchematicDiagramSolution(
         diagram_parser=digagram_parser,
         solution=solution,
@@ -58,7 +58,7 @@ def time_domain_solution(digagram_parser: SchematicDiagramAnalyzer, solution: Ne
         power_display=dsp.print_active_reactive_power
     )
 
-def complex_solution(digagram_parser: SchematicDiagramAnalyzer, solution: NetworkSolution, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
+def complex_solution(digagram_parser: SchematicDiagramParser, solution: NetworkSolution, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
     return SchematicDiagramSolution(
         diagram_parser=digagram_parser,
         solution=solution,

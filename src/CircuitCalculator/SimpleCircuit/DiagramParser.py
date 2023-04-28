@@ -16,6 +16,8 @@ class UnknownElement(Exception): pass
 class MultipleGroundNodes(Exception): pass
 class UnknownTranslator(Exception): pass
 
+# TODO: Folgende drei Funktionen muessen zu Elements rein
+
 def get_node_direction(node1: schemdraw.util.Point, node2: schemdraw.util.Point) -> tuple[int, int]:
     delta = node2 - node1
     delta_x = +1 if delta.x >= 0 else -1
@@ -31,7 +33,7 @@ def get_nodes(element: schemdraw.elements.Element, n_labels: tuple[str, ...]=('s
     return [round_node(element.absanchors[n_label]) for n_label in n_labels]
 
 @dataclass(frozen=True)
-class SchematicDiagramAnalyzer:
+class SchematicDiagramParser:
     drawing: elm.Schematic
 
     @property
@@ -144,7 +146,7 @@ class SchematicDiagramAnalyzer:
             return elements[0]
 
 def circuit_parser(schematic: elm.Schematic) -> Circuit:
-    schematic_diagram = SchematicDiagramAnalyzer(schematic)
+    schematic_diagram = SchematicDiagramParser(schematic)
     return schematic_diagram.translate_elements(circuit_translator_map)
 
 def network_parser(schematic: elm.Schematic, w: List[float] = []) -> List[Network]:
