@@ -1,11 +1,30 @@
-import schemdraw, schemdraw.elements
-
-from ..Utils import ScientificFloat, ScientificComplex
+import schemdraw, schemdraw.elements, schemdraw.util
 
 from .SchemdrawDIN import elements as din_elements
 from . import Display as dsp
 
 from typing import Any
+
+def round_node(node: schemdraw.util.Point) -> schemdraw.util.Point:
+    def local_round(x):
+        return round(x, ndigits=2)
+    return schemdraw.util.Point((local_round(node.x), local_round(node.y)))
+
+def get_nodes(element: schemdraw.elements.Element, n_labels: tuple[str, ...]=('start', 'end')) -> list[schemdraw.util.Point]:
+    return [round_node(element.absanchors[n_label]) for n_label in n_labels]
+
+def get_node_direction(node1: schemdraw.util.Point, node2: schemdraw.util.Point) -> tuple[int, int]:
+    delta = node2 - node1
+    delta_x = +1 if delta.x >= 0 else -1
+    delta_y = +1 if delta.y >= 0 else -1
+    return delta_x, delta_y
+
+def is_reverse(element: schemdraw.elements.Element) -> bool:
+    n1, n2 = get_nodes(element)
+    dx, dy = get_node_direction(n1, n2)
+    if dx < 0 or dy < 0:
+        reverse = True
+    return False
 
 def segments_of(element: schemdraw.elements.Element) -> list[schemdraw.segments.SegmentType]:
     return element.segments
@@ -54,7 +73,7 @@ class Impedance(schemdraw.elements.twoterm.ResistorIEC):
         label = ''
         label += f'{self._name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
-        label += str(ScientificComplex(value=self.Z, unit='$\\Omega$', use_exp_prefix=True, precision=precision)) if show_value else ''
+        label += dsp.print_impedance(self.Z, precision=precision) if show_value else ''
         self.anchors['Z_label'] = (0.5, 0.3)
         self.label(label, rotate=True, loc='Z_label', halign='center')
 
@@ -122,7 +141,7 @@ class Resistor(schemdraw.elements.twoterm.ResistorIEC):
         label = ''
         label += f'{self._name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
-        label += str(ScientificFloat(value=self.R, unit='$\\Omega$', use_exp_prefix=True)) if show_value else ''
+        label += dsp.print_resistance(self.R) if show_value else ''
         self.anchors['R_label'] = (0.5, 0.3)
         self.anchors['S_label'] = (2.8, 0.3)
         self.label(label, rotate=True, loc='R_label', halign='center')
@@ -259,7 +278,7 @@ class Capacitor(schemdraw.elements.twoterm.Capacitor):
         label = ''
         label += f'{self._name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
-        label += str(ScientificFloat(value=self.C, unit='$\\mathrm{F}$', use_exp_prefix=True)) if show_value else ''
+        label += dsp.print_capacitance(C) if show_value else ''
         self.anchors['C_label'] = (0.0, -0.9)
         self.anchors['S_label'] = (1.8, -1.9)
         self.label(label, rotate=True, loc='C_label', halign='center')
@@ -291,7 +310,7 @@ class Inductance(schemdraw.elements.twoterm.Inductor):
         label = ''
         label += f'{self._name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
-        label += str(ScientificFloat(value=self.L, unit='$\\mathrm{H}$', use_exp_prefix=True)) if show_value else ''
+        label += dsp.print_inductance(L) if show_value else ''
         self.label(label, rotate=True, ofst=label_offset)
 
     @property

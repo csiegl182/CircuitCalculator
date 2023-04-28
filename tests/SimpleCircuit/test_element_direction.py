@@ -1,5 +1,5 @@
-from CircuitCalculator.SimpleCircuit.DiagramParser import get_node_direction
-import schemdraw
+from CircuitCalculator.SimpleCircuit.Elements import get_node_direction
+import schemdraw.util
 
 def test_node_direction_identifies_positive_x_direction() -> None:
     n1 = schemdraw.util.Point([0, 0])

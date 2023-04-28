@@ -1,9 +1,8 @@
 import matplotlib # type: ignore
 matplotlib.use('Agg')
-from CircuitCalculator.SimpleCircuit.DiagramParser import SchematicDiagramParser, round_node, UnknownElement
-from CircuitCalculator.SimpleCircuit.Elements import CurrentSource, Resistor, Line, Schematic
+from CircuitCalculator.SimpleCircuit.DiagramParser import SchematicDiagramParser, UnknownElement
+from CircuitCalculator.SimpleCircuit.Elements import CurrentSource, Resistor, Line, Schematic, round_node
 import pytest
-import schemdraw
 
 class SimpleDrawing:
     def __init__(self, show: bool = False) -> None:

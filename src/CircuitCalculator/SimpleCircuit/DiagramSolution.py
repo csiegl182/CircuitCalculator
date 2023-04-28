@@ -2,7 +2,7 @@ from ..Network.solution import NetworkSolution
 
 from . import Elements as elm
 from . import Display as dsp
-from .DiagramParser import SchematicDiagramParser, get_nodes, get_node_direction
+from .DiagramTranslator import SchematicDiagramParser
 
 from dataclasses import dataclass
 from typing import Callable
@@ -29,9 +29,7 @@ class SchematicDiagramSolution:
         if type(element) is elm.VoltageSource or type(element) is elm.RealVoltageSource:
             reverse = not reverse
         # adjust missing direction information of CurrentLabel() method | TODO: Diese Funktion muss in VoltageLabel rein
-        n1, n2 = get_nodes(element) # TODO: Nach Elements
-        dx, dy = get_node_direction(n1, n2)
-        if dx < 0 or dy < 0:
+        if elm.is_reverse(element):
             reverse = not reverse
         return elm.VoltageLabel(element, label=self.voltage_display(V_branch), reverse=reverse, color=dsp.blue)
 

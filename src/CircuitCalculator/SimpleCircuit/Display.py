@@ -46,3 +46,15 @@ def print_active_reactive_power(value: complex, precision: int = 3):
     label = f'P: {P_sign}{P}'
     label+= f'\nQ: {Q_sign}{Q}' if Q.value > 1e-4 else ''
     return label
+
+def print_resistance(R: float, precision: int = 3):
+    return str(ScientificComplex(value=R, unit='Ω', use_exp_prefix=True, exp_prefixes={-3: 'm', 3: 'k', 6: 'M', 9: 'G'}, precision=precision))
+
+def print_impedance(Z: complex, precision: int = 3):
+    return str(ScientificComplex(value=Z, unit='Ω', use_exp_prefix=True, exp_prefixes={-3: 'm', 3: 'k', 6: 'M', 9: 'G'}, precision=precision))
+
+def print_capacitance(C: float, precision: int = 3):
+    return str(ScientificFloat(value=C, unit='F', use_exp_prefix=True, exp_prefixes={-12: 'p', -9: 'n', -6: 'μ', -3: 'm'}, precision=precision))
+
+def print_inductance(L: float, precision: int = 3):
+    return str(ScientificFloat(value=L, unit='H', use_exp_prefix=True, exp_prefixes={-9: 'n', -6: 'μ', -3: 'm'}, precision=precision))

@@ -1,36 +1,13 @@
 import schemdraw.elements, schemdraw.util
-
-from ..Network.network import Network
-from ..Circuit.circuit import Circuit, transform
-from ..Circuit import components as cmp
-
-
-from . import Elements as elm
-from .SchemdrawTranslatorTypes import ElementTranslatorMap
-from .CircuitComponentTranslators import circuit_translator_map
-
 from dataclasses import dataclass
-from typing import List
+from .SchemdrawTranslatorTypes import ElementTranslatorMap
+from . import Elements as elm
+from ..Circuit import circuit
+from ..Circuit import components
 
 class UnknownElement(Exception): pass
 class MultipleGroundNodes(Exception): pass
 class UnknownTranslator(Exception): pass
-
-# TODO: Folgende drei Funktionen muessen zu Elements rein
-
-def get_node_direction(node1: schemdraw.util.Point, node2: schemdraw.util.Point) -> tuple[int, int]:
-    delta = node2 - node1
-    delta_x = +1 if delta.x >= 0 else -1
-    delta_y = +1 if delta.y >= 0 else -1
-    return delta_x, delta_y
-
-def round_node(node: schemdraw.util.Point) -> schemdraw.util.Point:
-    def local_round(x):
-        return round(x, ndigits=2)
-    return schemdraw.util.Point((local_round(node.x), local_round(node.y)))
-
-def get_nodes(element: schemdraw.elements.Element, n_labels: tuple[str, ...]=('start', 'end')) -> list[schemdraw.util.Point]:
-    return [round_node(element.absanchors[n_label]) for n_label in n_labels]
 
 @dataclass(frozen=True)
 class SchematicDiagramParser:
@@ -60,10 +37,10 @@ class SchematicDiagramParser:
 
     @property
     def all_nodes(self) -> set[schemdraw.util.Point]:
-        nodes = {round_node(e.absanchors['start']) for e in self.circuit_elements}
-        nodes = nodes.union({round_node(e.absanchors['end']) for e in self.circuit_elements})
-        nodes = nodes.union({round_node(e.absanchors['start']) for e in self.line_elements})
-        nodes = nodes.union({round_node(e.absanchors['end']) for e in self.line_elements})
+        nodes = {elm.round_node(e.absanchors['start']) for e in self.circuit_elements}
+        nodes = nodes.union({elm.round_node(e.absanchors['end']) for e in self.circuit_elements})
+        nodes = nodes.union({elm.round_node(e.absanchors['start']) for e in self.line_elements})
+        nodes = nodes.union({elm.round_node(e.absanchors['end']) for e in self.line_elements})
         return nodes
 
     @property
@@ -78,7 +55,7 @@ class SchematicDiagramParser:
 
     @property
     def node_label_mapping(self) -> dict[schemdraw.util.Point, str]:
-        node_labels = {self.unique_node_mapping[get_nodes(e)[0]] : e.node_id for e in self.node_elements}
+        node_labels = {self.unique_node_mapping[elm.get_nodes(e)[0]] : e.node_id for e in self.node_elements}
         node_index = len(node_labels)+1
         unlabeled_nodes = [p for p in self.unique_nodes if p not in node_labels.keys()]
         for p in unlabeled_nodes:
@@ -108,19 +85,19 @@ class SchematicDiagramParser:
         if len(ground_nodes) == 0:
             return list(self.unique_nodes)[0]
         else:
-            return get_nodes(ground_nodes[0])[0]
+            return elm.get_nodes(ground_nodes[0])[0]
 
     @property
     def ground_label(self) -> str:
         return self._get_node_index(self.ground)
 
-    def translate_elements(self, translator_map : ElementTranslatorMap) -> Circuit:
-        def translate(element: schemdraw.elements.Element) -> cmp.Component:
+    def translate_elements(self, translator_map : ElementTranslatorMap) -> circuit.Circuit:
+        def translate(element: schemdraw.elements.Element) -> components.Component:
             try:
-                return translator_map[type(element)](element, tuple(map(self._get_node_index, get_nodes(element))))
+                return translator_map[type(element)](element, tuple(map(self._get_node_index, elm.get_nodes(element))))
             except KeyError:
                 raise UnknownTranslator(f"Network element '{type(element).__name__}' cannot be translated.")
-        return Circuit([translate(e) for e in self.all_elements if translate(e) is not None])
+        return circuit.Circuit([translate(e) for e in self.all_elements if translate(e) is not None])
 
     def _get_equal_electrical_potential_nodes(self, node: schemdraw.util.Point) -> set[schemdraw.util.Point]:
         equal_electrical_potential_nodes = set([node])
@@ -128,7 +105,7 @@ class SchematicDiagramParser:
         while len(equal_electrical_potential_nodes) > old_length:
             old_length = len(equal_electrical_potential_nodes)
             for line in self.line_elements:
-                n1, n2 = get_nodes(line)
+                n1, n2 = elm.get_nodes(line)
                 if n1 in equal_electrical_potential_nodes:
                     equal_electrical_potential_nodes.add(n2)
                 elif n2 in equal_electrical_potential_nodes:
@@ -144,13 +121,3 @@ class SchematicDiagramParser:
             raise UnknownElement(f'Element {name} not known')
         else:
             return elements[0]
-
-def circuit_parser(schematic: elm.Schematic) -> Circuit:
-    schematic_diagram = SchematicDiagramParser(schematic)
-    return schematic_diagram.translate_elements(circuit_translator_map)
-
-def network_parser(schematic: elm.Schematic, w: List[float] = []) -> List[Network]:
-    circuit = circuit_parser(schematic)
-    if len(w) == 0:
-        w = circuit.w
-    return transform(circuit=circuit, w=w)
