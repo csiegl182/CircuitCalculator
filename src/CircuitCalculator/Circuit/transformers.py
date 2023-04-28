@@ -43,10 +43,21 @@ def voltage_source(voltage_source: cmp.VoltageSource, w: float = 0, w_resolution
         element
     )
 
+def linear_current_source(current_source: cmp.LinearCurrentSource, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
+    element = elm.linear_current_source(current_source.id, elm.complex_value(current_source.I, 0), elm.complex_value(1/current_source.R, 0))
+    if np.abs(w-current_source.w) > w_resolution:
+        element = elm.open_circuit(current_source.id)
+    return ntw.Branch(
+        current_source.nodes[0],
+        current_source.nodes[1],
+        element
+    )
+
 transformers : dict[Type[cmp.Component], CircuitComponentTranslator] = {
     cmp.Resistor : resistor,
     cmp.Capacitor : capacitor,
     cmp.Inductance : inductance,
     cmp.CurrentSource : current_source,
-    cmp.VoltageSource : voltage_source
+    cmp.VoltageSource : voltage_source,
+    cmp.LinearCurrentSource : linear_current_source,
 }

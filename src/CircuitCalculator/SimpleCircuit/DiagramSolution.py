@@ -64,3 +64,12 @@ def complex_solution(digagram_parser: SchematicDiagramParser, solution: NetworkS
         current_display=partial(dsp.print_complex, unit='A', precision=precision, polar=polar, deg=deg),
         power_display=partial(dsp.print_complex, unit='VA', precision=precision, polar=polar, deg=deg)
     )
+
+def dc_solution(digagram_parser: SchematicDiagramParser, solution: NetworkSolution, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
+    return SchematicDiagramSolution(
+        diagram_parser=digagram_parser,
+        solution=solution,
+        voltage_display=partial(dsp.print_abs, unit='V', precision=precision, polar=polar, deg=deg),
+        current_display=partial(dsp.print_abs, unit='A', precision=precision, polar=polar, deg=deg),
+        power_display=partial(dsp.print_abs, unit='VA', precision=precision, polar=polar, deg=deg)
+    )

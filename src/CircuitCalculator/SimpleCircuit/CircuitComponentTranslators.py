@@ -34,6 +34,9 @@ def ac_current_source_translator(element: elm.ACCurrentSource, nodes: tuple[str,
         phi=element.phi*pi/180 if element.deg else element.phi
     )
 
+def linear_current_source_translator(element: elm.RealCurrentSource, nodes: tuple[str, str]) -> cct_cmp.LinearCurrentSource:
+    return cct_cmp.LinearCurrentSource(nodes=nodes, id=element.name, I=element.I.real, R=element.R)
+
 def none_translator(*_) -> None:
     return None
 
@@ -48,4 +51,5 @@ circuit_translator_map : ElementTranslatorMap = {
     elm.Line: none_translator,
     elm.Node: none_translator,
     elm.LabelNode: none_translator,
+    elm.RealCurrentSource: linear_current_source_translator,
 }

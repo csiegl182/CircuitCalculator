@@ -18,6 +18,15 @@ def print_complex(value: complex, unit: str = '', precision: int = 3, polar: boo
         compact=True
     ))
 
+def print_abs(value: complex, unit: str = '', precision: int = 3) -> str:
+    return str(ScientificFloat(
+        value=abs(value),
+        unit=unit,
+        precision=precision,
+        use_exp_prefix=True,
+        exp_prefixes={-6: 'u', -3: 'm', 3: 'k'},
+    ))
+
 def print_sinosoidal(value: complex, unit: str = '', precision: int = 3, w: float = 0, sin: bool = False, deg: bool = False, hertz: bool = False) -> str:
     abs_value = ScientificFloat(value=abs(value), unit=unit, precision=precision, use_exp_prefix=True, exp_prefixes={-6: 'u', -3: 'm', 3: 'k'})
     phase_value = phase(value)

@@ -23,7 +23,7 @@ def is_reverse(element: schemdraw.elements.Element) -> bool:
     n1, n2 = get_nodes(element)
     dx, dy = get_node_direction(n1, n2)
     if dx < 0 or dy < 0:
-        reverse = True
+        return True
     return False
 
 def segments_of(element: schemdraw.elements.Element) -> list[schemdraw.segments.SegmentType]:

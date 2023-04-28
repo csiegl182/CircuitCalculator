@@ -17,3 +17,6 @@ def network_translator(schematic: elm.Schematic, w: List[float] = []) -> List[Ne
     if len(w) == 0:
         w = circuit.w
     return transform(circuit=circuit, w=w)
+
+def dc_network_translator(schematic: elm.Schematic) -> Network:
+    return network_translator(schematic, w=[0])[0]

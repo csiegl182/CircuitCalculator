@@ -45,6 +45,11 @@ class VoltageSource(Source):
     type : str = field(default='voltage_source', init=False)
 
 @dataclass(frozen=True)
+class LinearCurrentSource(CurrentSource):
+    R : float = field(default=0.0)
+    type : str = field(default='linear_current_source', init=False)
+
+@dataclass(frozen=True)
 class Ground(Component):
     id : str = field(default='gnd')
     type : str = field(default='ground', init=False)
