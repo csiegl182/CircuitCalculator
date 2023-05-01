@@ -11,9 +11,6 @@ def test_network_1_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_current('R1'), 0.77, decimal=2)
     np.testing.assert_almost_equal(solution.get_current('R2'), 0.77, decimal=2)
     np.testing.assert_almost_equal(solution.get_current('I1'), -0.23, decimal=2)
-    np.testing.assert_almost_equal(solution.get_power('R1'), 5.92, decimal=2)
-    np.testing.assert_almost_equal(solution.get_power('R2'), 11.84, decimal=2)
-    np.testing.assert_almost_equal(solution.get_power('I1'), 5.33, decimal=2)
 
 def test_network_2_with_advanced_nodal_analysis() -> None:
     network = load_network_from_json('./examples/networks/json/example_network_2.json')
@@ -26,10 +23,6 @@ def test_network_2_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_current('R2'), 0.02, decimal=2)
     np.testing.assert_almost_equal(solution.get_current('R3'), 0.02, decimal=2)
     np.testing.assert_almost_equal(solution.get_current('U1'), 0.12, decimal=2)
-    np.testing.assert_almost_equal(solution.get_power('R1'), 0.10, decimal=2)
-    np.testing.assert_almost_equal(solution.get_power('R2'), 0.008, decimal=3)
-    np.testing.assert_almost_equal(solution.get_power('R3'), 0.012, decimal=3)
-    np.testing.assert_almost_equal(solution.get_power('U1'), 0.12, decimal=2)
 
 def test_network_3_with_advanced_nodal_analysis() -> None:
     network = load_network_from_json('./examples/networks/json/example_network_3.json')
@@ -48,13 +41,6 @@ def test_network_3_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_current('R5'), -0.04, decimal=2)
     np.testing.assert_almost_equal(solution.get_current('U1'), 0.056, decimal=3)
     np.testing.assert_almost_equal(solution.get_current('U2'), 0.075, decimal=3)
-    np.testing.assert_almost_equal(solution.get_power('R1'), 0.032, decimal=3)
-    np.testing.assert_almost_equal(solution.get_power('R2'), 0.0096, decimal=4)
-    np.testing.assert_almost_equal(solution.get_power('R3'), 0.0364, decimal=4)
-    np.testing.assert_almost_equal(solution.get_power('R4'), 0.0484, decimal=4)
-    np.testing.assert_almost_equal(solution.get_power('R5'), 0.0800, decimal=4)
-    np.testing.assert_almost_equal(solution.get_power('U1'), 0.057, decimal=3)
-    np.testing.assert_almost_equal(solution.get_power('U2'), 0.15, decimal=2)
     
 def test_network_4_with_advanced_nodal_analysis() -> None:
     network = load_network_from_json('./examples/networks/json/example_network_4.json')
@@ -73,13 +59,6 @@ def test_network_4_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_current('R5'), 0.028, decimal=3)
     np.testing.assert_almost_equal(solution.get_current('U1'), 0.052, decimal=3)
     np.testing.assert_almost_equal(solution.get_current('U2'), 0.094, decimal=3)
-    np.testing.assert_almost_equal(solution.get_power('R1'), 0.027, decimal=3)
-    np.testing.assert_almost_equal(solution.get_power('R2'), 0.012, decimal=3)
-    np.testing.assert_almost_equal(solution.get_power('R3'), 0.13, decimal=2)
-    np.testing.assert_almost_equal(solution.get_power('R4'), 0.03, decimal=2)
-    np.testing.assert_almost_equal(solution.get_power('R5'), 0.038, decimal=3)
-    np.testing.assert_almost_equal(solution.get_power('U1'), 0.05, decimal=2)
-    np.testing.assert_almost_equal(solution.get_power('U2'), 0.188, decimal=3)
 
 def test_network_5_with_advanced_nodal_analysis() -> None:
     network = load_network_from_json('./examples/networks/json/example_network_5.json')
@@ -100,14 +79,6 @@ def test_network_5_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_current('U2'), 0.048, decimal=3)
     np.testing.assert_almost_equal(solution.get_current('U3'), 0.0075, decimal=4)
     np.testing.assert_almost_equal(solution.get_current('I4'), 0.1, decimal=3)
-    np.testing.assert_almost_equal(solution.get_power('R1'),  0.24, decimal=2)
-    np.testing.assert_almost_equal(solution.get_power('R2'),  0.23, decimal=2)
-    np.testing.assert_almost_equal(solution.get_power('R3'),  0.069, decimal=3)
-    np.testing.assert_almost_equal(solution.get_power('R4'),  0.0022, decimal=4)
-    np.testing.assert_almost_equal(solution.get_power('U1'),  0.156, decimal=3)
-    np.testing.assert_almost_equal(solution.get_power('U2'),  0.096, decimal=3)
-    np.testing.assert_almost_equal(solution.get_power('U3'),  0.022, decimal=3)
-    np.testing.assert_almost_equal(solution.get_power('I4'), -0.27, decimal=2)
 
 def test_network_8_with_advanced_nodal_analysis() -> None:
     network = load_network_from_json('./examples/networks/json/example_network_8.json')
@@ -128,14 +99,6 @@ def test_network_8_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_current('U1'), 0.075, decimal=3)
     np.testing.assert_almost_equal(solution.get_current('U2'), 0.075, decimal=3)
     np.testing.assert_almost_equal(solution.get_current('I3'), 0.10, decimal=3)
-    np.testing.assert_almost_equal(solution.get_power('R1'),  0.10, decimal=2)
-    np.testing.assert_almost_equal(solution.get_power('R2'),  0.20, decimal=2)
-    np.testing.assert_almost_equal(solution.get_power('R3'),  0.0188, decimal=4)
-    np.testing.assert_almost_equal(solution.get_power('R4'),  0.40, decimal=2)
-    np.testing.assert_almost_equal(solution.get_power('R5'),  0.2812, decimal=4)
-    np.testing.assert_almost_equal(solution.get_power('U1'),  0.075, decimal=3)
-    np.testing.assert_almost_equal(solution.get_power('U2'),  0.15, decimal=2)
-    np.testing.assert_almost_equal(solution.get_power('I3'), -0.775, decimal=3)
 
 def test_network_9_with_advanced_nodal_analysis() -> None:
     network = load_network_from_json('./examples/networks/json/example_network_9.json')
@@ -152,10 +115,4 @@ def test_network_9_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_current('R4'), 5, decimal=3)
     np.testing.assert_almost_equal(solution.get_current('Iq'), 4, decimal=3)
     np.testing.assert_almost_equal(solution.get_current('Uq'), 5, decimal=3)
-    np.testing.assert_almost_equal(solution.get_power('R1'), 0, decimal=2)
-    np.testing.assert_almost_equal(solution.get_power('R2'), 80, decimal=2)
-    np.testing.assert_almost_equal(solution.get_power('R3'), 20, decimal=2)
-    np.testing.assert_almost_equal(solution.get_power('R4'), 500, decimal=2)
-    np.testing.assert_almost_equal(solution.get_power('Iq'), 0, decimal=2)
-    np.testing.assert_almost_equal(solution.get_power('Uq'), 600, decimal=2)
 

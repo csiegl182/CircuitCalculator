@@ -6,6 +6,4 @@ class NetworkSolution(Protocol):
 
     def get_current(self, branch_id: str) -> complex: ...
 
-    def get_power(self, branch_id: str) -> complex: ...
-
 NetworkSolver = Callable[[Network], NetworkSolution]
