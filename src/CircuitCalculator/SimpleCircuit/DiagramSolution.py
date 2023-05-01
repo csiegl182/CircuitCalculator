@@ -1,8 +1,9 @@
-from ..Network.solution import NetworkSolution, NetworkSolver
+from ..Network.solution import NetworkSolver
+from ..Circuit.solution import DCSolution
 
 from . import Elements as elm
 from . import Display as dsp
-from .DiagramTranslator import SchematicDiagramParser, dc_network_translator, network_translator
+from .DiagramTranslator import SchematicDiagramParser, circuit_translator
 
 from dataclasses import dataclass
 from typing import Callable
@@ -15,7 +16,7 @@ class UnknownTranslator(Exception): pass
 @dataclass
 class SchematicDiagramSolution:
     diagram_parser: SchematicDiagramParser
-    solution: NetworkSolution
+    solution: DCSolution
     voltage_display: Callable[[complex], str]
     current_display: Callable[[complex], str]
     power_display: Callable[[complex], str]
@@ -49,8 +50,7 @@ class SchematicDiagramSolution:
 
 def time_domain_solution(schematic: elm.Schematic, solver: NetworkSolver, w: float = 0, sin: bool = False, deg: bool = False, hertz: bool = False) -> SchematicDiagramSolution:
     digagram_parser = SchematicDiagramParser(schematic)
-    network = network_translator(schematic)[0]
-    solution = solver(network)
+    solution = DCSolution(circuit=circuit_translator(schematic), solver=solver)
     return SchematicDiagramSolution(
         diagram_parser=digagram_parser,
         solution=solution,
@@ -61,8 +61,7 @@ def time_domain_solution(schematic: elm.Schematic, solver: NetworkSolver, w: flo
 
 def complex_solution(schematic: elm.Schematic, solver: NetworkSolver, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
     digagram_parser = SchematicDiagramParser(schematic)
-    network = network_translator(schematic)[0]
-    solution = solver(network)
+    solution = DCSolution(circuit=circuit_translator(schematic), solver=solver)
     return SchematicDiagramSolution(
         diagram_parser=digagram_parser,
         solution=solution,
@@ -73,8 +72,7 @@ def complex_solution(schematic: elm.Schematic, solver: NetworkSolver, precision:
 
 def dc_solution(schematic: elm.Schematic, solver: NetworkSolver, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
     digagram_parser = SchematicDiagramParser(schematic)
-    network = dc_network_translator(schematic)
-    solution = solver(network)
+    solution = DCSolution(circuit=circuit_translator(schematic), solver=solver)
     return SchematicDiagramSolution(
         diagram_parser=digagram_parser,
         solution=solution,
