@@ -16,6 +16,12 @@ def test_ScientificFloat_returns_correct_value() -> None:
     precision = 3
     assert_almost_equal(float(ScientificFloat(value, precision=precision).__str__()), value, decimal=precision)
 
+def test_negative_numbers_preserves_sign() -> None:
+    value = -1.23
+    precision = 3
+    str_repr = str(ScientificFloat(value, precision=precision))
+    assert str_repr == '-1.23'
+
 def test_ScientificFloat_fills_with_trailing_zeros() -> None:
     value = 1.4
     precision = 3

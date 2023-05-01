@@ -100,7 +100,7 @@ class ScientificFloat:
         post_decimal_positions = max(self.precision - pre_decimal_positions, 0)
         pre_decimal = int(self.value3.mantissa)
         pre_decimal_str = f'{pre_decimal:d}'
-        post_decimal = int(np.round(self.value3.mantissa % 1 * 10**(post_decimal_positions)))
+        post_decimal = int(np.round(np.abs(self.value3.mantissa) % 1 * 10**(post_decimal_positions)))
         post_decimal_str = '' if post_decimal_positions == 0 else f'.{post_decimal:0{post_decimal_positions}d}'
         return f'{pre_decimal_str}{post_decimal_str}{self.exp_extension(self.value3.exponent)}{self.exp_prefix(self.value3.exponent)}{self.unit}'
 
