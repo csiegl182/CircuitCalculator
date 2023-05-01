@@ -70,7 +70,7 @@ def dc_solution(schematic: elm.Schematic, solver: NetworkSolver, precision: int 
     return SchematicDiagramSolution(
         diagram_parser=digagram_parser,
         solution=solution,
-        voltage_display=partial(dsp.print_abs, unit='V', precision=precision),
-        current_display=partial(dsp.print_abs, unit='A', precision=precision),
-        power_display=partial(dsp.print_abs, unit='VA', precision=precision)
+        voltage_display=partial(dsp.print_real, unit='V', precision=precision),
+        current_display=partial(dsp.print_real, unit='A', precision=precision),
+        power_display=partial(dsp.print_real, unit='VA', precision=precision)
     )
