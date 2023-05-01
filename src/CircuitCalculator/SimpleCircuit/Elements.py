@@ -479,10 +479,16 @@ class Ground(Node):
         return 'Ground'
 
 class VoltageLabel(schemdraw.elements.CurrentLabel):
-    def __init__(self, at: schemdraw.elements.Element, label: str = '', label_loc: str = 'bottom', **kwargs):
+    def __init__(self, at: schemdraw.elements.Element, label: str = '', label_loc: str = 'bottom', reverse: bool = False, **kwargs):
         kwargs.update(v_label_args.get(type(at), {}))
         kwargs.update({'color': kwargs.get('color', dsp.blue)})
-        super().__init__(**kwargs)
+        # adjust counting arrow system of voltage sources for display
+        if type(at) is VoltageSource or type(at) is RealVoltageSource:
+            reverse = not reverse
+        # adjust missing direction information of CurrentLabel() method | TODO: Diese Funktion muss in VoltageLabel rein
+        if is_reverse(at):
+            reverse = not reverse
+        super().__init__(reverse=reverse, **kwargs)
         if isinstance(at, RealVoltageSource):
             self.at(at.center)
         else:

@@ -26,12 +26,6 @@ class SchematicDiagramSolution:
         V_branch = self.solution.get_voltage(name)
         if reverse:
             V_branch *= -1
-        # adjust counting arrow system of voltage sources for display
-        if type(element) is elm.VoltageSource or type(element) is elm.RealVoltageSource:
-            reverse = not reverse
-        # adjust missing direction information of CurrentLabel() method | TODO: Diese Funktion muss in VoltageLabel rein
-        if elm.is_reverse(element):
-            reverse = not reverse
         return elm.VoltageLabel(element, label=self.voltage_display(V_branch), reverse=reverse, color=dsp.blue)
 
     def draw_current(self, name: str, reverse: bool = False, end: bool = False) -> elm.CurrentLabel:
