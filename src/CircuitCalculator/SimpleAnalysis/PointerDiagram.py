@@ -1,7 +1,7 @@
 from .Elements import complex_pointer
 from .Layout import Layout, color, grid_layout
 
-from ..Network.solution import NetworkSolution
+from ..Circuit.solution import ComplexSolution
 
 from functools import partial
 import numpy as np
@@ -40,7 +40,7 @@ class PointerDiagram:
         self.pointer_drawers.append(partial(complex_pointer, self.ax, z0, z0+z, **kwargs))
 
 class VoltagePointerDiagram(PointerDiagram):
-    def __init__(self, solution: NetworkSolution, resistor: float = 1.0, **kwargs):
+    def __init__(self, solution: ComplexSolution, resistor: float = 1.0, **kwargs):
         self._solution = solution
         self._resistor = resistor
         self._pointer_heads = {}
@@ -67,7 +67,7 @@ class VoltagePointerDiagram(PointerDiagram):
         self.add_pointer(z=z, color=color, label=f'$I({id})\cdot{resistor}\Omega$')
 
 class CurrentPointerDiagram(PointerDiagram):
-    def __init__(self, solution: NetworkSolution, conductor: float = 1.0, **kwargs):
+    def __init__(self, solution: ComplexSolution, conductor: float = 1.0, **kwargs):
         self._solution = solution
         self._conductor = conductor
         self._pointer_heads = {}

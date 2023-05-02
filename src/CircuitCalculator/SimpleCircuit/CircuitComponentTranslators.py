@@ -56,4 +56,7 @@ circuit_translator_map : ElementTranslatorMap = {
     elm.LabelNode: none_translator,
     elm.RealCurrentSource: linear_current_source_translator,
     elm.RealVoltageSource: linear_voltage_source_translator,
+    elm.VoltageLabel: none_translator,
+    elm.CurrentLabel: none_translator,
+    elm.PowerLabel: none_translator
 }

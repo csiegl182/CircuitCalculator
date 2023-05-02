@@ -6,8 +6,6 @@ correct_voltage = 1+1j
 other_voltage = 2+2j
 correct_current = 3+3j
 other_current = 4+4j
-correct_power = 5+5j
-other_power = 6+6j
 
 class NetworkSolutionMock:
     def get_voltage(self, branch_id: str) -> complex:
@@ -18,10 +16,6 @@ class NetworkSolutionMock:
         if branch_id == 'correct_id':
             return correct_current
         return other_current
-    def get_power(self, branch_id: str) -> complex:
-        if branch_id == 'correct_id':
-            return correct_power
-        return other_power
 
 def test_dc_solution_returns_voltage_when_asking_for_correct_id(monkeypatch: MonkeyPatch) -> None:
     monkeypatch.setattr('CircuitCalculator.Circuit.solution.transform', lambda _, w: [None])
@@ -56,11 +50,11 @@ def test_dc_solution_returns_power_when_asking_for_correct_id(monkeypatch: Monke
 
     dc_solution = DCSolution(Circuit([]), lambda _: NetworkSolutionMock())
 
-    assert dc_solution.get_power('correct_id') == correct_power
+    assert dc_solution.get_power('correct_id') == correct_voltage*correct_current.conjugate()
 
 def test_dc_solution_returns_power_when_asking_for_another_id(monkeypatch: MonkeyPatch) -> None:
     monkeypatch.setattr('CircuitCalculator.Circuit.solution.transform', lambda _, w: [None])
 
     dc_solution = DCSolution(Circuit([]), lambda _: NetworkSolutionMock())
 
-    assert dc_solution.get_power('another_id') == other_power
+    assert dc_solution.get_power('another_id') == other_voltage*other_current.conjugate()

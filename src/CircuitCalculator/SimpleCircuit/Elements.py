@@ -11,7 +11,10 @@ def round_node(node: schemdraw.util.Point) -> schemdraw.util.Point:
     return schemdraw.util.Point((local_round(node.x), local_round(node.y)))
 
 def get_nodes(element: schemdraw.elements.Element, n_labels: tuple[str, ...]=('start', 'end')) -> list[schemdraw.util.Point]:
-    return [round_node(element.absanchors[n_label]) for n_label in n_labels]
+    try:
+        return [round_node(element.absanchors[n_label]) for n_label in n_labels]
+    except KeyError:
+        return []
 
 def get_node_direction(node1: schemdraw.util.Point, node2: schemdraw.util.Point) -> tuple[int, int]:
     delta = node2 - node1

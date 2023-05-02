@@ -1,5 +1,6 @@
 from ..Network.solution import NetworkSolver
-from ..Circuit.solution import DCSolution
+from ..Network.NodalAnalysis import nodal_analysis_solver
+from ..Circuit.solution import DCSolution, ComplexSolution
 
 from . import Elements as elm
 from . import Display as dsp
@@ -16,7 +17,7 @@ class UnknownTranslator(Exception): pass
 @dataclass
 class SchematicDiagramSolution:
     diagram_parser: SchematicDiagramParser
-    solution: DCSolution
+    solution: ComplexSolution
     voltage_display: Callable[[complex], str]
     current_display: Callable[[complex], str]
     power_display: Callable[[complex], str]
@@ -42,9 +43,9 @@ class SchematicDiagramSolution:
         P_branch = self.solution.get_power(name)
         return elm.PowerLabel(element, label=self.power_display(P_branch), color=dsp.green)
 
-def time_domain_solution(schematic: elm.Schematic, solver: NetworkSolver, w: float = 0, sin: bool = False, deg: bool = False, hertz: bool = False) -> SchematicDiagramSolution:
+def time_domain_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_solver, w: float = 0, sin: bool = False, deg: bool = False, hertz: bool = False) -> SchematicDiagramSolution:
     digagram_parser = SchematicDiagramParser(schematic)
-    solution = DCSolution(circuit=circuit_translator(schematic), solver=solver)
+    solution = ComplexSolution(circuit=circuit_translator(schematic), solver=solver, w=w)
     return SchematicDiagramSolution(
         diagram_parser=digagram_parser,
         solution=solution,
@@ -53,24 +54,13 @@ def time_domain_solution(schematic: elm.Schematic, solver: NetworkSolver, w: flo
         power_display=dsp.print_active_reactive_power
     )
 
-def complex_solution(schematic: elm.Schematic, solver: NetworkSolver, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
+def complex_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_solver, w: float = 0, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
     digagram_parser = SchematicDiagramParser(schematic)
-    solution = DCSolution(circuit=circuit_translator(schematic), solver=solver)
+    solution = ComplexSolution(circuit=circuit_translator(schematic), solver=solver, w=w)
     return SchematicDiagramSolution(
         diagram_parser=digagram_parser,
         solution=solution,
         voltage_display=partial(dsp.print_complex, unit='V', precision=precision, polar=polar, deg=deg),
         current_display=partial(dsp.print_complex, unit='A', precision=precision, polar=polar, deg=deg),
         power_display=partial(dsp.print_complex, unit='VA', precision=precision, polar=polar, deg=deg)
-    )
-
-def dc_solution(schematic: elm.Schematic, solver: NetworkSolver, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
-    digagram_parser = SchematicDiagramParser(schematic)
-    solution = DCSolution(circuit=circuit_translator(schematic), solver=solver)
-    return SchematicDiagramSolution(
-        diagram_parser=digagram_parser,
-        solution=solution,
-        voltage_display=partial(dsp.print_real, unit='V', precision=precision),
-        current_display=partial(dsp.print_real, unit='A', precision=precision),
-        power_display=partial(dsp.print_real, unit='VA', precision=precision)
     )
