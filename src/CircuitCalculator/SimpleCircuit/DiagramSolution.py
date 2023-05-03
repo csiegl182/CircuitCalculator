@@ -1,6 +1,6 @@
 from ..Network.solution import NetworkSolver
 from ..Network.NodalAnalysis import nodal_analysis_solver
-from ..Circuit.solution import DCSolution, ComplexSolution
+from ..Circuit.solution import ComplexSolution
 
 from . import Elements as elm
 from . import Display as dsp

@@ -1,9 +1,12 @@
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
-from typing import Callable, List, Dict, Any
+from .Elements import complex_pointer
+
 import numpy as np
+from  functools import partial
 from dataclasses import dataclass, field
+from typing import Callable, List, Dict, Any
 
 color = {
     'black' : (0, 0, 0),
@@ -39,7 +42,7 @@ class TimeSeriesPlot:
     y_label: str = ''
     signal_args: Dict[str, Any] = field(default_factory=dict)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.fig, self.ax = plt.subplots(nrows=1, ncols=1, sharex=True)
         self.ax.set_xlabel('t→')
         self.ax.set_xlim(xmin=self.tmin, xmax=self.tmax)
@@ -50,9 +53,42 @@ class TimeSeriesPlot:
     def add_signal(self, x: np.ndarray, y: np.ndarray, label: str, **kwargs) -> None:
         self.signal_args.update({label : {'x': x, 'y': y, 'kwargs': kwargs}})
 
-    def draw(self):
+    def draw(self) -> None:
         for label, signal in self.signal_args.items():
             self.ax.plot(signal['x'], signal['y'], label=label, **signal['kwargs'])
+        self.ax.legend(
+            handles=[line for line in self.ax.lines],
+            ncol=len(self.ax.lines),
+            loc='upper center',
+            bbox_to_anchor=(0.5, 1.1),
+            frameon=False
+        )
+
+@dataclass
+class PointerDiagram:
+    arrow_base: float = 0.05
+    arrow_length: float = 0.05
+
+    def __post_init__(self) -> None:
+        self.fig, self.ax = plt.subplots(ncols=1, nrows=1)
+        self.ax.grid(visible=True, zorder=-1)
+        self.ax.set_aspect('equal', 'box')
+        self.ax.set_xlabel(r'Re{U}→')
+        self.ax.set_ylabel(r'Im{U}→')
+        self.pointer_drawers = []
+        self._max_length = 0
+
+    def add_pointer(self, z: complex, z0: complex = 0, **kwargs) -> None:
+        self._max_length = max(self._max_length, np.abs(z))
+        self.pointer_drawers.append(partial(complex_pointer, self.ax, z0, z0+z, **kwargs))
+
+    def draw(self) -> None:
+        for draw_pointer in self.pointer_drawers:
+            draw_pointer(height=self.arrow_base*self._max_length, width=self.arrow_length*self._max_length)
+        x_min, x_max = self.ax.get_xlim()
+        y_min, y_max = self.ax.get_ylim()
+        self.ax.set_xlim(xmin=min(x_min, y_min), xmax=max(x_max, y_max))
+        self.ax.set_ylim(ymin=min(x_min, y_min), ymax=max(x_max, y_max))
         self.ax.legend(
             handles=[line for line in self.ax.lines],
             ncol=len(self.ax.lines),
