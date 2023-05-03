@@ -79,3 +79,8 @@ def test_complex_value_with_dominating_imag_part_less_than_one() -> None:
     z = 0.25j
     str_repr = str(ScientificComplex(z, use_exp_prefix=False))
     assert str_repr == 'j250e-3'
+
+def test_negative_imaginary_part() -> None:
+    z = -0.25j
+    str_repr = str(ScientificComplex(z, use_exp_prefix=False, compact=True))
+    assert str_repr == '-j250e-3'

@@ -68,13 +68,15 @@ class TimeSeriesPlot:
 class PointerDiagram:
     arrow_base: float = 0.05
     arrow_length: float = 0.05
+    xlabel: str = ''
+    ylabel: str = ''
 
     def __post_init__(self) -> None:
         self.fig, self.ax = plt.subplots(ncols=1, nrows=1)
         self.ax.grid(visible=True, zorder=-1)
         self.ax.set_aspect('equal', 'box')
-        self.ax.set_xlabel(r'Re{U}→')
-        self.ax.set_ylabel(r'Im{U}→')
+        self.ax.set_xlabel(self.xlabel)
+        self.ax.set_ylabel(self.ylabel)
         self.pointer_drawers = []
         self._max_length = 0
 

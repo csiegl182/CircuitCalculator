@@ -63,6 +63,22 @@ class CurrentPointerDiagram:
 
     def __enter__(self):
         self._pointer_heads = {}
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.pointer_diagram.draw()
+
+@dataclass
+class PQDiagram:
+    pointer_diagram: PointerDiagram
+    solution: ComplexSolution
+    
+    def add_power(self, id: str, color=color['green']) -> None:
+        z = self.solution.get_power(id)
+        self.pointer_diagram.add_pointer(z=z, color=color, label=f'S({id})')
+
+    def __enter__(self):
+        return self
 
     def __exit__(self, type, value, traceback):
         self.pointer_diagram.draw()
