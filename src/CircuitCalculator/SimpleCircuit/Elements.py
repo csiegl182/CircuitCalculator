@@ -486,7 +486,7 @@ class VoltageLabel(schemdraw.elements.CurrentLabel):
         kwargs.update(v_label_args.get(type(at), {}))
         kwargs.update({'color': kwargs.get('color', dsp.blue)})
         # adjust counting arrow system of voltage sources for display
-        if type(at) is VoltageSource or type(at) is RealVoltageSource:
+        if type(at) is VoltageSource or type(at) is RealVoltageSource or type(at) is ACVoltageSource:
             reverse = not reverse
         # adjust missing direction information of CurrentLabel() method | TODO: Diese Funktion muss in VoltageLabel rein
         if is_reverse(at):
@@ -528,6 +528,8 @@ class PowerLabel(schemdraw.elements.Label):
 
 v_label_args : dict[Any, dict[str, float | str ]] = {
     Resistor : {'ofst' : -0.6},
+    VoltageSource : {'ofst' : -0.7},
+    ACVoltageSource : {'ofst' : -0.7},
     Impedance : {'ofst' : -0.6},
     Capacitor : {'ofst' : -0.6},
     Inductance : {'ofst' : -0.6},
@@ -541,5 +543,6 @@ i_label_args : dict[Any, dict[str, float]] = {
     Capacitor : {'ofst' : 1.4},
     Inductance : {'ofst' : 1.4},
     VoltageSource : {'ofst' : -2.8},
+    ACVoltageSource : {'ofst' : -3.8},
     RealVoltageSource: {'ofst' : -0.8}
 }

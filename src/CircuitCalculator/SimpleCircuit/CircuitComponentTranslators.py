@@ -16,9 +16,18 @@ def inductance_translator(element: elm.Inductance, nodes: tuple[str, str]) -> cc
 def ground_translator(element: elm.Ground, nodes: tuple[str]) -> cct_cmp.Ground:
     return cct_cmp.Ground(nodes=nodes, id=element.name)
 
+def dc_voltage_source_translator(element: elm.VoltageSource, nodes: tuple[str, str]) -> cct_cmp.VoltageSource:
+    return cct_cmp.VoltageSource(
+        nodes=nodes[::-1],
+        id=element.name,
+        V=element.V.real,
+        w=0,
+        phi=0
+    )
+
 def ac_voltage_source_translator(element: elm.ACVoltageSource, nodes: tuple[str, str]) -> cct_cmp.VoltageSource:
     return cct_cmp.VoltageSource(
-        nodes=nodes,
+        nodes=nodes[::-1],
         id=element.name,
         V=element.V,
         w=element.w,
@@ -45,6 +54,7 @@ def none_translator(*_) -> None:
 
 circuit_translator_map : ElementTranslatorMap = {
     elm.Resistor : resistor_translator,
+    elm.VoltageSource : dc_voltage_source_translator,
     elm.ACVoltageSource : ac_voltage_source_translator,
     elm.ACCurrentSource : ac_current_source_translator,
     elm.Capacitor : capacitor_translator,
