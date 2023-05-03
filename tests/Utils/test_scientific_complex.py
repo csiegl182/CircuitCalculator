@@ -23,16 +23,11 @@ def test_complex_value_with_negative_real_part_and_compact_layout() -> None:
 def test_complex_value_with_dominating_real_part() -> None:
     z = 3+7e-3j
     str_repr = str(ScientificComplex(z))
-    assert str_repr == '3.00'
-
-def test_complex_value_with_dominating_imag_part() -> None:
-    z = 3e-3+7j
-    str_repr = str(ScientificComplex(z))
-    assert str_repr == 'j7.00'
+    assert str_repr == '3.00 + j7.00e-3'
 
 def test_complex_value_with_different_scaling() -> None:
     z = 3+7e-3j
-    str_repr = str(ScientificComplex(z, hide_minor_part=False))
+    str_repr = str(ScientificComplex(z))
     assert str_repr == '3.00 + j7.00e-3'
 
 def test_complex_value_with_given_exponential_prefix() -> None:
@@ -42,7 +37,7 @@ def test_complex_value_with_given_exponential_prefix() -> None:
 
 def test_complex_value_with_different_scaling_and_given_exponential_prefix() -> None:
     z = 3e-3+7e-6j
-    str_repr = str(ScientificComplex(z, use_exp_prefix=True))
+    str_repr = str(ScientificComplex(z, use_exp_prefix=True, exp_prefixes={-3: 'm'}))
     assert str_repr == '3.00m'
 
 def test_complex_value_as_polar_in_rad() -> None:
@@ -74,3 +69,13 @@ def test_complex_value_hides_zero_imaginary_part() -> None:
     z = 1
     str_repr = str(ScientificComplex(z))
     assert str_repr == '1.00'
+
+def test_complex_value_with_dominating_imag_part() -> None:
+    z = 3e-3+7j
+    str_repr = str(ScientificComplex(z, use_exp_prefix=True, exp_prefixes={3: 'k', -3: 'm'}))
+    assert str_repr == 'j7.00'
+
+def test_complex_value_with_dominating_imag_part_less_than_one() -> None:
+    z = 0.25j
+    str_repr = str(ScientificComplex(z, use_exp_prefix=False))
+    assert str_repr == 'j250e-3'

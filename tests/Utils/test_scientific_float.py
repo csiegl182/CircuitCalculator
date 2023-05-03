@@ -64,12 +64,6 @@ def test_zoom_works_with_exponential_prefixes_for_100m() -> None:
     str_repr = str(ScientificFloat(value, precision=precision, use_exp_prefix=True))
     assert str_repr == '100m'
 
-def test_zoom_works_with_exponential_prefixes_for_large_values_out_of_range() -> None:
-    value = 10e6
-    precision = 3
-    str_repr = str(ScientificFloat(value, precision=precision, use_exp_prefix=True, exp_prefixes={3: 'k'}))
-    assert str_repr == '10.0e3k'
-
 def test_zoom_works_with_exponential_prefixes_for_small_values_out_of_range() -> None:
     value = 1e-5
     precision = 3
@@ -128,3 +122,13 @@ def test_scaled_value_with_low_precision() -> None:
     value = 120
     str_repr = str(ScientificFloat(value, precision=1))
     assert str_repr == '100'
+
+def test_large_positive_values_are_infinity() -> None:
+    value = 1e6
+    str_repr = str(ScientificFloat(value, precision=3, use_exp_prefix=True, exp_prefixes={3: 'k'}))
+    assert str_repr == '∞'
+
+def test_large_negative_values_are_minus_infinity() -> None:
+    value = -1e6
+    str_repr = str(ScientificFloat(value, precision=3, use_exp_prefix=True, exp_prefixes={3: 'k'}))
+    assert str_repr == '-∞'
