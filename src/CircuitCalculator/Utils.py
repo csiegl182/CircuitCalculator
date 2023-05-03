@@ -177,5 +177,5 @@ class ScientificComplex:
             if self.imag.value3.is_zero:
                 return f'{self.real_sign}{self.real.__str__()}'
             if self.real.value3.is_zero:
-                return f'{self.imag_sign}j{self.imag.__str__()}' if self.imag.value3.mantissa < 0 else f'j{self.imag.__str__()}'
+                return f'{self.imag_sign}j{self.imag.__str__()}' if self.value.imag < 0 else f'j{self.imag.__str__()}'
             return f'{self.real_sign}{self.real.__str__()}{self.imag_sign}j{self.imag.__str__()}'
