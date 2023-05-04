@@ -44,10 +44,9 @@ class Schematic(schemdraw.Drawing):
 class VoltageSource(din_elements.SourceUDIN):
     def __init__(self, V: complex, name: str, *args, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
+        self._V = V
         if reverse:
-            self._V = -V
-        else:
-            self._V = V
+            self._V *= -1
         self._name = name
         self.anchors['V_label'] = (0.5, 1.1)
         self.anchors['S_label'] = (0.5, 1.1)
@@ -114,10 +113,9 @@ class Impedance(schemdraw.elements.twoterm.ResistorIEC):
 class CurrentSource(din_elements.SourceIDIN):
     def __init__(self, I: complex, name: str, *args, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
+        self._I = I
         if reverse:
-            self._I = -I
-        else:
-            self._I = I
+            self._I *= -1
         self._name = name
         a, b = (1.2, 0.3), (1.8, 0.3)
         self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.red))
@@ -183,10 +181,9 @@ class Resistor(schemdraw.elements.twoterm.ResistorIEC):
 class ACVoltageSource(din_elements.SourceUDIN):
     def __init__(self, V: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
+        self._V = V
         if reverse:
-            self._V = -V
-        else:
-            self._V = V
+            self._V *= -1
         self._name = name
         self._w = w
         self._phi = phi
@@ -230,10 +227,9 @@ class ACVoltageSource(din_elements.SourceUDIN):
 class ACCurrentSource(din_elements.SourceIDIN):
     def __init__(self, I: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
+        self._I = I
         if reverse:
-            self._I = -I
-        else:
-            self._I = I
+            self._I *= -1
         self._name = name
         self._w = w
         self._phi = phi
