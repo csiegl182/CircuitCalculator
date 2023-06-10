@@ -5,6 +5,11 @@ from .supernodes import SuperNodes
 def switch_ground_node(network: Network, new_ground: str) -> Network:
     return Network(network.branches, new_ground)
 
+def remove_element(network: Network, element: str) -> Network:
+    branches = network.branches
+    branches.remove(network[element])
+    return Network(branches)
+
 def remove_ideal_current_sources(network: Network, keep: list[NortenTheveninElement] = []) -> Network:
     return Network([b for b in network.branches if not is_ideal_current_source(b.element) or b.element in keep], node_zero_label=network.node_zero_label)
 

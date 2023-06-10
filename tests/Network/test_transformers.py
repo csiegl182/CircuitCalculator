@@ -1,6 +1,7 @@
+import pytest
 from CircuitCalculator.Network.network import Network, Branch
 from CircuitCalculator.Network.elements import voltage_source, current_source, resistor, is_ideal_current_source, is_ideal_voltage_source
-from CircuitCalculator.Network.transformers import remove_ideal_current_sources, remove_ideal_voltage_sources
+from CircuitCalculator.Network.transformers import remove_ideal_current_sources, remove_ideal_voltage_sources, remove_element
 
 def test_remove_ideal_current_sources_removes_all_voltage_sources() -> None:
     network = Network(
@@ -116,3 +117,37 @@ def test_remove_ideal_voltage_sources_keeps_passives_connected_to_keep_elements(
     )
     network = remove_ideal_voltage_sources(network, keep=[vs1])
     assert r1 in [b.element for b in network.branches_between('1', '2')]
+
+def test_remove_network_element_removes_element() -> None:
+    vs1 = voltage_source('Us1', U=1)
+    vs2 = voltage_source('Us2', U=2)
+    r1 = resistor('R1', R=1)
+    r2 = resistor('R2', R=2)
+    network = Network(
+        branches=[
+            Branch('0', '1', vs1),
+            Branch('1', '2', vs2),
+            Branch('2', '3', r1),
+            Branch('3', '0', r2),
+        ]
+    )
+    network = remove_element(network, 'Us1')
+    with pytest.raises(KeyError):
+        network['Us1']
+
+
+def test_remove_network_element_removes_unknown_element() -> None:
+    vs1 = voltage_source('Us1', U=1)
+    vs2 = voltage_source('Us2', U=2)
+    r1 = resistor('R1', R=1)
+    r2 = resistor('R2', R=2)
+    network = Network(
+        branches=[
+            Branch('0', '1', vs1),
+            Branch('1', '2', vs2),
+            Branch('2', '3', r1),
+            Branch('3', '0', r2),
+        ]
+    )
+    with pytest.raises(KeyError):
+        network2 = remove_element(network, 'Usx')
