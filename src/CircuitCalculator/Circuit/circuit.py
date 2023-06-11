@@ -18,14 +18,14 @@ class Circuit:
 def w(f: float) -> float:
     return 2*np.pi*f
 
-def transform_circuit(circuit: Circuit, w: float, w_resolution: float, node_zero_label: str) -> Network:
-    return Network(
-        branches=[transformers[type(component)](component, w, w_resolution) for component in circuit.components if type(component) in transformers.keys()],
-        node_zero_label=node_zero_label
-    )
-
-def transform(circuit: Circuit, w: List[float] = [0], w_resolution: float = 1e-3) -> List[Network]:
+def transform_circuit(circuit: Circuit, w: float, w_resolution: float = 1e-3) -> Network:
     ground_nodes = [component for component in circuit.components if component.type == 'ground']
     if len(ground_nodes) > 1:
         raise MultipleGroundNodes
-    return [transform_circuit(circuit, w_, w_resolution, ground_nodes[0].nodes[0]) for w_ in w]
+    return Network(
+        branches=[transformers[type(component)](component, w, w_resolution) for component in circuit.components if type(component) in transformers.keys()],
+        node_zero_label=ground_nodes[0].nodes[0]
+    )
+
+def transform(circuit: Circuit, w: List[float] = [0], w_resolution: float = 1e-3) -> List[Network]:
+    return [transform_circuit(circuit, w_, w_resolution) for w_ in w]

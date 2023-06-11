@@ -150,4 +150,4 @@ def test_remove_network_element_removes_unknown_element() -> None:
         ]
     )
     with pytest.raises(KeyError):
-        network2 = remove_element(network, 'Usx')
+        remove_element(network, 'Usx')

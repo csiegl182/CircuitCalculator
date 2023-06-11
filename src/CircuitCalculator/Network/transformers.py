@@ -6,7 +6,7 @@ def switch_ground_node(network: Network, new_ground: str) -> Network:
     return Network(network.branches, new_ground)
 
 def remove_element(network: Network, element: str) -> Network:
-    branches = network.branches
+    branches = list(network.branches)
     branches.remove(network[element])
     return Network(branches)
 

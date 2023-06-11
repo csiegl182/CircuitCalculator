@@ -1,4 +1,5 @@
 from .network import Network
+from .elements import is_ideal_voltage_source
 from .transformers import switch_ground_node, passive_network, remove_element
 from . import labelmapper as map
 from .NodalAnalysis import create_node_matrix_from_network
@@ -6,6 +7,8 @@ from numpy.linalg import inv as inverse_matrix
         
 def open_circuit_impedance(network: Network, node1: str, node2: str, node_index_mapper: map.NodeIndexMapper = map.default) -> complex:
     if node1 == node2:
+        return 0
+    if any([is_ideal_voltage_source(b.element) for b in network.branches_between(node1, node2)]):
         return 0
     if network.is_zero_node(node1):
         node1, node2 = node2, node1
