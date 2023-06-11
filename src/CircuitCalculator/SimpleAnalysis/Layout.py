@@ -98,3 +98,30 @@ class PointerDiagram:
             bbox_to_anchor=(0.5, 1.1),
             frameon=False
         )
+
+@dataclass
+class NyquistPlot:
+    xlabel: str = ''
+    ylabel: str = ''
+    signal_args: Dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        self.fig, self.ax = plt.subplots(ncols=1, nrows=1)
+        self.ax.grid(visible=True, zorder=-1)
+        self.ax.set_aspect('equal', 'box')
+        self.ax.set_xlabel(self.xlabel)
+        self.ax.set_ylabel(self.ylabel)
+
+    def add_plot(self, z: complex, w: float, label: str, **kwargs) -> None:
+        self.signal_args.update({label : {'z': z, 'w': w, 'kwargs': kwargs}})
+
+    def draw(self) -> None:
+        for label, signal in self.signal_args.items():
+            self.ax.plot(np.real(signal['z']), np.imag(signal['z']), label=label, **signal['kwargs'])
+        self.ax.legend(
+            handles=[line for line in self.ax.lines],
+            ncol=len(self.ax.lines),
+            loc='upper center',
+            bbox_to_anchor=(0.5, 1.1),
+            frameon=False
+        )
