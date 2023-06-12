@@ -25,6 +25,15 @@ def dc_voltage_source_translator(element: elm.VoltageSource, nodes: tuple[str, s
         phi=0
     )
 
+def dc_current_source_translator(element: elm.CurrentSource, nodes: tuple[str, str]) -> cct_cmp.CurrentSource:
+    return cct_cmp.CurrentSource(
+        nodes=nodes[::-1],
+        id=element.name,
+        I=element.I.real,
+        w=0,
+        phi=0
+    )
+
 def ac_voltage_source_translator(element: elm.ACVoltageSource, nodes: tuple[str, str]) -> cct_cmp.VoltageSource:
     return cct_cmp.VoltageSource(
         nodes=nodes[::-1],

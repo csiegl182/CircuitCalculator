@@ -4,6 +4,7 @@ from .SchemdrawDIN import elements as din_elements
 from . import Display as dsp
 
 from typing import Any
+from enum import Enum
 
 def round_node(node: schemdraw.util.Point) -> schemdraw.util.Point:
     def local_round(x):
@@ -32,9 +33,28 @@ def is_reverse(element: schemdraw.elements.Element) -> bool:
 def segments_of(element: schemdraw.elements.Element) -> list[schemdraw.segments.SegmentType]:
     return element.segments
 
+class SwitchState(Enum):
+    OPEN = False
+    CLOSED = True
+
 class Schematic(schemdraw.Drawing):
     def __init__(self, unit=7, **kwargs):
         super().__init__(unit=unit, **kwargs)
+
+    def __getitem__(self, id: str) -> schemdraw.elements.Element:
+        names = [e.name for e in self.elements]
+        try:
+            index = names.index(id)
+        except ValueError:
+            raise KeyError
+        return self.elements[index]
+
+    def draw(self, *args, **kwargs):
+        try:
+            self.fig.clear()
+        except AttributeError:
+            pass
+        return super().draw(*args, **kwargs)
 
     def save_copy(self, fname: str, **kwargs) -> None:
         import copy
@@ -427,6 +447,40 @@ class Node(schemdraw.elements.Element):
     @property
     def name(self) -> str:
         return f'Node {self.node_id}'
+
+class Switch(schemdraw.elements.elements.Element2Term):
+    def __init__(self, name: str, *args, state: SwitchState = SwitchState.OPEN, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.state = state
+        self._name = name
+        self.segments.append(schemdraw.Segment([(0, 0), schemdraw.elements.elements.gap, (1, 0)]))
+        self.segments.append(schemdraw.SegmentCircle((schemdraw.elements.switches.sw_dot_r, 0), schemdraw.elements.switches.sw_dot_r, fill='bg', zorder=3))
+        self.segments.append(schemdraw.SegmentCircle((1-schemdraw.elements.switches.sw_dot_r, 0), schemdraw.elements.switches.sw_dot_r, fill='bg', zorder=3))
+        self.segments.append(schemdraw.Segment([(0,0)]))
+        if self.state == SwitchState.OPEN:
+            self.open()
+        if self.state == SwitchState.CLOSED:
+            self.close()
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    def open(self) -> None:
+        self.state = SwitchState.OPEN
+        self.segments.pop()
+        self.segments.append(schemdraw.Segment([(schemdraw.elements.switches.sw_dot_r, 0), (1, 0.6)]))
+
+    def close(self) -> None:
+        self.state = SwitchState.CLOSED
+        self.segments.pop()
+        self.segments.append(schemdraw.Segment([(schemdraw.elements.switches.sw_dot_r, 0), (1, schemdraw.elements.switches.sw_dot_r*1.2)]))
+
+    def toggle(self) -> None:
+        if self.state == self.state.OPEN:
+            self.close()
+        if self.state == self.state.CLOSED:
+            self.open()
 
 class LabelNode(Node):
     def __init__(self, id : str = '', id_loc : str | dict[str, str] = '', *args, show=True, **kwargs):
