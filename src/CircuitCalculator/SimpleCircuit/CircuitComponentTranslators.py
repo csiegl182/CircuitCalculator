@@ -1,7 +1,7 @@
 from . import Elements as elm
 from ..Circuit import components as cct_cmp
 from .SchemdrawTranslatorTypes import ElementTranslatorMap
-from math import pi
+from math import pi, inf
 
 
 def resistor_translator(element: elm.Resistor, nodes: tuple[str, str]) -> cct_cmp.Resistor:
@@ -58,6 +58,11 @@ def linear_current_source_translator(element: elm.RealCurrentSource, nodes: tupl
 def linear_voltage_source_translator(element: elm.RealVoltageSource, nodes: tuple[str, str]) -> cct_cmp.LinearVoltageSource:
     return cct_cmp.LinearVoltageSource(nodes=nodes, id=element.name, V=element.V.real, R=element.R)
 
+def switch_translator(element: elm.Switch, nodes: tuple[str, str]) -> cct_cmp.Resistor | None:
+    if element.state == element.state.OPEN:
+        return cct_cmp.Resistor(nodes=nodes, id=element.name, R=inf)
+    return cct_cmp.Resistor(nodes=nodes, id=element.name, R=1e-12)
+
 def none_translator(*_) -> None:
     return None
 
@@ -75,7 +80,8 @@ circuit_translator_map : ElementTranslatorMap = {
     elm.LabelNode: none_translator,
     elm.RealCurrentSource: linear_current_source_translator,
     elm.RealVoltageSource: linear_voltage_source_translator,
+    elm.Switch: switch_translator,
     elm.VoltageLabel: none_translator,
     elm.CurrentLabel: none_translator,
-    elm.PowerLabel: none_translator
+    elm.PowerLabel: none_translator,
 }

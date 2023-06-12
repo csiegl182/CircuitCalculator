@@ -42,12 +42,15 @@ class Schematic(schemdraw.Drawing):
         super().__init__(unit=unit, **kwargs)
 
     def __getitem__(self, id: str) -> schemdraw.elements.Element:
-        names = [e.name for e in self.elements]
+        names = [e.name for e in self.elements if hasattr(e, 'name')]
         try:
             index = names.index(id)
         except ValueError:
             raise KeyError
         return self.elements[index]
+
+    def clear_labels(self) -> None:
+        self.elements = [e for e in self.elements if not isinstance(e, VoltageLabel) and not isinstance(e, CurrentLabel)]
 
     def draw(self, *args, **kwargs):
         try:
@@ -538,7 +541,7 @@ class VoltageLabel(schemdraw.elements.CurrentLabel):
         # adjust counting arrow system of voltage sources for display
         if type(at) is VoltageSource or type(at) is RealVoltageSource or type(at) is ACVoltageSource:
             reverse = not reverse
-        # adjust missing direction information of CurrentLabel() method | TODO: Diese Funktion muss in VoltageLabel rein
+        # adjust missing direction information of CurrentLabel() method
         if is_reverse(at):
             reverse = not reverse
         super().__init__(reverse=reverse, **kwargs)
