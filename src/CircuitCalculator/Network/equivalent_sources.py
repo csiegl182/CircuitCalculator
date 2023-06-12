@@ -1,6 +1,6 @@
-from .Network.network import Network
-from .Network.NodalAnalysis import NodalAnalysisSolution
-from .Network.impedance import open_circuit_impedance
+from .network import Network
+from .NodalAnalysis import NodalAnalysisSolution
+from .impedance import open_circuit_impedance
 
 
 def calculate_open_circuit_voltage(network: Network, node1: str, node2: str) -> complex:

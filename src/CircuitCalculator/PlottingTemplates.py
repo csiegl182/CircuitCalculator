@@ -5,7 +5,7 @@ from matplotlib.axes import Axes
 import numpy as np
 from functools import partial
 from CircuitCalculator.Utils import scientific_float
-from CircuitCalculator.EquivalentSources import NortenEquivalentSource, TheveninEquivalentSource
+from CircuitCalculator.Network.EquivalentSources import NortenEquivalentSource, TheveninEquivalentSource
 
 def plot_equivalent_source_diagram(x0: float, y0: float, xlabel: str, ylabel: str, m2: float = 0, title: str = '', x0label: str = '', y0label: str = '') -> tuple[Figure, Axes]:
     fig, ax = plt.subplots()

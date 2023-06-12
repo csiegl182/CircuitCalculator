@@ -1,6 +1,6 @@
 from CircuitCalculator.Network.loaders import load_network_from_json
 from CircuitCalculator.Network.NodalAnalysis import nodal_analysis_solver
-from CircuitCalculator.EquivalentSources import NortenEquivalentSource, TheveninEquivalentSource
+from CircuitCalculator.Network.EquivalentSources import NortenEquivalentSource, TheveninEquivalentSource
 from CircuitCalculator.PlottingTemplates import plot_norten_source, plot_thevenin_source
 
 if __name__ == '__main__':
