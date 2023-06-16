@@ -16,6 +16,19 @@ def test_create_current_vector_from_reference_network_1() -> None:
     I_ref = np.array([-Vq])
     np.testing.assert_almost_equal(I, I_ref)
 
+def test_create_current_vector_from_reference_network_2() -> None:
+    Iq = 1+0j
+    R = 1
+    network = Network(
+        [
+            Branch('0', '1', current_source('Iq', I=Iq)),
+            Branch('1', '0', resistor('R1', R=R))
+        ]
+    )
+    I = create_current_vector_from_network(network)
+    I_ref = np.array([Iq])
+    np.testing.assert_almost_equal(I, I_ref)
+
 # def test_create_current_vector_from_reference_network_3() -> None:
 #     R1, R2, Ri = 10, 20, 100
 #     Iq = 1

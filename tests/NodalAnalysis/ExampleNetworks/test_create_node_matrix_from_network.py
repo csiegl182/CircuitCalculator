@@ -12,9 +12,21 @@ def test_create_node_matrix_from_reference_network_1() -> None:
             Branch('1', '0', resistor('R', R=R))
         ]
     )
-    
     Y = create_node_matrix_from_network(network)
     Y_ref = np.array([[complex(-R, 0)]])
+    np.testing.assert_almost_equal(Y, Y_ref)
+
+def test_create_node_matrix_from_reference_network_2() -> None:
+    Iq = 1+0j
+    R = 1
+    network = Network(
+        [
+            Branch('0', '1', current_source('Iq', I=Iq)),
+            Branch('1', '0', resistor('R1', R=R))
+        ]
+    )
+    Y = create_node_matrix_from_network(network)
+    Y_ref = np.array([[complex(R, 0)]])
     np.testing.assert_almost_equal(Y, Y_ref)
 
 def test_create_node_matrix_from_reference_network_X() -> None:

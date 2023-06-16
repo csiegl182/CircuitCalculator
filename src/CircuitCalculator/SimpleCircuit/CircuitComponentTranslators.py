@@ -29,7 +29,7 @@ def dc_current_source_translator(element: elm.CurrentSource, nodes: tuple[str, s
     return cct_cmp.CurrentSource(
         nodes=nodes[::-1],
         id=element.name,
-        I=element.I.real,
+        I=-element.I.real,
         w=0,
         phi=0
     )
@@ -69,6 +69,7 @@ def none_translator(*_) -> None:
 circuit_translator_map : ElementTranslatorMap = {
     elm.Resistor : resistor_translator,
     elm.VoltageSource : dc_voltage_source_translator,
+    elm.CurrentSource : dc_current_source_translator,
     elm.ACVoltageSource : ac_voltage_source_translator,
     elm.ACCurrentSource : ac_current_source_translator,
     elm.Capacitor : capacitor_translator,

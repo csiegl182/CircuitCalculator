@@ -1,0 +1,16 @@
+[
+    {
+        "type": "current_source",
+        "id": "Iq",
+        "N1": "0",
+        "N2": "1",
+        "I": {"real": 1, "imag" : 0}
+    },
+    {
+        "type": "resistor",
+        "id": "R",
+        "N1": "1",
+        "N2": "0",
+        "R": 1
+    }
+]
