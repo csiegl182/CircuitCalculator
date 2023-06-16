@@ -30,7 +30,7 @@ def test_list_of_circuit_elements_can_be_transformed_into_network_with_same_elem
 
     network = transform(circuit)[0]
     assert network['R1'].element.Z == R
-    assert network['V1'].element.U == U
+    assert network['V1'].element.V == U
 
 def test_ground_node_is_transformed_into_network() -> None:
     R = 100

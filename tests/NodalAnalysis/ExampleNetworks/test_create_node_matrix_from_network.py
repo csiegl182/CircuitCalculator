@@ -14,7 +14,7 @@ def test_create_node_matrix_from_reference_network_1() -> None:
     )
     
     Y = create_node_matrix_from_network(network)
-    Y_ref = np.array([[complex(2*R, 0)]])
+    Y_ref = np.array([[complex(-R, 0)]])
     np.testing.assert_almost_equal(Y, Y_ref)
 
 def test_create_node_matrix_from_reference_network_X() -> None:

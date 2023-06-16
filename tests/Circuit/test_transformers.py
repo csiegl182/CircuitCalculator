@@ -20,7 +20,7 @@ def test_voltage_source_transformer_transforms_dc_voltage_source() -> None:
     transformed_voltage_source = transform.voltage_source(voltage_source)
     assert (transformed_voltage_source.node1, transformed_voltage_source.node2) == nodes
     assert transformed_voltage_source.id == id
-    np.testing.assert_almost_equal(transformed_voltage_source.element.U, V)
+    np.testing.assert_almost_equal(transformed_voltage_source.element.V, V)
 
 def test_voltage_source_transformer_transforms_voltage_source_at_its_frequency() -> None:
     nodes = ('0', '1')
@@ -31,7 +31,7 @@ def test_voltage_source_transformer_transforms_voltage_source_at_its_frequency()
     transformed_voltage_source = transform.voltage_source(voltage_source, w=w)
     assert (transformed_voltage_source.node1, transformed_voltage_source.node2) == nodes
     assert transformed_voltage_source.id == id
-    np.testing.assert_almost_equal(transformed_voltage_source.element.U, V)
+    np.testing.assert_almost_equal(transformed_voltage_source.element.V, V)
 
 def test_voltage_source_transformer_transforms_voltage_source_at_another_frequency() -> None:
     nodes = ('0', '1')
@@ -42,7 +42,7 @@ def test_voltage_source_transformer_transforms_voltage_source_at_another_frequen
     transformed_voltage_source = transform.voltage_source(voltage_source, w=200)
     assert (transformed_voltage_source.node1, transformed_voltage_source.node2) == nodes
     assert transformed_voltage_source.id == id
-    np.testing.assert_almost_equal(transformed_voltage_source.element.U, 0)
+    np.testing.assert_almost_equal(transformed_voltage_source.element.V, 0)
 
 def test_current_source_transformer_transforms_dc_current_source() -> None:
     nodes = ('0', '1')

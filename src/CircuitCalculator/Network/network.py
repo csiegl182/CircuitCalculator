@@ -21,7 +21,7 @@ class Network:
     node_zero_label: str = '0'
 
     def __post_init__(self):
-        if self.node_zero_label not in self.node_labels:
+        if self.node_zero_label not in self.node_labels and self.number_of_nodes != 0:
             raise FloatingGroundNode
         if len(set(self.branch_ids)) != len(self.branches):
             raise AmbiguousBranchIDs
