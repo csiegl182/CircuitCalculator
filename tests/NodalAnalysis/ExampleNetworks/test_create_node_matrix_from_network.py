@@ -29,7 +29,7 @@ def test_create_node_matrix_from_reference_network_2() -> None:
     Y_ref = np.array([[complex(R, 0)]])
     np.testing.assert_almost_equal(Y, Y_ref)
 
-def test_create_node_matrix_from_reference_network_X() -> None:
+def test_create_node_matrix_from_reference_network_3() -> None:
     R1, R2, Ri = 10, 20, 100
     G1, G2, Gi = 1/R1, 1/R2, 1/Ri
     Iq = 1
@@ -44,7 +44,7 @@ def test_create_node_matrix_from_reference_network_X() -> None:
     Y_ref = np.array([[G1+Gi, -G1], [-G1, G1+G2]])
     np.testing.assert_almost_equal(Y.real, Y_ref.real)
 
-def test_create_node_matrix_from_reference_network_3() -> None:
+def test_create_node_matrix_from_reference_network_X() -> None:
     R1, R2, R3, R4, R5 = 10, 20, 30, 40, 50
     G1, G2, G3, G4 = 1/R1, 1/R2, 1/R3, 1/R4
     U1, U2 = 1, 2
