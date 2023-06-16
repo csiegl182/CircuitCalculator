@@ -2,6 +2,14 @@ from CircuitCalculator.Network.loaders import load_network_from_json
 from CircuitCalculator.Network.NodalAnalysis import nodal_analysis_solver
 import numpy as np
 
+def test_network_1_with_advanced_nodal_analysis() -> None:
+    network = load_network_from_json('./examples/networks/json/example_network_1.json')
+    solution = nodal_analysis_solver(network)
+    np.testing.assert_almost_equal(solution.get_current('Uq'), 1.00, decimal=2)
+    np.testing.assert_almost_equal(solution.get_voltage('R'), 1.00, decimal=2)
+    np.testing.assert_almost_equal(solution.get_voltage('Uq'), 1.00, decimal=2)
+    np.testing.assert_almost_equal(solution.get_current('R'), 1.00, decimal=2)
+
 def test_network_2_with_advanced_nodal_analysis() -> None:
     network = load_network_from_json('./examples/networks/json/example_network_2.json')
     solution = nodal_analysis_solver(network)
