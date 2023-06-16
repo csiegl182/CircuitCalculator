@@ -27,7 +27,7 @@ class SuperNodes:
                 SuperNode(
                     reference_node=other_node,
                     active_node=node,
-                    voltage=voltage_source.element.U if node == voltage_source.node1 else -voltage_source.element.U,
+                    voltage=voltage_source.element.V if node == voltage_source.node1 else -voltage_source.element.V,
                     voltage_source=voltage_source.element
                 )
             )

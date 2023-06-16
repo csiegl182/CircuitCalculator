@@ -6,7 +6,7 @@ from CircuitCalculator.Network.transformers import remove_ideal_current_sources,
 def test_remove_ideal_current_sources_removes_all_voltage_sources() -> None:
     network = Network(
         branches=[
-            Branch('0', '1', voltage_source('Us1', U=1)),
+            Branch('0', '1', voltage_source('Us1', V=1)),
             Branch('1', '2', resistor('R1', R=1)),
             Branch('2', '3', resistor('R2', R=2)),
             Branch('3', '4', current_source('Is1', I=1)),
@@ -22,7 +22,7 @@ def test_remove_ideal_current_sources_keeps_desired_current_sources() -> None:
     cs2 = current_source('Is2', I=2)
     network = Network(
         branches=[
-            Branch('0', '1', voltage_source('Us1', U=1)),
+            Branch('0', '1', voltage_source('Us1', V=1)),
             Branch('1', '2', resistor('R1', R=1)),
             Branch('2', '3', resistor('R2', R=2)),
             Branch('3', '4', cs1),
@@ -40,7 +40,7 @@ def test_remove_ideal_current_sources_ignores_other_elements_in_keep_elements() 
     r1 = resistor('R1', R=1)
     network = Network(
         branches=[
-            Branch('0', '1', voltage_source('Us1', U=1)),
+            Branch('0', '1', voltage_source('Us1', V=1)),
             Branch('1', '2', r1),
             Branch('2', '3', resistor('R2', R=2)),
             Branch('3', '4', cs1),
@@ -59,8 +59,8 @@ def test_remove_ideal_voltage_sources_removes_all_voltage_sources() -> None:
             Branch('0', '1', current_source('Is1', I=1)),
             Branch('1', '2', resistor('R1', R=1)),
             Branch('2', '3', resistor('R2', R=2)),
-            Branch('3', '4', voltage_source('Us1', U=1)),
-            Branch('4', '5', voltage_source('Us2', U=2)),
+            Branch('3', '4', voltage_source('Us1', V=1)),
+            Branch('4', '5', voltage_source('Us2', V=2)),
             Branch('5', '0', resistor('R3', R=4))
         ]
     )
@@ -68,8 +68,8 @@ def test_remove_ideal_voltage_sources_removes_all_voltage_sources() -> None:
     assert any([is_ideal_voltage_source(b.element) for b in network.branches]) == False
 
 def test_remove_ideal_voltage_sources_keeps_desired_voltage_sources() -> None:
-    vs1 = voltage_source('Us1', U=1)
-    vs2 = voltage_source('Us2', U=2)
+    vs1 = voltage_source('Us1', V=1)
+    vs2 = voltage_source('Us2', V=2)
     network = Network(
         branches=[
             Branch('0', '1', current_source('Is1', I=1)),
@@ -85,12 +85,12 @@ def test_remove_ideal_voltage_sources_keeps_desired_voltage_sources() -> None:
     assert vs2 not in [b.element for b in network.branches]
 
 def test_remove_ideal_voltage_sources_ignores_other_elements_in_keep_elements() -> None:
-    vs1 = voltage_source('Us1', U=1)
-    vs2 = voltage_source('Us2', U=2)
+    vs1 = voltage_source('Us1', V=1)
+    vs2 = voltage_source('Us2', V=2)
     r1 = resistor('R1', R=1)
     network = Network(
         branches=[
-            Branch('0', '1', voltage_source('Us3', U=1)),
+            Branch('0', '1', voltage_source('Us3', V=1)),
             Branch('1', '2', r1),
             Branch('2', '3', resistor('R2', R=2)),
             Branch('3', '4', vs1),
@@ -104,8 +104,8 @@ def test_remove_ideal_voltage_sources_ignores_other_elements_in_keep_elements() 
     assert vs2 not in [b.element for b in network.branches]
 
 def test_remove_ideal_voltage_sources_keeps_passives_connected_to_keep_elements() -> None:
-    vs1 = voltage_source('Us1', U=1)
-    vs2 = voltage_source('Us2', U=2)
+    vs1 = voltage_source('Us1', V=1)
+    vs2 = voltage_source('Us2', V=2)
     r1 = resistor('R1', R=1)
     r2 = resistor('R2', R=2)
     network = Network(
@@ -119,8 +119,8 @@ def test_remove_ideal_voltage_sources_keeps_passives_connected_to_keep_elements(
     assert r1 in [b.element for b in network.branches_between('1', '2')]
 
 def test_remove_network_element_removes_element() -> None:
-    vs1 = voltage_source('Us1', U=1)
-    vs2 = voltage_source('Us2', U=2)
+    vs1 = voltage_source('Us1', V=1)
+    vs2 = voltage_source('Us2', V=2)
     r1 = resistor('R1', R=1)
     r2 = resistor('R2', R=2)
     network = Network(
@@ -137,8 +137,8 @@ def test_remove_network_element_removes_element() -> None:
 
 
 def test_remove_network_element_removes_unknown_element() -> None:
-    vs1 = voltage_source('Us1', U=1)
-    vs2 = voltage_source('Us2', U=2)
+    vs1 = voltage_source('Us1', V=1)
+    vs2 = voltage_source('Us2', V=2)
     r1 = resistor('R1', R=1)
     r2 = resistor('R2', R=2)
     network = Network(
