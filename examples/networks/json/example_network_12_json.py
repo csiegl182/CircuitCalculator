@@ -1,16 +1,23 @@
 from CircuitCalculator.Network.loaders import load_network_from_json
 from CircuitCalculator.Network.NodalAnalysis import nodal_analysis_solver
-from CircuitCalculator.SimpleAnalysis.PointerDiagram import VoltagePointerDiagram
+from CircuitCalculator.Network.EquivalentSources import NortenEquivalentSource, TheveninEquivalentSource
+from CircuitCalculator.PlottingTemplates import plot_norten_source, plot_thevenin_source
 
 if __name__ == '__main__':
-    network = load_network_from_json('./examples/example_network_12.json')
+    network = load_network_from_json('./examples/example_network_10.json')
     solution = nodal_analysis_solver(network)
-    for id in network.branch_ids:
-        print(f'{network[id].node1}->{network[id].node2} U={solution.get_voltage(id):2.2f}V')
-        print(f'{network[id].node1}->{network[id].node2} I={solution.get_current(id):2.2f}A')
+    for branch in network.branch_ids:
+        print(f'{network[branch].node1}->{network[branch].node2} U={solution.get_voltage(branch):2.2f}V')
+        print(f'{network[branch].node1}->{network[branch].node2} I={solution.get_current(branch):2.2f}A')
 
-    with VoltagePointerDiagram(solution, conductor = 10) as pointer_diagram:
-        pointer_diagram.add_voltage_pointer('R')
-        pointer_diagram.add_voltage_pointer('I', origin='R')
-        pointer_diagram.add_voltage_pointer('Z', origin='I', color='black')
-        pointer_diagram.add_current_pointer('I')
+    plot_thevenin_source(
+        source=TheveninEquivalentSource(network, node1='0', node2='3'),
+        R_load=10
+    )
+    plot_norten_source(
+        source=NortenEquivalentSource(network, node1='0', node2='3'),
+        R_load=10
+    )
+
+
+    
