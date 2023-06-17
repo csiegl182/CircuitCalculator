@@ -112,25 +112,6 @@ def test_create_node_matrix_from_reference_network_7() -> None:
                       np.complex)
     np.testing.assert_almost_equal(Y, Y_ref)
 
-def test_create_node_matrix_from_reference_network_9() -> None:
-    R1, R2, R3, R4 = 15, 5, 20, 20
-    G1, G2, G3, G4 = 1/R1, 1/R2, 1/R3, 1/R4
-    U, I = 120, 4
-    network = Network(
-        branches=[
-            Branch('0', '1', current_source('Is', I=I)),
-            Branch('1', '0', resistor('R1', R=R1)),
-            Branch('2', '1', resistor('R2', R=R2)),
-            Branch('2', '0', resistor('R3', R=R3)),
-            Branch('3', '2', voltage_source('Us', V=U)),
-            Branch('3', '0', resistor('R4', R=R4))
-        ],
-        node_zero_label='0'
-    )
-    Y = create_node_matrix_from_network(network)
-    Y_ref = np.array([[G1+G2, -G2, 0], [-G2, G2+G3+G4, 0], [0, G4, -1]], np.double)
-    np.testing.assert_almost_equal(Y.real, Y_ref.real)
-
 def test_create_node_matrix_from_reference_network_10() -> None:
     R1, R2, R3, R4, R5 = 10, 20, 30, 40, 50
     G3, G4, G5 = 1/R3, 1/R4, 1/R5
@@ -152,6 +133,25 @@ def test_create_node_matrix_from_reference_network_10() -> None:
     np.testing.assert_almost_equal(Y.real, Y_ref.real)
 
 def test_create_node_matrix_from_reference_network_11() -> None:
+    R1, R2, R3, R4 = 15, 5, 20, 20
+    G1, G2, G3, G4 = 1/R1, 1/R2, 1/R3, 1/R4
+    U, I = 120, 4
+    network = Network(
+        branches=[
+            Branch('0', '1', current_source('Is', I=I)),
+            Branch('1', '0', resistor('R1', R=R1)),
+            Branch('2', '1', resistor('R2', R=R2)),
+            Branch('2', '0', resistor('R3', R=R3)),
+            Branch('3', '2', voltage_source('Us', V=U)),
+            Branch('3', '0', resistor('R4', R=R4))
+        ],
+        node_zero_label='0'
+    )
+    Y = create_node_matrix_from_network(network)
+    Y_ref = np.array([[G1+G2, -G2, 0], [-G2, G2+G3+G4, 0], [0, G4, -1]], np.double)
+    np.testing.assert_almost_equal(Y.real, Y_ref.real)
+
+def test_create_node_matrix_from_reference_network_12() -> None:
     R, Ri = 2, 1
     G, Gi = 1/R, 1/Ri
     Uq = 9

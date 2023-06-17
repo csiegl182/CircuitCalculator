@@ -1,5 +1,6 @@
 from CircuitCalculator.Network.loaders import load_network_from_json
 from CircuitCalculator.Network.NodalAnalysis import nodal_analysis_solver
+from CircuitCalculator.Network.impedance import open_circuit_impedance
 import numpy as np
 
 def test_network_1_with_advanced_nodal_analysis() -> None:
@@ -95,6 +96,21 @@ def test_network_7_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_current('U2'), 0.048, decimal=3)
     np.testing.assert_almost_equal(solution.get_current('U3'), 0.0075, decimal=4)
     np.testing.assert_almost_equal(solution.get_current('I4'), 0.1, decimal=3)
+
+def test_network_8_with_advanced_nodal_analysis() -> None:
+    network = load_network_from_json('./examples/networks/json/example_network_8.json')
+    Rges = open_circuit_impedance(network, '1', '2').real
+    np.testing.assert_almost_equal(Rges, 4.66, decimal=2)
+
+def test_network_9_with_advanced_nodal_analysis() -> None:
+    network = load_network_from_json('./examples/networks/json/example_network_9.json')
+    solution = nodal_analysis_solver(network)
+    np.testing.assert_almost_equal(solution.get_voltage('Vs1'), 1.00, decimal=2)
+    np.testing.assert_almost_equal(solution.get_voltage('Vs2'), 2.00, decimal=2)
+    np.testing.assert_almost_equal(solution.get_voltage('R1'), 3.00, decimal=2)
+    np.testing.assert_almost_equal(solution.get_current('Vs1'), 0.30, decimal=3)
+    np.testing.assert_almost_equal(solution.get_current('Vs2'), 0.30, decimal=3)
+    np.testing.assert_almost_equal(solution.get_current('R1'), 0.30, decimal=3)
 
 def test_network_10_with_advanced_nodal_analysis() -> None:
     network = load_network_from_json('./examples/networks/json/example_network_10.json')

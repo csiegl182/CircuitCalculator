@@ -9,13 +9,13 @@ class FileFormatError(Exception):
 def to_complex(z: dict[str, float], degree: bool = False) -> complex:
     try:
         return complex(z['real'], z['imag'])
-    except KeyError:
+    except (KeyError, TypeError):
         ...
     try:
         if degree:
             z['phase'] *= np.pi/180
         return z['abs']*complex(np.cos(z['phase']), np.sin(z['phase']))
-    except KeyError:
+    except (KeyError, TypeError):
         raise FileFormatError
 
 def translate_to_complex(keys : list[str], **kwargs):
