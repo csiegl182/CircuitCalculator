@@ -534,6 +534,18 @@ class Ground(Node):
     def name(self) -> str:
         return 'Ground'
 
+    def up(self) -> schemdraw.elements.Element:
+        return super().left()
+
+    def down(self) -> schemdraw.elements.Element:
+        return super().right()
+
+    def left(self) -> schemdraw.elements.Element:
+        return super().down()
+
+    def right(self) -> schemdraw.elements.Element:
+        return super().up()
+
 class VoltageLabel(schemdraw.elements.CurrentLabel):
     def __init__(self, at: schemdraw.elements.Element, label: str = '', label_loc: str = 'bottom', reverse: bool = False, **kwargs):
         kwargs.update(v_label_args.get(type(at), {}))
