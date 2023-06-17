@@ -135,17 +135,3 @@ def test_create_current_vector_from_reference_network_10() -> None:
                       I4+(V1+V2)*G4],
                       np.complex)
     np.testing.assert_almost_equal(I, I_ref)
-
-# def test_create_current_vektor_from_reference_network_13() -> None:
-#     R, Ri = 2, 2
-#     Uq = 9
-#     network = Network(
-#         branches=[
-#             Branch('1', '0', linear_voltage_source('Us1', U=Uq, Z=Ri)),
-#             Branch('1', '0', resistor('R1', R=R))
-#         ],
-#         node_zero_label='0'
-#     )
-#     I = create_current_vector_from_network(network)
-#     I_ref = np.array([-Uq/Ri])
-#     np.testing.assert_almost_equal(I.real, I_ref.real)
