@@ -84,7 +84,7 @@ def test_create_node_matrix_from_reference_network_5() -> None:
                       [0, 0, -G4, 1]], np.double)
     np.testing.assert_almost_equal(Y.real, Y_ref.real)
 
-def test_create_node_matrix_from_reference_network_X() -> None:
+def test_create_node_matrix_from_reference_network_6() -> None:
     R1, R2, R3, R4 = 10, 20, 30, 40
     G1, G2, G3, G4 = 1/R1, 1/R2, 1/R3, 1/R4
     U1, U2, U3, I4 = 1, 2, 3, 0.1
@@ -101,10 +101,13 @@ def test_create_node_matrix_from_reference_network_X() -> None:
         ]
     )
     Y = create_node_matrix_from_network(network)
-    print(Y.real)
-    Y_ref = np.array([[G1+G2+G3, 0, -G2, 0, 0], [G3, -1, 0, 0, 0], [-G2, 0, G2+G4, 0, 0], [0, 0, G4, -1, 0], [-G3, 0, -G4, 0, 1]], np.double)
-    print(Y_ref.real)
-    np.testing.assert_almost_equal(Y.real, Y_ref.real)
+    Y_ref = np.array([[G1+G2+G3, 0, -G2, 0, 0],
+                      [G3, -1, 0, 0, 0],
+                      [-G2, 0, G2+G4, 0, 0],
+                      [0, 0, G4, -1, 0],
+                      [-G3, 0, -G4, 0, 1]],
+                      np.complex)
+    np.testing.assert_almost_equal(Y, Y_ref)
 
 def test_create_node_matrix_from_reference_network_8() -> None:
     R1, R2, R3, R4, R5 = 10, 20, 30, 40, 50
