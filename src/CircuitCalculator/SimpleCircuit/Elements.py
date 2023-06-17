@@ -73,7 +73,7 @@ class VoltageSource(din_elements.SourceUDIN):
         self._name = name
         self.anchors['V_label'] = (0.5, 1.1)
         self.anchors['S_label'] = (0.5, 1.1)
-        label = dsp.print_complex(self.V, unit='V', precision=precision)
+        label = dsp.print_complex(V, unit='V', precision=precision)
         self.label(f'{self._name}={label}', rotate=True, color=dsp.blue, loc='V_label', halign='center', valign='center')
 
         a, b = (1.5, 0.7), (-0.5, 0.7)

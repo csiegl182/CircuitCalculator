@@ -152,8 +152,11 @@ def test_create_node_matrix_from_reference_network_11() -> None:
         node_zero_label='0'
     )
     Y = create_node_matrix_from_network(network)
-    Y_ref = np.array([[G1+G2, -G2, 0], [-G2, G2+G3+G4, 0], [0, G4, -1]], np.double)
-    np.testing.assert_almost_equal(Y.real, Y_ref.real)
+    Y_ref = np.array([[G1+G2, -G2, 0],
+                      [-G2, G2+G3+G4, 0],
+                      [0, G4, -1]],
+                      np.complex)
+    np.testing.assert_almost_equal(Y, Y_ref)
 
 def test_create_node_matrix_from_reference_network_12() -> None:
     R, Ri = 2, 1
