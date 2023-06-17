@@ -40,7 +40,8 @@ def test_create_current_vector_from_reference_network_3() -> None:
         ]
     )
     I = create_current_vector_from_network(network)
-    I_ref = np.array([Iq, 0])
+    I_ref = np.array([Iq,
+                      0])
     np.testing.assert_almost_equal(I, I_ref)
 
 def test_create_current_vector_from_reference_network_5() -> None:
@@ -57,7 +58,10 @@ def test_create_current_vector_from_reference_network_5() -> None:
         ]
     )
     I = create_current_vector_from_network(network)
-    I_ref = np.array([-U1*G1, U1*G1, -U2*G4, U2*(G4+G5)])
+    I_ref = np.array([-U1*G1,
+                      U1*G1,
+                      -U2*G4,
+                      U2*(G4+G5)])
     np.testing.assert_almost_equal(I, I_ref)
 
 def test_create_current_vector_from_reference_network_6() -> None:
@@ -76,28 +80,37 @@ def test_create_current_vector_from_reference_network_6() -> None:
         ]
     )
     I = create_current_vector_from_network(network)
-    I_ref = np.array([-V1*G1, V1*G1-V2*G4, -V2*(G4+G3), V2*G4])
-    np.testing.assert_almost_equal(I.real, I_ref.real)
+    I_ref = np.array([-V1*G1,
+                      V1*G1-V2*G4,
+                      -V2*(G4+G3),
+                      V2*G4],
+                      np.complex)
+    np.testing.assert_almost_equal(I, I_ref)
 
-# def test_create_current_vector_from_reference_network_7() -> None:
-#     R1, R2, R3, R4 = 10, 20, 30, 40
-#     G1, G2, G3, G4 = 1/R1, 1/R2, 1/R3, 1/R4
-#     U1, U2, U3, I4 = 1, 2, 3, 0.1
-#     network = Network(
-#         [
-#             Branch('0', '1', resistor('R1', R=R1)),
-#             Branch('2', '1', voltage_source('Us2', U=U2)),
-#             Branch('1', '3', resistor('R2', R=R2)),
-#             Branch('4', '3', voltage_source('Us3', U=U3)),
-#             Branch('2', '5', resistor('R3', R=R3)),
-#             Branch('4', '5', resistor('R4', R=R4)),
-#             Branch('3', '5', current_source('Is4', I=I4)),
-#             Branch('0', '5', voltage_source('Us1', U=U1))
-#         ]
-#     )
-#     I = create_current_vector_from_network(network)
-#     I_ref = np.array([-(U1+U2)*G3, -(U1+U2)*G3, -I4-(U1+U3)*G4, -(U1+U3)*G4, I4+G3*(U1+U2)+G4*(U1+U3)])
-#     np.testing.assert_almost_equal(I.real, I_ref.real)
+def test_create_current_vector_from_reference_network_7() -> None:
+    R1, R2, R3, R4 = 10, 20, 30, 40
+    G3, G4 = 1/R3, 1/R4
+    V1, V2, V3, I4 = 1, 2, 3, 0.1
+    network = Network(
+        [
+            Branch('0', '1', resistor('R1', R=R1)),
+            Branch('2', '1', voltage_source('Us2', V=V2)),
+            Branch('1', '3', resistor('R2', R=R2)),
+            Branch('4', '3', voltage_source('Us3', V=V3)),
+            Branch('2', '5', resistor('R3', R=R3)),
+            Branch('4', '5', resistor('R4', R=R4)),
+            Branch('3', '5', current_source('Is4', I=I4)),
+            Branch('0', '5', voltage_source('Us1', V=V1))
+        ]
+    )
+    I = create_current_vector_from_network(network)
+    I_ref = np.array([-(V1+V2)*G3,
+                      -(V1+V2)*G3,
+                      -I4-(V1+V3)*G4,
+                      -(V1+V3)*G4,
+                      I4+G3*(V1+V2)+G4*(V1+V3)],
+                      np.complex)
+    np.testing.assert_almost_equal(I, I_ref)
 
 # def test_create_current_vector_from_reference_network_10() -> None:
 #     R1, R2, R3, R4, R5 = 10, 20, 30, 40, 50
