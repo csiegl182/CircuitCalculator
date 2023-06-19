@@ -43,7 +43,7 @@ class SchematicDiagramSolution:
         P_branch = self.solution.get_power(name)
         return elm.PowerLabel(element, label=self.power_display(P_branch), color=dsp.green)
 
-def time_domain_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_solver, w: float = 0, sin: bool = False, deg: bool = False, hertz: bool = False) -> SchematicDiagramSolution:
+def time_domain_steady_state_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_solver, w: float = 0, sin: bool = False, deg: bool = False, hertz: bool = False) -> SchematicDiagramSolution:
     digagram_parser = SchematicDiagramParser(schematic)
     solution = ComplexSolution(circuit=circuit_translator(schematic), solver=solver, w=w)
     return SchematicDiagramSolution(
@@ -79,8 +79,7 @@ def complex_network_dc_solution(schematic: elm.Schematic, solver: NetworkSolver 
 
 def real_network_dc_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_solver, precision: int = 3) -> SchematicDiagramSolution:
     diagram_parser = SchematicDiagramParser(schematic)
-    network = network_translator(schematic)
-    solution = solver(network)
+    solution = ComplexSolution(circuit=circuit_translator(schematic), solver=solver)
     return SchematicDiagramSolution(
         diagram_parser=diagram_parser,
         solution=solution,
