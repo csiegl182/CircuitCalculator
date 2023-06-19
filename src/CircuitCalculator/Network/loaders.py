@@ -26,7 +26,7 @@ def translate_to_complex(keys : list[str], **kwargs):
 network_branch_translators : dict[str, Callable[..., elm.NortenTheveninElement]] = {
     "resistor" : elm.resistor,
     "conductor" : elm.conductor,
-    "impedance" : lambda **kwargs: elm.impedance(Z=to_complex(kwargs['Z']), **kwargs),
+    "impedance" : lambda **kwargs: elm.impedance(Z=to_complex(kwargs.pop('Z')), **kwargs),
     "admittance" : lambda **kwargs: elm.admittance(Y=to_complex(kwargs['Y']), **kwargs),
     "linear_current_source" : lambda **kwargs: elm.linear_current_source(**translate_to_complex(keys=['I', 'Y'], **kwargs)),
     "current_source" : lambda **kwargs: elm.current_source(I=to_complex(kwargs.pop('I')), **kwargs),
