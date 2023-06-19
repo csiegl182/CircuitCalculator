@@ -41,3 +41,7 @@ def test_ground_node_is_transformed_into_network() -> None:
 
     network = transform(circuit)[0]
     assert network.is_zero_node('1') == True
+
+def test_empty_circuit_can_be_created() -> None:
+    circuit = Circuit([])
+    assert len(circuit.components) == 0

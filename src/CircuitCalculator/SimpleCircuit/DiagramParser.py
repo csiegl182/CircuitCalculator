@@ -1,13 +1,9 @@
 import schemdraw.elements, schemdraw.util
 from dataclasses import dataclass
-from .SchemdrawTranslatorTypes import ElementTranslatorMap
 from . import Elements as elm
-from ..Circuit import circuit
-from ..Circuit import components
 
 class UnknownElement(Exception): pass
 class MultipleGroundNodes(Exception): pass
-class UnknownTranslator(Exception): pass
 
 @dataclass(frozen=True)
 class SchematicDiagramParser:
@@ -90,14 +86,6 @@ class SchematicDiagramParser:
     @property
     def ground_label(self) -> str:
         return self._get_node_index(self.ground)
-
-    def translate_elements(self, translator_map : ElementTranslatorMap) -> circuit.Circuit:
-        def translate(element: schemdraw.elements.Element) -> components.Component:
-            try:
-                return translator_map[type(element)](element, tuple(map(self._get_node_index, elm.get_nodes(element))))
-            except KeyError:
-                raise UnknownTranslator(f"Network element '{type(element).__name__}' cannot be translated.")
-        return circuit.Circuit([translate(e) for e in self.all_elements if translate(e) is not None])
 
     def _get_equal_electrical_potential_nodes(self, node: schemdraw.util.Point) -> set[schemdraw.util.Point]:
         equal_electrical_potential_nodes = set([node])

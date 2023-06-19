@@ -55,10 +55,10 @@ def time_domain_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal
     )
 
 def complex_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_solver, w: float = 0, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
-    digagram_parser = SchematicDiagramParser(schematic)
+    diagram_parser = SchematicDiagramParser(schematic)
     solution = ComplexSolution(circuit=circuit_translator(schematic), solver=solver, w=w)
     return SchematicDiagramSolution(
-        diagram_parser=digagram_parser,
+        diagram_parser=diagram_parser,
         solution=solution,
         voltage_display=partial(dsp.print_complex, unit='V', precision=precision, polar=polar, deg=deg),
         current_display=partial(dsp.print_complex, unit='A', precision=precision, polar=polar, deg=deg),
