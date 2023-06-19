@@ -72,7 +72,7 @@ class VoltageSource(din_elements.SourceUDIN):
             self._V *= -1
         self._name = name
         self.anchors['V_label'] = (0.5, 1.1)
-        self.anchors['S_label'] = (0.5, 1.1)
+        self.anchors['S_label'] = (1.8, 1.1)
         label = dsp.print_complex(V, unit='V', precision=precision)
         self.label(f'{self._name}={label}', rotate=True, color=dsp.blue, loc='V_label', halign='center', valign='center')
 
@@ -167,7 +167,7 @@ class Resistor(schemdraw.elements.twoterm.ResistorIEC):
         label += '=' if  show_name and show_value else ''
         label += dsp.print_resistance(self.R) if show_value else ''
         self.anchors['R_label'] = (0.5, 0.3)
-        self.anchors['S_label'] = (2.8, 0.3)
+        self.anchors['S_label'] = (1.8, 1.1)
         self.label(label, rotate=True, loc='R_label', halign='center')
 
     def down(self) -> schemdraw.elements.Element:
