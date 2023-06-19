@@ -4,7 +4,7 @@ from ..Circuit.solution import ComplexSolution
 
 from . import Elements as elm
 from . import Display as dsp
-from .DiagramTranslator import SchematicDiagramParser, circuit_translator
+from .DiagramTranslator import SchematicDiagramParser, circuit_translator, network_translator
 
 from dataclasses import dataclass
 from typing import Callable
@@ -54,7 +54,7 @@ def time_domain_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal
         power_display=dsp.print_active_reactive_power
     )
 
-def complex_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_solver, w: float = 0, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
+def single_frequency_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_solver, w: float = 0, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
     diagram_parser = SchematicDiagramParser(schematic)
     solution = ComplexSolution(circuit=circuit_translator(schematic), solver=solver, w=w)
     return SchematicDiagramSolution(
@@ -63,4 +63,28 @@ def complex_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_ana
         voltage_display=partial(dsp.print_complex, unit='V', precision=precision, polar=polar, deg=deg),
         current_display=partial(dsp.print_complex, unit='A', precision=precision, polar=polar, deg=deg),
         power_display=partial(dsp.print_complex, unit='VA', precision=precision, polar=polar, deg=deg)
+    )
+
+def complex_network_dc_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_solver, precision: int = 3) -> SchematicDiagramSolution:
+    diagram_parser = SchematicDiagramParser(schematic)
+    network = network_translator(schematic)
+    solution = solver(network)
+    return SchematicDiagramSolution(
+        diagram_parser=diagram_parser,
+        solution=solution,
+        voltage_display=partial(dsp.print_complex, unit='V', precision=precision),
+        current_display=partial(dsp.print_complex, unit='A', precision=precision),
+        power_display=partial(dsp.print_complex, unit='VA', precision=precision)
+    )
+
+def real_network_dc_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_solver, precision: int = 3) -> SchematicDiagramSolution:
+    diagram_parser = SchematicDiagramParser(schematic)
+    network = network_translator(schematic)
+    solution = solver(network)
+    return SchematicDiagramSolution(
+        diagram_parser=diagram_parser,
+        solution=solution,
+        voltage_display=partial(dsp.print_real, unit='V', precision=precision),
+        current_display=partial(dsp.print_real, unit='A', precision=precision),
+        power_display=partial(dsp.print_real, unit='W', precision=precision)
     )

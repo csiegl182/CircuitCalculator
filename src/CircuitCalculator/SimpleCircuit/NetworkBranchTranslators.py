@@ -21,7 +21,7 @@ def linear_voltage_source_translator(element: elm.RealVoltageSource, nodes: tupl
     return ntw.Branch(nodes[0], nodes[1], ntw_elm.linear_voltage_source(V=element.V, Z=element.R, name=element.name))
 
 def voltage_source_translator(element: elm.VoltageSource, nodes: tuple[str, str]) -> ntw.Branch:
-    return ntw.Branch(nodes[0], nodes[1], ntw_elm.voltage_source(U=-element.V, name=element.name))
+    return ntw.Branch(nodes[0], nodes[1], ntw_elm.voltage_source(V=-element.V, name=element.name))
 
 def none_translator(*_) -> None:
     return None
