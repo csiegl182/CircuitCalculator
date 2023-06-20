@@ -41,7 +41,7 @@ class NortenElement:
     @property
     def I(self) -> complex:
         try:
-            return self.V/self.Z
+            return complex(self.V)/self.Z
         except ZeroDivisionError:
             return np.nan
 
@@ -62,7 +62,7 @@ class TheveninElement:
     @property
     def V(self) -> complex:
         try:
-            return self.I/self.Y
+            return complex(self.I)/self.Y
         except ZeroDivisionError:
             return np.nan
 
