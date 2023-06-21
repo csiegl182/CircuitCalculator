@@ -1,4 +1,4 @@
-from .Layout import NyquistPlot, color
+from .layout import NyquistPlot, color
 from ..Circuit.circuit import Circuit
 from ..Circuit.impedance import open_circuit_impedance
 from dataclasses import dataclass

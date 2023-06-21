@@ -1,6 +1,6 @@
 from .TimeSeries import VoltageTimeSeriesPlot, CurrentTimeSeriesPlot
 from .PointerDiagram import VoltagePointerDiagram, CurrentPointerDiagram, PQDiagram
-from .Layout import TimeSeriesPlot, PointerDiagram
+from .layout import TimeSeriesPlot, PointerDiagram
 from ..Circuit.circuit import Circuit
 from ..Circuit.solution import TimeDomainSolution, ComplexSolution
 

@@ -1,4 +1,4 @@
-from .Layout import PointerDiagram, color
+from .layout import PointerDiagram, color
 from ..Circuit.solution import ComplexSolution
 from dataclasses import dataclass
 

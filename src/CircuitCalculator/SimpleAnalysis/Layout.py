@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
-from .Elements import complex_pointer
+from .plot_elements import complex_pointer
 
 import numpy as np
 from  functools import partial
@@ -24,13 +24,14 @@ color = {
     'white' : (1, 1, 1)
 }
 
-FigureAxes = tuple[Figure, List[Axes]]
+FigureAxes = tuple[Figure, List[Axes]] | tuple[Figure, Axes]
 Layout = Callable[[], FigureAxes]
+PlotFcn = Callable[[FigureAxes], FigureAxes]
 
-def default_layout(**kwargs) -> tuple[Figure, Axes]:
+def default_layout(**kwargs) -> FigureAxes:
     return plt.subplots(ncols=1, nrows=1, **kwargs)
 
-def grid_layout(grid: bool = True, **kwargs) -> tuple[Figure, Axes]:
+def grid_layout(grid: bool = True, **kwargs) -> FigureAxes:
     fig, ax = default_layout(**kwargs)
     ax.grid(visible=grid, zorder=-1)
     return fig, ax
@@ -125,3 +126,28 @@ class NyquistPlot:
             bbox_to_anchor=(0.5, 1.1),
             frameon=False
         )
+
+def figure_wide(*args: tuple[PlotFcn]) -> FigureAxes:
+    fig, ax = plt.subplots()
+    for plt_fcn in args:
+        plt_fcn(fig, ax)
+    return fig, ax
+
+def new_time_series_plot(tmin:float=0, tmax:float=1, grid:bool=True, ylabel:str='') -> PlotFcn:
+    def decorator(plot_fcn: PlotFcn) -> PlotFcn:
+        def wrapper(fig: Figure, ax: Axes | List[Axes], *args, **kwargs) -> FigureAxes:
+            ax.set_xlabel('t→')
+            ax.set_ylabel(ylabel)
+            ax.set_xlim(xmin=tmin, xmax=tmax)
+            ax.grid(visible=grid, zorder=-1)
+            fig, ax = plot_fcn(fig, ax, *args, **kwargs)
+            ax.legend(
+                handles=[line for line in ax.lines if not line._label.startswith('_')],
+                ncol=len(ax.lines),
+                loc='upper center',
+                bbox_to_anchor=(0.5, 1.1),
+                frameon=False
+            )
+            return fig, ax
+        return wrapper
+    return decorator
