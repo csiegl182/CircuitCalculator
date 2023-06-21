@@ -61,5 +61,10 @@ def arrow(ax: Axes, xy0, xy1, height, width, tail=False, color='black', **kwargs
     xy1[1]-=height*np.sin(alpha)/aspect
     ax.plot([xy0[0], xy1[0]], [xy0[1], xy1[1]], color=color, **kwargs)
 
-def complex_pointer(ax: Axes, z0, z1, **kwargs) -> None:
-    arrow(ax, [np.real(z0), np.imag(z0)], [np.real(z1), np.imag(z1)], **kwargs)
+def complex_pointer(ax: Axes, z0, z1, width=0.05, height=0.05, **kwargs) -> None:
+    xlim, ylim = ax.get_xlim(), ax.get_ylim()
+    delta_x, delta_y = xlim[1]-xlim[0], ylim[1]-ylim[0]
+    max_stretch = max(delta_x, delta_y)
+    width *= max_stretch
+    height *= max_stretch
+    arrow(ax, [np.real(z0), np.imag(z0)], [np.real(z1), np.imag(z1)], width, height, **kwargs)

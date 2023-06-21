@@ -1,19 +1,13 @@
 from .circuit import Circuit, transform
 from ..Network.NodalAnalysis import nodal_analysis_solver
 from ..Network.solution import NetworkSolver
-from typing import Callable, List, Union, Tuple
+from typing import Callable, List, Union, Tuple, Any
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import numpy as np
 
 TimeDomainFunction = Callable[[np.ndarray], np.ndarray]
 FrequencyDomainFunction = Tuple[np.ndarray, np.ndarray]
-CircuitSolutionValue = Union[
-    float,
-    complex,
-    TimeDomainFunction,
-    FrequencyDomainFunction
-]
 
 @dataclass
 class CircuitSolution(ABC):
@@ -21,16 +15,30 @@ class CircuitSolution(ABC):
     solver: NetworkSolver = field(default=nodal_analysis_solver)
 
     @abstractmethod
-    def get_voltage(self, id: str) -> CircuitSolutionValue:
+    def get_voltage(self, id: str) -> Any:
         ...
 
     @abstractmethod
-    def get_current(self, id: str) -> CircuitSolutionValue:
+    def get_current(self, id: str) -> Any:
         ...
 
     @abstractmethod
-    def get_power(self, id: str) -> CircuitSolutionValue:
+    def get_power(self, id: str) -> Any:
         ...
+
+@dataclass
+class NoSolution(CircuitSolution):
+    circuit: None = None
+
+    def get_voltage(self, _: str) -> float:
+        return 0
+
+    def get_current(self, _: str) -> float:
+        return 0
+
+    def get_power(self, _: str) -> float:
+        return 0
+
 
 @dataclass
 class DCSolution(CircuitSolution):
@@ -66,11 +74,10 @@ class ComplexSolution(CircuitSolution):
 
 @dataclass
 class TimeDomainSolution(CircuitSolution):
-    w: List[float] = field(default_factory=list)
+    w: List[float] = field(default_factory=list, init=False)
 
     def __post_init__(self):
-        if len(self.w) == 0:
-            self.w = self.circuit.w
+        self.w = self.circuit.w
         networks = transform(self.circuit, w=self.w)
         self._solutions = [self.solver(network) for network in networks]
 

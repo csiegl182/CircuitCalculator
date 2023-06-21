@@ -1,84 +1,40 @@
-from .layout import PointerDiagram, color
-from ..Circuit.solution import ComplexSolution
+from .layout import pointer_diagram_plot
+from ..Circuit import solution as solutions
 from dataclasses import dataclass
+from .plot_elements import complex_pointer
+import functools
 
-@dataclass
-class VoltagePointerDiagram:
-    pointer_diagram: PointerDiagram
-    solution: ComplexSolution
-    resistance: float = 1
+def plot_voltage_pointer(id: str, origin:str='', pd_lim:tuple[float, float, float, float]=(-1, 1, -1, 1),  **kwargs):
+    @pointer_diagram_plot(ax_lim=pd_lim, xlabel='Re{V}→', ylabel='Im{V}→')
+    def plot_pointer(fig, ax, solution:solutions.CircuitSolution=solutions.NoSolution()):
+        kwargs.update({'label':f'V({id})'})
+        z0 = 0 if origin == '' else complex(solution.get_voltage(origin))
+        z1 = complex(solution.get_voltage(id))
+        complex_pointer(ax, z0, z0+z1, **kwargs)
+        return fig, ax
+    return plot_pointer
 
-    def _set_reference(self, ref_id: str, z: complex, z0: complex) -> None:
-        self._pointer_heads.update({ref_id: z+z0})
+def plot_current_pointer(id:str, origin:str='', pd_lim:tuple[float, float, float, float]=(-1, 1, -1, 1),  **kwargs):
+    @pointer_diagram_plot(ax_lim=pd_lim, xlabel='Re{I}→', ylabel='Im{I}→')
+    def plot_pointer(fig, ax, solution:solutions.CircuitSolution=solutions.NoSolution()):
+        kwargs.update({'label':f'I({id})'})
+        z0 = 0 if origin == '' else complex(solution.get_current(origin))
+        z1 = complex(solution.get_current(id))
+        complex_pointer(ax, z0, z0+z1, **kwargs)
+        return fig, ax
+    return plot_pointer
 
-    def _get_reference(self, ref_id: str) -> complex:
-        if ref_id == '':
-            return 0
-        return self._pointer_heads.get(ref_id, self.solution.get_voltage(ref_id))
+def plot_power_pointer(id:str, origin:str='', pd_lim:tuple[float, float, float, float]=(-1, 1, -1, 1),  **kwargs):
+    @pointer_diagram_plot(ax_lim=pd_lim, xlabel='P→', ylabel='Q→')
+    def plot_pointer(fig, ax, solution:solutions.CircuitSolution=solutions.NoSolution()):
+        kwargs.update({'label':f'S({id})'})
+        z0 = 0 if origin == '' else complex(solution.get_power(origin))
+        z1 = complex(solution.get_power(id))
+        complex_pointer(ax, z0, z0+z1, **kwargs)
+        return fig, ax
+    return plot_pointer
 
-    def add_voltage_pointer(self, id: str, origin: str='', color=color['blue']) -> None:
-        z = self.solution.get_voltage(id)
-        z0 = self._get_reference(origin)
-        self._set_reference(id, z, z0)
-        self.pointer_diagram.add_pointer(z=z, z0=z0, color=color, label=f'V({id})')
-
-    def add_current_pointer(self, id: str, color=color['red'], resistance: float = 0) -> None:
-        if resistance == 0:
-            resistance = self.resistance
-        z = self.solution.get_current(id)*resistance
-        self.pointer_diagram.add_pointer(z=z, color=color, label=f'I({id})·{resistance}Ω')
-
-    def __enter__(self):
-        self._pointer_heads = {}
-        return self
-
-    def __exit__(self, type, value, traceback):
-        self.pointer_diagram.draw()
-
-@dataclass
-class CurrentPointerDiagram:
-    pointer_diagram: PointerDiagram
-    solution: ComplexSolution
-    conductance: float = 1
-
-    def _set_reference(self, ref_id: str, z: complex, z0: complex) -> None:
-        self._pointer_heads.update({ref_id: z+z0})
-
-    def _get_reference(self, ref_id: str) -> complex:
-        if ref_id == '':
-            return 0
-        return self._pointer_heads.get(ref_id, self.solution.get_current(ref_id))
-
-    def add_current_pointer(self, id: str, origin: str='', color=color['red']) -> None:
-        z = self.solution.get_current(id)
-        z0 = self._get_reference(origin)
-        self._set_reference(id, z, z0)
-        self.pointer_diagram.add_pointer(z=z, z0=z0, color=color, label=f'I({id})')
-
-    def add_voltage_pointer(self, id: str, color=color['blue'], conductance: float = 0) -> None:
-        if conductance == 0:
-            conductance = self.conductance
-        z = self.solution.get_voltage(id)*conductance
-        self.pointer_diagram.add_pointer(z=z, color=color, label=f'V({id})·{conductance}S')
-
-    def __enter__(self):
-        self._pointer_heads = {}
-        return self
-
-    def __exit__(self, type, value, traceback):
-        self.pointer_diagram.draw()
-
-@dataclass
-class PQDiagram:
-    pointer_diagram: PointerDiagram
-    solution: ComplexSolution
-    
-    def add_power(self, id: str, color=color['green']) -> None:
-        z = self.solution.get_power(id)
-        self.pointer_diagram.add_pointer(z=z, color=color, label=f'S({id})')
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, type, value, traceback):
-        self.pointer_diagram.draw()
+def pointer_diagram_analysis(circuit, w, fig_fcn, *args):
+    solution = solutions.ComplexSolution(circuit=circuit, w=w)
+    new_args = tuple(functools.partial(a, solution=solution) for a in args)
+    return fig_fcn(*new_args)

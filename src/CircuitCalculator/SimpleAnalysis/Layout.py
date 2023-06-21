@@ -24,9 +24,9 @@ color = {
     'white' : (1, 1, 1)
 }
 
-FigureAxes = tuple[Figure, List[Axes]] | tuple[Figure, Axes]
+FigureAxes = tuple[Figure, Axes]
 Layout = Callable[[], FigureAxes]
-PlotFcn = Callable[[FigureAxes], FigureAxes]
+PlotFcn = Callable[[Figure, Axes], FigureAxes]
 
 def default_layout(**kwargs) -> FigureAxes:
     return plt.subplots(ncols=1, nrows=1, **kwargs)
@@ -36,81 +36,40 @@ def grid_layout(grid: bool = True, **kwargs) -> FigureAxes:
     ax.grid(visible=grid, zorder=-1)
     return fig, ax
 
-def figure_wide(*args: tuple[PlotFcn]) -> FigureAxes:
+def figure_wide(*args: PlotFcn) -> FigureAxes:
     fig, ax = plt.subplots()
     for plt_fcn in args:
         plt_fcn(fig, ax)
     return fig, ax
 
-@dataclass
-class PointerDiagram:
-    arrow_base: float = 0.05
-    arrow_length: float = 0.05
-    xlabel: str = ''
-    ylabel: str = ''
-
-    def __post_init__(self) -> None:
-        self.fig, self.ax = plt.subplots(ncols=1, nrows=1)
-        self.ax.grid(visible=True, zorder=-1)
-        self.ax.set_aspect('equal', 'box')
-        self.ax.set_xlabel(self.xlabel)
-        self.ax.set_ylabel(self.ylabel)
-        self.pointer_drawers = []
-        self._max_length = 0
-
-    def add_pointer(self, z: complex, z0: complex = 0, **kwargs) -> None:
-        self._max_length = max(self._max_length, np.abs(z))
-        self.pointer_drawers.append(partial(complex_pointer, self.ax, z0, z0+z, **kwargs))
-
-    def draw(self) -> None:
-        for draw_pointer in self.pointer_drawers:
-            draw_pointer(height=self.arrow_base*self._max_length, width=self.arrow_length*self._max_length)
-        x_min, x_max = self.ax.get_xlim()
-        y_min, y_max = self.ax.get_ylim()
-        self.ax.set_xlim(xmin=min(x_min, y_min), xmax=max(x_max, y_max))
-        self.ax.set_ylim(ymin=min(x_min, y_min), ymax=max(x_max, y_max))
-        self.ax.legend(
-            handles=[line for line in self.ax.lines],
-            ncol=len(self.ax.lines),
-            loc='upper center',
-            bbox_to_anchor=(0.5, 1.1),
-            frameon=False
-        )
-
-@dataclass
-class NyquistPlot:
-    xlabel: str = ''
-    ylabel: str = ''
-    signal_args: Dict[str, Any] = field(default_factory=dict)
-
-    def __post_init__(self) -> None:
-        self.fig, self.ax = plt.subplots(ncols=1, nrows=1)
-        self.ax.grid(visible=True, zorder=-1)
-        self.ax.set_aspect('equal', 'box')
-        self.ax.set_xlabel(self.xlabel)
-        self.ax.set_ylabel(self.ylabel)
-
-    def add_plot(self, z: complex, w: float, label: str, **kwargs) -> None:
-        self.signal_args.update({label : {'z': z, 'w': w, 'kwargs': kwargs}})
-
-    def draw(self) -> None:
-        for label, signal in self.signal_args.items():
-            self.ax.plot(np.real(signal['z']), np.imag(signal['z']), label=label, **signal['kwargs'])
-        self.ax.legend(
-            handles=[line for line in self.ax.lines],
-            ncol=len(self.ax.lines),
-            loc='upper center',
-            bbox_to_anchor=(0.5, 1.1),
-            frameon=False
-        )
-
-def timeseries_plot(tmin:float=0, tmax:float=1, grid:bool=True, ylabel:str='') -> PlotFcn:
+def timeseries_plot(tmin:float=0, tmax:float=1, grid:bool=True, ylabel:str='') -> Callable[[PlotFcn], PlotFcn]:
     def decorator(plot_fcn: PlotFcn) -> PlotFcn:
-        def wrapper(fig: Figure, ax: Axes | List[Axes], *args, **kwargs) -> FigureAxes:
+        def wrapper(fig: Figure, ax: Axes, *args, **kwargs) -> FigureAxes:
             ax.set_xlabel('t→')
             ax.set_ylabel(ylabel)
             ax.set_xlim(xmin=tmin, xmax=tmax)
             ax.grid(visible=grid, zorder=-1)
+            fig, ax = plot_fcn(fig, ax, *args, **kwargs)
+            ax.legend(
+                handles=[line for line in ax.lines if not line._label.startswith('_')],
+                ncol=len(ax.lines),
+                loc='upper center',
+                bbox_to_anchor=(0.5, 1.1),
+                frameon=False
+            )
+            return fig, ax
+        return wrapper
+    return decorator
+
+def pointer_diagram_plot(ax_lim:tuple[float, float, float, float], xlabel:str='', ylabel:str='', grid:bool=True) -> Callable[[PlotFcn], PlotFcn]:
+    def decorator(plot_fcn: PlotFcn) -> PlotFcn:
+        def wrapper(fig: Figure, ax: Axes, *args, **kwargs) -> FigureAxes:
+            ax.grid(visible=grid, zorder=-1)
+            ax.set_aspect('equal', 'box')
+            ax.set_xlabel(xlabel)
+            ax.set_ylabel(ylabel)
+            ax.set_xlim(left=ax_lim[0], right=ax_lim[1])
+            ax.set_ylim(bottom=ax_lim[2], top=ax_lim[3])
             fig, ax = plot_fcn(fig, ax, *args, **kwargs)
             ax.legend(
                 handles=[line for line in ax.lines if not line._label.startswith('_')],
