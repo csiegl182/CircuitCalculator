@@ -36,34 +36,11 @@ def grid_layout(grid: bool = True, **kwargs) -> FigureAxes:
     ax.grid(visible=grid, zorder=-1)
     return fig, ax
 
-@dataclass
-class TimeSeriesPlot:
-    tmax: float
-    tmin: float = 0
-    y_label: str = ''
-    signal_args: Dict[str, Any] = field(default_factory=dict)
-
-    def __post_init__(self) -> None:
-        self.fig, self.ax = plt.subplots(nrows=1, ncols=1, sharex=True)
-        self.ax.set_xlabel('t→')
-        self.ax.set_xlim(xmin=self.tmin, xmax=self.tmax)
-        self._signal_plot_config: dict[str, dict[str, Any]] = {}
-        self.ax.set_ylabel(f'{self.y_label}')
-        self.ax.grid(visible=True, zorder=-1)
-
-    def add_signal(self, x: np.ndarray, y: np.ndarray, label: str, **kwargs) -> None:
-        self.signal_args.update({label : {'x': x, 'y': y, 'kwargs': kwargs}})
-
-    def draw(self) -> None:
-        for label, signal in self.signal_args.items():
-            self.ax.plot(signal['x'], signal['y'], label=label, **signal['kwargs'])
-        self.ax.legend(
-            handles=[line for line in self.ax.lines],
-            ncol=len(self.ax.lines),
-            loc='upper center',
-            bbox_to_anchor=(0.5, 1.1),
-            frameon=False
-        )
+def figure_wide(*args: tuple[PlotFcn]) -> FigureAxes:
+    fig, ax = plt.subplots()
+    for plt_fcn in args:
+        plt_fcn(fig, ax)
+    return fig, ax
 
 @dataclass
 class PointerDiagram:
@@ -127,13 +104,7 @@ class NyquistPlot:
             frameon=False
         )
 
-def figure_wide(*args: tuple[PlotFcn]) -> FigureAxes:
-    fig, ax = plt.subplots()
-    for plt_fcn in args:
-        plt_fcn(fig, ax)
-    return fig, ax
-
-def new_time_series_plot(tmin:float=0, tmax:float=1, grid:bool=True, ylabel:str='') -> PlotFcn:
+def timeseries_plot(tmin:float=0, tmax:float=1, grid:bool=True, ylabel:str='') -> PlotFcn:
     def decorator(plot_fcn: PlotFcn) -> PlotFcn:
         def wrapper(fig: Figure, ax: Axes | List[Axes], *args, **kwargs) -> FigureAxes:
             ax.set_xlabel('t→')
