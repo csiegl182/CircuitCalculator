@@ -40,10 +40,10 @@ def apply_plt_fcn(fig, ax, *args: PlotFcn) -> FigureAxes:
         plt_fcn(fig, ax)
     return fig, ax
 
-def timeseries_plot(tmin:float=0, tmax:float=1, grid:bool=True, ylabel:str='') -> Callable[[PlotFcn], PlotFcn]:
+def timeseries_plot(tmin:float=0, tmax:float=1, grid:bool=True, xlabel:str='t→', ylabel:str='') -> Callable[[PlotFcn], PlotFcn]:
     def decorator(plot_fcn: PlotFcn) -> PlotFcn:
         def wrapper(fig: Figure, ax: Axes, *args, **kwargs) -> FigureAxes:
-            ax.set_xlabel('t→')
+            ax.set_xlabel(xlabel)
             ax.set_ylabel(ylabel)
             ax.set_xlim(xmin=tmin, xmax=tmax)
             ax.grid(visible=grid, zorder=-1)
