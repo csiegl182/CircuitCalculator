@@ -1,12 +1,8 @@
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
-from .plot_elements import complex_pointer
 
-import numpy as np
-from  functools import partial
-from dataclasses import dataclass, field
-from typing import Callable, List, Dict, Any
+from typing import Callable
 
 color = {
     'black' : (0, 0, 0),
@@ -36,8 +32,10 @@ def grid_layout(grid: bool = True, **kwargs) -> FigureAxes:
     ax.grid(visible=grid, zorder=-1)
     return fig, ax
 
-def figure_wide(*args: PlotFcn) -> FigureAxes:
-    fig, ax = plt.subplots()
+def figure_default() -> FigureAxes:
+    return plt.subplots()
+
+def apply_plt_fcn(fig, ax, *args: PlotFcn) -> FigureAxes:
     for plt_fcn in args:
         plt_fcn(fig, ax)
     return fig, ax

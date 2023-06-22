@@ -67,4 +67,5 @@ def complex_pointer(ax: Axes, z0, z1, width=0.05, height=0.05, **kwargs) -> None
     max_stretch = max(delta_x, delta_y)
     width *= max_stretch
     height *= max_stretch
-    arrow(ax, [np.real(z0), np.imag(z0)], [np.real(z1), np.imag(z1)], width, height, **kwargs)
+    if z0 != z1:
+        arrow(ax, [np.real(z0), np.imag(z0)], [np.real(z1), np.imag(z1)], width, height, **kwargs)
