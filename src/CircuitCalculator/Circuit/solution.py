@@ -1,13 +1,11 @@
 from .circuit import Circuit, transform
+from ..SignalProcessing.types import TimeDomainFunction, FrequencyDomainFunction
 from ..Network.NodalAnalysis import nodal_analysis_solver
 from ..Network.solution import NetworkSolver
-from typing import Callable, List, Union, Tuple, Any
+from typing import Callable, List, Tuple, Any
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import numpy as np
-
-TimeDomainFunction = Callable[[np.ndarray], np.ndarray]
-FrequencyDomainFunction = Tuple[np.ndarray, np.ndarray]
 
 @dataclass
 class CircuitSolution(ABC):
