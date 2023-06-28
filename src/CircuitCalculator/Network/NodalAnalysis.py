@@ -7,7 +7,8 @@ from . import labelmapper as map
 from .solution import NetworkSolution
 import itertools
 
-class DimensionError(Exception): pass
+class DimensionError(Exception):
+    ...
 
 def admittance_connected_to(network: Network, node: str) -> complex:
     return sum(b.element.Y for b in network.branches_connected_to(node) if np.isfinite(b.element.Y))
@@ -103,9 +104,12 @@ class NodalAnalysisSolution:
         Y = create_node_matrix_from_network(network, node_index_mapper=node_mapper)
         I = create_current_vector_from_network(network, node_index_mapper=node_mapper)
         self._network = network
-        self._solution_vector = calculate_node_voltages(Y, I)
         self._super_nodes = SuperNodes(network)
         self._node_mapping = node_mapper(network)
+        try:
+            self._solution_vector = calculate_node_voltages(Y, I)
+        except np.linalg.LinAlgError:
+            self._solution_vector = np.zeros(np.size(I))
 
     def _calculate_potential_of_node(self, node: str) -> complex:
         V_active = 0+0j

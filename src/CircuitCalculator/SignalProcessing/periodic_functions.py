@@ -37,8 +37,6 @@ class CosFunction:
     def time_function(self) -> TimeDomainFunction:
         return lambda t: self.amplitude*np.cos(2*np.pi/self.period*t + self.phase)
 
-import numpy.typing as npt
-
 @dataclass
 class CosFunctionHarmonics:
     amplitude0: float

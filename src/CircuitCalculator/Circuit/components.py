@@ -1,5 +1,9 @@
+import numpy as np
+import numpy.typing as npt
 from dataclasses import dataclass, field
 from abc import ABC
+from ..SignalProcessing.periodic_functions import PeriodicFunction, HarmonicCoefficients, fourier_series, CosFunction
+from typing import Type
     
 @dataclass(frozen=True)
 class Component(ABC):
@@ -58,6 +62,38 @@ class LinearCurrentSource(CurrentSource):
 class LinearVoltageSource(VoltageSource):
     R : float = field(default=0.0)
     type : str = field(default='linear_voltage_source', init=False)
+
+@dataclass(frozen=True)
+class PeriodicVoltageSource(VoltageSource):
+    wavetype : Type[PeriodicFunction] = field(default=CosFunction)
+
+    @property
+    def time_properties(self) -> PeriodicFunction:
+        return self.wavetype(period=2*np.pi/self.w, amplitude=self.V, phase=self.phi)
+
+    @property
+    def frequency_properties(self) -> HarmonicCoefficients:
+        return fourier_series(self.time_properties)
+
+    def frequency_components(self, w_max: float) -> npt.NDArray[np.double]:
+        n_max = np.floor(w_max/self.w)
+        return np.array([self.w*n for n in np.arange(n_max)])
+
+@dataclass(frozen=True)
+class PeriodicCurrentSource(CurrentSource):
+    wavetype : Type[PeriodicFunction] = field(default=CosFunction)
+
+    @property
+    def time_properties(self) -> PeriodicFunction:
+        return self.wavetype(period=2*np.pi/self.w, amplitude=self.I, phase=self.phi)
+
+    @property
+    def frequency_properties(self) -> HarmonicCoefficients:
+        return fourier_series(self.time_properties)
+
+    def frequency_components(self, w_max: float) -> npt.NDArray[np.double]:
+        n_max = np.floor(self.w/w_max)
+        return np.array([self.w*n for n in np.arange(n_max)])
 
 @dataclass(frozen=True)
 class Ground(Component):

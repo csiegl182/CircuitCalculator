@@ -1,8 +1,8 @@
-from .circuit import Circuit, transform
+from .circuit import Circuit, transform, frequency_components
 from ..SignalProcessing.types import TimeDomainFunction, FrequencyDomainFunction
 from ..Network.NodalAnalysis import nodal_analysis_solver
 from ..Network.solution import NetworkSolver
-from typing import Callable, List, Tuple, Any
+from typing import Any
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import numpy as np
@@ -72,10 +72,11 @@ class ComplexSolution(CircuitSolution):
 
 @dataclass
 class TimeDomainSolution(CircuitSolution):
-    w: List[float] = field(default_factory=list, init=False)
+    w_max: float = field(default=0)
+    w: list[float] = field(default_factory=list, init=False)
 
     def __post_init__(self):
-        self.w = self.circuit.w
+        self.w = frequency_components(self.circuit, self.w_max)
         networks = transform(self.circuit, w=self.w)
         self._solutions = [self.solver(network) for network in networks]
 

@@ -34,14 +34,30 @@ def current_source(current_source: cmp.CurrentSource, w: float = 0, w_resolution
     )
 
 def voltage_source(voltage_source: cmp.VoltageSource, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
-    element = elm.voltage_source(voltage_source.id, elm.complex_value(voltage_source.V, 0))
+    element = elm.voltage_source(voltage_source.id, elm.complex_value(voltage_source.V, voltage_source.phi))
     if np.abs(w-voltage_source.w) > w_resolution:
         element = elm.short_cicruit(voltage_source.id)
     return ntw.Branch(
         voltage_source.nodes[0],
         voltage_source.nodes[1],
-        element
+        element)
+
+def harmonic_voltage_source(source: cmp.PeriodicVoltageSource, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
+    n = np.round(w/source.w)
+    delta_n = np.abs(w/source.w - n)
+    if delta_n > w_resolution/source.w:
+        return ntw.Branch(
+            source.nodes[0],
+            source.nodes[1],
+            elm.short_cicruit(source.id))
+    single_frequency_source = cmp.VoltageSource(
+        nodes=source.nodes,
+        id=source.id,
+        w=w,
+        phi=source.frequency_properties.phase(n),
+        V=source.frequency_properties.amplitude(n)
     )
+    return voltage_source(single_frequency_source, w, w_resolution)
 
 def linear_current_source(current_source: cmp.LinearCurrentSource, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
     element = elm.linear_current_source(current_source.id, elm.complex_value(current_source.I, 0), elm.complex_value(current_source.G, 0))
@@ -50,8 +66,7 @@ def linear_current_source(current_source: cmp.LinearCurrentSource, w: float = 0,
     return ntw.Branch(
         current_source.nodes[0],
         current_source.nodes[1],
-        element
-    )
+        element)
 
 def linear_voltage_source(voltage_source: cmp.LinearVoltageSource, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
     element = elm.linear_voltage_source(voltage_source.id, elm.complex_value(voltage_source.V, 0), elm.complex_value(voltage_source.R, 0))
@@ -70,4 +85,5 @@ transformers : dict[Type[cmp.Component], CircuitComponentTranslator] = {
     cmp.CurrentSource : current_source,
     cmp.VoltageSource : voltage_source,
     cmp.LinearCurrentSource : linear_current_source,
+    cmp.PeriodicVoltageSource : harmonic_voltage_source,
 }

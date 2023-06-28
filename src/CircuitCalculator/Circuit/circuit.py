@@ -1,4 +1,4 @@
-from .components import Component
+from .components import Component, PeriodicCurrentSource, PeriodicVoltageSource
 from .transformers import transformers
 from ..Network.network import Network
 import numpy as np
@@ -38,3 +38,13 @@ def transform_circuit(circuit: Circuit, w: float, w_resolution: float = 1e-3) ->
 
 def transform(circuit: Circuit, w: list[float] = [0], w_resolution: float = 1e-3) -> list[Network]:
     return [transform_circuit(circuit, w_, w_resolution) for w_ in w]
+
+def frequency_components(circuit: Circuit, w_max: float) -> list[float]:
+    active_components = [c for c in circuit.components if c.is_active]
+    w = []
+    for ac in active_components:
+        if type(ac) == PeriodicVoltageSource or type(ac) == PeriodicCurrentSource:
+            w.extend(ac.frequency_components(w_max))
+        else:
+            w.append(ac.w)
+    return list(set(w))
