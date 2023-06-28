@@ -201,6 +201,50 @@ class Resistor(schemdraw.elements.twoterm.ResistorIEC):
 
         super()._place_label(*args, **kwargs)
 
+class Conductance(schemdraw.elements.twoterm.ResistorIEC):
+    def __init__(self, G: float, name: str, *args, show_name: bool = True, show_value: bool = True, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._G = G
+        self._name = name
+        label = ''
+        label += f'{self._name}' if show_name else ''
+        label += '=' if  show_name and show_value else ''
+        label += dsp.print_conductance(self.G) if show_value else ''
+        self.anchors['G_label'] = (0.5, 0.3)
+        self.anchors['S_label'] = (1.8, 1.1)
+        self.label(label, rotate=True, loc='G_label', halign='center')
+
+    def down(self) -> schemdraw.elements.Element:
+        self.anchors['G_label'] = (0.5, -0.9)
+        return super().down()
+
+    def left(self) -> schemdraw.elements.Element:
+        self.anchors['G_label'] = (0.5, -1)
+        return super().left()
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def R(self) -> float:
+        return 1/self._G
+
+    @property
+    def G(self) -> float:
+        return self._G
+
+    def values(self) -> dict[str, float]:
+        return {'G' : self._R}
+
+    def _place_label(self, *args, **kwargs):
+        delta = self.end-self.start
+        if abs(delta[1]) > abs(delta[0]): # portrait placing of resistor
+            if delta[1] < 0:
+                kwargs.update({'rotation': 90})
+
+        super()._place_label(*args, **kwargs)
+
 class ACVoltageSource(din_elements.SourceUDIN):
     def __init__(self, V: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)

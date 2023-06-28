@@ -7,6 +7,9 @@ from math import pi, inf
 def resistor_translator(element: elm.Resistor, nodes: tuple[str, str]) -> cct_cmp.Resistor:
     return cct_cmp.Resistor(nodes=nodes, id=element.name, R=element.R)
 
+def conductance_translator(element: elm.Conductance, nodes: tuple[str, str]) -> cct_cmp.Conductance:
+    return cct_cmp.Conductance(nodes=nodes, id=element.name, G=element.G)
+
 def capacitor_translator(element: elm.Capacitor, nodes: tuple[str, str]) -> cct_cmp.Capacitor:
     return cct_cmp.Capacitor(nodes=nodes, id=element.name, C=element.C)
 
@@ -68,6 +71,7 @@ def none_translator(*_) -> None:
 
 circuit_translator_map : ElementTranslatorMap = {
     elm.Resistor : resistor_translator,
+    elm.Conductance : conductance_translator,
     elm.VoltageSource : dc_voltage_source_translator,
     elm.CurrentSource : dc_current_source_translator,
     elm.ACVoltageSource : ac_voltage_source_translator,

@@ -19,6 +19,11 @@ class Resistor(TwoPoleComponent):
     type : str = field(default='resistor', init=False)
 
 @dataclass(frozen=True)
+class Conductance(TwoPoleComponent):
+    G : float
+    type : str = field(default='conductance', init=False)
+
+@dataclass(frozen=True)
 class Capacitor(TwoPoleComponent):
     C : float
     type : str = field(default='capacitor', init=False)
