@@ -27,6 +27,14 @@ def plot_frequencies_by_id(
         return fig, ax
     return plot_frequencies
 
+def plot_frequencies_by_fcn(
+        fd_fcn:FrequencyDomainFunction,
+        **kwargs) -> layout.PlotFcn:
+    def plot_frequencies(fig:layout.Figure, ax:layout.Axes, **_) -> layout.FigureAxes:
+        plot_discrete_frequencies_fcn(ax, fd_fcn[0], np.abs(fd_fcn[1]), **kwargs)
+        return fig, ax
+    return plot_frequencies
+
 def frequency_domain_plot(
         *args,
         wmax:float,
@@ -49,6 +57,32 @@ def discrete_frequencies_voltage_analysis(
     @layout.frequencydomain_plot(wmin=wmin, wmax=wmax, ylabel='V(ω)→')
     def plot_frequencydomain(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
         new_args = [functools.partial(a, fd_fcn=solution.get_voltage, label_fcn=lambda id: f'V({id})') for a in args]
+        layout.apply_plt_fcn(fig, ax, *new_args)
+        return fig, ax
+    return plot_frequencydomain(*layout_fcn())
+
+def discrete_frequencies_current_analysis(
+        *args,
+        solution:FrequencyDomainSolution,
+        wmax:float,
+        wmin:float=0,
+        layout_fcn:layout.Layout=layout.figure_default) -> layout.FigureAxes:
+    @layout.frequencydomain_plot(wmin=wmin, wmax=wmax, ylabel='I(ω)→')
+    def plot_frequencydomain(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
+        new_args = [functools.partial(a, fd_fcn=solution.get_current, label_fcn=lambda id: f'I({id})') for a in args]
+        layout.apply_plt_fcn(fig, ax, *new_args)
+        return fig, ax
+    return plot_frequencydomain(*layout_fcn())
+
+def discrete_frequencies_power_analysis(
+        *args,
+        solution:FrequencyDomainSolution,
+        wmax:float,
+        wmin:float=0,
+        layout_fcn:layout.Layout=layout.figure_default) -> layout.FigureAxes:
+    @layout.frequencydomain_plot(wmin=wmin, wmax=wmax, ylabel='S(ω)→')
+    def plot_frequencydomain(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
+        new_args = [functools.partial(a, fd_fcn=solution.get_power, label_fcn=lambda id: f'S({id})') for a in args]
         layout.apply_plt_fcn(fig, ax, *new_args)
         return fig, ax
     return plot_frequencydomain(*layout_fcn())

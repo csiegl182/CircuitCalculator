@@ -111,6 +111,6 @@ class FrequencyDomainSolution(CircuitSolution):
         return np.array(self.w), currents
 
     def get_power(self, component_id: str) -> FrequencyDomainFunction:
-        voltage = self.get_voltage(component_id)
-        current = self.get_current(component_id)
-        return np.array(self.w), np.array(voltage)*np.conj(np.array(current))
+        w, voltage = self.get_voltage(component_id)
+        _, current = self.get_current(component_id)
+        return w, voltage*np.conj(current)
