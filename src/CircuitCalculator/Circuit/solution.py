@@ -95,19 +95,22 @@ class TimeDomainSolution(CircuitSolution):
 
 @dataclass
 class FrequencyDomainSolution(CircuitSolution):
+    w_max: float = field(default=0)
+
     def __post_init__(self):
-        networks = transform(self.circuit, w=self.circuit.w)
+        self.w = frequency_components(self.circuit, self.w_max)
+        networks = transform(self.circuit, w=self.w)
         self._solutions = [self.solver(network) for network in networks]
 
     def get_voltage(self, component_id: str) -> FrequencyDomainFunction:
         voltages = np.array([solution.get_voltage(component_id) for solution in self._solutions])
-        return np.array(self.circuit.w), voltages
+        return np.array(self.w), voltages
 
     def get_current(self, component_id: str) -> FrequencyDomainFunction:
         currents = np.array([solution.get_current(component_id) for solution in self._solutions])
-        return np.array(self.circuit.w), currents
+        return np.array(self.w), currents
 
     def get_power(self, component_id: str) -> FrequencyDomainFunction:
         voltage = self.get_voltage(component_id)
         current = self.get_current(component_id)
-        return np.array(self.circuit.w), np.array(voltage)*np.conj(np.array(current))
+        return np.array(self.w), np.array(voltage)*np.conj(np.array(current))

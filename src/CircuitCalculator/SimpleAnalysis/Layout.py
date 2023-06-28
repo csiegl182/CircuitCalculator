@@ -59,6 +59,25 @@ def timeseries_plot(tmin:float=0, tmax:float=1, grid:bool=True, xlabel:str='t→
         return wrapper
     return decorator
 
+def frequencydomain_plot(wmin:float=0, wmax:float=1, grid:bool=True, xlabel:str='ω→', ylabel:str='') -> Callable[[PlotFcn], PlotFcn]:
+    def decorator(plot_fcn: PlotFcn) -> PlotFcn:
+        def wrapper(fig: Figure, ax: Axes, *args, **kwargs) -> FigureAxes:
+            ax.set_xlabel(xlabel)
+            ax.set_ylabel(ylabel)
+            ax.set_xlim(xmin=wmin, xmax=wmax)
+            ax.grid(visible=grid, zorder=-1)
+            fig, ax = plot_fcn(fig, ax, *args, **kwargs)
+            ax.legend(
+                handles=[line for line in ax.lines if not line._label.startswith('_')],
+                ncol=len(ax.lines),
+                loc='upper center',
+                bbox_to_anchor=(0.5, 1.1),
+                frameon=False
+            )
+            return fig, ax
+        return wrapper
+    return decorator
+
 def pointer_diagram_plot(ax_lim:tuple[float, float, float, float], xlabel:str='', ylabel:str='', grid:bool=True) -> Callable[[PlotFcn], PlotFcn]:
     def decorator(plot_fcn: PlotFcn) -> PlotFcn:
         def wrapper(fig: Figure, ax: Axes, *args, **kwargs) -> FigureAxes:

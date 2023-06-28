@@ -23,10 +23,6 @@ class Circuit:
         else:
             self.ground_node = ground_nodes[0]
 
-    @property
-    def w(self) -> list[float]:
-        return [component.w for component in self.components if component.is_active]
-
 def w(f: float) -> float:
     return 2*np.pi*f
 
@@ -47,4 +43,6 @@ def frequency_components(circuit: Circuit, w_max: float) -> list[float]:
             w.extend(ac.frequency_components(w_max))
         else:
             w.append(ac.w)
-    return list(set(w))
+    w = list(set(w))
+    w.sort()
+    return w
