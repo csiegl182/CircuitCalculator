@@ -22,10 +22,10 @@ def plot_timeseries_by_id(
               **_) -> layout.FigureAxes:
         x_min, x_max = t_min, t_max
         if t_min >= t_max:
-            x_min, x_max = ax.get_xlim()
+            x_min, x_max = ax[0].get_xlim()
         if 'label' not in kwargs.keys():
             kwargs.update({'label':label_fcn(id)})
-        plot_timeseries_fcn(ax, ts_fcn(id), x_min, x_max, N_samples, **kwargs)
+        plot_timeseries_fcn(ax[0], ts_fcn(id), x_min, x_max, N_samples, **kwargs)
         return fig, ax
     return plot_timeseries
 
@@ -38,8 +38,8 @@ def plot_timeseries_by_fcn(
     def plot_timeseries(fig:layout.Figure, ax:layout.Axes, **_) -> layout.FigureAxes:
         x_min, x_max = t_min, t_max
         if t_min >= t_max:
-            x_min, x_max = ax.get_xlim()
-        plot_timeseries_fcn(ax, ts_fcn, x_min, x_max, N_samples, **kwargs)
+            x_min, x_max = ax[0].get_xlim()
+        plot_timeseries_fcn(ax[0], ts_fcn, x_min, x_max, N_samples, **kwargs)
         return fig, ax
     return plot_timeseries
 

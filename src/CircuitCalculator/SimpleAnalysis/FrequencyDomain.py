@@ -5,11 +5,11 @@ import numpy as np
 import functools
 
 def plot_discrete_frequencies_fcn(ax:layout.Axes, w:np.ndarray, X:np.ndarray, **kwargs) -> None:
-    line = ax.plot([w[0], w[0]], [0, X[0]], **kwargs)
+    line = ax[0].plot([w[0], w[0]], [0, X[0]], **kwargs)
     color = line[0].get_color()
     kwargs.update({'label': '', 'color': color})
     for w0, X0 in zip(w[1:], X[1:]):
-        ax.plot([w0, w0], [0, X0], **kwargs)
+        ax[0].plot([w0, w0], [0, X0], **kwargs)
 
 def plot_frequencies_by_id(
         id:str,
