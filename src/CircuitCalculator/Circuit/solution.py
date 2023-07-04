@@ -9,7 +9,7 @@ import numpy as np
 
 @dataclass
 class CircuitSolution(ABC):
-    circuit: Circuit
+    circuit: Circuit = field(default=Circuit([]))
     solver: NetworkSolver = field(default=nodal_analysis_solver)
 
     @abstractmethod
@@ -23,20 +23,6 @@ class CircuitSolution(ABC):
     @abstractmethod
     def get_power(self, id: str) -> Any:
         ...
-
-@dataclass
-class NoSolution(CircuitSolution):
-    circuit: None = None
-
-    def get_voltage(self, _: str) -> float:
-        return 0
-
-    def get_current(self, _: str) -> float:
-        return 0
-
-    def get_power(self, _: str) -> float:
-        return 0
-
 
 @dataclass
 class DCSolution(CircuitSolution):
