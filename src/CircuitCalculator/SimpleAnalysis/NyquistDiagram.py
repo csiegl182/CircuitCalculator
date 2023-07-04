@@ -29,7 +29,9 @@ def nyquist_plot(
         layout_fcn:layout.Layout=layout.figure_default,
         xlabel:str='',
         ylabel:str='') -> layout.FigureAxes:
-    @layout.nyquist_plot(ax_lim=ax_lim, xlabel=xlabel, ylabel=ylabel)
+    @layout.legend()
+    @layout.grid()
+    @layout.nyquist_like_plot(ax_lim=ax_lim, xlabel=xlabel, ylabel=ylabel)
     def plot_frequencydomain(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
         layout.apply_plt_fcn(fig, ax, *args)
         return fig, ax
@@ -39,8 +41,12 @@ def nyquist_voltage_analysis(
         *args,
         solution:FrequencyDomainSolution,
         ax_lim:tuple[float, float, float, float],
-        layout_fcn:layout.Layout=layout.figure_default) -> layout.FigureAxes:
-    @layout.nyquist_plot(ax_lim=ax_lim, xlabel='Re{V}→', ylabel='Im{V}→')
+        layout_fcn:layout.Layout=layout.figure_default,
+        xlabel:str='Re{V}→',
+        ylabel:str='Im{V}→') -> layout.FigureAxes:
+    @layout.legend()
+    @layout.grid()
+    @layout.nyquist_like_plot(ax_lim=ax_lim, xlabel=xlabel, ylabel=ylabel)
     def plot_nyquist(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
         new_args = [functools.partial(a, fd_fcn=solution.get_voltage, label_fcn=lambda id: f'V({id})') for a in args]
         layout.apply_plt_fcn(fig, ax, *new_args)
@@ -51,8 +57,12 @@ def nyquist_current_analysis(
         *args,
         solution:FrequencyDomainSolution,
         ax_lim:tuple[float, float, float, float],
-        layout_fcn:layout.Layout=layout.figure_default) -> layout.FigureAxes:
-    @layout.nyquist_plot(ax_lim=ax_lim, xlabel='Re{I}→', ylabel='Im{I}→')
+        layout_fcn:layout.Layout=layout.figure_default,
+        xlabel:str='Re{I}→',
+        ylabel:str='Im{I}→') -> layout.FigureAxes:
+    @layout.legend()
+    @layout.grid()
+    @layout.nyquist_like_plot(ax_lim=ax_lim, xlabel=xlabel, ylabel=ylabel)
     def plot_nyquist(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
         new_args = [functools.partial(a, fd_fcn=solution.get_voltage, label_fcn=lambda id: f'I({id})') for a in args]
         layout.apply_plt_fcn(fig, ax, *new_args)
@@ -63,8 +73,12 @@ def nyquist_power_analysis(
         *args,
         solution:FrequencyDomainSolution,
         ax_lim:tuple[float, float, float, float],
-        layout_fcn:layout.Layout=layout.figure_default) -> layout.FigureAxes:
-    @layout.nyquist_plot(ax_lim=ax_lim, xlabel='P→', ylabel='Q→')
+        layout_fcn:layout.Layout=layout.figure_default,
+        xlabel:str='P→',
+        ylabel:str='Q→') -> layout.FigureAxes:
+    @layout.legend()
+    @layout.grid()
+    @layout.nyquist_like_plot(ax_lim=ax_lim, xlabel=xlabel, ylabel=ylabel)
     def plot_nyquist(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
         new_args = [functools.partial(a, fd_fcn=solution.get_voltage, label_fcn=lambda id: f'S({id})') for a in args]
         layout.apply_plt_fcn(fig, ax, *new_args)

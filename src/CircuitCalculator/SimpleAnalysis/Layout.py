@@ -4,6 +4,9 @@ from matplotlib.axes import Axes as Axis
 
 from typing import Callable
 
+class LayoutError(Exception):
+    ...
+
 color = {
     'black' : (0, 0, 0),
     'grey' : (.7, .7, .7),
@@ -41,83 +44,87 @@ def apply_plt_fcn(fig, ax, *args: PlotFcn) -> FigureAxes:
         plt_fcn(fig, ax)
     return fig, ax
 
-def timeseries_plot(tmin:float=0, tmax:float=1, grid:bool=True, xlabel:str='t→', ylabel:str='') -> Callable[[PlotFcn], PlotFcn]:
+def legend(yoffset:float=1.1) -> Callable[[PlotFcn], PlotFcn]:
     def decorator(plot_fcn: PlotFcn) -> PlotFcn:
         def wrapper(fig: Figure, ax: Axes, *args, **kwargs) -> FigureAxes:
-            ax[0].set_xlabel(xlabel)
-            ax[0].set_ylabel(ylabel)
-            ax[0].set_xlim(xmin=tmin, xmax=tmax)
-            ax[0].grid(visible=grid, zorder=-1)
             fig, ax = plot_fcn(fig, ax, *args, **kwargs)
             ax[0].legend(
                 handles=[line for line in ax[0].lines if not line._label.startswith('_')],
                 ncol=len(ax[0].lines),
                 loc='upper center',
-                bbox_to_anchor=(0.5, 1.1),
+                bbox_to_anchor=(0.5, yoffset),
                 frameon=False
             )
             return fig, ax
         return wrapper
     return decorator
 
-def frequencydomain_plot(wmin:float=0, wmax:float=1, grid:bool=True, xlabel:str='ω→', ylabel:str='') -> Callable[[PlotFcn], PlotFcn]:
+def grid(visible:bool=True) -> Callable[[PlotFcn], PlotFcn]:
     def decorator(plot_fcn: PlotFcn) -> PlotFcn:
         def wrapper(fig: Figure, ax: Axes, *args, **kwargs) -> FigureAxes:
-            ax[0].set_xlabel(xlabel)
-            ax[0].set_ylabel(ylabel)
-            ax[0].set_xlim(xmin=wmin, xmax=wmax)
-            ax[0].grid(visible=grid, zorder=-1)
-            fig, ax = plot_fcn(fig, ax, *args, **kwargs)
-            ax[0].legend(
-                handles=[line for line in ax[0].lines if not line._label.startswith('_')],
-                ncol=len(ax[0].lines),
-                loc='upper center',
-                bbox_to_anchor=(0.5, 1.1),
-                frameon=False
-            )
-            return fig, ax
+            for a in ax:
+                a.grid(visible=visible, zorder=-1)
+            return plot_fcn(fig, ax, *args, **kwargs)
         return wrapper
     return decorator
 
-def nyquist_plot(ax_lim:tuple[float, float, float, float], xlabel:str='', ylabel:str='', grid:bool=True) -> Callable[[PlotFcn], PlotFcn]:
+def equal_scaling() -> Callable[[PlotFcn], PlotFcn]:
     def decorator(plot_fcn: PlotFcn) -> PlotFcn:
         def wrapper(fig: Figure, ax: Axes, *args, **kwargs) -> FigureAxes:
-            ax[0].grid(visible=grid, zorder=-1)
-            ax[0].set_aspect('equal', 'box')
+            for a in ax:
+                a.set_aspect('equal', 'box')
+            return plot_fcn(fig, ax, *args, **kwargs)
+        return wrapper
+    return decorator
+
+def xlim_bottom(xmin:float=0, xmax:float=-1) -> Callable[[PlotFcn], PlotFcn]:
+    def decorator(plot_fcn: PlotFcn) -> PlotFcn:
+        def wrapper(fig: Figure, ax: Axes, *args, **kwargs) -> FigureAxes:
+            if xmax >= xmin:
+                ax[-1].set_xlim(left=xmin, right=xmax)
+            return plot_fcn(fig, ax, *args, **kwargs)
+        return wrapper
+    return decorator
+
+def xlabel_bottom(label:str='') -> Callable[[PlotFcn], PlotFcn]:
+    def decorator(plot_fcn: PlotFcn) -> PlotFcn:
+        def wrapper(fig: Figure, ax: Axes, *args, **kwargs) -> FigureAxes:
+            ax[-1].set_xlabel(label)
+            return plot_fcn(fig, ax, *args, **kwargs)
+        return wrapper
+    return decorator
+
+def nyquist_like_plot(ax_lim:tuple[float, float, float, float], xlabel:str='', ylabel:str='') -> Callable[[PlotFcn], PlotFcn]:
+    def decorator(plot_fcn: PlotFcn) -> PlotFcn:
+        @equal_scaling()
+        def wrapper(fig: Figure, ax: Axes, *args, **kwargs) -> FigureAxes:
             ax[0].set_xlabel(xlabel)
             ax[0].set_ylabel(ylabel)
             ax[0].set_xlim(left=ax_lim[0], right=ax_lim[1])
             ax[0].set_ylim(bottom=ax_lim[2], top=ax_lim[3])
-            fig, ax = plot_fcn(fig, ax, *args, **kwargs)
-            ax[0].legend(
-                handles=[line for line in ax[0].lines if not line._label.startswith('_')],
-                ncol=len(ax[0].lines),
-                loc='upper center',
-                bbox_to_anchor=(0.5, 1.1),
-                frameon=False
-            )
-            return fig, ax
+            return plot_fcn(fig, ax, *args, **kwargs)
         return wrapper
     return decorator
 
-def bode_plot(wmin:float=0, wmax:float=1, grid:bool=True, xlabel:str='ω→', ylabel_abs:str='', ylabel_phase:str='') -> Callable[[PlotFcn], PlotFcn]:
+def frequencydomain_plot(ylabel:str='') -> Callable[[PlotFcn], PlotFcn]:
     def decorator(plot_fcn: PlotFcn) -> PlotFcn:
         def wrapper(fig: Figure, ax: Axes, *args, **kwargs) -> FigureAxes:
-            ax[0].set_xlabel(xlabel)
-            ax[0].set_ylabel(ylabel_abs)
-            ax[0].set_xlim(xmin=wmin, xmax=wmax)
-            ax[0].grid(visible=grid, zorder=-1)
-            ax[1].set_xlabel(xlabel)
-            ax[1].set_ylabel(ylabel_phase)
-            ax[1].grid(visible=grid, zorder=-1)
-            fig, ax = plot_fcn(fig, ax, *args, **kwargs)
-            ax[0].legend(
-                handles=[line for line in ax[0].lines if not line._label.startswith('_')],
-                ncol=len(ax[0].lines),
-                loc='upper center',
-                bbox_to_anchor=(0.5, 1.1),
-                frameon=False
-            )
-            return fig, ax
+            ax[0].set_ylabel(ylabel)
+            ax[1].set_ylabel(ylabel)
+            return plot_fcn(fig, ax, *args, **kwargs)
+        return wrapper
+    return decorator
+
+def bode_like_plot(wmin:float=0, wmax:float=-1, logw:bool=False, logy:bool=False, xlabel:str='ω→', ylabel:str='') -> Callable[[PlotFcn], PlotFcn]:
+    def decorator(plot_fcn: PlotFcn) -> PlotFcn:
+        @xlabel_bottom(xlabel)
+        @xlim_bottom(xmin=wmin, xmax=wmax)
+        def wrapper(fig: Figure, ax: Axes, *args, **kwargs) -> FigureAxes:
+            if len(ylabel) > 0:
+                ax[-2].set_ylabel(f'|{ylabel}|→')
+                ax[-1].set_ylabel(f'arg{{ylabel}}→')
+            ax[-2].set_yscale('log' if logy else 'linear')
+            ax[-1].set_xscale('log' if logw else 'linear')
+            return plot_fcn(fig, ax, *args, **kwargs)
         return wrapper
     return decorator

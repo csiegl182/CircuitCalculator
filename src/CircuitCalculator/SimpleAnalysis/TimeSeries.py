@@ -50,10 +50,14 @@ def time_domain_plot(
         layout_fcn:layout.Layout=layout.figure_default,
         xlabel:str='t→',
         ylabel:str='') -> layout.FigureAxes:
-        @layout.timeseries_plot(tmin=tmin, tmax=tmax, xlabel=xlabel, ylabel=ylabel)
+        @layout.legend()
+        @layout.grid()
+        @layout.xlim_bottom(xmin=tmin, xmax=tmax)
+        @layout.xlabel_bottom(xlabel)
         def plot_timeseries(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
-             layout.apply_plt_fcn(fig, ax, *args)
-             return fig, ax
+            ax[-1].set_ylabel(ylabel)
+            layout.apply_plt_fcn(fig, ax, *args)
+            return fig, ax
         return plot_timeseries(*layout_fcn())
 
 def steady_state_voltage_timedomain_analysis(
@@ -61,12 +65,18 @@ def steady_state_voltage_timedomain_analysis(
         solution:TimeDomainSolution,
         tmax:float,
         tmin:float=0,
-        layout_fcn:layout.Layout=layout.figure_default) -> layout.FigureAxes:
-        @layout.timeseries_plot(tmin=tmin, tmax=tmax, ylabel='v(t)→')
+        layout_fcn:layout.Layout=layout.figure_default,
+        xlabel:str='t→',
+        ylabel:str='v(t)→') -> layout.FigureAxes:
+        @layout.legend()
+        @layout.grid()
+        @layout.xlim_bottom(xmin=tmin, xmax=tmax)
+        @layout.xlabel_bottom(xlabel)
         def plot_timeseries(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
-             new_args = [functools.partial(a, ts_fcn=solution.get_voltage, label_fcn=lambda id: f'V({id})') for a in args]
-             layout.apply_plt_fcn(fig, ax, *new_args)
-             return fig, ax
+            ax[-1].set_ylabel(ylabel)
+            new_args = [functools.partial(a, ts_fcn=solution.get_voltage, label_fcn=lambda id: f'V({id})') for a in args]
+            layout.apply_plt_fcn(fig, ax, *new_args)
+            return fig, ax
         return plot_timeseries(*layout_fcn())
 
 def steady_state_current_timedomain_analysis(
@@ -74,12 +84,18 @@ def steady_state_current_timedomain_analysis(
         solution:TimeDomainSolution,
         tmax:float,
         tmin:float=0,
-        layout_fcn:layout.Layout=layout.figure_default) -> layout.FigureAxes:
-        @layout.timeseries_plot(tmin=tmin, tmax=tmax, ylabel='i(t)→')
+        layout_fcn:layout.Layout=layout.figure_default,
+        xlabel:str='t→',
+        ylabel:str='i(t)→') -> layout.FigureAxes:
+        @layout.legend()
+        @layout.grid()
+        @layout.xlim_bottom(xmin=tmin, xmax=tmax)
+        @layout.xlabel_bottom(xlabel)
         def plot_timeseries(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
-             new_args = [functools.partial(a, ts_fcn=solution.get_current, label_fcn=lambda id: f'I({id})') for a in args]
-             layout.apply_plt_fcn(fig, ax, *new_args)
-             return fig, ax
+            ax[-1].set_ylabel(ylabel)
+            new_args = [functools.partial(a, ts_fcn=solution.get_current, label_fcn=lambda id: f'I({id})') for a in args]
+            layout.apply_plt_fcn(fig, ax, *new_args)
+            return fig, ax
         return plot_timeseries(*layout_fcn())
 
 def steady_state_instantaneous_power_analysis(
@@ -87,10 +103,16 @@ def steady_state_instantaneous_power_analysis(
         solution:TimeDomainSolution,
         tmax:float,
         tmin:float=0,
-        layout_fcn:layout.Layout=layout.figure_default) -> layout.FigureAxes:
-        @layout.timeseries_plot(tmin=tmin, tmax=tmax, ylabel='p(t)→')
+        layout_fcn:layout.Layout=layout.figure_default,
+        xlabel:str='t→',
+        ylabel:str='p(t)→') -> layout.FigureAxes:
+        @layout.legend()
+        @layout.grid()
+        @layout.xlim_bottom(xmin=tmin, xmax=tmax)
+        @layout.xlabel_bottom(xlabel)
         def plot_timeseries(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
-             new_args = [functools.partial(a, ts_fcn=solution.get_power, label_fcn=lambda id: f'P({id})') for a in args]
-             layout.apply_plt_fcn(fig, ax, *new_args)
-             return fig, ax
+            ax[-1].set_ylabel(ylabel)
+            new_args = [functools.partial(a, ts_fcn=solution.get_power, label_fcn=lambda id: f'P({id})') for a in args]
+            layout.apply_plt_fcn(fig, ax, *new_args)
+            return fig, ax
         return plot_timeseries(*layout_fcn())

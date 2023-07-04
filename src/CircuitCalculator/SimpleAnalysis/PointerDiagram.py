@@ -27,7 +27,9 @@ def pointer_diagram(
         layout_fcn:layout.Layout=layout.figure_default,
         xlabel:str='',
         ylabel:str='') -> layout.FigureAxes:
-    @layout.nyquist_plot(ax_lim=pd_lim, xlabel=xlabel, ylabel=ylabel)
+    @layout.legend()
+    @layout.grid()
+    @layout.nyquist_like_plot(ax_lim=pd_lim, xlabel=xlabel, ylabel=ylabel)
     def plot_pointers(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
         layout.apply_plt_fcn(fig, ax, *args)
         return fig, ax
@@ -38,7 +40,9 @@ def voltage_pointer_diagram_analysis(
         solution:ComplexSolution,
         pd_lim:tuple[float, float, float, float]=(-1, 1, -1, 1),
         layout_fcn:layout.Layout=layout.figure_default) -> layout.FigureAxes:
-    @layout.nyquist_plot(ax_lim=pd_lim, xlabel='Re{V}→', ylabel='Im{V}→')
+    @layout.legend()
+    @layout.grid()
+    @layout.nyquist_like_plot(ax_lim=pd_lim, xlabel='Re{V}→', ylabel='Im{V}→')
     def plot_pointers(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
         new_args = tuple(functools.partial(a, pointer_fcn=solution.get_voltage, label_fcn=lambda id: f'V({id})') for a in args)
         layout.apply_plt_fcn(fig, ax, *new_args)
@@ -50,7 +54,9 @@ def current_pointer_diagram_analysis(
         solution:ComplexSolution,
         pd_lim:tuple[float, float, float, float]=(-1, 1, -1, 1),
         layout_fcn:layout.Layout=layout.figure_default) -> layout.FigureAxes:
-    @layout.nyquist_plot(ax_lim=pd_lim, xlabel='Re{I}→', ylabel='Im{I}→')
+    @layout.legend()
+    @layout.grid()
+    @layout.nyquist_like_plot(ax_lim=pd_lim, xlabel='Re{I}→', ylabel='Im{I}→')
     def plot_pointers(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
         new_args = tuple(functools.partial(a, pointer_fcn=solution.get_current, label_fcn=lambda id: f'I({id})') for a in args)
         layout.apply_plt_fcn(fig, ax, *new_args)
@@ -62,7 +68,9 @@ def power_pointer_diagram_analysis(
         solution:ComplexSolution,
         pd_lim:tuple[float, float, float, float]=(-1, 1, -1, 1),
         layout_fcn:layout.Layout=layout.figure_default) -> layout.FigureAxes:
-    @layout.nyquist_plot(ax_lim=pd_lim, xlabel='P→', ylabel='Q→')
+    @layout.legend()
+    @layout.grid()
+    @layout.nyquist_like_plot(ax_lim=pd_lim, xlabel='P→', ylabel='Q→')
     def plot_pointers(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
         new_args = tuple(functools.partial(a, pointer_fcn=solution.get_power, label_fcn=lambda id: f'S({id})') for a in args)
         layout.apply_plt_fcn(fig, ax, *new_args)
