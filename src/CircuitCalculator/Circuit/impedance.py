@@ -9,7 +9,7 @@ def element_impedance(circuit: Circuit, element_id: str, w: np.ndarray = np.arra
     return np.array([ntw_imp.element_impedance(transform_circuit(circuit, w0), element_id) for w0 in w])
 
 def open_circuit_dc_resistance(circuit: Circuit, node1: str, node2: str) -> float:
-    return open_circuit_impedance(circuit, node1, node2, w=np.array(0))[0].real
+    return open_circuit_impedance(circuit, node1, node2, w=np.array([0]))[0].real
 
 def element_dc_resistance(circuit: Circuit, element_id: str) -> float:
-    return element_impedance(circuit, element_id, w=np.array(0))[0].real
+    return element_impedance(circuit, element_id, w=np.array([0]))[0].real
