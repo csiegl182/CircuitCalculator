@@ -1,4 +1,4 @@
-from ..Network.solution import NetworkSolver
+from ..Network.solution import NetworkSolver, NetworkSolution
 from ..Network.NodalAnalysis import nodal_analysis_solver
 from ..Circuit.solution import ComplexSolution
 
@@ -17,7 +17,7 @@ class UnknownTranslator(Exception): pass
 @dataclass
 class SchematicDiagramSolution:
     diagram_parser: SchematicDiagramParser
-    solution: ComplexSolution
+    solution: ComplexSolution | NetworkSolution
     voltage_display: Callable[[complex], str]
     current_display: Callable[[complex], str]
     power_display: Callable[[complex], str]
