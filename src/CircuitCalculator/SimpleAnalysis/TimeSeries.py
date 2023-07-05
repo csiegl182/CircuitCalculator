@@ -54,23 +54,25 @@ def plot_timeseries_factory(
         solution:TimeDomainSolution=TimeDomainSolution(),
         tmax:float=-1,
         tmin:float=0,
-        xlabel:str='t→') -> layout.PlotFcn:
+        xlabel:str='t→',
+        ylabel:str='') -> layout.PlotFcn:
 
     time_series_configurations: Dict[str, PlotTimeSeriesProperties] = {
         'voltage' : {'ts_fcn': solution.get_voltage, 'label_fcn': lambda id: f'V({id})', 'ylabel': 'v(t)→'},
         'current' : {'ts_fcn': solution.get_current, 'label_fcn': lambda id: f'I({id})', 'ylabel': 'i(t)→'},
         'power' : {'ts_fcn': solution.get_power, 'label_fcn': lambda id: f'P({id})', 'ylabel': 'p(t)→'},
-        'default' : {'ts_fcn': lambda _: lambda t: np.zeros(np.size(t)), 'label_fcn': lambda _: f'', 'ylabel': ''}
+        'default' : {'ts_fcn': lambda _: lambda t: np.zeros(np.size(t)), 'label_fcn': lambda _: '', 'ylabel': ''}
     }
 
     ts_properties = time_series_configurations.get(type, time_series_configurations['default'])
+    ylabel = ylabel if len(ylabel) > 0 else ts_properties['ylabel']
 
     @layout.legend()
     @layout.grid()
     @layout.xlim_bottom(xmin=tmin, xmax=tmax)
     @layout.xlabel_bottom(xlabel)
     def plot_timeseries(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
-        ax[-1].set_ylabel(ts_properties['ylabel'])
+        ax[-1].set_ylabel(ylabel)
         updated_args = [functools.partial(a, ts_fcn=ts_properties['ts_fcn'], label_fcn=ts_properties['label_fcn']) for a in args]
         layout.apply_plt_fcn(fig, ax, *updated_args)
         return fig, ax
