@@ -32,6 +32,8 @@ class Network:
 
     @property
     def node_labels(self) -> list[str]:
+        if len(self.branches) == 0:
+            return [self.node_zero_label]
         node1_set = {branch.node1 for branch in self.branches}
         node2_set = {branch.node2 for branch in self.branches}
         return sorted(list(node1_set.union(node2_set)))
