@@ -28,9 +28,6 @@ FigureAxes = tuple[Figure, Axes]
 Layout = Callable[[], FigureAxes]
 PlotFcn = Callable[[Figure, Axes], FigureAxes]
 
-def default_layout(**kwargs) -> FigureAxes:
-    return plt.subplots(ncols=1, nrows=1, **kwargs)
-
 def figure_default() -> FigureAxes:
     fig, ax = plt.subplots()
     return fig, (ax,)
