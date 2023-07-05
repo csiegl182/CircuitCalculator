@@ -92,7 +92,7 @@ class PeriodicCurrentSource(CurrentSource):
         return fourier_series(self.time_properties)
 
     def frequency_components(self, w_max: float) -> npt.NDArray[np.double]:
-        n_max = np.floor(self.w/w_max)
+        n_max = np.floor(w_max/self.w)
         return np.array([self.w*n for n in np.arange(n_max)])
 
 @dataclass(frozen=True)
