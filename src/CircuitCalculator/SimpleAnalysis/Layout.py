@@ -119,7 +119,7 @@ def bode_like_plot(wmin:float=0, wmax:float=-1, logw:bool=False, logy:bool=False
         def wrapper(fig: Figure, ax: Axes, *args, **kwargs) -> FigureAxes:
             if len(ylabel) > 0:
                 ax[-2].set_ylabel(f'|{ylabel}|→')
-                ax[-1].set_ylabel(f'arg{{ylabel}}→')
+                ax[-1].set_ylabel(f'arg{{{ylabel}}}→')
             ax[-2].set_yscale('log' if logy else 'linear')
             ax[-1].set_xscale('log' if logw else 'linear')
             return plot_fcn(fig, ax, *args, **kwargs)
