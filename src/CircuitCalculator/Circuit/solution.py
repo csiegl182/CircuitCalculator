@@ -9,7 +9,7 @@ import numpy as np
 
 @dataclass
 class CircuitSolution(ABC):
-    circuit: Circuit = field(default=Circuit([]))
+    circuit: Circuit = field(default_factory=lambda : Circuit([]))
     solver: NetworkSolver = field(default=nodal_analysis_solver)
 
     @abstractmethod
