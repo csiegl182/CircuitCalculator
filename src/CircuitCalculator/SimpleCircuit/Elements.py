@@ -291,6 +291,53 @@ class ACVoltageSource(din_elements.SourceUDIN):
     def values(self) -> dict[str, complex]:
         return {'U' : self.V}
 
+class RectVoltageSource(schemdraw.elements.Source):
+    def __init__(self, V: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
+        super().__init__(*args, reverse=reverse, **kwargs)
+        self._V = V
+        if reverse:
+            self._V *= -1
+        self._name = name
+        self._w = w
+        self._phi = phi
+        self._deg = deg
+        self._sin = sin
+        label = dsp.print_sinosoidal(self._V, unit='V', precision=precision, w=w, deg=deg)
+        self.anchors['V_label'] = (0.5, 1.1)
+        self.anchors['S_label'] = (1.8, -1.5)
+        self.label(f'{self._name}={label}', rotate=True, color=dsp.blue, loc='V_label', halign='center', valign='center')
+
+        a, b = (1.5, 0.7), (-0.5, 0.7)
+        self.segments.append(schemdraw.Segment([(-0.2, 0.1), (-0.1, 0.1)]))
+        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.blue))
+
+    @property
+    def w(self) -> float:
+        return self._w
+
+    @property
+    def phi(self) -> float:
+        return self._phi
+
+    @property
+    def sin(self) -> bool:
+        return self._sin
+
+    @property
+    def deg(self) -> bool:
+        return self._deg
+
+    @property
+    def V(self) -> float:
+        return self._V
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    def values(self) -> dict[str, complex]:
+        return {'U' : self.V}
+
 class ACCurrentSource(din_elements.SourceIDIN):
     def __init__(self, I: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)

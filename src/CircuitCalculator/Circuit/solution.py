@@ -30,14 +30,14 @@ class DCSolution(CircuitSolution):
         network = transform(self.circuit, w=[0])[0]
         self._solution = self.solver(network)
 
-    def get_voltage(self, component_id: str) -> complex:
-        return self._solution.get_voltage(component_id)
+    def get_voltage(self, component_id: str) -> float:
+        return self._solution.get_voltage(component_id).real
 
-    def get_current(self, component_id: str) -> complex:
-        return self._solution.get_current(component_id)
+    def get_current(self, component_id: str) -> float:
+        return self._solution.get_current(component_id).real
 
-    def get_power(self, component_id: str) -> complex:
-        return self._solution.get_voltage(component_id)*np.conj(self._solution.get_current(component_id))
+    def get_power(self, component_id: str) -> float:
+        return self.get_voltage(component_id)*self.get_current(component_id)
 
 @dataclass
 class ComplexSolution(CircuitSolution):
