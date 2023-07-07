@@ -1,5 +1,6 @@
 from . import Elements as elm
 from ..Circuit import components as cct_cmp
+from ..SignalProcessing import periodic_functions
 from .SchemdrawTranslatorTypes import ElementTranslatorMap
 from math import pi, inf
 
@@ -55,6 +56,26 @@ def ac_current_source_translator(element: elm.ACCurrentSource, nodes: tuple[str,
         phi=element.phi*pi/180 if element.deg else element.phi
     )
 
+def rect_voltage_source_translator(element: elm.RectVoltageSource, nodes: tuple[str, str]) -> cct_cmp.VoltageSource:
+    return cct_cmp.PeriodicVoltageSource(
+        nodes=nodes[::-1],
+        id=element.name,
+        V=element.V,
+        w=element.w,
+        phi=element.phi*pi/180 if element.deg else element.phi,
+        wavetype=periodic_functions.RectFunction
+    )
+
+def rect_current_source_translator(element: elm.RectCurrentSource, nodes: tuple[str, str]) -> cct_cmp.CurrentSource:
+    return cct_cmp.PeriodicCurrentSource(
+        nodes=nodes,
+        id=element.name,
+        I=element.I,
+        w=element.w,
+        phi=element.phi*pi/180 if element.deg else element.phi,
+        wavetype=periodic_functions.RectFunction
+    )
+
 def linear_current_source_translator(element: elm.RealCurrentSource, nodes: tuple[str, str]) -> cct_cmp.LinearCurrentSource:
     return cct_cmp.LinearCurrentSource(nodes=nodes, id=element.name, I=element.I.real, G=element.G)
 
@@ -76,6 +97,8 @@ circuit_translator_map : ElementTranslatorMap = {
     elm.CurrentSource : dc_current_source_translator,
     elm.ACVoltageSource : ac_voltage_source_translator,
     elm.ACCurrentSource : ac_current_source_translator,
+    elm.RectVoltageSource : rect_voltage_source_translator,
+    elm.RectCurrentSource : rect_current_source_translator,
     elm.Capacitor : capacitor_translator,
     elm.Inductance : inductance_translator,
     elm.Ground : ground_translator,
