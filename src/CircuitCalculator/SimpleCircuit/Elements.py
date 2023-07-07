@@ -347,10 +347,8 @@ class RectVoltageSource(schemdraw.elements.Source):
         self._phi = phi
         self._deg = deg
         self._sin = sin
-        label = dsp.print_sinosoidal(self._V, unit='V', precision=precision, w=w, deg=deg)
         self.anchors['V_label'] = (0.5, 1.1)
         self.anchors['S_label'] = (1.8, -1.5)
-        self.label(f'{self._name}={label}', rotate=True, color=dsp.blue, loc='V_label', halign='center', valign='center')
 
         a, b = (1.5, 0.7), (-0.5, 0.7)
         self.segments.append(schemdraw.Segment([(0.3, 0.25), (0.3, 0.1), (0.7, 0.1), (0.7, -0.05), (0.3, -0.05), (0.3, -0.2), (0.7, -0.2)]))
@@ -394,9 +392,7 @@ class RectCurrentSource(schemdraw.elements.Source):
         self._phi = phi
         self._deg = deg
         self._sin = sin
-        label = dsp.print_sinosoidal(self._I, unit='A', precision=precision, w=w, deg=deg)
         self.anchors['I_label'] = (0.5, 1.1)
-        self.label(f'{self._name}={label}', rotate=True, color=dsp.blue, loc='I_label', halign='center', valign='center')
 
         a, b = (1.5, 0.7), (-0.5, 0.7)
         self.segments.append(schemdraw.Segment([(0.3, 0.25), (0.3, 0.1), (0.7, 0.1), (0.7, -0.05), (0.3, -0.05), (0.3, -0.2), (0.7, -0.2)]))
