@@ -53,10 +53,8 @@ class Schematic(schemdraw.Drawing):
         self.elements = [e for e in self.elements if not isinstance(e, VoltageLabel) and not isinstance(e, CurrentLabel)]
 
     def draw(self, *args, **kwargs):
-        try:
+        if self.fig is not None:
             self.fig.clear()
-        except AttributeError:
-            pass
         return super().draw(*args, **kwargs)
 
     def save_copy(self, fname: str, **kwargs) -> None:
@@ -81,6 +79,7 @@ class VoltageSource(din_elements.SourceUDIN):
 
     def down(self) -> schemdraw.elements.Element:
         self.anchors['s_label'] = (0.5, -0.7)
+        return self
 
     @property
     def name(self) -> str:
@@ -442,9 +441,22 @@ class Capacitor(schemdraw.elements.twoterm.Capacitor):
         label += f'{self._name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
         label += dsp.print_capacitance(C) if show_value else ''
-        self.anchors['value_label'] = (0.0, -0.9)
-        self.anchors['s_label'] = (0.5, 0.9)
+        self.anchors['value_label'] = (0.0, 0.3)
+        self.anchors['v_label'] = (0.0, -1.0)
+        self.anchors['s_label'] = (0.0, 0.9)
         self.label(label, rotate=True, loc='value_label', halign='center')
+
+    def down(self) -> schemdraw.elements.Element:
+        self.anchors['value_label'] = (0.0, -0.6)
+        self.anchors['s_label'] = (0.0, -1.1)
+        self.anchors['v_label'] = (0.0, 0.3)
+        return super().down()
+
+    def left(self) -> schemdraw.elements.Element:
+        self.anchors['value_label'] = (0.0, -0.6)
+        self.anchors['s_label'] = (0.0, -1.1)
+        self.anchors['v_label'] = (0.0, 0.3)
+        return super().left()
 
     @property
     def name(self) -> str:
@@ -750,7 +762,7 @@ v_label_args : dict[Any, dict[str, float | str ]] = {
     VoltageSource : {'ofst' : -0.7},
     ACVoltageSource : {'ofst' : -0.7},
     Impedance : {'ofst' : -0.6},
-    Capacitor : {'ofst' : -0.6},
+    # Capacitor : {'ofst' : -0.6},
     Inductance : {'ofst' : -0.6},
     CurrentSource : {'ofst' : -0.8, 'label_loc': 'top'},
     RealCurrentSource : {'ofst' : -2.1, 'label_loc': 'top'}
