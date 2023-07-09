@@ -1,24 +1,30 @@
 [
     {
+        "type": "voltage_source",
+        "id": "Us",
+        "N1": "1",
+        "N2": "0",
+        "V": {"real": 1, "imag": -2}
+    },
+    {
         "type": "impedance",
-        "id": "R",
+        "id": "Z1",
+        "N1": "1",
+        "N2": "0",
+        "Z": {"real": 10, "imag": 10}
+    },
+    {
+        "type": "impedance",
+        "id": "Z2",
         "N1": "1",
         "N2": "2",
-        "Z": {"abs": 10, "phase": 45},
-        "degree": true
+        "Z": {"real": 20, "imag": 0}
     },
     {
         "type": "impedance",
-        "id": "Z",
+        "id": "Z3",
         "N1": "2",
         "N2": "0",
-        "Z": {"real": 20, "imag": -20}
-    },
-    {
-        "type": "real_current_source",
-        "id": "I",
-        "N1": "0",
-        "N2": "1",
-        "I": 1
+        "Z": {"real": 30, "imag": 0}
     }
 ]

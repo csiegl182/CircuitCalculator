@@ -1,24 +1,16 @@
 [
     {
-        "type": "resistor",
-        "id": "R1",
+        "type": "voltage_source",
+        "id": "Uq",
         "N1": "1",
-        "N2": "2",
-        "R": 10
+        "N2": "0",
+        "V": {"real": 1, "imag" : 0}
     },
     {
         "type": "resistor",
-        "id": "R2",
-        "N1": "2",
+        "id": "R",
+        "N1": "1",
         "N2": "0",
-        "R": 20
-    },
-    {
-        "type": "linear_current_source",
-        "id": "I1",
-        "N1": "0",
-        "N2": "1",
-        "I": {"real": 1, "imag" : 0},
-        "Y": {"real" : 0.01, "imag" : 0}
+        "R": 1
     }
 ]

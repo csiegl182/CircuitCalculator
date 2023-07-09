@@ -1,6 +1,5 @@
 from typing import Any, Callable
 from .network import Network, Branch
-from .elements import NortenTheveninElement
 from . import elements as elm
 import numpy as np
 
@@ -10,13 +9,13 @@ class FileFormatError(Exception):
 def to_complex(z: dict[str, float], degree: bool = False) -> complex:
     try:
         return complex(z['real'], z['imag'])
-    except KeyError:
+    except (KeyError, TypeError):
         ...
     try:
         if degree:
             z['phase'] *= np.pi/180
         return z['abs']*complex(np.cos(z['phase']), np.sin(z['phase']))
-    except KeyError:
+    except (KeyError, TypeError):
         raise FileFormatError
 
 def translate_to_complex(keys : list[str], **kwargs):
@@ -24,16 +23,16 @@ def translate_to_complex(keys : list[str], **kwargs):
         kwargs.update({value : to_complex(kwargs[value])})
     return kwargs
 
-network_branch_translators : dict[str, Callable[..., NortenTheveninElement]] = {
+network_branch_translators : dict[str, Callable[..., elm.NortenTheveninElement]] = {
     "resistor" : elm.resistor,
     "conductor" : elm.conductor,
-    "impedance" : lambda **kwargs: elm.impedance(Z=to_complex(kwargs['Z']), **kwargs),
+    "impedance" : lambda **kwargs: elm.impedance(Z=to_complex(kwargs.pop('Z')), **kwargs),
     "admittance" : lambda **kwargs: elm.admittance(Y=to_complex(kwargs['Y']), **kwargs),
     "linear_current_source" : lambda **kwargs: elm.linear_current_source(**translate_to_complex(keys=['I', 'Y'], **kwargs)),
-    "current_source" : lambda **kwargs: elm.current_source(I=to_complex(kwargs['I']), **kwargs),
+    "current_source" : lambda **kwargs: elm.current_source(I=to_complex(kwargs.pop('I')), **kwargs),
     "real_current_source" : elm.current_source,
-    "linear_voltage_source" : lambda **kwargs: elm.linear_voltage_source(U=to_complex(kwargs['U']), Z=to_complex(kwargs['Z']), **kwargs),
-    "voltage_source" : lambda **kwargs: elm.voltage_source(U=to_complex(kwargs['U']), **kwargs),
+    "linear_voltage_source" : lambda **kwargs: elm.linear_voltage_source(V=to_complex(kwargs['V']), Z=to_complex(kwargs['Z']), **kwargs),
+    "voltage_source" : lambda **kwargs: elm.voltage_source(V=to_complex(kwargs.pop('V')), **kwargs),
     "real_voltage_source" : elm.voltage_source,
 }
 

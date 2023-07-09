@@ -1,34 +1,12 @@
-from dataclasses import dataclass
 import schemdraw.elements, schemdraw.util
+from dataclasses import dataclass
 from . import Elements as elm
-from .NetworkBranchTranslators import network_translator_map
-from .CircuitComponentTranslators import circuit_translator_map
-from .Display import red, blue, print_voltage, print_current
-from ..Network.network import Network
-from ..Network.solution import NetworkSolution
-from .SchemdrawTranslatorTypes import ElementTranslatorMap
-from ..Circuit.circuit import Circuit
-from typing import Any
 
 class UnknownElement(Exception): pass
 class MultipleGroundNodes(Exception): pass
 
-def get_node_direction(node1: schemdraw.util.Point, node2: schemdraw.util.Point) -> tuple[int, int]:
-    delta = node2 - node1
-    delta_x = +1 if delta.x >= 0 else -1
-    delta_y = +1 if delta.y >= 0 else -1
-    return delta_x, delta_y
-
-def round_node(node: schemdraw.util.Point) -> schemdraw.util.Point:
-    def local_round(x):
-        return round(x, ndigits=2)
-    return schemdraw.util.Point((local_round(node.x), local_round(node.y)))
-
-def get_nodes(element: schemdraw.elements.Element, n_labels: tuple[str, ...]=('start', 'end')) -> list[schemdraw.util.Point]:
-    return [round_node(element.absanchors[n_label]) for n_label in n_labels]
-
 @dataclass(frozen=True)
-class SchematicDiagramAnalyzer:
+class SchematicDiagramParser:
     drawing: elm.Schematic
 
     @property
@@ -55,10 +33,10 @@ class SchematicDiagramAnalyzer:
 
     @property
     def all_nodes(self) -> set[schemdraw.util.Point]:
-        nodes = {round_node(e.absanchors['start']) for e in self.circuit_elements}
-        nodes = nodes.union({round_node(e.absanchors['end']) for e in self.circuit_elements})
-        nodes = nodes.union({round_node(e.absanchors['start']) for e in self.line_elements})
-        nodes = nodes.union({round_node(e.absanchors['end']) for e in self.line_elements})
+        nodes = {elm.round_node(e.absanchors['start']) for e in self.circuit_elements}
+        nodes = nodes.union({elm.round_node(e.absanchors['end']) for e in self.circuit_elements})
+        nodes = nodes.union({elm.round_node(e.absanchors['start']) for e in self.line_elements})
+        nodes = nodes.union({elm.round_node(e.absanchors['end']) for e in self.line_elements})
         return nodes
 
     @property
@@ -73,7 +51,7 @@ class SchematicDiagramAnalyzer:
 
     @property
     def node_label_mapping(self) -> dict[schemdraw.util.Point, str]:
-        node_labels = {self.unique_node_mapping[get_nodes(e)[0]] : e.node_id for e in self.node_elements}
+        node_labels = {self.unique_node_mapping[elm.get_nodes(e)[0]] : e.node_id for e in self.node_elements}
         node_index = len(node_labels)+1
         unlabeled_nodes = [p for p in self.unique_nodes if p not in node_labels.keys()]
         for p in unlabeled_nodes:
@@ -103,18 +81,11 @@ class SchematicDiagramAnalyzer:
         if len(ground_nodes) == 0:
             return list(self.unique_nodes)[0]
         else:
-            return get_nodes(ground_nodes[0])[0]
+            return elm.get_nodes(ground_nodes[0])[0]
 
     @property
     def ground_label(self) -> str:
         return self._get_node_index(self.ground)
-
-    def translate_elements(self, translator_map : ElementTranslatorMap) -> list[Any]:
-        def translate(element: schemdraw.elements.Element) -> Any:
-            return translator_map[type(element)](element, tuple(map(self._get_node_index, get_nodes(element))))
-        def translator_available(element: schemdraw.elements.Element) -> bool:
-            return type(element) in translator_map.keys()
-        return [translate(e) for e in self.all_elements if translator_available(e)]
 
     def _get_equal_electrical_potential_nodes(self, node: schemdraw.util.Point) -> set[schemdraw.util.Point]:
         equal_electrical_potential_nodes = set([node])
@@ -122,7 +93,7 @@ class SchematicDiagramAnalyzer:
         while len(equal_electrical_potential_nodes) > old_length:
             old_length = len(equal_electrical_potential_nodes)
             for line in self.line_elements:
-                n1, n2 = get_nodes(line)
+                n1, n2 = elm.get_nodes(line)
                 if n1 in equal_electrical_potential_nodes:
                     equal_electrical_potential_nodes.add(n2)
                 elif n2 in equal_electrical_potential_nodes:
@@ -138,45 +109,3 @@ class SchematicDiagramAnalyzer:
             raise UnknownElement(f'Element {name} not known')
         else:
             return elements[0]
-
-def network_parser(schematic: elm.Schematic) -> Network:
-    schematic_diagram = SchematicDiagramAnalyzer(schematic)
-    return Network(
-        branches=schematic_diagram.translate_elements(network_translator_map),
-        zero_node_label=schematic_diagram.ground_label
-    )
-
-def circuit_parser(schematic: elm.Schematic) -> Circuit:
-    schematic_diagram = SchematicDiagramAnalyzer(schematic)
-    return schematic_diagram.translate_elements(circuit_translator_map)
-
-@dataclass
-class SchematicDiagramSolution:
-    diagram_parser: SchematicDiagramAnalyzer
-    solution: NetworkSolution
-
-    def draw_voltage(self, name: str, reverse: bool = False, precision: int = 3) -> elm.VoltageLabel:
-        element = self.diagram_parser.get_element(name)
-        V_branch = self.solution.get_voltage(name)
-        if reverse:
-            V_branch *= -1
-        # adjust counting arrow system of voltage sources for display
-        if type(element) is elm.VoltageSource or type(element) is elm.RealVoltageSource:
-            reverse = not reverse
-        # adjust missing direction information of CurrentLabel() method
-        n1, n2 = get_nodes(element)
-        dx, dy = get_node_direction(n1, n2)
-        if dx < 0 or dy < 0:
-            reverse = not reverse
-        v_label_args = elm.v_label_args.get(type(element), {})
-        return elm.VoltageLabel(element, label=f'{print_voltage(V_branch, precision=precision)}', reverse=reverse, color=blue, **v_label_args)
-
-    def draw_current(self, name: str, reverse: bool = False, end: bool = False, precision=3) -> elm.CurrentLabel:
-        element = self.diagram_parser.get_element(name)
-        I_branch = self.solution.get_current(name)
-        if reverse:
-            I_branch *= -1
-        if end:
-            reverse = not reverse
-        i_label_args = elm.i_label_args.get(type(element), {})
-        return elm.CurrentLabel(element, label=f'{print_current(I_branch, precision=precision)}', reverse=reverse, start=not end, color=red, **i_label_args)

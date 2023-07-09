@@ -1,4 +1,4 @@
-from typing import Protocol, TypedDict
+from typing import Protocol
 from dataclasses import dataclass
 import numpy as np
 
@@ -16,7 +16,7 @@ class NortenTheveninElement(Protocol):
         """Admittance value of element"""
         ...
     @property
-    def U(self) -> complex:
+    def V(self) -> complex:
         """Voltage value of element"""
         ...
     @property
@@ -29,7 +29,7 @@ class NortenElement:
     name : str
     type : str
     Z : complex
-    U : complex
+    V : complex
 
     @property
     def Y(self) -> complex:
@@ -41,7 +41,7 @@ class NortenElement:
     @property
     def I(self) -> complex:
         try:
-            return self.U/self.Z
+            return complex(self.V)/self.Z
         except ZeroDivisionError:
             return np.nan
 
@@ -60,20 +60,20 @@ class TheveninElement:
             return np.inf
 
     @property
-    def U(self) -> complex:
+    def V(self) -> complex:
         try:
-            return self.I/self.Y
+            return complex(self.I)/self.Y
         except ZeroDivisionError:
             return np.nan
 
 def impedance(name : str, Z : complex) -> NortenTheveninElement:
-    return NortenElement(Z=Z, U=0, name=name, type='impedance')
+    return NortenElement(Z=Z, V=0, name=name, type='impedance')
 
 def admittance(name : str, Y : complex) -> NortenTheveninElement:
     return TheveninElement( Y=Y, I=0, name=name, type='admittance')
 
 def resistor(name : str, R : float) -> NortenTheveninElement:
-    return NortenElement(Z=R, U=0, name=name, type='resistor')
+    return NortenElement(Z=R, V=0, name=name, type='resistor')
 
 def conductor(name : str, G : float) -> NortenTheveninElement:
     return TheveninElement(Y=G, I=0, name=name, type='conductor')
@@ -84,17 +84,17 @@ def linear_current_source(name : str, I : complex, Y : complex) -> NortenTheveni
 def current_source(name : str, I : complex) -> NortenTheveninElement:
     return TheveninElement(I=I, Y=0, name=name, type='current_source')
 
-def linear_voltage_source(name : str, U : complex, Z : complex) -> NortenTheveninElement:
-    return NortenElement(U=U, Z=Z, name=name, type='linear_voltage_source')
+def linear_voltage_source(name : str, V : complex, Z : complex) -> NortenTheveninElement:
+    return NortenElement(V=V, Z=Z, name=name, type='linear_voltage_source')
 
-def voltage_source(name : str, U : complex) -> NortenTheveninElement:
-    return NortenElement(U=U, Z=0, name=name, type='voltage_source')
+def voltage_source(name : str, V : complex) -> NortenTheveninElement:
+    return NortenElement(V=V, Z=0, name=name, type='voltage_source')
 
 def open_circuit(name : str) -> NortenTheveninElement:
     return TheveninElement(I=0, Y=0, name=name, type='open_circuit')
 
 def short_cicruit(name : str) -> NortenTheveninElement:
-    return NortenElement(U=0, Z=0, name=name, type='short_circuit')
+    return NortenElement(V=0, Z=0, name=name, type='short_circuit')
 
 def impedance_value(R : float = 0.0, X : float = 0.0, absZ : float = -1.0, phi : float = 0.0, degree : bool = False) -> complex:
     if degree:
@@ -120,7 +120,7 @@ def complex_value(X : float, phi : float = 0.0, rms: bool = False, deg: bool = F
     return X*complex(np.cos(phi), np.sin(phi))
 
 def is_voltage_source(element: NortenTheveninElement) -> bool:
-    return np.abs(element.U) > 0
+    return np.abs(element.V) > 0
 
 def is_current_source(element: NortenTheveninElement) -> bool:
     return np.abs(element.I) > 0

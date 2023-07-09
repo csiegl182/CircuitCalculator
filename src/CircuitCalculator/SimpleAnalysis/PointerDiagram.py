@@ -1,92 +1,71 @@
-import numpy as np
-from .Elements import complex_pointer
-from .Layout import Layout, color, grid_layout
-from functools import partial
-from CircuitCalculator.Network.solution import NetworkSolution
+from . import layout
+from .plot_elements import complex_pointer
+import functools
+from typing import Callable, Dict, TypedDict
+from ..Circuit.solution import ComplexSolution
 
-class PointerDiagram:
-    def __init__(self, layout: Layout = grid_layout, arrow_base: float = 0.05, arrow_length: float = 0.05):
-        self.pointer_drawers = []
-        self._max_length = 0
-        self.fig, self.ax = layout()
-        self._arrow_base = arrow_base
-        self._arrow_length = arrow_length
-        self.ax.set_aspect('equal', 'box')
-        self.ax.set_xlabel(r'$\mathrm{Re}\,\{U\}$')
-        self.ax.set_ylabel(r'$\mathrm{Im}\,\{U\}$')
+def plot_pointer_by_id(id:str, origin:str='', scaling:float=1, **kwargs) -> layout.PlotFcn:
+    def plot_pointer(fig:layout.Figure, ax:layout.Axes, *, pointer_fcn:Callable[[str], complex]=lambda _: 0+0j, label_fcn:Callable[[str], str]=lambda _: '') -> layout.FigureAxes:
+        z0 = 0 if origin == '' else complex(pointer_fcn(origin))
+        z1 = complex(pointer_fcn(id))
+        z1 *= scaling
+        if 'label' not in kwargs.keys():
+            kwargs.update({'label':label_fcn(id)})
+        complex_pointer(ax[0], z0, z0+z1, **kwargs)
+        return fig, ax
+    return plot_pointer
 
-    def __enter__(self):
-        return self
+def plot_pointer_by_value(z:complex, origin:complex=0+0j, **kwargs) -> layout.PlotFcn:
+    def plot_pointer(fig:layout.Figure, ax:layout.Axes, **_) -> layout.FigureAxes:
+        complex_pointer(ax[0], origin, z+origin, **kwargs)
+        return fig, ax
+    return plot_pointer
 
-    def __exit__(self, type, value, traceback):
-        for draw_pointer in self.pointer_drawers:
-            draw_pointer(height=self._arrow_base*self._max_length, width=self._arrow_length*self._max_length)
-        x_min, x_max = self.ax.get_xlim()
-        y_min, y_max = self.ax.get_ylim()
-        self.ax.set_xlim(xmin=min(x_min, y_min), xmax=max(x_max, y_max))
-        self.ax.set_ylim(ymin=min(x_min, y_min), ymax=max(x_max, y_max))
-        self.ax.legend(
-            handles=[line for line in self.ax.lines],
-            ncol=len(self.ax.lines),
-            loc='upper center',
-            bbox_to_anchor=(0.5, 1.1),
-            frameon=False
-        )
+class PlotPointerDiagramProperties(TypedDict):
+    pointer_fcn: Callable[[str], complex]
+    label_fcn: Callable[[str], str]
+    xlabel:str
+    ylabel:str
 
-    def add_pointer(self, z: complex, z0: complex = 0, **kwargs):
-        self._max_length = max(self._max_length, np.abs(z))
-        self.pointer_drawers.append(partial(complex_pointer, self.ax, z0, z0+z, **kwargs))
+def plot_pointers_factory(
+        *args,
+        type:str='default',
+        solution:ComplexSolution=ComplexSolution(),
+        pd_lim:tuple[float, float, float, float]=(-1, 1, -1, 1),
+        xlabel:str='',
+        ylabel:str='') -> layout.PlotFcn:
+    
+    pointer_diagram_configurations: Dict[str, PlotPointerDiagramProperties] = {
+        'default' : {'pointer_fcn' : lambda _: 0j, 'label_fcn' : lambda _: '', 'xlabel' : 'Re→', 'ylabel' : 'Im→'},
+        'voltage' : {'pointer_fcn' : solution.get_voltage, 'label_fcn' : lambda id: f'V({id})', 'xlabel' : 'Re{V}→', 'ylabel' : 'Im{V}→'},
+        'current' : {'pointer_fcn' : solution.get_current, 'label_fcn' : lambda id: f'I({id})', 'xlabel' : 'Re{I}→', 'ylabel' : 'Im{I}→'},
+        'power' : {'pointer_fcn' : solution.get_power, 'label_fcn' : lambda id: f'S({id})', 'xlabel' : 'P→', 'ylabel' : 'Q→'}
+    }
+    pd_properties = pointer_diagram_configurations.get(type, pointer_diagram_configurations['default'])
+    xlabel = xlabel if len(xlabel) > 0 else pd_properties['xlabel']
+    ylabel = ylabel if len(ylabel) > 0 else pd_properties['ylabel']
 
-class VoltagePointerDiagram(PointerDiagram):
-    def __init__(self, solution: NetworkSolution, resistor: float = 1.0, **kwargs):
-        self._solution = solution
-        self._resistor = resistor
-        self._pointer_heads = {}
-        super().__init__(**kwargs)
+    @layout.legend()
+    @layout.grid()
+    @layout.nyquist_like_plot(ax_lim=pd_lim, xlabel=xlabel, ylabel=ylabel)
+    def plot_pointers(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
+        new_args = tuple(functools.partial(a, pointer_fcn=pd_properties['pointer_fcn'], label_fcn=pd_properties['label_fcn']) for a in args)
+        layout.apply_plt_fcn(fig, ax, *new_args)
+        return fig, ax
+    return plot_pointers
 
-    def _set_reference(self, ref_id: str, z: complex, z0: complex) -> None:
-        self._pointer_heads.update({ref_id: z+z0})
+def pointer_diagram(*args, layout_fcn:layout.Layout=layout.figure_default, **kwargs) -> layout.FigureAxes:
+    plot_pointers = plot_pointers_factory(*args, type='default', **kwargs)
+    return plot_pointers(*layout_fcn())
 
-    def _get_reference(self, ref_id: str) -> complex:
-        if ref_id == '':
-            return 0
-        return self._pointer_heads.get(ref_id, self._solution.get_voltage(ref_id))
+def voltage_pointer_diagram_analysis(*args, layout_fcn:layout.Layout=layout.figure_default, **kwargs) -> layout.FigureAxes:
+    plot_pointers = plot_pointers_factory(*args, type='voltage', **kwargs)
+    return plot_pointers(*layout_fcn())
 
-    def add_voltage_pointer(self, id: str, origin: str='', color=color['blue']) -> None:
-        z = self._solution.get_voltage(id)
-        z0 = self._get_reference(origin)
-        self._set_reference(id, z, z0)
-        self.add_pointer(z=z, z0=z0, color=color, label=f'$V({id})$')
+def current_pointer_diagram_analysis(*args, layout_fcn:layout.Layout=layout.figure_default, **kwargs) -> layout.FigureAxes:
+    plot_pointers = plot_pointers_factory(*args, type='current', **kwargs)
+    return plot_pointers(*layout_fcn())
 
-    def add_current_pointer(self, id: str, color=color['red'], resistor: float = 0) -> None:
-        if resistor == 0:
-            resistor = self._resistor
-        z = self._solution.get_current(id)*resistor
-        self.add_pointer(z=z, color=color, label=f'$I({id})\cdot{resistor}\Omega$')
-
-class CurrentPointerDiagram(PointerDiagram):
-    def __init__(self, solution: NetworkSolution, conductor: float = 1.0, **kwargs):
-        self._solution = solution
-        self._conductor = conductor
-        self._pointer_heads = {}
-        super().__init__(**kwargs)
-
-    def _set_reference(self, ref_id: str, z: complex, z0: complex) -> None:
-        self._pointer_heads.update({ref_id: z+z0})
-
-    def _get_reference(self, ref_id: str) -> complex:
-        if ref_id == '':
-            return 0
-        return self._pointer_heads.get(ref_id, self._solution.get_current(ref_id))
-
-    def add_current_pointer(self, id: str, origin: str='', color=color['red']) -> None:
-        z = self._solution.get_current(id)
-        z0 = self._get_reference(origin)
-        self._set_reference(id, z, z0)
-        self.add_pointer(z=z, z0=z0, color=color, label=f'$I({id})$')
-
-    def add_voltage_pointer(self, id: str, color=color['blue'], conductor: float = 0) -> None:
-        if conductor == 0:
-            conductor = self._conductor
-        z = self._solution.get_voltage(id)*conductor
-        self.add_pointer(z=z, color=color, label=f'$V({id})\cdot{conductor}\mathrm{{S}}$')
+def power_pointer_diagram_analysis(*args, layout_fcn:layout.Layout=layout.figure_default, **kwargs) -> layout.FigureAxes:
+    plot_pointers = plot_pointers_factory(*args, type='power', **kwargs)
+    return plot_pointers(*layout_fcn())

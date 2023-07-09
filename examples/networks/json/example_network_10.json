@@ -1,44 +1,58 @@
 [
     {
-        "type": "real_current_source",
-        "id": "Iq",
-        "N1": "3",
-        "N2": "2",
-        "I": 4
-    },
-    {
         "type": "resistor",
         "id": "R1",
-        "N1": "2",
-        "N2": "3",
-        "R": 15 
+        "N1": "1",
+        "N2": "0",
+        "R": 10
     },
     {
         "type": "resistor",
         "id": "R2",
         "N1": "2",
         "N2": "1",
-        "R": 5
+        "R": 20
     },
     {
         "type": "resistor",
         "id": "R3",
-        "N1": "1",
-        "N2": "3",
-        "R": 20
-    },
-    {
-        "type": "real_voltage_source",
-        "id": "Uq",
-        "N1": "0",
-        "N2": "1",
-        "U": 120
+        "N1": "3",
+        "N2": "0",
+        "R": 30
     },
     {
         "type": "resistor",
         "id": "R4",
-        "N1": "0",
+        "N1": "2",
+        "N2": "4",
+        "R": 40
+    },
+    {
+        "type": "resistor",
+        "id": "R5",
+        "N1": "2",
         "N2": "3",
-        "R": 20
+        "R": 50
+    },
+    {
+        "type": "real_voltage_source",
+        "id": "U1",
+        "N1": "1",
+        "N2": "0",
+        "V": 1
+    },
+    {
+        "type": "real_voltage_source",
+        "id": "U2",
+        "N1": "2",
+        "N2": "1",
+        "V": 2
+    },
+    {
+        "type": "real_current_source",
+        "id": "I3",
+        "N1": "3",
+        "N2": "4",
+        "I": 0.1
     }
 ]

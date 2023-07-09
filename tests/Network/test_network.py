@@ -7,6 +7,10 @@ def test_Network_knows_about_its_node_number() -> None:
     network = Network([Branch('0', '1', resistor('R1', 10))])
     assert network.number_of_nodes == 2
 
+def test_empty_Network_has_one_node() -> None:
+    network = Network([])
+    assert network.number_of_nodes == 1
+
 def test_Network_returns_branches_connected_to_node() -> None:
     branchA = Branch('0', '1', resistor('R1', 10))
     branchB = Branch('0', '2', resistor('R2', 20))
@@ -70,6 +74,19 @@ def test_switching_unknown_ground_node_leads_to_error() -> None:
     network = Network([branchA, branchB, branchC, branchD])
     with pytest.raises(FloatingGroundNode):
         switch_ground_node(network, '7')
+
+def test_ground_node_not_part_of_network_raises_error() -> None:
+    R1, R2, R3, R4 = 10, 20, 30, 40
+    branchA = Branch('0', '1', resistor('R1', R1))
+    branchB = Branch('0', '2', resistor('R2', R2))
+    branchC = Branch('1', '2', resistor('R3', R3))
+    branchD = Branch('0', '2', resistor('R4', R4))
+    with pytest.raises(FloatingGroundNode):
+        Network([branchA, branchB, branchC, branchD], '7')
+
+def test_empty_network_can_be_generated() -> None:
+    network = Network([], node_zero_label='x')
+    assert len(network.branches) == 0
 
 def test_branch_ids_are_distinct() -> None:
     R1, R2, R3, R4 = 10, 20, 30, 40
