@@ -683,6 +683,8 @@ class VoltageLabel(schemdraw.elements.CurrentLabel):
     def __init__(self, at: schemdraw.elements.Element, label: str = '', label_loc: str = 'bottom', reverse: bool = False, **kwargs):
         kwargs.update(v_label_args.get(type(at), {}))
         kwargs.update({'color': kwargs.get('color', dsp.blue)})
+        kwargs.update({'headlength': kwargs.get('headlength', 0.4)})
+        kwargs.update({'headwidth': kwargs.get('headwidth', 0.3)})
         # adjust counting arrow system of voltage sources for display
         if type(at) in source_elements:
             reverse = not reverse
@@ -704,6 +706,8 @@ class CurrentLabel(schemdraw.elements.CurrentLabelInline):
     def __init__(self, at: schemdraw.elements.Element, label: str = '', **kwargs):
         kwargs.update(i_label_args.get(type(at), {}))
         kwargs.update({'color': kwargs.get('color', dsp.red)})
+        kwargs.update({'headlength': kwargs.get('headlength', 0.4)})
+        kwargs.update({'headwidth': kwargs.get('headwidth', 0.3)})
         totlen = at._userparams.get('l', at._userparams.get('unit', 3))
         kwargs.update({'ofst': totlen/4-0.15+kwargs.get('ofst', 0)})
         start = kwargs.get('start', True)
