@@ -71,13 +71,16 @@ class VoltageSource(din_elements.SourceUDIN):
         if reverse:
             self._V *= -1
         self._name = name
-        self.anchors['V_label'] = (0.5, 1.1)
-        self.anchors['S_label'] = (1.8, 1.1)
+        self.anchors['value_label'] = (0.5, 1.1)
+        self.anchors['s_label'] = (0.5, 1.5)
         label = dsp.print_complex(V, unit='V', precision=precision)
-        self.label(f'{self._name}={label}', rotate=True, color=dsp.blue, loc='V_label', halign='center', valign='center')
+        self.label(f'{self._name}={label}', rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
 
         a, b = (1.5, 0.7), (-0.5, 0.7)
         self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.blue))
+
+    def down(self) -> schemdraw.elements.Element:
+        self.anchors['s_label'] = (0.5, -0.7)
 
     @property
     def name(self) -> str:
@@ -166,16 +169,21 @@ class Resistor(schemdraw.elements.twoterm.ResistorIEC):
         label += f'{self._name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
         label += dsp.print_resistance(self.R) if show_value else ''
-        self.anchors['R_label'] = (0.5, 0.3)
-        self.anchors['S_label'] = (1.8, 1.1)
-        self.label(label, rotate=True, loc='R_label', halign='center')
+        self.anchors['value_label'] = (0.5, 0.3)
+        self.anchors['s_label'] = (0.5, 0.9)
+        self.anchors['v_label'] = (0.5, -1.1)
+        self.label(label, rotate=True, loc='value_label', halign='center')
 
     def down(self) -> schemdraw.elements.Element:
-        self.anchors['R_label'] = (0.5, -0.9)
+        self.anchors['value_label'] = (0.5, -0.6)
+        self.anchors['s_label'] = (0.5, -1.2)
+        self.anchors['v_label'] = (0.5, 0.3)
         return super().down()
 
     def left(self) -> schemdraw.elements.Element:
-        self.anchors['R_label'] = (0.5, -1)
+        self.anchors['value_label'] = (0.5, -0.6)
+        self.anchors['s_label'] = (0.5, -1.2)
+        self.anchors['v_label'] = (0.5, 0.3)
         return super().left()
 
     @property
@@ -210,16 +218,16 @@ class Conductance(schemdraw.elements.twoterm.ResistorIEC):
         label += f'{self._name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
         label += dsp.print_conductance(self.G) if show_value else ''
-        self.anchors['G_label'] = (0.5, 0.3)
-        self.anchors['S_label'] = (1.8, 1.1)
-        self.label(label, rotate=True, loc='G_label', halign='center')
+        self.anchors['value_label'] = (0.5, 0.3)
+        self.anchors['s_label'] = (1.8, 1.1)
+        self.label(label, rotate=True, loc='value_label', halign='center')
 
     def down(self) -> schemdraw.elements.Element:
-        self.anchors['G_label'] = (0.5, -0.9)
+        self.anchors['value_label'] = (0.5, -0.9)
         return super().down()
 
     def left(self) -> schemdraw.elements.Element:
-        self.anchors['G_label'] = (0.5, -1)
+        self.anchors['value_label'] = (0.5, -1)
         return super().left()
 
     @property
@@ -257,9 +265,9 @@ class ACVoltageSource(din_elements.SourceUDIN):
         self._deg = deg
         self._sin = sin
         label = dsp.print_sinosoidal(self._V, unit='V', precision=precision, w=w, deg=deg)
-        self.anchors['V_label'] = (0.5, 1.1)
-        self.anchors['S_label'] = (1.8, -1.5)
-        self.label(f'{self._name}={label}', rotate=True, color=dsp.blue, loc='V_label', halign='center', valign='center')
+        self.anchors['value_label'] = (0.5, 1.1)
+        self.anchors['s_label'] = (0.5, 0.9)
+        self.label(f'{self._name}={label}', rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
 
         a, b = (1.5, 0.7), (-0.5, 0.7)
         self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.blue))
@@ -347,8 +355,8 @@ class RectVoltageSource(schemdraw.elements.Source):
         self._phi = phi
         self._deg = deg
         self._sin = sin
-        self.anchors['V_label'] = (0.5, 1.1)
-        self.anchors['S_label'] = (1.8, -1.5)
+        self.anchors['value_label'] = (0.5, 1.1)
+        self.anchors['s_label'] = (0.5, 0.9)
 
         a, b = (1.5, 0.7), (-0.5, 0.7)
         self.segments.append(schemdraw.Segment([(0.3, 0.25), (0.3, 0.1), (0.7, 0.1), (0.7, -0.05), (0.3, -0.05), (0.3, -0.2), (0.7, -0.2)]))
@@ -434,9 +442,9 @@ class Capacitor(schemdraw.elements.twoterm.Capacitor):
         label += f'{self._name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
         label += dsp.print_capacitance(C) if show_value else ''
-        self.anchors['C_label'] = (0.0, -0.9)
-        self.anchors['S_label'] = (1.8, -1.9)
-        self.label(label, rotate=True, loc='C_label', halign='center')
+        self.anchors['value_label'] = (0.0, -0.9)
+        self.anchors['s_label'] = (0.5, 0.9)
+        self.label(label, rotate=True, loc='value_label', halign='center')
 
     @property
     def name(self) -> str:
@@ -688,9 +696,6 @@ class VoltageLabel(schemdraw.elements.CurrentLabel):
         # adjust counting arrow system of voltage sources for display
         if type(at) in source_elements:
             reverse = not reverse
-        # adjust missing direction information of CurrentLabel() method
-        if is_reverse(at):
-            reverse = not reverse
         super().__init__(reverse=reverse, **kwargs)
         if isinstance(at, RealVoltageSource):
             self.at(at.center)
@@ -700,7 +705,10 @@ class VoltageLabel(schemdraw.elements.CurrentLabel):
                 self.theta(at.transform.theta)
             except AttributeError:
                 self.at(at)
-        self.label(label, rotate=kwargs.get('rotate', True), loc=label_loc, ofst=(0, -0.1))
+        rotate = kwargs.get('rotate', True)
+        if rotate == True and at.transform.theta == 270:
+            rotate = 90
+        self.label(label, rotate=rotate, loc=label_loc, ofst=(0, -0.1))
 
 class CurrentLabel(schemdraw.elements.CurrentLabelInline):
     def __init__(self, at: schemdraw.elements.Element, label: str = '', **kwargs):
@@ -722,11 +730,14 @@ class PowerLabel(schemdraw.elements.Label):
         kwargs.update({'color': kwargs.get('color', dsp.green)})
         super().__init__(**kwargs)
         try:
-            self.at(at.S_label)
+            self.at(at.s_label)
             self.theta(at.transform.theta)
         except AttributeError:
             self.at(at.center)
-        self.label(label)
+        rotate = kwargs.get('rotate', True)
+        if rotate == True and at.transform.theta == 270:
+            rotate = 90
+        self.label(label, rotate=rotate, halign='center')
 
 source_elements : list[Any] = [
         VoltageSource,
@@ -736,7 +747,6 @@ source_elements : list[Any] = [
 ]
 
 v_label_args : dict[Any, dict[str, float | str ]] = {
-    Resistor : {'ofst' : -0.6},
     VoltageSource : {'ofst' : -0.7},
     ACVoltageSource : {'ofst' : -0.7},
     Impedance : {'ofst' : -0.6},
