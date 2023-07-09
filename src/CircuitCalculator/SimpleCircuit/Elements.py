@@ -169,20 +169,20 @@ class Resistor(schemdraw.elements.twoterm.ResistorIEC):
         label += '=' if  show_name and show_value else ''
         label += dsp.print_resistance(self.R) if show_value else ''
         self.anchors['value_label'] = (0.5, 0.3)
-        self.anchors['s_label'] = (0.5, 0.9)
         self.anchors['v_label'] = (0.5, -1.1)
+        self.anchors['s_label'] = (0.5, 0.9)
         self.label(label, rotate=True, loc='value_label', halign='center')
 
     def down(self) -> schemdraw.elements.Element:
         self.anchors['value_label'] = (0.5, -0.6)
-        self.anchors['s_label'] = (0.5, -1.2)
         self.anchors['v_label'] = (0.5, 0.3)
+        self.anchors['s_label'] = (0.5, -1.2)
         return super().down()
 
     def left(self) -> schemdraw.elements.Element:
         self.anchors['value_label'] = (0.5, -0.6)
-        self.anchors['s_label'] = (0.5, -1.2)
         self.anchors['v_label'] = (0.5, 0.3)
+        self.anchors['s_label'] = (0.5, -1.2)
         return super().left()
 
     @property
@@ -205,7 +205,6 @@ class Resistor(schemdraw.elements.twoterm.ResistorIEC):
         if abs(delta[1]) > abs(delta[0]): # portrait placing of resistor
             if delta[1] < 0:
                 kwargs.update({'rotation': 90})
-
         super()._place_label(*args, **kwargs)
 
 class Conductance(schemdraw.elements.twoterm.ResistorIEC):
@@ -299,7 +298,7 @@ class ACVoltageSource(din_elements.SourceUDIN):
         return {'U' : self.V}
 
 class ACCurrentSource(din_elements.SourceIDIN):
-    def __init__(self, I: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
+    def __init__(self, I: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
         self._I = I
         if reverse:
@@ -474,7 +473,6 @@ class Capacitor(schemdraw.elements.twoterm.Capacitor):
         if abs(delta[1]) > abs(delta[0]): # portrait placing of resistor
             if delta[1] < 0:
                 kwargs.update({'rotation': 90})
-
         super()._place_label(*args, **kwargs)
 
 class Inductance(schemdraw.elements.twoterm.Inductor):
@@ -486,7 +484,22 @@ class Inductance(schemdraw.elements.twoterm.Inductor):
         label += f'{self._name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
         label += dsp.print_inductance(L) if show_value else ''
-        self.label(label, rotate=True, ofst=label_offset)
+        self.anchors['value_label'] = (0.5, 0.3)
+        self.anchors['v_label'] = (0.5, -0.8)
+        self.anchors['s_label'] = (0.5, 0.9)
+        self.label(label, rotate=True, loc='value_label', halign='center')
+
+    def down(self) -> schemdraw.elements.Element:
+        self.anchors['value_label'] = (0.5, -0.6)
+        self.anchors['v_label'] = (0.5, 0.3)
+        self.anchors['s_label'] = (0.5, -1.2)
+        return super().down()
+
+    def left(self) -> schemdraw.elements.Element:
+        self.anchors['value_label'] = (0.5, -0.6)
+        self.anchors['v_label'] = (0.5, 0.2)
+        self.anchors['s_label'] = (0.5, -1.2)
+        return super().left()
 
     @property
     def name(self) -> str:
@@ -504,7 +517,6 @@ class Inductance(schemdraw.elements.twoterm.Inductor):
         if abs(delta[1]) > abs(delta[0]): # portrait placing of resistor
             if delta[1] < 0:
                 kwargs.update({'rotation': 90})
-
         super()._place_label(*args, **kwargs)
 
 class RealCurrentSource(schemdraw.elements.Element2Term):
@@ -761,9 +773,6 @@ source_elements : list[Any] = [
 v_label_args : dict[Any, dict[str, float | str ]] = {
     VoltageSource : {'ofst' : -0.7},
     ACVoltageSource : {'ofst' : -0.7},
-    Impedance : {'ofst' : -0.6},
-    # Capacitor : {'ofst' : -0.6},
-    Inductance : {'ofst' : -0.6},
     CurrentSource : {'ofst' : -0.8, 'label_loc': 'top'},
     RealCurrentSource : {'ofst' : -2.1, 'label_loc': 'top'}
 }
