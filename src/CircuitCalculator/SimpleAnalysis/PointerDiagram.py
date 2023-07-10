@@ -1,11 +1,11 @@
-from . import layout2
+from . import layout
 from .plot_elements import complex_pointer
 import functools
 from typing import Callable, Dict, TypedDict
 from ..Circuit.solution import ComplexSolution
 
-def plot_pointer_by_id(id:str, origin:str='', scaling:float=1, **kwargs) -> layout2.PlotFcn:
-    def plot_pointer(fig:layout2.Figure, ax:layout2.Axes, *, pointer_fcn:Callable[[str], complex]=lambda _: 0+0j, label_fcn:Callable[[str], str]=lambda _: '') -> layout2.FigureAxes:
+def plot_pointer_by_id(id:str, origin:str='', scaling:float=1, **kwargs) -> layout.PlotFcn:
+    def plot_pointer(fig:layout.Figure, ax:layout.Axes, *, pointer_fcn:Callable[[str], complex]=lambda _: 0+0j, label_fcn:Callable[[str], str]=lambda _: '') -> layout.FigureAxes:
         z0 = 0 if origin == '' else complex(pointer_fcn(origin))
         z1 = complex(pointer_fcn(id))
         z1 *= scaling
@@ -15,8 +15,8 @@ def plot_pointer_by_id(id:str, origin:str='', scaling:float=1, **kwargs) -> layo
         return fig, ax
     return plot_pointer
 
-def plot_pointer_by_value(z:complex, origin:complex=0+0j, **kwargs) -> layout2.PlotFcn:
-    def plot_pointer(fig:layout2.Figure, ax:layout2.Axes, **_) -> layout2.FigureAxes:
+def plot_pointer_by_value(z:complex, origin:complex=0+0j, **kwargs) -> layout.PlotFcn:
+    def plot_pointer(fig:layout.Figure, ax:layout.Axes, **_) -> layout.FigureAxes:
         complex_pointer(ax[0], origin, z+origin, **kwargs)
         return fig, ax
     return plot_pointer
@@ -33,7 +33,7 @@ def plot_pointers_factory(
         solution:ComplexSolution=ComplexSolution(),
         pd_lim:tuple[float, float, float, float]=(-1, 1, -1, 1),
         xlabel:str='',
-        ylabel:str='') -> layout2.PlotFcn:
+        ylabel:str='') -> layout.PlotFcn:
     
     pointer_diagram_configurations: Dict[str, PlotPointerDiagramProperties] = {
         'default' : {'pointer_fcn' : lambda _: 0j, 'label_fcn' : lambda _: '', 'xlabel' : 'Re→', 'ylabel' : 'Im→'},
@@ -45,27 +45,27 @@ def plot_pointers_factory(
     xlabel = xlabel if len(xlabel) > 0 else pd_properties['xlabel']
     ylabel = ylabel if len(ylabel) > 0 else pd_properties['ylabel']
 
-    @layout2.legend()
-    @layout2.grid()
-    @layout2.nyquist_like_plot(ax_lim=pd_lim, xlabel=xlabel, ylabel=ylabel)
-    def plot_pointers(fig:layout2.Figure, ax:layout2.Axes) -> layout2.FigureAxes:
+    @layout.legend()
+    @layout.grid()
+    @layout.nyquist_like_plot(ax_lim=pd_lim, xlabel=xlabel, ylabel=ylabel)
+    def plot_pointers(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
         new_args = tuple(functools.partial(a, pointer_fcn=pd_properties['pointer_fcn'], label_fcn=pd_properties['label_fcn']) for a in args)
-        layout2.apply_plt_fcn(fig, ax, *new_args)
+        layout.apply_plt_fcn(fig, ax, *new_args)
         return fig, ax
     return plot_pointers
 
-def pointer_diagram(*args, layout_fcn:layout2.Layout=layout2.figure_default, **kwargs) -> layout2.FigureAxes:
+def pointer_diagram(*args, layout_fcn:layout.Layout=layout.figure_default, **kwargs) -> layout.FigureAxes:
     plot_pointers = plot_pointers_factory(*args, type='default', **kwargs)
     return plot_pointers(*layout_fcn())
 
-def voltage_pointer_diagram_analysis(*args, layout_fcn:layout2.Layout=layout2.figure_default, **kwargs) -> layout2.FigureAxes:
+def voltage_pointer_diagram_analysis(*args, layout_fcn:layout.Layout=layout.figure_default, **kwargs) -> layout.FigureAxes:
     plot_pointers = plot_pointers_factory(*args, type='voltage', **kwargs)
     return plot_pointers(*layout_fcn())
 
-def current_pointer_diagram_analysis(*args, layout_fcn:layout2.Layout=layout2.figure_default, **kwargs) -> layout2.FigureAxes:
+def current_pointer_diagram_analysis(*args, layout_fcn:layout.Layout=layout.figure_default, **kwargs) -> layout.FigureAxes:
     plot_pointers = plot_pointers_factory(*args, type='current', **kwargs)
     return plot_pointers(*layout_fcn())
 
-def power_pointer_diagram_analysis(*args, layout_fcn:layout2.Layout=layout2.figure_default, **kwargs) -> layout2.FigureAxes:
+def power_pointer_diagram_analysis(*args, layout_fcn:layout.Layout=layout.figure_default, **kwargs) -> layout.FigureAxes:
     plot_pointers = plot_pointers_factory(*args, type='power', **kwargs)
     return plot_pointers(*layout_fcn())

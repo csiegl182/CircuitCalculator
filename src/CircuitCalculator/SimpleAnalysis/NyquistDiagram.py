@@ -1,11 +1,11 @@
-from . import layout2
+from . import layout
 from ..Circuit.solution import FrequencyDomainSolution, FrequencyDomainFunction
 import functools
 from typing import Callable, Dict, TypedDict
 import numpy as np
 
-def plot_nyquist_by_id(id:str, **kwargs) -> layout2.PlotFcn:
-    def plot_pointer(fig:layout2.Figure, ax:layout2.Axes, *, fd_fcn:Callable[[str], tuple[list[float], list[complex]]]=lambda _: ([0], [0+0j]), label_fcn:Callable[[str], str]=lambda _: '') -> layout2.FigureAxes:
+def plot_nyquist_by_id(id:str, **kwargs) -> layout.PlotFcn:
+    def plot_pointer(fig:layout.Figure, ax:layout.Axes, *, fd_fcn:Callable[[str], tuple[list[float], list[complex]]]=lambda _: ([0], [0+0j]), label_fcn:Callable[[str], str]=lambda _: '') -> layout.FigureAxes:
         w, z = fd_fcn(id)
         if 'label' not in kwargs.keys():
             kwargs.update({'label':label_fcn(id)})
@@ -17,8 +17,8 @@ def plot_nyquist_by_id(id:str, **kwargs) -> layout2.PlotFcn:
         return fig, ax
     return plot_pointer
 
-def plot_nyquist_by_value(z:list[complex], **kwargs) -> layout2.PlotFcn:
-    def plot_pointer(fig:layout2.Figure, ax:layout2.Axes, **_) -> layout2.FigureAxes:
+def plot_nyquist_by_value(z:list[complex], **kwargs) -> layout.PlotFcn:
+    def plot_pointer(fig:layout.Figure, ax:layout.Axes, **_) -> layout.FigureAxes:
         ax[0].plot(np.real(z), np.imag(z), **kwargs)
         return fig, ax
     return plot_pointer
@@ -35,7 +35,7 @@ def plot_nyquist_diagram_factory(
         solution:FrequencyDomainSolution=FrequencyDomainSolution(),
         ax_lim:tuple[float, float, float, float]=(-1, 1, -1, 1),
         xlabel:str='',
-        ylabel:str='') -> layout2.PlotFcn:
+        ylabel:str='') -> layout.PlotFcn:
 
     nyquist_diagram_configuration: Dict[str, NyquistDiagramProperties] = {
         'default' : {'fd_fcn' : lambda _: (np.zeros(1), np.zeros(1)), 'label_fcn' : lambda _: '', 'xlabel' : 'Re→', 'ylabel' : 'Im→'},
@@ -47,27 +47,27 @@ def plot_nyquist_diagram_factory(
     xlabel = xlabel if len(xlabel) > 0 else nd_properties['xlabel']
     ylabel = ylabel if len(ylabel) > 0 else nd_properties['ylabel']
 
-    @layout2.legend()
-    @layout2.grid()
-    @layout2.nyquist_like_plot(ax_lim=ax_lim, xlabel=xlabel, ylabel=ylabel)
-    def plot_nyquist_diagram(fig:layout2.Figure, ax:layout2.Axes) -> layout2.FigureAxes:
+    @layout.legend()
+    @layout.grid()
+    @layout.nyquist_like_plot(ax_lim=ax_lim, xlabel=xlabel, ylabel=ylabel)
+    def plot_nyquist_diagram(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
         new_args = [functools.partial(a, fd_fcn=nd_properties['fd_fcn'], label_fcn=nd_properties['label_fcn']) for a in args]
-        layout2.apply_plt_fcn(fig, ax, *new_args)
+        layout.apply_plt_fcn(fig, ax, *new_args)
         return fig, ax
     return plot_nyquist_diagram
 
-def nyquist_plot(*args, layout_fcn:layout2.Layout=layout2.figure_default, **kwargs) -> layout2.FigureAxes:
+def nyquist_plot(*args, layout_fcn:layout.Layout=layout.figure_default, **kwargs) -> layout.FigureAxes:
     plot_nyquist_diagram = plot_nyquist_diagram_factory(*args, type='default', **kwargs)
     return plot_nyquist_diagram(*layout_fcn())
 
-def nyquist_voltage_analysis(*args, layout_fcn:layout2.Layout=layout2.figure_default, **kwargs) -> layout2.FigureAxes:
+def nyquist_voltage_analysis(*args, layout_fcn:layout.Layout=layout.figure_default, **kwargs) -> layout.FigureAxes:
     plot_nyquist_diagram = plot_nyquist_diagram_factory(*args, type='voltage', **kwargs)
     return plot_nyquist_diagram(*layout_fcn())
 
-def nyquist_current_analysis(*args, layout_fcn:layout2.Layout=layout2.figure_default, **kwargs) -> layout2.FigureAxes:
+def nyquist_current_analysis(*args, layout_fcn:layout.Layout=layout.figure_default, **kwargs) -> layout.FigureAxes:
     plot_nyquist_diagram = plot_nyquist_diagram_factory(*args, type='current', **kwargs)
     return plot_nyquist_diagram(*layout_fcn())
 
-def nyquist_power_analysis(*args, layout_fcn:layout2.Layout=layout2.figure_default, **kwargs) -> layout2.FigureAxes:
+def nyquist_power_analysis(*args, layout_fcn:layout.Layout=layout.figure_default, **kwargs) -> layout.FigureAxes:
     plot_nyquist_diagram = plot_nyquist_diagram_factory(*args, type='power', **kwargs)
     return plot_nyquist_diagram(*layout_fcn())
