@@ -1,10 +1,10 @@
-from . import layout
+from . import layout2
 from ..Circuit.solution import FrequencyDomainSolution, FrequencyDomainFunction
 from typing import Callable, TypedDict
 import numpy as np
 import functools
 
-def plot_discrete_frequencies_fcn(ax:layout.Axis, w:np.ndarray, X:np.ndarray, **kwargs) -> None:
+def plot_discrete_frequencies_fcn(ax:layout2.Axis, w:np.ndarray, X:np.ndarray, **kwargs) -> None:
     line = ax.plot([w[0], w[0]], [0, X[0]], **kwargs)
     color = line[0].get_color()
     kwargs.update({'label': '', 'color': color})
@@ -13,13 +13,13 @@ def plot_discrete_frequencies_fcn(ax:layout.Axis, w:np.ndarray, X:np.ndarray, **
 
 def plot_frequencies_by_id(
         id:str,
-        **kwargs) -> layout.PlotFcn:
+        **kwargs) -> layout2.PlotFcn:
     def plot_frequencies(
-            fig:layout.Figure,
-            ax:layout.Axes,
+            fig:layout2.Figure,
+            ax:layout2.Axes,
             fd_fcn:Callable[[str], FrequencyDomainFunction]=lambda _: (np.array(0), np.array(0)),
             label_fcn:Callable[[str], str]=lambda _: '',
-            **_) -> layout.FigureAxes:
+            **_) -> layout2.FigureAxes:
         if 'label' not in kwargs.keys():
             kwargs.update({'label':label_fcn(id)})
         w, X = fd_fcn(id)
@@ -30,8 +30,8 @@ def plot_frequencies_by_id(
 
 def plot_frequencies_by_fcn(
         fd_fcn:FrequencyDomainFunction,
-        **kwargs) -> layout.PlotFcn:
-    def plot_frequencies(fig:layout.Figure, ax:layout.Axes, **_) -> layout.FigureAxes:
+        **kwargs) -> layout2.PlotFcn:
+    def plot_frequencies(fig:layout2.Figure, ax:layout2.Axes, **_) -> layout2.FigureAxes:
         plot_discrete_frequencies_fcn(ax[-2], fd_fcn[0], np.abs(fd_fcn[1]), **kwargs)
         plot_discrete_frequencies_fcn(ax[-1], fd_fcn[0], np.angle(fd_fcn[1]), **kwargs)
         return fig, ax
@@ -55,7 +55,7 @@ def plot_frequencydomain_factory(
         logw:bool=False,
         logy:bool=False,
         xlabel:str='ω→',
-        ylabel:str='') -> layout.PlotFcn:
+        ylabel:str='') -> layout2.PlotFcn:
 
     fd_plot_config: dict[str, FrequencyDomainPlotProperties] = {
         'default' : {'fd_fcn' : lambda _: (np.zeros(1), np.zeros(1)), 'label_fcn' : lambda _: '', 'ylabel' : ''},
@@ -66,31 +66,31 @@ def plot_frequencydomain_factory(
     fd_properties = fd_plot_config.get(type, fd_plot_config['default'])
     ylabel = ylabel if len(ylabel) > 0 else fd_properties['ylabel']
 
-    @layout.legend(yoffset=1.2)
-    @layout.grid()
-    @layout.bode_like_plot(wmin=wmin, wmax=wmax, logw=logw, logy=logy, xlabel=xlabel, ylabel=ylabel)
-    def plot_frequencydomain(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
+    @layout2.legend(yoffset=1.2)
+    @layout2.grid()
+    @layout2.bode_like_plot(wmin=wmin, wmax=wmax, logw=logw, logy=logy, xlabel=xlabel, ylabel=ylabel)
+    def plot_frequencydomain(fig:layout2.Figure, ax:layout2.Axes) -> layout2.FigureAxes:
         ax[-2].set_ylim(bottom=abs_min)
         if abs_max > 0:
             ax[-2].set_ylim(top=abs_max)
         ax[-1].set_ylim(bottom=phi_min, top=phi_max)
         new_args = [functools.partial(a, fd_fcn=fd_properties['fd_fcn'], label_fcn=fd_properties['label_fcn']) for a in args]
-        layout.apply_plt_fcn(fig, ax, *new_args)
+        layout2.apply_plt_fcn(fig, ax, *new_args)
         return fig, ax
     return plot_frequencydomain
 
-def frequency_domain_plot(*args, layout_fcn:layout.Layout=layout.figure_two_rows, **kwargs) -> layout.FigureAxes:
+def frequency_domain_plot(*args, layout_fcn:layout2.Layout=layout2.figure_two_rows, **kwargs) -> layout2.FigureAxes:
     plot_frequencydomain = plot_frequencydomain_factory(*args, type='default', **kwargs)
     return plot_frequencydomain(*layout_fcn())
 
-def discrete_frequencies_voltage_analysis(*args, layout_fcn:layout.Layout=layout.figure_two_rows, **kwargs) -> layout.FigureAxes:
+def discrete_frequencies_voltage_analysis(*args, layout_fcn:layout2.Layout=layout2.figure_two_rows, **kwargs) -> layout2.FigureAxes:
     plot_frequencydomain = plot_frequencydomain_factory(*args, type='voltage', **kwargs)
     return plot_frequencydomain(*layout_fcn())
 
-def discrete_frequencies_current_analysis(*args, layout_fcn:layout.Layout=layout.figure_two_rows, **kwargs) -> layout.FigureAxes:
+def discrete_frequencies_current_analysis(*args, layout_fcn:layout2.Layout=layout2.figure_two_rows, **kwargs) -> layout2.FigureAxes:
     plot_frequencydomain = plot_frequencydomain_factory(*args, type='current', **kwargs)
     return plot_frequencydomain(*layout_fcn())
 
-def discrete_frequencies_power_analysis(*args, layout_fcn:layout.Layout=layout.figure_two_rows, **kwargs) -> layout.FigureAxes:
+def discrete_frequencies_power_analysis(*args, layout_fcn:layout2.Layout=layout2.figure_two_rows, **kwargs) -> layout2.FigureAxes:
     plot_frequencydomain = plot_frequencydomain_factory(*args, type='power', **kwargs)
     return plot_frequencydomain(*layout_fcn())

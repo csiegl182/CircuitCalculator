@@ -1,4 +1,4 @@
-from . import layout
+from . import layout2
 from ..Circuit.solution import TimeDomainSolution, TimeDomainFunction
 import numpy as np
 import functools
@@ -13,13 +13,13 @@ def plot_timeseries_by_id(
           t_min:float=0,
           t_max:float=0,
           N_samples:int=500,
-          **kwargs) -> layout.PlotFcn:
+          **kwargs) -> layout2.PlotFcn:
     def plot_timeseries(
-              fig:layout.Figure,
-              ax:layout.Axes,
+              fig:layout2.Figure,
+              ax:layout2.Axes,
               ts_fcn:Callable[[str], TimeDomainFunction]=lambda _: lambda t: np.zeros(np.size(t)),
               label_fcn:Callable[[str], str]=lambda _: '',
-              **_) -> layout.FigureAxes:
+              **_) -> layout2.FigureAxes:
         x_min, x_max = t_min, t_max
         if t_min >= t_max:
             x_min, x_max = ax[0].get_xlim()
@@ -34,8 +34,8 @@ def plot_timeseries_by_fcn(
           t_min:float=0,
           t_max:float=0,
           N_samples:int=500,
-          **kwargs) -> layout.PlotFcn:
-    def plot_timeseries(fig:layout.Figure, ax:layout.Axes, **_) -> layout.FigureAxes:
+          **kwargs) -> layout2.PlotFcn:
+    def plot_timeseries(fig:layout2.Figure, ax:layout2.Axes, **_) -> layout2.FigureAxes:
         x_min, x_max = t_min, t_max
         if t_min >= t_max:
             x_min, x_max = ax[0].get_xlim()
@@ -55,7 +55,7 @@ def plot_timeseries_factory(
         tmax:float=-1,
         tmin:float=0,
         xlabel:str='t→',
-        ylabel:str='') -> layout.PlotFcn:
+        ylabel:str='') -> layout2.PlotFcn:
 
     time_series_configurations: Dict[str, PlotTimeSeriesProperties] = {
         'voltage' : {'ts_fcn': solution.get_voltage, 'label_fcn': lambda id: f'V({id})', 'ylabel': 'v(t)→'},
@@ -67,29 +67,29 @@ def plot_timeseries_factory(
     ts_properties = time_series_configurations.get(type, time_series_configurations['default'])
     ylabel = ylabel if len(ylabel) > 0 else ts_properties['ylabel']
 
-    @layout.legend()
-    @layout.grid()
-    @layout.xlim_bottom(xmin=tmin, xmax=tmax)
-    @layout.xlabel_bottom(xlabel)
-    def plot_timeseries(fig:layout.Figure, ax:layout.Axes) -> layout.FigureAxes:
+    @layout2.legend()
+    @layout2.grid()
+    @layout2.xlim_bottom(xmin=tmin, xmax=tmax)
+    @layout2.xlabel_bottom(xlabel)
+    def plot_timeseries(fig:layout2.Figure, ax:layout2.Axes) -> layout2.FigureAxes:
         ax[-1].set_ylabel(ylabel)
         updated_args = [functools.partial(a, ts_fcn=ts_properties['ts_fcn'], label_fcn=ts_properties['label_fcn']) for a in args]
-        layout.apply_plt_fcn(fig, ax, *updated_args)
+        layout2.apply_plt_fcn(fig, ax, *updated_args)
         return fig, ax
     return plot_timeseries
 
-def time_domain_plot(*args, layout_fcn:layout.Layout=layout.figure_default, **kwargs) -> layout.FigureAxes:
+def time_domain_plot(*args, layout_fcn:layout2.Layout=layout2.figure_default, **kwargs) -> layout2.FigureAxes:
         plot_timeseries = plot_timeseries_factory(*args, type='default', **kwargs)
         return plot_timeseries(*layout_fcn())
 
-def steady_state_voltage_timedomain_analysis(*args, layout_fcn:layout.Layout=layout.figure_default, **kwargs) -> layout.FigureAxes:
+def steady_state_voltage_timedomain_analysis(*args, layout_fcn:layout2.Layout=layout2.figure_default, **kwargs) -> layout2.FigureAxes:
         plot_timeseries = plot_timeseries_factory(*args, type='voltage', **kwargs)
         return plot_timeseries(*layout_fcn())
 
-def steady_state_current_timedomain_analysis(*args, layout_fcn:layout.Layout=layout.figure_default, **kwargs) -> layout.FigureAxes:
+def steady_state_current_timedomain_analysis(*args, layout_fcn:layout2.Layout=layout2.figure_default, **kwargs) -> layout2.FigureAxes:
         plot_timeseries = plot_timeseries_factory(*args, type='current', **kwargs)
         return plot_timeseries(*layout_fcn())
 
-def steady_state_instantaneous_power_analysis(*args, layout_fcn:layout.Layout=layout.figure_default, **kwargs) -> layout.FigureAxes:
+def steady_state_instantaneous_power_analysis(*args, layout_fcn:layout2.Layout=layout2.figure_default, **kwargs) -> layout2.FigureAxes:
         plot_timeseries = plot_timeseries_factory(*args, type='power', **kwargs)
         return plot_timeseries(*layout_fcn())
