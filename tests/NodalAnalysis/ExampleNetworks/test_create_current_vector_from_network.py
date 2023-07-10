@@ -13,7 +13,7 @@ def test_create_current_vector_from_reference_network_1() -> None:
         ]
     )
     I = create_current_vector_from_network(network)
-    I_ref = np.array([-Vq])
+    I_ref = np.array([-Vq], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
 def test_create_current_vector_from_reference_network_2() -> None:
@@ -26,7 +26,7 @@ def test_create_current_vector_from_reference_network_2() -> None:
         ]
     )
     I = create_current_vector_from_network(network)
-    I_ref = np.array([Iq])
+    I_ref = np.array([Iq], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
 def test_create_current_vector_from_reference_network_3() -> None:
@@ -41,7 +41,7 @@ def test_create_current_vector_from_reference_network_3() -> None:
     )
     I = create_current_vector_from_network(network)
     I_ref = np.array([Iq,
-                      0])
+                      0], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
 def test_create_current_vector_from_reference_network_5() -> None:
@@ -61,7 +61,7 @@ def test_create_current_vector_from_reference_network_5() -> None:
     I_ref = np.array([-U1*G1,
                       U1*G1,
                       -U2*G4,
-                      U2*(G4+G5)])
+                      U2*(G4+G5)], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
 def test_create_current_vector_from_reference_network_6() -> None:
@@ -84,7 +84,7 @@ def test_create_current_vector_from_reference_network_6() -> None:
                       V1*G1-V2*G4,
                       -V2*(G4+G3),
                       V2*G4],
-                      np.complex)
+                      dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
 def test_create_current_vector_from_reference_network_7() -> None:
@@ -109,7 +109,7 @@ def test_create_current_vector_from_reference_network_7() -> None:
                       -I4-(V1+V3)*G4,
                       -(V1+V3)*G4,
                       I4+G3*(V1+V2)+G4*(V1+V3)],
-                      np.complex)
+                      dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
 def test_create_current_vector_from_reference_network_10() -> None:
@@ -133,5 +133,5 @@ def test_create_current_vector_from_reference_network_10() -> None:
                       -(V1+V2)*(G4+G5)-V2*G2,
                       -I4+(V1+V2)*G5,
                       I4+(V1+V2)*G4],
-                      np.complex)
+                      dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)

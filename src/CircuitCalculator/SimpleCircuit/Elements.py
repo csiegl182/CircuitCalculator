@@ -101,15 +101,21 @@ class Impedance(schemdraw.elements.twoterm.ResistorIEC):
         label += f'{self._name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
         label += dsp.print_impedance(self.Z, precision=precision) if show_value else ''
-        self.anchors['Z_label'] = (0.5, 0.3)
-        self.label(label, rotate=True, loc='Z_label', halign='center')
+        self.anchors['value_label'] = (0.5, 0.3)
+        self.anchors['v_label'] = (0.5, -1.1)
+        self.anchors['s_label'] = (0.5, 0.9)
+        self.label(label, rotate=True, loc='value_label', halign='center')
 
     def down(self) -> schemdraw.elements.Element:
-        self.anchors['Z_label'] = (0.5, -0.9)
+        self.anchors['value_label'] = (0.5, -0.6)
+        self.anchors['v_label'] = (0.5, 0.3)
+        self.anchors['s_label'] = (0.5, -1.2)
         return super().down()
 
     def left(self) -> schemdraw.elements.Element:
-        self.anchors['Z_label'] = (0.5, -1)
+        self.anchors['value_label'] = (0.5, -0.6)
+        self.anchors['v_label'] = (0.5, 0.3)
+        self.anchors['s_label'] = (0.5, -1.2)
         return super().left()
 
     @property

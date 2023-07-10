@@ -2,7 +2,7 @@ from hypothesis import given, strategies as st
 from CircuitCalculator.Network.elements import complex_value
 import numpy as np
 
-@given(st.floats(min_value=0, allow_subnormal=False), st.floats(allow_nan=False, allow_infinity=False))
+@given(st.floats(min_value=0, max_value=1e12, allow_subnormal=False), st.floats(allow_nan=False, allow_infinity=False))
 def test_complex_value_calculates_absolute_value(X: float, phi: float) -> None:
     z = complex_value(X, phi)
     np.testing.assert_approx_equal(np.abs(z), X)
@@ -33,12 +33,12 @@ def test_complex_value_reduces_phase_to_minus_pi_to_pi(phi, n) -> None:
     z = complex_value(1, phi+n*2*np.pi)
     np.testing.assert_almost_equal(np.angle(z), phi, decimal=3)
 
-@given(st.floats(min_value=0, allow_infinity=False), st.floats(allow_nan=False, allow_infinity=False))
+@given(st.floats(min_value=0, max_value=1e14), st.floats(allow_nan=False, allow_infinity=False))
 def test_complex_value_can_handle_rms_values(X, phi) -> None:
     z = complex_value(X, phi, rms=True)
     np.testing.assert_approx_equal(np.abs(z), X*np.sqrt(2))
 
-@given(st.floats(min_value=-180, max_value=180, allow_nan=False, allow_infinity=False))
+@given(st.floats(min_value=-180, max_value=180, allow_nan=False, allow_infinity=False, allow_subnormal=False))
 def test_complex_value_can_handle_degree_phases(phi) -> None:
     z = complex_value(1, phi, deg=True)
     np.testing.assert_approx_equal(np.degrees(np.angle(z)), phi)

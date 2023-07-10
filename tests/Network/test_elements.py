@@ -1,5 +1,5 @@
 from CircuitCalculator.Network.elements import linear_current_source, resistor, conductor, linear_voltage_source
-from numpy import inf, nan, isnan
+from numpy import inf, isnan
 
 def test_zero_resistance_has_inf_conductance() -> None:
     R = resistor('R1', R=0)
