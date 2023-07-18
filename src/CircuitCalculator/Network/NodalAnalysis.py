@@ -16,6 +16,9 @@ def admittance_connected_to(network: Network, node: str) -> complex:
 def admittance_between(network: Network, node1: str, node2: str) -> complex:
     return sum([b.element.Y for b in network.branches_between(node1, node2) if np.isfinite(b.element.Y)])
 
+def connected_nodes(network: Network, node: str) -> list[str]:
+    return [b.node1 if b.node1 != node else b.node2 for b in network.branches_connected_to(node)]
+
 def create_node_matrix_from_network(network: Network, node_index_mapper: map.NodeIndexMapper = map.default) -> np.ndarray:
     def node_matrix_element(i_label:str, j_label:str) -> complex:
         if i_label == j_label:
@@ -31,53 +34,26 @@ def create_node_matrix_from_network(network: Network, node_index_mapper: map.Nod
 def create_current_vector_from_network(network: Network, node_index_mapper: map.NodeIndexMapper = map.default) -> np.ndarray:
     super_nodes = SuperNodes(network)
     node_mapping = node_index_mapper(network)
+    reference_node_mapping = {n: i for n, i in node_mapping.items() if super_nodes.is_reference(n)}
     b = np.zeros(len(node_mapping), dtype=complex)
-    # active_node_labels = [l for l in node_mapping.keys() if super_nodes.is_active(l)]
     def current_sources(node: str) -> complex:
         current_sources = [b for b in network.branches_connected_to(node) if is_current_source(b.element)]
         return sum([-cs.element.I if cs.node1 == node else cs.element.I for cs in current_sources])
-    # def connected_active_nodes(active_node: str) -> list[str]:
-    #     return [n for n in network.nodes_connected_to(active_node) if super_nodes.is_active(n)]
-    # def active_node_current(active_node: str) -> complex:
-    #     I_connected_admittances = super_nodes.voltage_to_next_reference(active_node)*admittance_connected_to(network, active_node)
-    #     reference_node = super_nodes.get_reference_node(active_node)
-    #     if super_nodes.is_active(reference_node):
-    #         I_parallel_admittance = super_nodes.voltage_to_next_reference(reference_node)*admittance_between(network, active_node, reference_node)
-    #         return I_parallel_admittance-I_connected_admittances
-    #     return sum([super_nodes.voltage_to_next_reference(cn)*admittance_between(network, active_node, cn) for cn in connected_active_nodes(active_node)])-I_connected_admittances
-    # def passive_node_current(passive_node: str) -> complex:
-    #     I_parallel_admittances = sum([super_nodes.voltage_to_next_reference(an)*admittance_between(network, an, passive_node) for an in active_node_labels if super_nodes.get_reference_node(an) != passive_node])
-    #     if super_nodes.is_reference(passive_node):
-    #         active_node = super_nodes.get_active_node(passive_node)
-    #         I_connected_admittances = super_nodes.voltage_to_next_reference(active_node)*admittance_connected_to(network, active_node)
-    #         I_parallel_to_active_nodes = sum([super_nodes.voltage_to_next_reference(cn)*admittance_between(network, active_node, cn) for cn in connected_active_nodes(active_node)])
-    #         I_parallel_to_passive_nodes = super_nodes.voltage_to_next_reference(active_node)*admittance_between(network, active_node, passive_node)
-    #         return I_parallel_admittances+I_parallel_to_active_nodes+I_parallel_to_passive_nodes-I_connected_admittances
-    #     return I_parallel_admittances
-    # def current_of_voltage_sources(node: str) -> complex:
-    #     if super_nodes.is_active(node):
-    #         return active_node_current(node)
-    #     return passive_node_current(node)
+    def currents_of_connected_active_nodes(node: str) -> complex:
+        connected_active_nodes = [n for n in connected_nodes(network, node) if super_nodes.is_active(n)]
+        connected_active_nodes = [n for n in connected_active_nodes if not super_nodes.belong_to_same(n, node)]
+        return sum([super_nodes.voltage_to_next_reference(cn)*admittance_between(network, cn, node) for cn in connected_active_nodes])
+    def currents_of_belonging_voltage_sources(reference_node: str) -> complex:
+        an = super_nodes.get_active_node(reference_node)
+        connected_admittances_without_parallel_one = admittance_connected_to(network, an)-admittance_between(network, an, reference_node)
+        return -super_nodes.voltage_to_next_reference(an)*connected_admittances_without_parallel_one
     for i_label, i in node_mapping.items():
         b[i] = current_sources(i_label)
-        if super_nodes.is_reference(i_label):
-            an = super_nodes.get_active_node(i_label)
-            b[i] += current_sources(an)
-            b[i] += -super_nodes.voltage_to_next_reference(an)*(admittance_connected_to(network, an)-admittance_between(network, i_label, an))
-        for br in network.branches_connected_to(i_label):
-            n = br.node1 if br.node1 != i_label else br.node2
-            if super_nodes.belong_to_same(n, i_label):
-                continue
-            if super_nodes.is_active(n):
-                b[i] += super_nodes.voltage_to_next_reference(n)*br.element.Y
-        if super_nodes.is_reference(i_label):
-            an = super_nodes.get_active_node(i_label)
-            for br in network.branches_connected_to(an):
-                n = br.node1 if br.node1 != an else br.node2
-                if super_nodes.belong_to_same(an, n):
-                    continue
-                if super_nodes.is_active(n):
-                    b[i] += super_nodes.voltage_to_next_reference(n)*br.element.Y
+        b[i] += currents_of_connected_active_nodes(i_label)
+    for ref_label, i in reference_node_mapping.items():
+        b[i] += current_sources(super_nodes.get_active_node(ref_label))
+        b[i] += currents_of_connected_active_nodes(super_nodes.get_active_node(ref_label))
+        b[i] += currents_of_belonging_voltage_sources(ref_label)
     return b
 
 def calculate_node_voltages(Y : np.ndarray, I : np.ndarray) -> np.ndarray:
