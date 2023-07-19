@@ -78,6 +78,7 @@ class VoltageSource(din_elements.SourceUDIN):
         self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.blue))
 
     def down(self) -> schemdraw.elements.Element:
+        super().down()
         self.anchors['s_label'] = (0.5, -0.7)
         return self
 
