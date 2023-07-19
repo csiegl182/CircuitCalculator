@@ -1,6 +1,5 @@
 from CircuitCalculator.Network.loaders import load_network_from_json
-from CircuitCalculator.Network.NodalAnalysis import nodal_analysis_solver
-from CircuitCalculator.Network.impedance import open_circuit_impedance
+from CircuitCalculator.Network.NodalAnalysis import nodal_analysis_solver, open_circuit_impedance
 import numpy as np
 
 def test_network_1_with_advanced_nodal_analysis() -> None:

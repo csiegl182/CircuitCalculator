@@ -1,6 +1,5 @@
 from CircuitCalculator.Network.loaders import load_network_from_json
 from CircuitCalculator.Network.NodalAnalysis import nodal_analysis_solver
-from CircuitCalculator.SimpleAnalysis.PointerDiagram import VoltagePointerDiagram
 
 if __name__ == '__main__':
     network = load_network_from_json('examples/networks/json/example_network_12.json')
