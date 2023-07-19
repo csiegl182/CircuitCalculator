@@ -169,3 +169,21 @@ def test_create_node_matrix_from_reference_network_11() -> None:
                       [-G2, G2+G3+G4]],
                       dtype=complex)
     np.testing.assert_almost_equal(Y, Y_ref)
+
+def test_create_node_matrix_from_reference_network_13() -> None:
+    R1, R2, R3 = 10, 20, 30
+    G1, G2, G3 = 1/R1, 1/R2, 1/R3
+    V = 1
+    network = Network(
+        branches=[
+            Branch('1', '0', voltage_source('V', V=V)),
+            Branch('1', '2', resistor('R1', R=R1)),
+            Branch('1', '2', resistor('R2', R=R2)),
+            Branch('2', '0', resistor('R3', R=R3))
+        ],
+        node_zero_label='0'
+    )
+    Y = create_node_matrix_from_network(network)
+    Y_ref = np.array([[G1+G2+G3]],
+                      dtype=complex)
+    np.testing.assert_almost_equal(Y, Y_ref)

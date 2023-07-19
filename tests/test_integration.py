@@ -147,3 +147,16 @@ def test_network_11_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_current('Iq'), 4, decimal=3)
     np.testing.assert_almost_equal(solution.get_current('Uq'), -5, decimal=3)
 
+def test_network_13_with_advanced_nodal_analysis() -> None:
+    network = load_network_from_json('./examples/networks/json/example_network_13.json')
+    solution = nodal_analysis_solver(network)
+    np.testing.assert_almost_equal(solution.get_voltage('R1'), 0.182, decimal=3)
+    np.testing.assert_almost_equal(solution.get_voltage('R2'), 0.182, decimal=3)
+    np.testing.assert_almost_equal(solution.get_voltage('R3'), 0.818, decimal=3)
+    np.testing.assert_almost_equal(solution.get_voltage('Vs'), 1, decimal=2)
+    np.testing.assert_almost_equal(solution.get_current('R1'), 0.0182, decimal=4)
+    np.testing.assert_almost_equal(solution.get_current('R2'), 0.0091, decimal=4)
+    np.testing.assert_almost_equal(solution.get_current('R3'), 0.0273, decimal=4)
+    np.testing.assert_almost_equal(solution.get_current('Vs'), -0.0273, decimal=3)
+
+
