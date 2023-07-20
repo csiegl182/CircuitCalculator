@@ -158,5 +158,3 @@ def test_network_13_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_current('R2'), 0.0091, decimal=4)
     np.testing.assert_almost_equal(solution.get_current('R3'), 0.0273, decimal=4)
     np.testing.assert_almost_equal(solution.get_current('Vs'), -0.0273, decimal=3)
-
-

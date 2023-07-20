@@ -74,7 +74,7 @@ class VoltageSource(din_elements.SourceUDIN):
         label = dsp.print_complex(V, unit='V', precision=precision)
         self.label(f'{self._name}={label}', rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
 
-        a, b = (1.5, 0.7), (-0.5, 0.7)
+        a, b = (-0.5, 0.7), (1.5, 0.7)
         self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.blue))
 
     def down(self) -> schemdraw.elements.Element:
@@ -724,9 +724,6 @@ class VoltageLabel(schemdraw.elements.CurrentLabel):
         kwargs.update({'color': kwargs.get('color', dsp.blue)})
         kwargs.update({'headlength': kwargs.get('headlength', 0.4)})
         kwargs.update({'headwidth': kwargs.get('headwidth', 0.3)})
-        # adjust counting arrow system of voltage sources for display
-        if type(at) in source_elements:
-            reverse = not reverse
         super().__init__(reverse=reverse, **kwargs)
         if isinstance(at, RealVoltageSource):
             self.at(at.center)
@@ -770,18 +767,11 @@ class PowerLabel(schemdraw.elements.Label):
             rotate = 90
         self.label(label, rotate=rotate, halign='center')
 
-source_elements : list[Any] = [
-        VoltageSource,
-        RealVoltageSource,
-        ACVoltageSource,
-        CurrentSource
-]
-
 v_label_args : dict[Any, dict[str, float | str ]] = {
     VoltageSource : {'ofst' : -0.7},
     ACVoltageSource : {'ofst' : -0.7},
     CurrentSource : {'ofst' : -0.8, 'label_loc': 'top'},
-    RealCurrentSource : {'ofst' : -2.1, 'label_loc': 'top'}
+    RealCurrentSource : {'ofst' : 1.1, 'label_loc': 'top'}
 }
 
 i_label_args : dict[Any, dict[str, float]] = {
