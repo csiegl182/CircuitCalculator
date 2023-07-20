@@ -352,11 +352,10 @@ class ACCurrentSource(din_elements.SourceIDIN):
         self._deg = deg
         self._sin = sin
         label = dsp.print_sinosoidal(self._I, unit='A', precision=precision, w=w, deg=deg)
-        self.anchors['I_label'] = (0.5, 1.1)
-        self.label(f'{self._name}={label}', rotate=True, color=dsp.blue, loc='I_label', halign='center', valign='center')
-
-        a, b = (1.5, 0.7), (-0.5, 0.7)
-        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.blue))
+        a, b = (1.2, 0.3), (1.8, 0.3)
+        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.red))
+        self.anchors['I_label'] = a
+        self.label(f'{self._name}={label}', loc='I_label', ofst=(0, 0.4), rotate=True, color=dsp.red)
 
     @property
     def is_reverse(self) -> bool:
@@ -451,11 +450,9 @@ class RectCurrentSource(schemdraw.elements.Source):
         self._phi = phi
         self._deg = deg
         self._sin = sin
-        self.anchors['I_label'] = (0.5, 1.1)
-
-        a, b = (1.5, 0.7), (-0.5, 0.7)
         self.segments.append(schemdraw.Segment([(0.3, 0.25), (0.3, 0.1), (0.7, 0.1), (0.7, -0.05), (0.3, -0.05), (0.3, -0.2), (0.7, -0.2)]))
-        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.blue))
+        a, b = (1.2, 0.3), (1.8, 0.3)
+        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.red))
 
     @property
     def is_reverse(self) -> bool:
