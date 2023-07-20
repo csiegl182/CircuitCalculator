@@ -22,45 +22,45 @@ def ground_translator(element: elm.Ground, nodes: tuple[str]) -> cct_cmp.Ground:
 
 def dc_voltage_source_translator(element: elm.VoltageSource, nodes: tuple[str, str]) -> cct_cmp.VoltageSource:
     return cct_cmp.VoltageSource(
-        nodes=nodes,
+        nodes=nodes if not element.is_reverse else nodes[::-1],
         id=element.name,
-        V=element.V.real,
+        V=element.V.real if not element.is_reverse else -element.V.real,
         w=0,
         phi=0
     )
 
 def dc_current_source_translator(element: elm.CurrentSource, nodes: tuple[str, str]) -> cct_cmp.CurrentSource:
     return cct_cmp.CurrentSource(
-        nodes=nodes,
+        nodes=nodes if not element.is_reverse else nodes[::-1],
         id=element.name,
-        I=element.I.real,
+        I=element.I.real if not element.is_reverse else -element.I.real,
         w=0,
         phi=0
     )
 
 def ac_voltage_source_translator(element: elm.ACVoltageSource, nodes: tuple[str, str]) -> cct_cmp.VoltageSource:
     return cct_cmp.VoltageSource(
-        nodes=nodes,
+        nodes=nodes if not element.is_reverse else nodes[::-1],
         id=element.name,
-        V=element.V,
+        V=element.V if not element.is_reverse else -element.V,
         w=element.w,
         phi=element.phi*pi/180 if element.deg else element.phi
     )
 
 def ac_current_source_translator(element: elm.ACCurrentSource, nodes: tuple[str, str]) -> cct_cmp.CurrentSource:
     return cct_cmp.CurrentSource(
-        nodes=nodes,
+        nodes=nodes if not element.is_reverse else nodes[::-1],
         id=element.name,
-        I=element.I,
+        I=element.I if not element.is_reverse else -element.I,
         w=element.w,
         phi=element.phi*pi/180 if element.deg else element.phi
     )
 
 def rect_voltage_source_translator(element: elm.RectVoltageSource, nodes: tuple[str, str]) -> cct_cmp.VoltageSource:
     return cct_cmp.PeriodicVoltageSource(
-        nodes=nodes,
+        nodes=nodes if not element.is_reverse else nodes[::-1],
         id=element.name,
-        V=element.V,
+        V=element.V if not element.is_reverse else -element.V,
         w=element.w,
         phi=element.phi*pi/180 if element.deg else element.phi,
         wavetype=periodic_functions.RectFunction
@@ -68,9 +68,9 @@ def rect_voltage_source_translator(element: elm.RectVoltageSource, nodes: tuple[
 
 def rect_current_source_translator(element: elm.RectCurrentSource, nodes: tuple[str, str]) -> cct_cmp.CurrentSource:
     return cct_cmp.PeriodicCurrentSource(
-        nodes=nodes,
+        nodes=nodes if not element.is_reverse else nodes[::-1],
         id=element.name,
-        I=element.I,
+        I=element.I if not element.is_reverse else -element.I,
         w=element.w,
         phi=element.phi*pi/180 if element.deg else element.phi,
         wavetype=periodic_functions.RectFunction
@@ -102,7 +102,6 @@ circuit_translator_map : ElementTranslatorMap = {
     elm.Capacitor : capacitor_translator,
     elm.Inductance : inductance_translator,
     elm.Ground : ground_translator,
-    elm.ACVoltageSource : ac_voltage_source_translator,
     elm.Line: none_translator,
     elm.Node: none_translator,
     elm.LabelNode: none_translator,
