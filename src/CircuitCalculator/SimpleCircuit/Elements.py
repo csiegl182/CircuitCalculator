@@ -85,7 +85,7 @@ class SimpleAnalysisElement(ABC):
 class VoltageSource(schemdraw.elements.SourceV, SimpleAnalysisElement):
     def __init__(self, V: complex, name: str, *args, reverse=False, precision=3, **kwargs):
         schemdraw.elements.SourceV.__init__(self, *args, reverse=reverse, **kwargs)
-        SimpleAnalysisElement.__init__(self, *args, name=name, reverse=reverse, **kwargs)
+        SimpleAnalysisElement.__init__(self, name=name, reverse=reverse)
         self._V = V if not reverse else -V
 
         self.anchors['value_label'] = (0.5, 1.1)
@@ -108,6 +108,25 @@ class VoltageSource(schemdraw.elements.SourceV, SimpleAnalysisElement):
 
     def values(self) -> dict[str, complex]:
         return {'V' : self.V}
+
+class CurrentSource(schemdraw.elements.SourceI, SimpleAnalysisElement):
+    def __init__(self, I: complex, name: str, *args, reverse=False, precision=3, **kwargs):
+        schemdraw.elements.SourceI.__init__(self, *args, reverse=reverse, **kwargs)
+        SimpleAnalysisElement.__init__(self, name=name, reverse=reverse)
+        self._I = I if not reverse else -I
+
+        a, b = (1.2, 0.3), (1.8, 0.3)
+        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.red))
+        self.anchors['I_label'] = a
+        label = dsp.print_complex(self._I, unit='A', precision=precision)
+        self.label(f'{self._name}={label}', loc='I_label', ofst=(0, 0.4), rotate=True, color=dsp.red)
+
+    @property
+    def I(self) -> complex:
+        return self._I
+
+    def values(self) -> dict[str, complex]:
+        return {'I' : self.I}
 
 class Impedance(schemdraw.elements.twoterm.ResistorIEC):
     def __init__(self, Z: complex, name: str, *args, show_name: bool = True, show_value: bool = True, precision: int = 3, reverse: bool = False, **kwargs):
@@ -163,36 +182,6 @@ class Impedance(schemdraw.elements.twoterm.ResistorIEC):
 
         super()._place_label(*args, **kwargs)
 
-class CurrentSource(din_elements.SourceIDIN):
-    def __init__(self, I: complex, name: str, *args, reverse=False, precision=3, **kwargs):
-        self._I = I
-        self._reverse = reverse
-        super().__init__(*args, reverse=self._reverse, **kwargs)
-        if self._reverse:
-            self._I *= -1
-        self._name = name
-        a, b = (1.2, 0.3), (1.8, 0.3)
-        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.red))
-        self.anchors['I_label'] = a
-        label = dsp.print_complex(self._I, unit='A', precision=precision)
-        self.label(f'{self._name}={label}', loc='I_label', ofst=(0, 0.4), rotate=True, color=dsp.red)
-
-    @property
-    def is_reverse(self) -> bool:
-        return self._reverse
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def I(self) -> complex:
-        return self._I
-
-    def values(self) -> dict[str, complex]:
-        return {'I' : self.I}
-
-# class Resistor(schemdraw.elements.twoterm.ResistorIEC):
 class Resistor(schemdraw.elements.Resistor):
     def __init__(self, R: float, name: str, *args, show_name: bool = True, show_value: bool = True, reverse: bool = False, **kwargs):
         self._R = R
@@ -546,7 +535,7 @@ class Capacitor(schemdraw.elements.twoterm.Capacitor):
                 kwargs.update({'rotation': 90})
         super()._place_label(*args, **kwargs)
 
-class Inductance(schemdraw.elements.twoterm.Inductor):
+class Inductance(schemdraw.elements.Inductor):
     def __init__(self, L: float, name: str, *args, show_name: bool = True, show_value: bool = True, label_offset: float = 0.2, reverse: bool = False, **kwargs):
         self._L = L
         self._name = name
