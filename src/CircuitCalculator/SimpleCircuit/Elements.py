@@ -1,7 +1,9 @@
 import schemdraw, schemdraw.elements, schemdraw.util
 
-from .SchemdrawDIN import elements as din_elements
+from .styles.DIN import elements as din_elements
 from . import Display as dsp
+
+import numpy as np
 
 from typing import Any
 from enum import Enum
@@ -62,17 +64,34 @@ class Schematic(schemdraw.Drawing):
         cpy = copy.deepcopy(self)
         cpy.save(fname, **kwargs)
 
-class VoltageSource(din_elements.SourceUDIN):
-    def __init__(self, V: complex, name: str, *args, reverse=False, precision=3, **kwargs):
-        self._V = V
-        self._reverse = reverse
-        super().__init__(*args, reverse=self._reverse, **kwargs)
-        if self._reverse:
-            self._V *= -1
+from abc import ABC
+
+class SimpleAnalysisElement(ABC):
+    def __init__(self, *, name: str, reverse: bool = False):
         self._name = name
+        self._reverse = reverse
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def is_reverse(self) -> bool:
+        return self._reverse
+
+    def values(self) -> dict[str, complex]:
+        ...
+
+class VoltageSource(schemdraw.elements.SourceV, SimpleAnalysisElement):
+    def __init__(self, V: complex, name: str, *args, reverse=False, precision=3, **kwargs):
+        schemdraw.elements.SourceV.__init__(self, *args, reverse=reverse, **kwargs)
+        SimpleAnalysisElement.__init__(self, *args, name=name, reverse=reverse, **kwargs)
+        self._V = V if not reverse else -V
+
         self.anchors['value_label'] = (0.5, 1.1)
+        self.anchors['v_label'] = (0.5, -1.1)
         self.anchors['s_label'] = (0.5, 1.5)
-        label = dsp.print_complex(V, unit='V', precision=precision)
+        label = dsp.print_complex(self._V, unit='V', precision=precision)
         self.label(f'{self._name}={label}', rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
 
         a, b = (-0.5, 0.7), (1.5, 0.7)
@@ -84,19 +103,11 @@ class VoltageSource(din_elements.SourceUDIN):
         return self
 
     @property
-    def is_reverse(self) -> bool:
-        return self._reverse
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
     def V(self) -> complex:
         return self._V
 
     def values(self) -> dict[str, complex]:
-        return {'U' : self.V}
+        return {'V' : self.V}
 
 class Impedance(schemdraw.elements.twoterm.ResistorIEC):
     def __init__(self, Z: complex, name: str, *args, show_name: bool = True, show_value: bool = True, precision: int = 3, reverse: bool = False, **kwargs):
@@ -181,7 +192,8 @@ class CurrentSource(din_elements.SourceIDIN):
     def values(self) -> dict[str, complex]:
         return {'I' : self.I}
 
-class Resistor(schemdraw.elements.twoterm.ResistorIEC):
+# class Resistor(schemdraw.elements.twoterm.ResistorIEC):
+class Resistor(schemdraw.elements.Resistor):
     def __init__(self, R: float, name: str, *args, show_name: bool = True, show_value: bool = True, reverse: bool = False, **kwargs):
         self._R = R
         self._name = name
@@ -295,7 +307,7 @@ class ACVoltageSource(din_elements.SourceUDIN):
         self._phi = phi
         self._deg = deg
         self._sin = sin
-        label = dsp.print_sinosoidal(V, unit='V', precision=precision, w=w, deg=deg)
+        label = dsp.print_sinosoidal(V*np.exp(1j*phi), unit='V', precision=precision, w=w, deg=deg)
         self.anchors['value_label'] = (0.5, 1.1)
         self.anchors['s_label'] = (0.5, 1.5)
         self.label(f'{self._name}={label}', rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
@@ -835,7 +847,6 @@ class PowerLabel(schemdraw.elements.Label):
         self.label(label, rotate=rotate, halign='center')
 
 v_label_args : dict[Any, dict[str, float | str ]] = {
-    VoltageSource : {'ofst' : -0.7},
     ACVoltageSource : {'ofst' : -0.7},
     CurrentSource : {'ofst' : -0.8, 'label_loc': 'top'},
     RealCurrentSource : {'ofst' : 1.1, 'label_loc': 'top'}
