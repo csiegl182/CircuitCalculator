@@ -1,3 +1,6 @@
+import schemdraw
+from . import Display as dsp
+
 def resistor(element):
     class extended_resistor(element):
         def __init__(self, *args, **kwargs):
@@ -33,6 +36,7 @@ def source(element):
             super().__init__(*args, **kwargs)
             self.anchors['value_label'] = (0.5, 1.1)
             self.anchors['v_label'] = (0.5, -1.1)
+            self.anchors['i_label'] = (1.2, 0.3)
             self.anchors['s_label'] = (0.5, 1.5)
 
         def down(self):
@@ -40,4 +44,8 @@ def source(element):
             return super().down()
     return extended_source
 
-de
+def voltage_arrow(start: tuple[float, float] = (-0.5, 0.7), end: tuple[float, float] = (1.5, 0.7), arrowwidth=0.3, arrowlength=0.4, color=dsp.blue) -> schemdraw.Segment:
+    return schemdraw.Segment((start, end), arrow='->', arrowwidth=arrowwidth, arrowlength=arrowlength, color=color)
+
+def current_arrow(start: tuple[float, float] = (1.2, 0.3), end: tuple[float, float] = (1.8, 0.3), arrowwidth=0.3, arrowlength=0.4, color=dsp.red) -> schemdraw.Segment:
+    return schemdraw.Segment((start, end), arrow='->', arrowwidth=arrowwidth, arrowlength=arrowlength, color=color)
