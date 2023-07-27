@@ -1,4 +1,5 @@
 import schemdraw, schemdraw.elements, schemdraw.util
+from . import schemdraw_element_extension as extended
 
 from . import Display as dsp
 
@@ -6,6 +7,7 @@ import numpy as np
 
 from typing import Any
 from enum import Enum
+from abc import ABC
 
 def round_node(node: schemdraw.util.Point) -> schemdraw.util.Point:
     def local_round(x):
@@ -63,8 +65,6 @@ class Schematic(schemdraw.Drawing):
         cpy = copy.deepcopy(self)
         cpy.save(fname, **kwargs)
 
-from abc import ABC
-
 class SimpleAnalysisElement(ABC):
     def __init__(self, *, name: str, reverse: bool = False):
         self._name = name
@@ -81,25 +81,16 @@ class SimpleAnalysisElement(ABC):
     def values(self) -> dict[str, complex]:
         ...
 
+@extended.source
 class VoltageSource(schemdraw.elements.SourceV, SimpleAnalysisElement):
-    def __init__(self, V: complex, name: str, *args, reverse=False, precision=3, **kwargs):
+    def __init__(self, *args, name: str, V: complex, reverse: bool = False, precision: int = 3, **kwargs):
         schemdraw.elements.SourceV.__init__(self, *args, reverse=reverse, **kwargs)
         SimpleAnalysisElement.__init__(self, name=name, reverse=reverse)
         self._V = V if not reverse else -V
-
-        self.anchors['value_label'] = (0.5, 1.1)
-        self.anchors['v_label'] = (0.5, -1.1)
-        self.anchors['s_label'] = (0.5, 1.5)
         label = dsp.print_complex(self._V, unit='V', precision=precision)
-        self.label(f'{self._name}={label}', rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
-
+        self.label(f'{name}={label}', rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
         a, b = (-0.5, 0.7), (1.5, 0.7)
         self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.blue))
-
-    def down(self) -> schemdraw.elements.Element:
-        super().down()
-        self.anchors['s_label'] = (0.5, -0.7)
-        return self
 
     @property
     def V(self) -> complex:
@@ -108,17 +99,17 @@ class VoltageSource(schemdraw.elements.SourceV, SimpleAnalysisElement):
     def values(self) -> dict[str, complex]:
         return {'V' : self.V}
 
+@extended.source
 class CurrentSource(schemdraw.elements.SourceI, SimpleAnalysisElement):
-    def __init__(self, I: complex, name: str, *args, reverse=False, precision=3, **kwargs):
+    def __init__(self, *args, I: complex, name: str, reverse=False, precision=3, **kwargs):
         schemdraw.elements.SourceI.__init__(self, *args, reverse=reverse, **kwargs)
         SimpleAnalysisElement.__init__(self, name=name, reverse=reverse)
         self._I = I if not reverse else -I
-
-        a, b = (1.2, 0.3), (1.8, 0.3)
-        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.red))
-        self.anchors['I_label'] = a
         label = dsp.print_complex(self._I, unit='A', precision=precision)
-        self.label(f'{self._name}={label}', loc='I_label', ofst=(0, 0.4), rotate=True, color=dsp.red)
+        self.label(f'{self._name}={label}', loc='i_label', ofst=(0, 0.4), rotate=True, color=dsp.red)
+        a, b = (1.2, 0.3), (1.8, 0.3)
+        self.anchors['i_label'] = a
+        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.red))
 
     @property
     def I(self) -> complex:
@@ -127,8 +118,9 @@ class CurrentSource(schemdraw.elements.SourceI, SimpleAnalysisElement):
     def values(self) -> dict[str, complex]:
         return {'I' : self.I}
 
+@extended.resistor
 class Resistor(schemdraw.elements.Resistor, SimpleAnalysisElement):
-    def __init__(self, R: float, name: str, *args, show_name: bool = True, show_value: bool = True, reverse: bool = False, **kwargs):
+    def __init__(self, *args, R: float, name: str, show_name: bool = True, show_value: bool = True, reverse: bool = False, **kwargs):
         schemdraw.elements.Resistor.__init__(self, *args, reverse=reverse, **kwargs)
         SimpleAnalysisElement.__init__(self, name=name, reverse=reverse)
         self._R = R
@@ -136,29 +128,7 @@ class Resistor(schemdraw.elements.Resistor, SimpleAnalysisElement):
         label += f'{self._name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
         label += dsp.print_resistance(self.R) if show_value else ''
-        self.anchors['value_label'] = (0.5, 0.3)
-        self.anchors['v_label'] = (0.5, -1.1)
-        self.anchors['s_label'] = (0.5, 0.9)
         self.label(label, rotate=True, loc='value_label', halign='center')
-
-    def down(self) -> schemdraw.elements.Element:
-        self.anchors['value_label'] = (0.5, -0.6)
-        self.anchors['v_label'] = (0.5, 0.3)
-        self.anchors['s_label'] = (0.5, -1.2)
-        return schemdraw.elements.Resistor.down(self)
-
-    def left(self) -> schemdraw.elements.Element:
-        self.anchors['value_label'] = (0.5, -0.6)
-        self.anchors['v_label'] = (0.5, 0.3)
-        self.anchors['s_label'] = (0.5, -1.2)
-        return schemdraw.elements.Resistor.left(self)
-
-    def _place_label(self, *args, **kwargs):
-        delta = self.end-self.start
-        if abs(delta[1]) > abs(delta[0]): # portrait placing of resistor
-            if delta[1] < 0:
-                kwargs.update({'rotation': 90})
-        schemdraw.elements.Resistor._place_label(self, *args, **kwargs)
 
     @property
     def R(self) -> float:
@@ -171,8 +141,9 @@ class Resistor(schemdraw.elements.Resistor, SimpleAnalysisElement):
     def values(self) -> dict[str, float]:
         return {'R' : self._R}
 
-class Conductance(schemdraw.elements.Resistor):
-    def __init__(self, G: float, name: str, *args, show_name: bool = True, show_value: bool = True, reverse: bool = False, **kwargs):
+@extended.resistor
+class Conductance(schemdraw.elements.Resistor, SimpleAnalysisElement):
+    def __init__(self, *args, G: float, name: str, show_name: bool = True, show_value: bool = True, reverse: bool = False, **kwargs):
         schemdraw.elements.Resistor.__init__(*args, reverse=reverse, **kwargs)
         SimpleAnalysisElement.__init__(self, name=name, reverse=reverse)
         self._G = G
@@ -180,29 +151,7 @@ class Conductance(schemdraw.elements.Resistor):
         label += f'{self._name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
         label += dsp.print_conductance(self.G) if show_value else ''
-        self.anchors['value_label'] = (0.5, 0.3)
-        self.anchors['v_label'] = (0.5, 0.3)
-        self.anchors['s_label'] = (1.8, 1.1)
         self.label(label, rotate=True, loc='value_label', halign='center')
-
-    def down(self) -> schemdraw.elements.Element:
-        self.anchors['value_label'] = (0.5, -0.6)
-        self.anchors['v_label'] = (0.5, 0.3)
-        self.anchors['s_label'] = (0.5, -1.2)
-        return schemdraw.elements.Resistor.down(self)
-
-    def left(self) -> schemdraw.elements.Element:
-        self.anchors['value_label'] = (0.5, -0.6)
-        self.anchors['v_label'] = (0.5, 0.3)
-        self.anchors['s_label'] = (0.5, -1.2)
-        return schemdraw.elements.Resistor.left(self)
-
-    def _place_label(self, *args, **kwargs):
-        delta = self.end-self.start
-        if abs(delta[1]) > abs(delta[0]): # portrait placing of resistor
-            if delta[1] < 0:
-                kwargs.update({'rotation': 90})
-        schemdraw.elements.Resistor._place_label(self, *args, **kwargs)
 
     @property
     def R(self) -> float:
@@ -215,8 +164,9 @@ class Conductance(schemdraw.elements.Resistor):
     def values(self) -> dict[str, float]:
         return {'G' : self._R}
 
+@extended.resistor
 class Impedance(schemdraw.elements.Resistor, SimpleAnalysisElement):
-    def __init__(self, Z: complex, name: str, *args, show_name: bool = True, show_value: bool = True, precision: int = 3, reverse: bool = False, **kwargs):
+    def __init__(self, *args, Z: complex, name: str, show_name: bool = True, show_value: bool = True, precision: int = 3, reverse: bool = False, **kwargs):
         schemdraw.elements.Resistor.__init__(self, *args, reverse=reverse, **kwargs)
         SimpleAnalysisElement.__init__(self, name=name, reverse=reverse)
         self._Z = Z
@@ -224,29 +174,7 @@ class Impedance(schemdraw.elements.Resistor, SimpleAnalysisElement):
         label += f'{self._name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
         label += dsp.print_impedance(self.Z, precision=precision) if show_value else ''
-        self.anchors['value_label'] = (0.5, 0.3)
-        self.anchors['v_label'] = (0.5, -1.1)
-        self.anchors['s_label'] = (0.5, 0.9)
         self.label(label, rotate=True, loc='value_label', halign='center')
-
-    def down(self) -> schemdraw.elements.Element:
-        self.anchors['value_label'] = (0.5, -0.6)
-        self.anchors['v_label'] = (0.5, 0.3)
-        self.anchors['s_label'] = (0.5, -1.2)
-        return schemdraw.elements.Resistor.down(self)
-
-    def left(self) -> schemdraw.elements.Element:
-        self.anchors['value_label'] = (0.5, -0.6)
-        self.anchors['v_label'] = (0.5, 0.3)
-        self.anchors['s_label'] = (0.5, -1.2)
-        return schemdraw.elements.Resistor.left(self)
-
-    def _place_label(self, *args, **kwargs):
-        delta = self.end-self.start
-        if abs(delta[1]) > abs(delta[0]): # portrait placing of resistor
-            if delta[1] < 0:
-                kwargs.update({'rotation': 90})
-        schemdraw.elements.Resistor._place_label(self, *args, **kwargs)
 
     @property
     def Z(self) -> complex:
@@ -259,34 +187,18 @@ class Impedance(schemdraw.elements.Resistor, SimpleAnalysisElement):
     def values(self) -> dict[str, complex]:
         return {'Z' : self._Z}
 
-class ACVoltageSource(schemdraw.elements.SourceSin):
+@extended.source
+class ACVoltageSource(schemdraw.elements.SourceSin, SimpleAnalysisElement):
     def __init__(self, V: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
-        self._V = V
-        self._reverse = reverse
-        super().__init__(*args, reverse=self._reverse, **kwargs)
-        if self._reverse:
-            self._V *= -1
-        self._name = name
+        schemdraw.elements.SourceSin.__init__(*args, reverse=self._reverse, **kwargs)
+        SimpleAnalysisElement.__init__(self, name=name, reverse=reverse)
+        self._V = V if not reverse else -V
         self._w = w
         self._phi = phi
         self._deg = deg
         self._sin = sin
         label = dsp.print_sinosoidal(V*np.exp(1j*phi), unit='V', precision=precision, w=w, deg=deg)
-        self.anchors['value_label'] = (0.5, 1.1)
-        self.anchors['s_label'] = (0.5, 1.5)
         self.label(f'{self._name}={label}', rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
-
-        a, b = (-0.5, 0.7), (1.5, 0.7)
-        self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.blue))
-
-    def down(self) -> schemdraw.elements.Element:
-        super().down()
-        self.anchors['s_label'] = (0.5, -0.7)
-        return self
-
-    @property
-    def is_reverse(self) -> bool:
-        return self._reverse
 
     @property
     def w(self) -> float:
@@ -308,21 +220,15 @@ class ACVoltageSource(schemdraw.elements.SourceSin):
     def V(self) -> float:
         return self._V
 
-    @property
-    def name(self) -> str:
-        return self._name
-
     def values(self) -> dict[str, complex]:
         return {'U' : self.V}
 
-class ACCurrentSource(schemdraw.elements.SourceSin):
-    def __init__(self, I: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, **kwargs):
-        self._I = I
-        self._reverse = reverse
-        super().__init__(*args, reverse=self._reverse, **kwargs)
-        if reverse:
-            self._I *= -1
-        self._name = name
+@extended.source
+class ACCurrentSource(schemdraw.elements.SourceSin, SimpleAnalysisElement):
+    def __init__(self, *args, I: float, w: float, phi: float, name: str, sin=False, deg=False, reverse=False, precision=3, **kwargs):
+        schemdraw.elements.SourceSin.__init__(*args, reverse=self._reverse, **kwargs)
+        SimpleAnalysisElement.__init__(self, name=name, reverse=reverse)
+        self._I = I if not reverse else -I
         self._w = w
         self._phi = phi
         self._deg = deg
@@ -330,12 +236,8 @@ class ACCurrentSource(schemdraw.elements.SourceSin):
         label = dsp.print_sinosoidal(self._I, unit='A', precision=precision, w=w, deg=deg)
         a, b = (1.2, 0.3), (1.8, 0.3)
         self.segments.append(schemdraw.Segment((a, b), arrow='->', arrowwidth=.3, arrowlength=.4, color=dsp.red))
-        self.anchors['I_label'] = a
-        self.label(f'{self._name}={label}', loc='I_label', ofst=(0, 0.4), rotate=True, color=dsp.red)
-
-    @property
-    def is_reverse(self) -> bool:
-        return self._reverse
+        self.anchors['i_label'] = a
+        self.label(f'{self._name}={label}', loc='i_label', ofst=(0, 0.4), rotate=True, color=dsp.red)
 
     @property
     def w(self) -> float:
@@ -357,13 +259,10 @@ class ACCurrentSource(schemdraw.elements.SourceSin):
     def I(self) -> float:
         return self._I
 
-    @property
-    def name(self) -> str:
-        return self._name
-
     def values(self) -> dict[str, complex]:
         return {'I' : self.I}
 
+@extended.source
 class RectVoltageSource(schemdraw.elements.SourceSquare):
     def __init__(self, V: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
         self._V = V
@@ -376,8 +275,6 @@ class RectVoltageSource(schemdraw.elements.SourceSquare):
         self._phi = phi
         self._deg = deg
         self._sin = sin
-        self.anchors['value_label'] = (0.5, 1.1)
-        self.anchors['s_label'] = (0.5, 0.9)
 
         a, b = (-0.5, 0.7), (1.5, 0.7)
         self.segments.append(schemdraw.Segment([(0.3, 0.25), (0.3, 0.1), (0.7, 0.1), (0.7, -0.05), (0.3, -0.05), (0.3, -0.2), (0.7, -0.2)]))
@@ -811,8 +708,6 @@ class PowerLabel(schemdraw.elements.Label):
         self.label(label, rotate=rotate, halign='center')
 
 v_label_args : dict[Any, dict[str, float | str ]] = {
-    ACVoltageSource : {'ofst' : -0.7},
-    CurrentSource : {'ofst' : -0.8, 'label_loc': 'top'},
     RealCurrentSource : {'ofst' : 1.1, 'label_loc': 'top'}
 }
 
