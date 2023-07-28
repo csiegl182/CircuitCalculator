@@ -21,6 +21,12 @@ def resistor(element):
             self.anchors['s_label'] = (0.5, -1.2)
             return super().up()
 
+        def left(self):
+            self.anchors['value_label'] = (0.5, -0.9)
+            self.anchors['v_label'] = (0.5, 0.3)
+            self.anchors['s_label'] = (0.5, -1.2)
+            return super().left()
+
         def _place_label(self, *args, **kwargs):
             delta = self.end-self.start
             if abs(delta[1]) > abs(delta[0]): # portrait placing of resistor
@@ -44,7 +50,7 @@ def source(element):
             return super().down()
     return extended_source
 
-def voltage_arrow(start: tuple[float, float] = (-0.5, 0.7), end: tuple[float, float] = (1.5, 0.7), arrowwidth=0.3, arrowlength=0.4, color=dsp.blue) -> schemdraw.Segment:
+def voltage_arrow(start: tuple[float, float] = (1.5, 0.7), end: tuple[float, float] = (-0.5, 0.7), arrowwidth=0.3, arrowlength=0.4, color=dsp.blue) -> schemdraw.Segment:
     return schemdraw.Segment((start, end), arrow='->', arrowwidth=arrowwidth, arrowlength=arrowlength, color=color)
 
 def current_arrow(start: tuple[float, float] = (1.2, 0.3), end: tuple[float, float] = (1.8, 0.3), arrowwidth=0.3, arrowlength=0.4, color=dsp.red) -> schemdraw.Segment:

@@ -22,7 +22,7 @@ def ground_translator(element: elm.Ground, nodes: tuple[str]) -> cct_cmp.Ground:
 
 def dc_voltage_source_translator(element: elm.VoltageSource, nodes: tuple[str, str]) -> cct_cmp.VoltageSource:
     return cct_cmp.VoltageSource(
-        nodes=nodes if not element.is_reverse else nodes[::-1],
+        nodes=nodes[::-1] if not element.is_reverse else nodes,
         id=element.name,
         V=element.V.real if not element.is_reverse else -element.V.real,
         w=0,
@@ -40,7 +40,7 @@ def dc_current_source_translator(element: elm.CurrentSource, nodes: tuple[str, s
 
 def ac_voltage_source_translator(element: elm.ACVoltageSource, nodes: tuple[str, str]) -> cct_cmp.VoltageSource:
     return cct_cmp.VoltageSource(
-        nodes=nodes if not element.is_reverse else nodes[::-1],
+        nodes=nodes[::-1] if not element.is_reverse else nodes,
         id=element.name,
         V=element.V if not element.is_reverse else -element.V,
         w=element.w,
@@ -58,7 +58,7 @@ def ac_current_source_translator(element: elm.ACCurrentSource, nodes: tuple[str,
 
 def rect_voltage_source_translator(element: elm.RectVoltageSource, nodes: tuple[str, str]) -> cct_cmp.VoltageSource:
     return cct_cmp.PeriodicVoltageSource(
-        nodes=nodes if not element.is_reverse else nodes[::-1],
+        nodes=nodes[::-1] if not element.is_reverse else nodes,
         id=element.name,
         V=element.V if not element.is_reverse else -element.V,
         w=element.w,
@@ -80,7 +80,12 @@ def linear_current_source_translator(element: elm.RealCurrentSource, nodes: tupl
     return cct_cmp.LinearCurrentSource(nodes=nodes, id=element.name, I=element.I.real, G=element.G)
 
 def linear_voltage_source_translator(element: elm.RealVoltageSource, nodes: tuple[str, str]) -> cct_cmp.LinearVoltageSource:
-    return cct_cmp.LinearVoltageSource(nodes=nodes, id=element.name, V=element.V.real, R=element.R)
+    return cct_cmp.LinearVoltageSource(
+        nodes=nodes if not element.is_reverse else nodes[::-1],
+        id=element.name,
+        V=element.V.real if not element.is_reverse else -element.V.real,
+        R=element.R
+    )
 
 def switch_translator(element: elm.Switch, nodes: tuple[str, str]) -> cct_cmp.Resistor | None:
     if element.state == element.state.OPEN:

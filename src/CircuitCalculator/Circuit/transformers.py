@@ -102,6 +102,7 @@ transformers : dict[Type[cmp.Component], CircuitComponentTranslator] = {
     cmp.CurrentSource : current_source,
     cmp.VoltageSource : voltage_source,
     cmp.LinearCurrentSource : linear_current_source,
+    cmp.LinearVoltageSource : linear_voltage_source,
     cmp.PeriodicVoltageSource : periodic_voltage_source,
     cmp.PeriodicCurrentSource : periodic_current_source,
 }
