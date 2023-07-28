@@ -462,20 +462,21 @@ class RealCurrentSource(schemdraw.elements.Element2Term, SimpleAnalysisElement):
 
 class RealVoltageSource(schemdraw.elements.Element2Term, SimpleAnalysisElement):
     def __init__(self, voltage_source: VoltageSource, resistor: Resistor, *args, reverse: bool = False, **kwargs):
-        schemdraw.elements.Element2Term.__init__(self, *args, reverse=reverse, **kwargs)
-        SimpleAnalysisElement.__init__(self, name=voltage_source.name, reverse=reverse)
-        self.segments.append(schemdraw.segments.Segment([(0, 0), (0, 0), schemdraw.elements.elements.gap, (4, 0), (4, 0)]))
-        self.segments.extend(segments_of(voltage_source))
-        self.segments.append(schemdraw.segments.Segment([(1, 0), (3, 0)]))
-        transform = schemdraw.transform.Transform(theta = 0, globalshift=(3, 0))
-        self.segments.extend([s.xform(transform) for s in segments_of(resistor)])
-        # self.anchors.update(voltage_source.anchors)
-        # self.anchors.update({k:(v[0]+3, v[1]) for k, v in resistor.anchors.items()})
+        if voltage_source.is_reverse:
+            reverse = not reverse
+        schemdraw.elements.Element2Term.__init__(self, *args, reverse=voltage_source.is_reverse, **kwargs)
+        SimpleAnalysisElement.__init__(self, name=voltage_source.name, reverse=voltage_source.is_reverse)
+        transform_resistor = schemdraw.transform.Transform(theta = 0, globalshift=(3, 0))
+        transform_voltage_source = schemdraw.transform.Transform(theta = 0, globalshift=(0, 0))
+        if reverse:
+            transform_resistor, transform_voltage_source = transform_voltage_source, transform_resistor
+        self.segments.append(schemdraw.segments.Segment([(0, 0), (0, 0), schemdraw.elements.elements.gap, (1, 0), (3, 0), schemdraw.elements.elements.gap, (4, 0), (4, 0)]))
+        self.segments.extend([s.xform(transform_resistor) for s in segments_of(resistor)])
+        self.segments.extend([s.xform(transform_voltage_source) for s in segments_of(voltage_source)])
         self.anchors['value_label'] = (0.5, 1.1)
         self.anchors['v_label'] = (0.5, -2.4)
         self._userlabels += voltage_source._userlabels
         self._userlabels += resistor._userlabels
-        self._name = voltage_source.name
         self._V = voltage_source.V
         self._R = resistor.R
 
