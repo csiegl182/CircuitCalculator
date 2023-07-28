@@ -84,7 +84,7 @@ class SimpleAnalysisElement(ABC):
 @extension.source
 class VoltageSource(schemdraw.elements.SourceV, SimpleAnalysisElement):
     def __init__(self, *args, name: str, V: complex, reverse: bool = False, precision: int = 3, **kwargs):
-        schemdraw.elements.SourceV.__init__(self, *args, reverse=reverse, **kwargs)
+        schemdraw.elements.SourceV.__init__(self, *args, reverse=not reverse, **kwargs)
         SimpleAnalysisElement.__init__(self, name=name, reverse=reverse)
         self._V = V if not reverse else -V
         label = dsp.print_complex(V, unit='V', precision=precision)
@@ -187,7 +187,7 @@ class Impedance(schemdraw.elements.Resistor, SimpleAnalysisElement):
 @extension.source
 class ACVoltageSource(schemdraw.elements.SourceSin, SimpleAnalysisElement):
     def __init__(self, V: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
-        schemdraw.elements.SourceSin.__init__(*args, reverse=self._reverse, **kwargs)
+        schemdraw.elements.SourceSin.__init__(*args, reverse=not reverse, **kwargs)
         SimpleAnalysisElement.__init__(self, name=name, reverse=reverse)
         self._V = V if not reverse else -V
         self._w = w
@@ -260,7 +260,7 @@ class ACCurrentSource(schemdraw.elements.SourceSin, SimpleAnalysisElement):
 @extension.source
 class RectVoltageSource(schemdraw.elements.SourceSquare, SimpleAnalysisElement):
     def __init__(self, V: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
-        schemdraw.elements.SourceSquare.__init__(*args, reverse=self._reverse, **kwargs)
+        schemdraw.elements.SourceSquare.__init__(*args, reverse=not reverse, **kwargs)
         SimpleAnalysisElement.__init__(self, name=name, reverse=reverse)
         self._V = V if not reverse else -V
         self._name = name
@@ -295,7 +295,7 @@ class RectVoltageSource(schemdraw.elements.SourceSquare, SimpleAnalysisElement):
 
 class RectCurrentSource(schemdraw.elements.SourceSquare, SimpleAnalysisElement):
     def __init__(self, I: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
-        schemdraw.elements.SourceSquare.__init__(self, *args, reverse=self._reverse, **kwargs)
+        schemdraw.elements.SourceSquare.__init__(self, *args, reverse=reverse, **kwargs)
         SimpleAnalysisElement.__init__(self, name=name, reverse=reverse)
         self._I = I if not reverse else -I
         self._w = w
@@ -462,23 +462,33 @@ class RealCurrentSource(schemdraw.elements.Element2Term, SimpleAnalysisElement):
 
 class RealVoltageSource(schemdraw.elements.Element2Term, SimpleAnalysisElement):
     def __init__(self, voltage_source: VoltageSource, resistor: Resistor, *args, reverse: bool = False, **kwargs):
-        if voltage_source.is_reverse:
+        reverse_voltage_source = not voltage_source.is_reverse
+        if reverse_voltage_source:
             reverse = not reverse
-        schemdraw.elements.Element2Term.__init__(self, *args, reverse=voltage_source.is_reverse, **kwargs)
-        SimpleAnalysisElement.__init__(self, name=voltage_source.name, reverse=voltage_source.is_reverse)
-        transform_resistor = schemdraw.transform.Transform(theta = 0, globalshift=(3, 0))
-        transform_voltage_source = schemdraw.transform.Transform(theta = 0, globalshift=(0, 0))
+        schemdraw.elements.Element2Term.__init__(self, *args, reverse=reverse_voltage_source, **kwargs)
+        SimpleAnalysisElement.__init__(self, name=voltage_source.name, reverse=reverse_voltage_source)
+        transform_resistor = schemdraw.transform.Transform(theta = 0, globalshift=(0, 0))
+        transform_voltage_source = schemdraw.transform.Transform(theta = 0, globalshift=(3, 0))
         if reverse:
             transform_resistor, transform_voltage_source = transform_voltage_source, transform_resistor
         self.segments.append(schemdraw.segments.Segment([(0, 0), (0, 0), schemdraw.elements.elements.gap, (1, 0), (3, 0), schemdraw.elements.elements.gap, (4, 0), (4, 0)]))
         self.segments.extend([s.xform(transform_resistor) for s in segments_of(resistor)])
         self.segments.extend([s.xform(transform_voltage_source) for s in segments_of(voltage_source)])
-        self.anchors['value_label'] = (0.5, 1.1)
-        self.anchors['v_label'] = (0.5, -2.4)
+        for a, p in voltage_source.anchors.items():
+            self.anchors[a+'_vs'] = transform_voltage_source.transform(p)
+        for a, p in resistor.anchors.items():
+            self.anchors[a+'_res'] = transform_resistor.transform(p)
+        voltage_source_labels = [l for l in voltage_source._userlabels]
+        resistor_labels = [l for l in resistor._userlabels]
+        for l in voltage_source_labels:
+            l.loc += '_vs'
+        for l in resistor_labels:
+            l.loc += '_res'
         self._userlabels += voltage_source._userlabels
         self._userlabels += resistor._userlabels
-        self._V = voltage_source.V
+        self._V = -voltage_source.V
         self._R = resistor.R
+        self.anchors['v_label'] = (2, -1.5)
 
     @property
     def V(self) -> complex:
@@ -621,15 +631,14 @@ class VoltageLabel(schemdraw.elements.CurrentLabel):
         kwargs.update({'color': kwargs.get('color', dsp.blue)})
         kwargs.update({'headlength': kwargs.get('headlength', 0.4)})
         kwargs.update({'headwidth': kwargs.get('headwidth', 0.3)})
-        super().__init__(reverse=reverse, **kwargs)
         if isinstance(at, RealVoltageSource):
-            self.at(at.center)
-        else:
-            try:
-                self.at(at.v_label)
-                self.theta(at.transform.theta)
-            except AttributeError:
-                self.at(at)
+            kwargs.update({'length': kwargs.get('length', 4)})
+        super().__init__(reverse=reverse, **kwargs)
+        try:
+            self.at(at.v_label)
+            self.theta(at.transform.theta)
+        except AttributeError:
+            self.at(at)
         rotate = kwargs.get('rotate', True)
         if rotate == True and at.transform.theta == 270:
             rotate = 90
@@ -645,6 +654,8 @@ class CurrentLabel(schemdraw.elements.CurrentLabelInline):
         kwargs.update({'ofst': totlen/4-0.15+kwargs.get('ofst', 0)})
         start = kwargs.get('start', True)
         reverse = kwargs.get('reverse', False)
+        if isinstance(at, RealVoltageSource): # when replacing CurrentLabelInline this dependency may be removed
+            reverse = not reverse
         kwargs.update({'start' : start, 'reverse' : reverse})
         super().__init__(**kwargs)
         self.at(at)

@@ -22,7 +22,7 @@ def ground_translator(element: elm.Ground, nodes: tuple[str]) -> cct_cmp.Ground:
 
 def dc_voltage_source_translator(element: elm.VoltageSource, nodes: tuple[str, str]) -> cct_cmp.VoltageSource:
     return cct_cmp.VoltageSource(
-        nodes=nodes[::-1] if not element.is_reverse else nodes,
+        nodes=nodes if not element.is_reverse else nodes[::-1],
         id=element.name,
         V=element.V.real if not element.is_reverse else -element.V.real,
         w=0,
@@ -40,7 +40,7 @@ def dc_current_source_translator(element: elm.CurrentSource, nodes: tuple[str, s
 
 def ac_voltage_source_translator(element: elm.ACVoltageSource, nodes: tuple[str, str]) -> cct_cmp.VoltageSource:
     return cct_cmp.VoltageSource(
-        nodes=nodes[::-1] if not element.is_reverse else nodes,
+        nodes=nodes if not element.is_reverse else nodes[::-1],
         id=element.name,
         V=element.V if not element.is_reverse else -element.V,
         w=element.w,

@@ -1,6 +1,6 @@
 import numpy as np
 from .network import Network
-from .elements import is_ideal_current_source, is_ideal_voltage_source, is_current_source
+from .elements import is_ideal_current_source, is_ideal_voltage_source, is_current_source, is_voltage_source
 from .supernodes import SuperNodes
 from . import labelmapper as map
 from . import transformers as trf
@@ -149,6 +149,8 @@ class NodalAnalysisSolution:
                 branch.node1,
                 branch.node2)
             return  I_branch_element+I_other_elements
+        if is_voltage_source(branch.element):
+            return -(self.get_voltage(branch_id)+branch.element.V)/branch.element.Z
         return self.get_voltage(branch_id)/branch.element.Z
 
     def get_power(self, branch_id: str) -> complex:
