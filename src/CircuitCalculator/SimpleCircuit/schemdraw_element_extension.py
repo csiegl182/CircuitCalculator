@@ -16,7 +16,7 @@ def resistor(element):
             return super().down()
 
         def up(self):
-            self.anchors['value_label'] = (0.5, -0.6)
+            self.anchors['value_label'] = (0.5, -0.9)
             self.anchors['v_label'] = (0.5, 0.3)
             self.anchors['s_label'] = (0.5, -1.2)
             return super().up()
