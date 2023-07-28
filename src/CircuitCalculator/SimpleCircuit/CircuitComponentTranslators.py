@@ -77,7 +77,11 @@ def rect_current_source_translator(element: elm.RectCurrentSource, nodes: tuple[
     )
 
 def linear_current_source_translator(element: elm.RealCurrentSource, nodes: tuple[str, str]) -> cct_cmp.LinearCurrentSource:
-    return cct_cmp.LinearCurrentSource(nodes=nodes, id=element.name, I=element.I.real, G=element.G)
+    return cct_cmp.LinearCurrentSource(
+        nodes=nodes if not element.is_reverse else nodes[::-1],
+        id=element.name,
+        I=element.I.real if not element.is_reverse else -element.I.real,
+        G=element.G)
 
 def linear_voltage_source_translator(element: elm.RealVoltageSource, nodes: tuple[str, str]) -> cct_cmp.LinearVoltageSource:
     return cct_cmp.LinearVoltageSource(

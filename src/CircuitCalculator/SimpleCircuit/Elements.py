@@ -427,6 +427,8 @@ class Inductance(schemdraw.elements.Inductor):
 
 class RealCurrentSource(schemdraw.elements.Element2Term, SimpleAnalysisElement):
     def __init__(self, current_source: CurrentSource, resistor: Resistor, *args, zoom_resistor=0.7, reverse: bool = False, **kwargs):
+        if current_source.is_reverse:
+            reverse = not reverse
         schemdraw.elements.Element2Term.__init__(self, *args, reverse=reverse, **kwargs)
         SimpleAnalysisElement.__init__(self, name=current_source.name, reverse=reverse)
         self.segments += segments_of(current_source)
