@@ -26,7 +26,7 @@ def test_network_3_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_voltage('I1'), -23.08, decimal=2)
     np.testing.assert_almost_equal(solution.get_current('R1'), 0.77, decimal=2)
     np.testing.assert_almost_equal(solution.get_current('R2'), 0.77, decimal=2)
-    np.testing.assert_almost_equal(solution.get_current('I1'), -0.23, decimal=2)
+    np.testing.assert_almost_equal(solution.get_current('I1'), -0.77, decimal=2)
 
 def test_network_4_with_advanced_nodal_analysis() -> None:
     network = load_network_from_json('./examples/networks/json/example_network_4.json')
