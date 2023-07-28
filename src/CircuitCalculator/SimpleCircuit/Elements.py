@@ -654,7 +654,7 @@ class CurrentLabel(schemdraw.elements.CurrentLabelInline):
         kwargs.update({'ofst': totlen/4-0.15+kwargs.get('ofst', 0)})
         start = kwargs.get('start', True)
         reverse = kwargs.get('reverse', False)
-        if isinstance(at, RealVoltageSource): # when replacing CurrentLabelInline this dependency may be removed
+        if isinstance(at, RealVoltageSource) or isinstance(at, RealCurrentSource): # when replacing CurrentLabelInline this dependency may be removed
             reverse = not reverse
         kwargs.update({'start' : start, 'reverse' : reverse})
         super().__init__(**kwargs)
@@ -681,6 +681,8 @@ i_label_args : dict[Any, dict[str, float]] = {
     Capacitor : {'ofst' : 1.4},
     Inductance : {'ofst' : 1.4},
     VoltageSource : {'ofst' : -2.8},
+    CurrentSource : {'ofst' : -2.8},
     ACVoltageSource : {'ofst' : -3.8},
-    RealVoltageSource: {'ofst' : -0.8}
+    RealVoltageSource: {'ofst' : -0.8},
+    RealCurrentSource: {'ofst' : 1.4}
 }
