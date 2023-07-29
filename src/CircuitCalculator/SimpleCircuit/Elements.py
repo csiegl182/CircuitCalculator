@@ -371,12 +371,12 @@ class Inductance(schemdraw.elements.Inductor):
     def values(self) -> dict[str, float]:
         return {'L$' : self._L}
 
-@simple_analysis_element
-class RealCurrentSource(schemdraw.elements.Element2Term):
-    def __init__(self, current_source: CurrentSource, resistor: Resistor, *args, zoom_resistor=0.7, reverse: bool = False, **kwargs):
+class RealCurrentSource(schemdraw.elements.Element2Term, SimpleAnalysisElement):
+    def __init__(self, current_source: CurrentSource, resistor: Resistor, *args, zoom_resistor: float = 0.7, name: str = '', reverse: bool = False, **kwargs):
         if current_source.is_reverse:
             reverse = not reverse
-        super().__init__(self, *args, reverse=reverse, **kwargs)
+        super().__init__(*args, reverse=reverse, **kwargs)
+        SimpleAnalysisElement.__init__(self, name=current_source.name, reverse=reverse)
         self.segments += segments_of(current_source)
         transform = schemdraw.transform.Transform(theta = 0, globalshift=((1-zoom_resistor)/2,-1.5), localshift=(0, 0), zoom=zoom_resistor)
         self.segments += [s.xform(transform) for s in segments_of(resistor)]

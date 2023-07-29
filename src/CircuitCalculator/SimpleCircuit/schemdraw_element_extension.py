@@ -17,8 +17,8 @@ def resistor(element: Type[schemdraw.elements.Element]) -> Type[schemdraw.elemen
             return super().down()
 
         def up(self) -> schemdraw.elements.Element:
-            self.anchors['value_label'] = (0.5, -0.9)
-            self.anchors['v_label'] = (0.5, 0.3)
+            self.anchors['value_label'] = (0.5, 0.4)
+            self.anchors['v_label'] = (0.5, -1.1)
             self.anchors['s_label'] = (0.5, -1.2)
             return super().up()
 
