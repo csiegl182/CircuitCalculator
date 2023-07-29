@@ -333,6 +333,7 @@ class RectCurrentSource(schemdraw.elements.SourceSquare):
     def values(self) -> dict[str, complex]:
         return {'I' : self.I}
 
+@extension.capacitor
 @simple_analysis_element
 class Capacitor(schemdraw.elements.Capacitor):
     def __init__(self, C: float, name: str, *args, show_name: bool = True, show_value: bool = True, reverse: bool = False, **kwargs):
