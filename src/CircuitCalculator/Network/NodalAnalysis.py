@@ -116,6 +116,8 @@ class NodalAnalysisSolution:
             self._solution_vector = calculate_node_voltages(Y, I)
         except np.linalg.LinAlgError:
             self._solution_vector = np.zeros(np.size(I))
+        if np.any(np.isnan(self._solution_vector)):
+            self._solution_vector = np.zeros(np.size(I))
 
     def _select_active_node(self, branch_id: str) -> str:
         branch = self._network[branch_id]
