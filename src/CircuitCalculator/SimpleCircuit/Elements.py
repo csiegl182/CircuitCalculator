@@ -231,7 +231,7 @@ class ACVoltageSource(schemdraw.elements.SourceSin):
 @simple_analysis_element
 class ACCurrentSource(schemdraw.elements.SourceSin):
     def __init__(self, *args, I: float, w: float, phi: float, name: str, sin=False, deg=False, reverse=False, precision=3, **kwargs):
-        super().__init__(*args, reverse=self._reverse, **kwargs)
+        super().__init__(*args, reverse=reverse, **kwargs)
         self._I = I if not reverse else -I
         self._w = w
         self._phi = phi
@@ -267,7 +267,7 @@ class ACCurrentSource(schemdraw.elements.SourceSin):
 @extension.source
 @simple_analysis_element
 class RectVoltageSource(schemdraw.elements.SourceSquare):
-    def __init__(self, V: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
+    def __init__(self, V: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, **kwargs):
         super().__init__(*args, reverse=not reverse, **kwargs)
         self._V = V if not reverse else -V
         self._w = w
@@ -275,6 +275,7 @@ class RectVoltageSource(schemdraw.elements.SourceSquare):
         self._deg = deg
         self._sin = sin
         self.segments.append(extension.voltage_arrow())
+        self.label(f'{name}', loc='value_label', halign='center', rotate=True, color=dsp.blue)
 
     @property
     def w(self) -> float:
@@ -301,7 +302,7 @@ class RectVoltageSource(schemdraw.elements.SourceSquare):
 
 @simple_analysis_element
 class RectCurrentSource(schemdraw.elements.SourceSquare):
-    def __init__(self, I: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
+    def __init__(self, I: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, **kwargs):
         super().__init__(self, *args, reverse=reverse, **kwargs)
         self._I = I if not reverse else -I
         self._w = w
@@ -309,6 +310,7 @@ class RectCurrentSource(schemdraw.elements.SourceSquare):
         self._deg = deg
         self._sin = sin
         self.segments.append(extension.current_arrow())
+        self.label(f'{name}', loc='i_label', halign='center', rotate=True, color=dsp.red)
 
     @property
     def w(self) -> float:
