@@ -1,0 +1,24 @@
+[
+    {
+        "type": "linear_voltage_source",
+        "id": "Vs",
+        "N1": "0",
+        "N2": "1",
+        "V": {"real": 1, "imag": 0},
+        "Z": {"real": 10, "imag": 0}
+    },
+    {
+        "type": "resistor",
+        "id": "R1",
+        "N1": "1",
+        "N2": "0",
+        "R": 10
+    },
+    {
+        "type": "resistor",
+        "id": "R2",
+        "N1": "1",
+        "N2": "0",
+        "R": 20
+    }
+]

@@ -11,5 +11,8 @@ The following examples illustrate how to use CircuitCalclulator for a DC bias po
 - [Example 7](simple_circuit/example_network_7_schemdraw.ipynb)
 - [Example 8](simple_circuit/example_network_8_schemdraw.ipynb)
 - [Example 9](simple_circuit/example_network_9_schemdraw.ipynb)
+- [Example 10](simple_circuit/example_network_10_schemdraw.ipynb)
 - [Example 11](simple_circuit/example_network_11_schemdraw.ipynb)
 - [Example 12](simple_circuit/example_network_12_schemdraw.ipynb)
+- [Example 13](simple_circuit/example_network_13_schemdraw.ipynb)
+- [Example 14](simple_circuit/example_network_14_schemdraw.ipynb)

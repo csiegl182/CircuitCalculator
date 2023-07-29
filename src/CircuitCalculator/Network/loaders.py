@@ -31,7 +31,7 @@ network_branch_translators : dict[str, Callable[..., elm.NortenTheveninElement]]
     "linear_current_source" : lambda **kwargs: elm.linear_current_source(**translate_to_complex(keys=['I', 'Y'], **kwargs)),
     "current_source" : lambda **kwargs: elm.current_source(I=to_complex(kwargs.pop('I')), **kwargs),
     "real_current_source" : elm.current_source,
-    "linear_voltage_source" : lambda **kwargs: elm.linear_voltage_source(V=to_complex(kwargs['V']), Z=to_complex(kwargs['Z']), **kwargs),
+    "linear_voltage_source" : lambda **kwargs: elm.linear_voltage_source(V=to_complex(kwargs.pop('V')), Z=to_complex(kwargs.pop('Z')), **kwargs),
     "voltage_source" : lambda **kwargs: elm.voltage_source(V=to_complex(kwargs.pop('V')), **kwargs),
     "real_voltage_source" : elm.voltage_source,
 }
