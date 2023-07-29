@@ -342,22 +342,7 @@ class Capacitor(schemdraw.elements.Capacitor):
         label += f'{name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
         label += dsp.print_capacitance(C) if show_value else ''
-        self.anchors['value_label'] = (0.0, 0.3)
-        self.anchors['v_label'] = (0.0, -1.0)
-        self.anchors['s_label'] = (0.0, 0.9)
         self.label(label, rotate=True, loc='value_label', halign='center')
-
-    def down(self) -> schemdraw.elements.Element:
-        self.anchors['value_label'] = (0.0, -0.6)
-        self.anchors['s_label'] = (0.0, -1.1)
-        self.anchors['v_label'] = (0.0, 0.3)
-        return super().down()
-
-    def left(self) -> schemdraw.elements.Element:
-        self.anchors['value_label'] = (0.0, -0.6)
-        self.anchors['s_label'] = (0.0, -1.1)
-        self.anchors['v_label'] = (0.0, 0.3)
-        return super().left()
 
     @property
     def C(self) -> float:
@@ -366,13 +351,7 @@ class Capacitor(schemdraw.elements.Capacitor):
     def values(self) -> dict[str, float]:
         return {'C' : self._C}
 
-    def _place_label(self, *args, **kwargs):
-        delta = self.end-self.start
-        if abs(delta[1]) > abs(delta[0]): # portrait placing of resistor
-            if delta[1] < 0:
-                kwargs.update({'rotation': 90})
-        super()._place_label(*args, **kwargs)
-
+@extension.inductor
 @simple_analysis_element
 class Inductance(schemdraw.elements.Inductor):
     def __init__(self, L: float, name: str, *args, show_name: bool = True, show_value: bool = True, label_offset: float = 0.2, reverse: bool = False, **kwargs):
@@ -382,22 +361,7 @@ class Inductance(schemdraw.elements.Inductor):
         label += f'{name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
         label += dsp.print_inductance(L) if show_value else ''
-        self.anchors['value_label'] = (0.5, 0.3)
-        self.anchors['v_label'] = (0.5, -0.8)
-        self.anchors['s_label'] = (0.5, 0.9)
         self.label(label, rotate=True, loc='value_label', halign='center')
-
-    def down(self) -> schemdraw.elements.Element:
-        self.anchors['value_label'] = (0.5, -0.6)
-        self.anchors['v_label'] = (0.5, 0.3)
-        self.anchors['s_label'] = (0.5, -1.2)
-        return super().down()
-
-    def left(self) -> schemdraw.elements.Element:
-        self.anchors['value_label'] = (0.5, -0.6)
-        self.anchors['v_label'] = (0.5, 0.2)
-        self.anchors['s_label'] = (0.5, -1.2)
-        return super().left()
 
     @property
     def L(self) -> float:
@@ -405,13 +369,6 @@ class Inductance(schemdraw.elements.Inductor):
 
     def values(self) -> dict[str, float]:
         return {'L$' : self._L}
-
-    def _place_label(self, *args, **kwargs):
-        delta = self.end-self.start
-        if abs(delta[1]) > abs(delta[0]): # portrait placing of resistor
-            if delta[1] < 0:
-                kwargs.update({'rotation': 90})
-        super()._place_label(*args, **kwargs)
 
 @simple_analysis_element
 class RealCurrentSource(schemdraw.elements.Element2Term):
