@@ -426,9 +426,11 @@ class RealVoltageSource(schemdraw.elements.Element2Term, SimpleAnalysisElement):
         voltage_source_labels = [l for l in voltage_source._userlabels]
         resistor_labels = [l for l in resistor._userlabels]
         for l in voltage_source_labels:
-            l.loc += '_vs'
+            if type(l.loc) == str:
+                l.loc += '_vs'
         for l in resistor_labels:
-            l.loc += '_res'
+            if type(l.loc) == str:
+                l.loc += '_res'
         self._userlabels += voltage_source._userlabels
         self._userlabels += resistor._userlabels
         self._V = -voltage_source.V
