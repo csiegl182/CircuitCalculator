@@ -1,0 +1,14 @@
+[
+    {
+        "type": "dc_voltage_source",
+        "id": "Vs",
+        "nodes": ["a", "b"],
+        "value": {"V": 1}
+    },
+    {
+        "type": "resistor",
+        "id": "R",
+        "nodes": ["a", "b"],
+        "value": {"R": 100}
+    }
+]

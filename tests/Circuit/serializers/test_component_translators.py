@@ -28,7 +28,7 @@ def test_conductance_translator() -> None:
 
 def test_voltage_source_translator() -> None:
     voltage_source_dict = {
-        'type': 'voltage_source',
+        'type': 'dc_voltage_source',
         'id': 'voltage_source',
         'nodes': ('0', '1'),
         'value': {'V': 100}
@@ -41,7 +41,7 @@ def test_voltage_source_translator() -> None:
 
 def test_current_source_translator() -> None:
     current_source_dict = {
-        'type': 'current_source',
+        'type': 'dc_current_source',
         'id': 'current_source',
         'nodes': ('0', '1'),
         'value': {'I': 100}

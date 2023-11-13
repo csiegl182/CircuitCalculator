@@ -4,7 +4,7 @@ from CircuitCalculator.Circuit.serializers import load_circuit, UnknownCircuitCo
 def test_circuit_can_be_loaded_from_dict() -> None:
     test_circuit = [
         {
-            'type': 'voltage_source',
+            'type': 'dc_voltage_source',
             'id': 'Vs',
             'nodes': ('1', '0'),
             'value': {'V': 1}
@@ -75,7 +75,7 @@ def test_missing_component_id_leads_to_error() -> None:
 def test_odd_value_information_leads_to_error() -> None:
     test_circuit = [
         {
-            'type': 'voltage_source',
+            'type': 'dc_voltage_source',
             'id': 'Vs',
             'nodes': ('1', '0'),
             'value': {'R': 1}
