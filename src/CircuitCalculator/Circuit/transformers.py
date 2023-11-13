@@ -9,26 +9,35 @@ CircuitComponent = TypeVar("CircuitComponent", bound=ccp.Component)
 CircuitComponentTranslator = Callable[[ccp.Component, float, float], ntw.Branch]
 
 def resistor(resistor: ccp.Component, *_) -> ntw.Branch:
-    return ntw.Branch(resistor.nodes[0], resistor.nodes[1], elm.resistor(resistor.id, float(resistor.value['R'])))
+    R = float(resistor.value['R'])
+    return ntw.Branch(resistor.nodes[0], resistor.nodes[1], elm.resistor(resistor.id, R))
 
 def impedance(impedance: ccp.Component, *_) -> ntw.Branch:
-    return ntw.Branch(impedance.nodes[0], impedance.nodes[1], elm.impedance(impedance.id, complex(float(impedance.value['R']), float(impedance.value['X']))))
+    Z = complex(
+        float(impedance.value['R']),
+        float(impedance.value['X'])
+    )
+    return ntw.Branch(impedance.nodes[0], impedance.nodes[1], elm.impedance(impedance.id, Z))
 
 def capacitor(capacitor: ccp.Component, w: float = 0, *_) -> ntw.Branch:
+    C = float(capacitor.value['C'])
     return ntw.Branch(
         capacitor.nodes[0],
         capacitor.nodes[1],
-        elm.admittance(capacitor.id, elm.admittance_value(B=w*float(capacitor.value['C']))))
+        elm.admittance(capacitor.id, elm.admittance_value(B=w*C)))
 
 def inductance(inductance: ccp.Component, w: float = 0, *_) -> ntw.Branch:
+    L = float(capacitor.value['L'])
     return ntw.Branch(
         inductance.nodes[0],
         inductance.nodes[1],
-        elm.impedance(inductance.id, elm.impedance_value(X=w*float(inductance.value['L'])))
+        elm.impedance(inductance.id, elm.impedance_value(X=w*L))
     )
 
 def dc_voltage_source(voltage_source: ccp.Component, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
-    element = elm.voltage_source(voltage_source.id, elm.complex_value(float(voltage_source.value['V']), 0), elm.complex_value(float(voltage_source.value['R']), 0))
+    V = elm.complex_value(float(voltage_source.value['V']), 0)
+    Z = elm.complex_value(float(voltage_source.value['R']), 0)
+    element = elm.voltage_source(voltage_source.id, V, Z)
     if np.abs(w-float(voltage_source.value['w'])) > w_resolution:
         element = elm.short_circuit(voltage_source.id)
     return ntw.Branch(
@@ -37,7 +46,10 @@ def dc_voltage_source(voltage_source: ccp.Component, w: float = 0, w_resolution:
         element)
 
 def ac_voltage_source(voltage_source: ccp.Component, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
-    element = elm.voltage_source(voltage_source.id, elm.complex_value(float(voltage_source.value['V']), float(voltage_source.value['phi'])), elm.complex_value(float(voltage_source.value['R']), 0))
+    vs_V = float(voltage_source.value['V'])
+    vs_phi = float(voltage_source.value['phi'])
+    vs_R = float(voltage_source.value['R'])
+    element = elm.voltage_source(voltage_source.id, elm.complex_value(vs_V, vs_phi), elm.complex_value(vs_R, 0))
     if np.abs(w-float(voltage_source.value['w'])) > w_resolution:
         element = elm.short_circuit(voltage_source.id)
     return ntw.Branch(
@@ -46,7 +58,15 @@ def ac_voltage_source(voltage_source: ccp.Component, w: float = 0, w_resolution:
         element)
 
 def complex_voltage_source(voltage_source: ccp.Component, *_) -> ntw.Branch:
-    element = elm.voltage_source(voltage_source.id, complex(float(voltage_source.value['V_real']), float(voltage_source.value['V_imag'])), complex(voltage_source.value['R'], voltage_source.value['X']))
+    cs_V = complex(
+        float(voltage_source.value['V_real']),
+        float(voltage_source.value['V_imag'])
+    )
+    cs_Z = complex(
+        float(voltage_source.value['R']),
+        float(voltage_source.value['X'])
+    )
+    element = elm.voltage_source(voltage_source.id, cs_V, cs_Z)
     return ntw.Branch(
         voltage_source.nodes[0],
         voltage_source.nodes[1],
@@ -73,8 +93,11 @@ def periodic_voltage_source(source: ccp.Component, w: float = 0, w_resolution: f
     return ac_voltage_source(single_frequency_source, w, w_resolution)
 
 def dc_current_source(current_source: ccp.Component, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
-    element = elm.current_source(current_source.id, elm.complex_value(current_source.value['I'], 0), elm.complex_value(current_source.value['G'], 0))
-    if np.abs(w-current_source.value['w']) > w_resolution:
+    cs_I = float(current_source.value['I'])
+    cs_G = float(current_source.value['G'])
+    cs_w = float(current_source.value['w'])
+    element = elm.current_source(current_source.id, elm.complex_value(cs_I, 0), elm.complex_value(cs_G, 0))
+    if np.abs(w-cs_w) > w_resolution:
         element = elm.open_circuit(current_source.id)
     return ntw.Branch(
         current_source.nodes[0],
@@ -83,8 +106,12 @@ def dc_current_source(current_source: ccp.Component, w: float = 0, w_resolution:
     )
 
 def ac_current_source(current_source: ccp.Component, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
-    element = elm.current_source(current_source.id, elm.complex_value(current_source.value['I'], current_source.value['phi']), elm.complex_value(current_source.value['G']))
-    if np.abs(w-current_source.value['w']) > w_resolution:
+    cs_I = float(current_source.value['I'])
+    cs_G = float(current_source.value['G'])
+    cs_w = float(current_source.value['w'])
+    cs_phi = float(current_source.value['phi'])
+    element = elm.current_source(current_source.id, elm.complex_value(cs_I, cs_phi), elm.complex_value(cs_G))
+    if np.abs(w-cs_w) > w_resolution:
         element = elm.open_circuit(current_source.id)
     return ntw.Branch(
         current_source.nodes[0],
@@ -93,8 +120,17 @@ def ac_current_source(current_source: ccp.Component, w: float = 0, w_resolution:
     )
 
 def complex_current_source(current_source: ccp.Component, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
-    element = elm.current_source(current_source.id, complex(current_source.value['I_real'], current_source.value['I_imag']), complex(current_source.value['G'], current_source.value['B']))
-    if np.abs(w-current_source.value['w']) > w_resolution:
+    cs_I = complex(
+        float(current_source.value['I_real']),
+        float(current_source.value['I_imag'])
+    )
+    cs_Y = complex(
+        float(current_source.value['G']),
+        float(current_source.value['B'])
+    )
+    cs_w = float(current_source.value['w'])
+    element = elm.current_source(current_source.id, cs_I, cs_Y)
+    if np.abs(w-cs_w) > w_resolution:
         element = elm.short_circuit(current_source.id)
     return ntw.Branch(
         current_source.nodes[0],
@@ -121,15 +157,6 @@ def periodic_current_source(source: ccp.Component, w: float = 0, w_resolution: f
     )
     return ac_current_source(single_frequency_source, w, w_resolution)
 
-def linear_current_source(current_source: ccp.LinearCurrentSource, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
-    element = elm.linear_current_source(current_source.id, elm.complex_value(current_source.I, 0), elm.complex_value(current_source.G, 0))
-    if np.abs(w-current_source.w) > w_resolution:
-        element = elm.open_circuit(current_source.id)
-    return ntw.Branch(
-        current_source.nodes[0],
-        current_source.nodes[1],
-        element)
-
 transformers : dict[str, CircuitComponentTranslator] = {
     'resistor' : resistor,
     'impedance' : impedance,
@@ -142,8 +169,5 @@ transformers : dict[str, CircuitComponentTranslator] = {
     'ac_current_source' : ac_current_source,
     'complex_current_source' : complex_current_source,
     'periodic_voltage_source' : periodic_voltage_source,
-    'periodic_current_source' : periodic_current_source,
-    # cmp.LinearCurrentSource : linear_current_source,
-    # cmp.LinearVoltageSource : linear_voltage_source,
-    # cmp.PeriodicVoltageSource : periodic_voltage_source,
+    'periodic_current_source' : periodic_current_source
 }

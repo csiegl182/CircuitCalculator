@@ -30,21 +30,21 @@ def test_linear_current_source_with_inf_conductance_has_zero_voltage() -> None:
     assert I.V == 0
 
 def test_linear_current_source_with_zero_conductance_has_nan_voltage() -> None:
-    I = linear_current_source('Is1', I=1, Y=0)
+    I = current_source('Is1', I=1, Y=0)
     assert isnan(I.V)
 
 def test_linear_voltage_source_with_zero_resistance_has_inf_conductance() -> None:
-    U = linear_voltage_source('Us1', V=1, Z=0)
+    U = voltage_source('Us1', V=1, Z=0)
     assert U.Y == inf
 
 def test_linear_voltage_source_with_inf_resistance_has_zero_conductance() -> None:
-    U = linear_voltage_source('Us1', V=1, Z=inf)
+    U = voltage_source('Us1', V=1, Z=inf)
     assert U.Y == 0
 
 def test_linear_voltage_source_with_inf_resistance_has_zero_current() -> None:
-    U = linear_voltage_source('Us1', V=1, Z=inf)
+    U = voltage_source('Us1', V=1, Z=inf)
     assert U.I == 0
 
 def test_linear_voltage_source_with_zero_resistance_has_nan_current() -> None:
-    U = linear_voltage_source('Us1', V=1, Z=0)
+    U = voltage_source('Us1', V=1, Z=0)
     assert isnan(U.I)

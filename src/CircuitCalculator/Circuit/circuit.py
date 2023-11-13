@@ -1,9 +1,8 @@
-from .components import Component, is_active#, PeriodicCurrentSource, PeriodicVoltageSource
+from .components import Component, is_active
 from .transformers import transformers
 from ..Network.network import Network
 import numpy as np
 from dataclasses import dataclass, field
-from ..SignalProcessing.periodic_functions import periodic_function, fourier_series
 
 class MultipleGroundNodes(Exception): pass
 
