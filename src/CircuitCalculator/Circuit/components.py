@@ -1,18 +1,15 @@
 import numpy as np
 import numpy.typing as npt
 from dataclasses import dataclass, field
-from abc import ABC
 from ..SignalProcessing.periodic_functions import PeriodicFunction, HarmonicCoefficients, fourier_series, CosFunction, ConstantFunction
-from typing import Type, Any
+from typing import Type
 
 @dataclass(frozen=True)
 class Component:
     type : str
-    nodes : tuple[str, ...] = field(default=('0',))
     id : str = field(default='0')
+    nodes : tuple[str, ...] = field(default=('0',))
     value: dict[str, float | str] = field(default_factory=dict)
-    is_active: bool = field(default=False, init=False)
-    w: float= field(default=0, init=False)
 
 def resistor(id: str, nodes: tuple[str, str], R: float) -> Component:
     return Component(
