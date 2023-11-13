@@ -1,4 +1,4 @@
-from CircuitCalculator.Network.elements import linear_current_source, resistor, conductor, linear_voltage_source
+from CircuitCalculator.Network.elements import current_source, resistor, conductor, voltage_source
 from numpy import inf, isnan
 
 def test_zero_resistance_has_inf_conductance() -> None:
@@ -18,15 +18,15 @@ def test_inf_conductance_has_zero_resistance() -> None:
     assert G.Z == 0
 
 def test_linear_current_source_with_zero_conductance_has_inf_resistance() -> None:
-    I = linear_current_source('Is1', I=1, Y=0)
+    I = current_source('Is1', I=1, Y=0)
     assert I.Z == inf
 
 def test_linear_current_source_with_inf_conductance_has_zero_resistance() -> None:
-    I = linear_current_source('Is1', I=1, Y=inf)
+    I = current_source('Is1', I=1, Y=inf)
     assert I.Z == 0
 
 def test_linear_current_source_with_inf_conductance_has_zero_voltage() -> None:
-    I = linear_current_source('Is1', I=1, Y=inf)
+    I = current_source('Is1', I=1, Y=inf)
     assert I.V == 0
 
 def test_linear_current_source_with_zero_conductance_has_nan_voltage() -> None:
