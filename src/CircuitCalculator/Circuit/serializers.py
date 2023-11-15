@@ -16,8 +16,8 @@ class IncorrectComponentInformation(Exception):
 circuit_component_translators : dict[str, Callable[..., ccp.Component]] = {
     "resistor" : ccp.resistor,
     "conductance" : ccp.conductance,
-    # "impedance" : lambda **kwargs: elm.impedance(Z=to_complex(kwargs.pop('Z')), **kwargs),
-    # "admittance" : lambda **kwargs: elm.admittance(Y=to_complex(kwargs['Y']), **kwargs),
+    "impedance" : ccp.impedance,
+    "admittance" : ccp.admittance,
     "dc_voltage_source" : ccp.dc_voltage_source,
     "ac_voltage_source" : ccp.ac_voltage_source,
     "complex_voltage_source" : ccp.complex_voltage_source,
