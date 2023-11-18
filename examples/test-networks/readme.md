@@ -1,6 +1,10 @@
-## Examples
+## Test Networks
 
-The following examples illustrate how to use CircuitCalclulator for a DC bias point analysis on real valued resistor networks or complex valued impedance networks.
+These networks serve also as test examples for the automated integration tests. They are provided as two different inputs:
+
+1. Direct input of `Network()` objects from json-files.
+2. Transformation from `Circuit()` objects, which are in turn constructed in python.
+3. Transformation from `Schematic()` objects, which are in turn constructed in python.
 
 - [Example 1](simple_circuit/example_network_1_schemdraw.ipynb)
 - [Example 2](simple_circuit/example_network_2_schemdraw.ipynb)
