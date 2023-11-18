@@ -27,7 +27,7 @@ def capacitor(capacitor: ccp.Component, w: float = 0, *_) -> ntw.Branch:
         elm.admittance(capacitor.id, elm.admittance_value(B=w*C)))
 
 def inductance(inductance: ccp.Component, w: float = 0, *_) -> ntw.Branch:
-    L = float(capacitor.value['L'])
+    L = float(inductance.value['L'])
     return ntw.Branch(
         inductance.nodes[0],
         inductance.nodes[1],
