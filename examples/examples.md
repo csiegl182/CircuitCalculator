@@ -6,9 +6,9 @@ Currently, there are three different ways to setup `Circuit` objects. The `Circu
 
 #### Direct setup of `Circuit` objects with python code
 
-- [DC voltage source](../test-networks/02_circuit/example_04.ipynb)
-- [DC voltage and current sources](../test-networks/02_circuit/example_10.ipynb)
-- [Complex elements](../test-networks/02_circuit/example_12.ipynb)
+- [DC voltage source](test-networks/02_circuit/example_04.ipynb)
+- [DC voltage and current sources](test-networks/02_circuit/example_10.ipynb)
+- [Complex elements](test-networks/02_circuit/example_12.ipynb)
 
 #### Load `Circuit` objects from json data files
 
@@ -16,9 +16,9 @@ TODO
 
 #### Setup of `Circuit` objects via `Schematic` objects (based on schemdraw package)
 
-- [DC voltage source](../test-networks/03_simple_circuit/example_04.ipynb)
-- [DC voltage and current sources](../test-networks/03_simple_circuit/example_10.ipynb)
-- [Complex elements](../test-networks/03_simple_circuit/example_12.ipynb)
+- [DC voltage source](test-networks/03_simple_circuit/example_04.ipynb)
+- [DC voltage and current sources](test-networks/03_simple_circuit/example_10.ipynb)
+- [Complex elements](test-networks/03_simple_circuit/example_12.ipynb)
 - [Switches](python/example_circuit_4.ipynb)
 
 ### Analysis of circuits
@@ -29,13 +29,13 @@ CircuitCalculator provides different methods to analyse `Circuit` objects. In ad
 
 ##### Bias point analysis
 
-- [DC voltage source](../test-networks/02_circuit/example_04.ipynb)
-- [DC voltage and current sources](../test-networks/02_circuit/example_10.ipynb)
-- [Complex elements](../test-networks/02_circuit/example_12.ipynb)
+- [DC voltage source](test-networks/02_circuit/example_04.ipynb)
+- [DC voltage and current sources](test-networks/02_circuit/example_10.ipynb)
+- [Complex elements](test-networks/02_circuit/example_12.ipynb)
 
 ##### Calculating open circuit resistance/impedance between two nodes
 
-- [Open circuit resistance](../test-networks/03_circuit/example_08.ipynb)
+- [Open circuit resistance](test-networks/03_circuit/example_08.ipynb)
 
 ##### Calculate parameters of Norten and Thévenin equivalent sources
 
