@@ -16,9 +16,9 @@ TODO
 
 #### Setup of `Circuit` objects via `Schematic` objects (based on schemdraw package)
 
-- [DC voltage source](test-networks/03_simple_circuit/example_04.ipynb)
-- [DC voltage and current sources](test-networks/03_simple_circuit/example_10.ipynb)
-- [Complex elements](test-networks/03_simple_circuit/example_12.ipynb)
+- [DC voltage source](test-networks/03_simple_circuit/example_network_4.ipynb)
+- [DC voltage and current sources](test-networks/03_simple_circuit/example_network_10.ipynb)
+- [Complex elements](test-networks/03_simple_circuit/example_network_12.ipynb)
 - [Switches](python/example_circuit_4.ipynb)
 
 ### Analysis of circuits
@@ -35,7 +35,7 @@ CircuitCalculator provides different methods to analyse `Circuit` objects. In ad
 
 ##### Calculating open circuit resistance/impedance between two nodes
 
-- [Open circuit resistance](test-networks/03_circuit/example_08.ipynb)
+- [Open circuit resistance](test-networks/03_circuit/example_network_8.ipynb)
 
 ##### Calculate parameters of Norten and Thévenin equivalent sources
 
@@ -57,7 +57,7 @@ Based on `Schematic` objects
 - [Power Flow](python/example_circuit_3.ipynb)
 - [Frequency-Domain Analysis](python/example_circuit_5.ipynb)
 
-The following examples illustrate how to use CircuitCalclulator for a DC bias point analysis on real valued resistor networks or complex valued impedance networks.
+The following examples illustrate how to use _CircuitCalclulator_ for a DC bias point analysis on real valued resistor networks or complex valued impedance networks.
 
 ### Test Networks
 
