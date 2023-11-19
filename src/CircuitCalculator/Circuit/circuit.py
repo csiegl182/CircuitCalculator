@@ -35,16 +35,14 @@ def transform_circuit(circuit: Circuit, w: float, w_resolution: float = 1e-3) ->
 def transform(circuit: Circuit, w: list[float] = [0], w_resolution: float = 1e-3) -> list[Network]:
     return [transform_circuit(circuit, w_, w_resolution) for w_ in w]
 
-def frequency_components(circuit: Circuit, w_max: float) -> list[float]: # TODO
-    active_components = [c for c in circuit.components if is_active(c)]
-    w = []
-    for ac in active_components:
-        if ac.type == 'periodic_voltage_source' or ac.type == 'periodic_current_source':
-            n_max = np.floor(w_max/float(ac.value['w']))
-            w_vec = np.array([float(ac.value['w'])*n for n in np.arange(n_max)])
-            w.extend(w_vec)
-        else:
-            w.append(ac.value['w'])
-    w = list(set(w))
-    w.sort()
-    return w
+def frequency_components(circuit: Circuit, w_max: float) -> list[float]:
+    def frequencies(component: Component) -> list[float]:
+        try:
+            w = float(component.value['w'])
+        except KeyError:
+            return []
+        if component.type == 'periodic_voltage_source' or component.type == 'periodic_current_source':
+            n_max = np.floor(w_max/w)
+            return [w*n for n in np.arange(n_max+1)]
+        return [w]
+    return sorted(list(set([w for c in circuit.components for w in frequencies(c)])))
