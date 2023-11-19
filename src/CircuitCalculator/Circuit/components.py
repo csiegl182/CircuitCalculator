@@ -1,6 +1,5 @@
 import numpy as np
 from dataclasses import dataclass, field
-from ..SignalProcessing.periodic_functions import PeriodicFunction, ConstantFunction
 
 @dataclass(frozen=True)
 class Component:
@@ -81,15 +80,14 @@ def complex_voltage_source(id: str, nodes: tuple[str, str], V: complex, Z: compl
         nodes=nodes
         )
 
-# TODO: weird definition
-def periodic_voltage_source(id: str, nodes: tuple[str, str], periodic_function: PeriodicFunction = ConstantFunction(), R: float = 0) -> Component:
+def periodic_voltage_source(id: str, nodes: tuple[str, str], wavetype: str, V: float, w: float, phi: float, R: float = 0) ->Component:
     return Component(
         type='periodic_voltage_source',
         id=id,
-        value={'wavetype': periodic_function.wavetype,
-               'V': periodic_function.amplitude,
-               'w': 2*np.pi/periodic_function.period,
-               'phi': periodic_function.phase,
+        value={'wavetype': wavetype,
+               'V': V,
+               'w': w,
+               'phi': phi,
                'R': R},
         nodes=nodes
         )
@@ -118,14 +116,14 @@ def complex_current_source(id: str, nodes: tuple[str, str], I: complex, Y: compl
         nodes=nodes
         )
 
-def periodic_current_source(id: str, nodes: tuple[str, str], periodic_function: PeriodicFunction = ConstantFunction(), G: float = 0) -> Component:
+def periodic_current_source(id: str, nodes: tuple[str, str], wavetype: str, I: float, w: float, phi: float, G: float = 0) ->Component:
     return Component(
         type='periodic_current_source',
         id=id,
-        value={'wavetype': periodic_function.wavetype,
-               'I': periodic_function.amplitude,
-               'w': 2*np.pi/periodic_function.period,
-               'phi': periodic_function.phase,
+        value={'wavetype': wavetype,
+               'I': I,
+               'w': w,
+               'phi': phi,
                'G': G},
         nodes=nodes
         )

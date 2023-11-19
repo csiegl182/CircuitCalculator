@@ -57,15 +57,21 @@ def rect_voltage_source_translator(element: elm.RectVoltageSource, nodes: tuple[
     return ccp.periodic_voltage_source(
         nodes=(nodes[1], nodes[0]) if not element.is_reverse else nodes,
         id=element.name,
-        periodic_function=RectFunction(2*pi/element.w, element.V if not element.is_reverse else -element.V, element.phi*pi/180 if element.deg else element.phi)
+        wavetype=RectFunction.wavetype,
+        V=element.V if not element.is_reverse else -element.V,
+        w=element.w,
+        phi=element.phi*pi/180 if element.deg else element.phi
     )
 
 def rect_current_source_translator(element: elm.RectVoltageSource, nodes: tuple[str, str]) -> ccp.Component:
     from ..SignalProcessing.periodic_functions import RectFunction
-    return ccp.periodic_voltage_source(
+    return ccp.periodic_current_source(
         nodes=(nodes[1], nodes[0]) if not element.is_reverse else nodes,
         id=element.name,
-        periodic_function=RectFunction(2*pi/element.w, element.I if not element.is_reverse else -element.V, element.phi*pi/180 if element.deg else element.phi)
+        wavetype=RectFunction.wavetype,
+        I=element.I if not element.is_reverse else -element.I,
+        w=element.w,
+        phi=element.phi*pi/180 if element.deg else element.phi
     )
 
 def linear_current_source_translator(element: elm.RealCurrentSource, nodes: tuple[str, str]) -> ccp.Component:

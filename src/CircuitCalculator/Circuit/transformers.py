@@ -72,13 +72,15 @@ def complex_voltage_source(voltage_source: ccp.Component, *_) -> ntw.Branch:
         voltage_source.nodes[1],
         element)
 
-def periodic_voltage_source(source: ccp.Component, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch: # TODO
-    pf = periodic_function(str(source.value['wavetype']))
-    my_pf = pf(period=2*np.pi/float(source.value['w']), amplitude=float(source.value['V']), phase=float(source.value['phi']))
-    frequency_properties = fourier_series(my_pf)
-    n = np.round(w/float(source.value['w']))
-    delta_n = np.abs(w/float(source.value['w']) - n)
-    if delta_n > w_resolution/float(source.value['w']):
+def periodic_voltage_source(source: ccp.Component, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
+    wavetype = str(source.value['wavetype'])
+    w0 = float(source.value['w'])
+    V = float(source.value['V'])
+    phi = float(source.value['phi'])
+    frequency_properties = fourier_series(periodic_function(wavetype)(period=2*np.pi/w0, amplitude=V, phase=phi))
+    n = np.round(w/w0)
+    delta_n = np.abs(w/w0 - n)
+    if delta_n > w_resolution/w0:
         return ntw.Branch(
             source.nodes[0],
             source.nodes[1],
@@ -137,13 +139,15 @@ def complex_current_source(current_source: ccp.Component, w: float = 0, w_resolu
         current_source.nodes[1],
         element)
 
-def periodic_current_source(source: ccp.Component, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch: # TODO
-    pf = periodic_function(str(source.value['wavetype']))
-    my_pf = pf(period=2*np.pi/float(source.value['w']), amplitude=float(source.value['I']), phase=float(source.value['phi']))
-    frequency_properties = fourier_series(my_pf)
-    n = np.round(w/float(source.value['w']))
-    delta_n = np.abs(w/float(source.value['w']) - n)
-    if delta_n > w_resolution/float(source.value['w']):
+def periodic_current_source(source: ccp.Component, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
+    wavetype = str(source.value['wavetype'])
+    w0 = float(source.value['w'])
+    I = float(source.value['I'])
+    phi = float(source.value['phi'])
+    frequency_properties = fourier_series(periodic_function(wavetype)(period=2*np.pi/w0, amplitude=I, phase=phi))
+    n = np.round(w/w0)
+    delta_n = np.abs(w/w0 - n)
+    if delta_n > w_resolution/w0:
         return ntw.Branch(
             source.nodes[0],
             source.nodes[1],
