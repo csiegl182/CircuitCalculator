@@ -12,7 +12,7 @@ Currently, there are three different ways to setup `Circuit` objects. The `Circu
 
 #### Load `Circuit` objects from json data files
 
-TODO
+- [DC voltage source](input/json/example_circuit_1.py)
 
 #### Setup of `Circuit` objects via `Schematic` objects (based on schemdraw package)
 
