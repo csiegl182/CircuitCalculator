@@ -4,7 +4,7 @@ This project is a simple calculator for electrical circuits. It allows users to 
 
 ## Usage
 
-To use this calculator, there are different interfaces. The most convenient one is to use the `SimpleCircuit` module, which is based somehow on the ![schemdraw](https://schemdraw.readthedocs.io/en/latest/) package. There are several IPython notebook examples can be found [here](examples/networks/examples.md).
+To use this calculator, there are different interfaces. The most convenient one is to use the `SimpleCircuit` module, which is based somehow on the [schemdraw](https://schemdraw.readthedocs.io/en/latest/) package. There are several IPython notebook examples can be found [here](examples/examples.md).
 
 ## Components Supported
 

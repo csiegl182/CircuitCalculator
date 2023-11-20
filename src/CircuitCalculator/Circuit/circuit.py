@@ -1,4 +1,4 @@
-from .components import Component, PeriodicCurrentSource, PeriodicVoltageSource
+from .components import Component, is_active
 from .transformers import transformers
 from ..Network.network import Network
 import numpy as np
@@ -28,7 +28,7 @@ def w(f: float) -> float:
 
 def transform_circuit(circuit: Circuit, w: float, w_resolution: float = 1e-3) -> Network:
     return Network(
-        branches=[transformers[type(component)](component, w, w_resolution) for component in circuit.components if type(component) in transformers.keys()],
+        branches=[transformers[component.type](component, w, w_resolution) for component in circuit.components if component.type in transformers.keys()],
         node_zero_label=circuit.ground_node
     )
 
@@ -36,13 +36,13 @@ def transform(circuit: Circuit, w: list[float] = [0], w_resolution: float = 1e-3
     return [transform_circuit(circuit, w_, w_resolution) for w_ in w]
 
 def frequency_components(circuit: Circuit, w_max: float) -> list[float]:
-    active_components = [c for c in circuit.components if c.is_active]
-    w = []
-    for ac in active_components:
-        if type(ac) == PeriodicVoltageSource or type(ac) == PeriodicCurrentSource:
-            w.extend(ac.frequency_components(w_max))
-        else:
-            w.append(ac.w)
-    w = list(set(w))
-    w.sort()
-    return w
+    def frequencies(component: Component) -> list[float]:
+        try:
+            w = float(component.value['w'])
+        except KeyError:
+            return []
+        if component.type == 'periodic_voltage_source' or component.type == 'periodic_current_source':
+            n_max = np.floor(w_max/w)
+            return [w*n for n in np.arange(n_max+1)]
+        return [w]
+    return sorted(list(set([w for c in circuit.components for w in frequencies(c)])))

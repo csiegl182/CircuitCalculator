@@ -1,100 +1,99 @@
 from . import Elements as elm
-from ..Circuit import components as cct_cmp
+from ..Circuit import components as ccp
 from ..SignalProcessing import periodic_functions
 from .SchemdrawTranslatorTypes import ElementTranslatorMap
 from math import pi, inf
 
 
-def resistor_translator(element: elm.Resistor, nodes: tuple[str, str]) -> cct_cmp.Resistor:
-    return cct_cmp.Resistor(nodes=nodes, id=element.name, R=element.R)
+def resistor_translator(element: elm.Resistor, nodes: tuple[str, str]) -> ccp.Component:
+    return ccp.resistor(id=element.name, nodes=nodes, R=element.R)
 
-def conductance_translator(element: elm.Conductance, nodes: tuple[str, str]) -> cct_cmp.Conductance:
-    return cct_cmp.Conductance(nodes=nodes, id=element.name, G=element.G)
+def conductance_translator(element: elm.Conductance, nodes: tuple[str, str]) -> ccp.Component:
+    return ccp.conductance(nodes=nodes, id=element.name, G=element.G)
 
-def capacitor_translator(element: elm.Capacitor, nodes: tuple[str, str]) -> cct_cmp.Capacitor:
-    return cct_cmp.Capacitor(nodes=nodes, id=element.name, C=element.C)
+def capacitor_translator(element: elm.Capacitor, nodes: tuple[str, str]) -> ccp.Component:
+    return ccp.capacitor(nodes=nodes, id=element.name, C=element.C)
 
-def inductance_translator(element: elm.Inductance, nodes: tuple[str, str]) -> cct_cmp.Inductance:
-    return cct_cmp.Inductance(nodes=nodes, id=element.name, L=element.L)
+def inductance_translator(element: elm.Inductance, nodes: tuple[str, str]) -> ccp.Component:
+    return ccp.inductance(nodes=nodes, id=element.name, L=element.L)
 
-def ground_translator(element: elm.Ground, nodes: tuple[str]) -> cct_cmp.Ground:
-    return cct_cmp.Ground(nodes=nodes, id=element.name)
+def ground_translator(element: elm.Ground, nodes: tuple[str]) -> ccp.Component:
+    return ccp.ground(nodes=nodes, id=element.name)
 
-def dc_voltage_source_translator(element: elm.VoltageSource, nodes: tuple[str, str]) -> cct_cmp.VoltageSource:
-    return cct_cmp.VoltageSource(
-        nodes=nodes if not element.is_reverse else nodes[::-1],
+def dc_voltage_source_translator(element: elm.VoltageSource, nodes: tuple[str, str]) -> ccp.Component:
+    return ccp.dc_voltage_source(
+        nodes=nodes if not element.is_reverse else (nodes[1], nodes[0]),
         id=element.name,
-        V=element.V.real if not element.is_reverse else -element.V.real,
-        w=0,
-        phi=0
+        V=element.V.real if not element.is_reverse else -element.V.real
     )
 
-def dc_current_source_translator(element: elm.CurrentSource, nodes: tuple[str, str]) -> cct_cmp.CurrentSource:
-    return cct_cmp.CurrentSource(
-        nodes=nodes if not element.is_reverse else nodes[::-1],
+def dc_current_source_translator(element: elm.CurrentSource, nodes: tuple[str, str]) -> ccp.Component:
+    return ccp.dc_current_source(
+        nodes=nodes if not element.is_reverse else (nodes[1], nodes[0]),
         id=element.name,
-        I=element.I.real if not element.is_reverse else -element.I.real,
-        w=0,
-        phi=0
+        I=element.I.real if not element.is_reverse else -element.I.real
     )
 
-def ac_voltage_source_translator(element: elm.ACVoltageSource, nodes: tuple[str, str]) -> cct_cmp.VoltageSource:
-    return cct_cmp.VoltageSource(
-        nodes=nodes if not element.is_reverse else nodes[::-1],
+def ac_voltage_source_translator(element: elm.ACVoltageSource, nodes: tuple[str, str]) -> ccp.Component:
+    return ccp.ac_voltage_source(
+        nodes=nodes if not element.is_reverse else (nodes[1], nodes[0]),
         id=element.name,
         V=element.V if not element.is_reverse else -element.V,
         w=element.w,
         phi=element.phi*pi/180 if element.deg else element.phi
     )
 
-def ac_current_source_translator(element: elm.ACCurrentSource, nodes: tuple[str, str]) -> cct_cmp.CurrentSource:
-    return cct_cmp.CurrentSource(
-        nodes=nodes if not element.is_reverse else nodes[::-1],
+def ac_current_source_translator(element: elm.ACCurrentSource, nodes: tuple[str, str]) -> ccp.Component:
+    return ccp.ac_current_source(
+        nodes=nodes if not element.is_reverse else (nodes[1], nodes[0]),
         id=element.name,
         I=element.I if not element.is_reverse else -element.I,
         w=element.w,
         phi=element.phi*pi/180 if element.deg else element.phi
     )
 
-def rect_voltage_source_translator(element: elm.RectVoltageSource, nodes: tuple[str, str]) -> cct_cmp.VoltageSource:
-    return cct_cmp.PeriodicVoltageSource(
-        nodes=nodes[::-1] if not element.is_reverse else nodes,
+def rect_voltage_source_translator(element: elm.RectVoltageSource, nodes: tuple[str, str]) -> ccp.Component:
+    from ..SignalProcessing.periodic_functions import RectFunction
+    return ccp.periodic_voltage_source(
+        nodes=(nodes[1], nodes[0]) if not element.is_reverse else nodes,
         id=element.name,
+        wavetype=RectFunction.wavetype,
         V=element.V if not element.is_reverse else -element.V,
         w=element.w,
-        phi=element.phi*pi/180 if element.deg else element.phi,
-        wavetype=periodic_functions.RectFunction
+        phi=element.phi*pi/180 if element.deg else element.phi
     )
 
-def rect_current_source_translator(element: elm.RectCurrentSource, nodes: tuple[str, str]) -> cct_cmp.CurrentSource:
-    return cct_cmp.PeriodicCurrentSource(
-        nodes=nodes if not element.is_reverse else nodes[::-1],
+def rect_current_source_translator(element: elm.RectVoltageSource, nodes: tuple[str, str]) -> ccp.Component:
+    from ..SignalProcessing.periodic_functions import RectFunction
+    return ccp.periodic_current_source(
+        nodes=(nodes[1], nodes[0]) if not element.is_reverse else nodes,
         id=element.name,
+        wavetype=RectFunction.wavetype,
         I=element.I if not element.is_reverse else -element.I,
         w=element.w,
-        phi=element.phi*pi/180 if element.deg else element.phi,
-        wavetype=periodic_functions.RectFunction
+        phi=element.phi*pi/180 if element.deg else element.phi
     )
 
-def linear_current_source_translator(element: elm.RealCurrentSource, nodes: tuple[str, str]) -> cct_cmp.LinearCurrentSource:
-    return cct_cmp.LinearCurrentSource(
-        nodes=nodes if not element.is_reverse else nodes[::-1],
+def linear_current_source_translator(element: elm.RealCurrentSource, nodes: tuple[str, str]) -> ccp.Component:
+    return ccp.dc_current_source(
+        nodes=nodes if not element.is_reverse else (nodes[1], nodes[0]),
         id=element.name,
         I=element.I.real if not element.is_reverse else -element.I.real,
-        G=element.G)
+        G=element.G
+    )
 
-def linear_voltage_source_translator(element: elm.RealVoltageSource, nodes: tuple[str, str]) -> cct_cmp.LinearVoltageSource:
-    return cct_cmp.LinearVoltageSource(
-        nodes=nodes if not element.is_reverse else nodes[::-1],
+def linear_voltage_source_translator(element: elm.RealVoltageSource, nodes: tuple[str, str]) -> ccp.Component:
+    return ccp.dc_voltage_source(
+        nodes=nodes if not element.is_reverse else (nodes[1], nodes[0]),
         id=element.name,
         V=element.V.real if not element.is_reverse else -element.V.real,
         R=element.R
     )
 
-def switch_translator(element: elm.Switch, nodes: tuple[str, str]) -> cct_cmp.Resistor | None:
+def switch_translator(element: elm.Switch, nodes: tuple[str, str]) -> ccp.Component | None:
     if element.state == element.state.OPEN:
-        return cct_cmp.Resistor(nodes=nodes, id=element.name, R=inf)
-    return cct_cmp.Resistor(nodes=nodes, id=element.name, R=1e-12)
+        return ccp.resistor(nodes=nodes, id=element.name, R=inf)
+    return ccp.resistor(nodes=nodes, id=element.name, R=1e-12)
 
 def none_translator(*_) -> None:
     return None

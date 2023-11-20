@@ -78,22 +78,16 @@ def resistor(name : str, R : float) -> NortenTheveninElement:
 def conductor(name : str, G : float) -> NortenTheveninElement:
     return TheveninElement(Y=G, I=0, name=name, type='conductor')
 
-def linear_current_source(name : str, I : complex, Y : complex) -> NortenTheveninElement:
-    return TheveninElement(I=I, Y=Y, name=name, type='linear_current_source')
+def voltage_source(name : str, V : complex, Z : complex = 0) -> NortenTheveninElement:
+    return NortenElement(V=V, Z=Z, name=name, type='voltage_source')
 
-def current_source(name : str, I : complex) -> NortenTheveninElement:
-    return TheveninElement(I=I, Y=0, name=name, type='current_source')
-
-def linear_voltage_source(name : str, V : complex, Z : complex) -> NortenTheveninElement:
-    return NortenElement(V=V, Z=Z, name=name, type='linear_voltage_source')
-
-def voltage_source(name : str, V : complex) -> NortenTheveninElement:
-    return NortenElement(V=V, Z=0, name=name, type='voltage_source')
+def current_source(name : str, I : complex, Y : complex = 0) -> NortenTheveninElement:
+    return TheveninElement(I=I, Y=Y, name=name, type='current_source')
 
 def open_circuit(name : str) -> NortenTheveninElement:
     return TheveninElement(I=0, Y=0, name=name, type='open_circuit')
 
-def short_cicruit(name : str) -> NortenTheveninElement:
+def short_circuit(name : str) -> NortenTheveninElement:
     return NortenElement(V=0, Z=0, name=name, type='short_circuit')
 
 def impedance_value(R : float = 0.0, X : float = 0.0, absZ : float = -1.0, phi : float = 0.0, degree : bool = False) -> complex:
