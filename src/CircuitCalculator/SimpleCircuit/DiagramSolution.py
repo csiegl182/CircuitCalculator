@@ -67,8 +67,7 @@ def single_frequency_solution(schematic: elm.Schematic, solver: NetworkSolver = 
 
 def complex_network_dc_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_solver, precision: int = 3) -> SchematicDiagramSolution:
     diagram_parser = SchematicDiagramParser(schematic)
-    network = network_translator(schematic)
-    solution = solver(network)
+    solution = ComplexSolution(circuit=circuit_translator(schematic), solver=solver)
     return SchematicDiagramSolution(
         diagram_parser=diagram_parser,
         solution=solution,

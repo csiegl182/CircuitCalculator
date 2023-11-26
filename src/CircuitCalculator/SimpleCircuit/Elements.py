@@ -91,6 +91,23 @@ def simple_analysis_element(element):
 @extension.source
 @simple_analysis_element
 class VoltageSource(schemdraw.elements.SourceV):
+    def __init__(self, *args, name: str, V: float, reverse: bool = False, precision: int = 3, **kwargs):
+        super().__init__(*args, reverse=not reverse, **kwargs)
+        self._V = V if not reverse else -V
+        label = dsp.print_real(V, unit='V', precision=precision)
+        self.label(f'{name}={label}', rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
+        self.segments.append(extension.voltage_arrow())
+
+    @property
+    def V(self) -> float:
+        return self._V
+
+    def values(self) -> dict[str, float]:
+        return {'V' : self.V}
+
+@extension.source
+@simple_analysis_element
+class ComplexVoltageSource(schemdraw.elements.SourceV):
     def __init__(self, *args, name: str, V: complex, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=not reverse, **kwargs)
         self._V = V if not reverse else -V
@@ -108,6 +125,23 @@ class VoltageSource(schemdraw.elements.SourceV):
 @extension.source
 @simple_analysis_element
 class CurrentSource(schemdraw.elements.SourceI):
+    def __init__(self, *args, I: float, name: str, reverse=False, precision=3, **kwargs):
+        super().__init__(*args, reverse=reverse, **kwargs)
+        self._I = I if not reverse else -I
+        label = dsp.print_complex(I, unit='A', precision=precision)
+        self.label(f'{name}={label}', loc='i_label', ofst=(0, 0.4), rotate=True, color=dsp.red)
+        self.segments.append(extension.current_arrow())
+
+    @property
+    def I(self) -> float:
+        return self._I
+
+    def values(self) -> dict[str, float]:
+        return {'I' : self.I}
+
+@extension.source
+@simple_analysis_element
+class ComplexCurrentSource(schemdraw.elements.SourceI):
     def __init__(self, *args, I: complex, name: str, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
         self._I = I if not reverse else -I
@@ -631,7 +665,9 @@ i_label_args : dict[Any, dict[str, float]] = {
     Capacitor : {'ofst' : 1.4},
     Inductance : {'ofst' : 1.4},
     VoltageSource : {'ofst' : -2.8},
+    ComplexVoltageSource : {'ofst' : -2.8},
     CurrentSource : {'ofst' : -2.8},
+    ComplexCurrentSource : {'ofst' : -2.8},
     ACVoltageSource : {'ofst' : -3.8},
     RealVoltageSource: {'ofst' : -0.8},
     RealCurrentSource: {'ofst' : 1.4}
