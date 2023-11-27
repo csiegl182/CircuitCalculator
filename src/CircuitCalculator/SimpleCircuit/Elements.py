@@ -497,10 +497,11 @@ class Line(schemdraw.elements.lines.Line):
     def name(self) -> str:
         return ''
 
+@simple_analysis_element
 class Node(schemdraw.elements.Element):
-    def __init__(self, id: str = '', *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.node_id = id
+    def __init__(self, *args, name: str = '', **kwargs):
+        super().__init__(*args, name=name, **kwargs)
+        self.node_id = name
         self.params['theta'] = 0
         self.params['drop'] = (0, 0)
         self.anchors['start'] = (0, 0)
@@ -511,9 +512,32 @@ class Node(schemdraw.elements.Element):
         self.anchors['SE'] = (0.5, -0.3)
         self.anchors['SW'] = (-0.5, -0.3)
 
-    @property
-    def name(self) -> str:
-        return f'Node {self.node_id}'
+class LabelNode(Node):
+    def __init__(self, id_loc : str | dict[str, str] = '', *args, name: str = '', show=True, **kwargs):
+        super().__init__(*args, name=name, **kwargs)
+        locations = {
+            'W': {'loc': 'left', 'halign': 'right', 'valign': 'center'},
+            'N': {'loc': 'top', 'halign': 'center', 'valign': 'bottom'},
+            'NE': {'loc': 'NE', 'halign': 'left', 'valign': 'bottom'},
+            'NW': {'loc': 'NW', 'halign': 'right', 'valign': 'bottom'},
+            'E': {'loc': 'right', 'halign': 'left', 'valign': 'center'},
+            'S': {'loc': 'bottom', 'halign': 'center', 'valign': 'top'},
+            'SW': {'loc': 'SW', 'halign': 'right', 'valign': 'top'},
+            'SE': {'loc': 'SE', 'halign': 'left', 'valign': 'top'}
+        }
+        self.segments.append(schemdraw.SegmentCircle((0, 0), 0.12, fill='black'))
+        self.id_loc = {}
+        if isinstance(id_loc, str):
+            self.id_loc.update(locations.get(id_loc, {}))
+        else:
+            self.id_loc.update(id_loc)
+        if show:
+            self.show()
+
+    def show(self):
+        self.segments.append(schemdraw.SegmentCircle((0, 0), 0.12, fill='black'))
+        self.bbox = self.get_bbox(includetext=False)
+        self.label(f'{self.name}', **self.id_loc)
 
 class Switch(schemdraw.elements.elements.Element2Term):
     def __init__(self, name: str, *args, state: SwitchState = SwitchState.OPEN, **kwargs):
@@ -548,37 +572,6 @@ class Switch(schemdraw.elements.elements.Element2Term):
             self.close()
         if self.state == self.state.CLOSED:
             self.open()
-
-class LabelNode(Node):
-    def __init__(self, id : str = '', id_loc : str | dict[str, str] = '', *args, show=True, **kwargs):
-        super().__init__(id, *args, **kwargs)
-        locations = {
-            'W': {'loc': 'left', 'halign': 'right', 'valign': 'center'},
-            'N': {'loc': 'top', 'halign': 'center', 'valign': 'bottom'},
-            'NE': {'loc': 'NE', 'halign': 'left', 'valign': 'bottom'},
-            'NW': {'loc': 'NW', 'halign': 'right', 'valign': 'bottom'},
-            'E': {'loc': 'right', 'halign': 'left', 'valign': 'center'},
-            'S': {'loc': 'bottom', 'halign': 'center', 'valign': 'top'},
-            'SW': {'loc': 'SW', 'halign': 'left', 'valign': 'top'},
-            'SE': {'loc': 'SE', 'halign': 'right', 'valign': 'top'}
-        }
-        self.segments.append(schemdraw.SegmentCircle((0, 0), 0.12, fill='black'))
-        self.id_loc = {}
-        if isinstance(id_loc, str):
-            self.id_loc.update(locations.get(id_loc, {}))
-        else:
-            self.id_loc.update(id_loc)
-        if show:
-            self.show()
-
-    def show(self):
-        self.segments.append(schemdraw.SegmentCircle((0, 0), 0.12, fill='black'))
-        self.bbox = self.get_bbox(includetext=False)
-        self.label(f'{self.node_id}', **self.id_loc)
-
-    @property
-    def name(self) -> str:
-        return f'Node {self.node_id}'
 
 class Ground(Node):
     def __init__(self, id: str = '0', *args, **kwargs):
