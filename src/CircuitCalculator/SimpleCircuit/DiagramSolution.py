@@ -46,7 +46,7 @@ class SchematicDiagramSolution:
     def draw_potential(self, node: str, loc:str = '') -> elm.LabelNode:
         element = self.diagram_parser.get_element(node)
         node_potential = self.solution.get_potential(node_id=node)
-        return elm.LabelNode(id_loc=loc, name=self.voltage_display(node_potential), at=element.absdrop[0])
+        return elm.LabelNode(id_loc=loc, name=self.voltage_display(node_potential), at=element.absdrop[0], color=dsp.blue)
 
 def time_domain_steady_state_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_solver, w: float = 0, sin: bool = False, deg: bool = False, hertz: bool = False) -> SchematicDiagramSolution:
     digagram_parser = SchematicDiagramParser(schematic)

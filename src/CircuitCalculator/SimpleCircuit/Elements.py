@@ -575,7 +575,7 @@ class Switch(schemdraw.elements.elements.Element2Term):
 
 class Ground(Node):
     def __init__(self, id: str = '0', *args, **kwargs):
-        super().__init__(id, *args, **kwargs)
+        super().__init__(id, *args, name=id, **kwargs)
         gndgap = 0.12
         gnd_lead = 0.4
         resheight = schemdraw.elements.twoterm.resheight
