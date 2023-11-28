@@ -21,6 +21,10 @@ class CircuitSolution(ABC):
         ...
 
     @abstractmethod
+    def get_potential(self, id: str) -> Any:
+        ...
+
+    @abstractmethod
     def get_power(self, id: str) -> Any:
         ...
 
@@ -35,6 +39,9 @@ class DCSolution(CircuitSolution):
 
     def get_current(self, component_id: str) -> float:
         return self._solution.get_current(component_id).real
+
+    def get_potential(self, node_id: str) -> float:
+        return self._solution.get_potential(node_id).real
 
     def get_power(self, component_id: str) -> float:
         return self.get_voltage(component_id)*self.get_current(component_id)
@@ -52,6 +59,9 @@ class ComplexSolution(CircuitSolution):
 
     def get_current(self, component_id: str) -> complex:
         return self._solution.get_current(component_id)
+
+    def get_potential(self, node_id: str) -> complex:
+        return self._solution.get_potential(node_id)
 
     def get_power(self, component_id: str) -> complex:
         return self._solution.get_voltage(component_id)*np.conj(self._solution.get_current(component_id))
@@ -74,6 +84,10 @@ class TimeDomainSolution(CircuitSolution):
         currents = [solution.get_current(component_id) for solution in self._solutions]
         return np.vectorize(lambda t: np.array(np.sum([np.abs(V)*np.cos(w*t+np.angle(V)) for V, w in zip(currents, self.w)])))
 
+    def get_potential(self, node_id: str) -> TimeDomainFunction:
+        potentials = [solution.get_potential(node_id) for solution in self._solutions]
+        return np.vectorize(lambda t: np.array(np.sum([np.abs(phi)*np.cos(w*t+np.angle(phi)) for phi, w in zip(potentials, self.w)])))
+
     def get_power(self, component_id: str) -> TimeDomainFunction:
         voltage = self.get_voltage(component_id)
         current = self.get_current(component_id)
@@ -95,6 +109,10 @@ class FrequencyDomainSolution(CircuitSolution):
     def get_current(self, component_id: str) -> FrequencyDomainFunction:
         currents = np.array([solution.get_current(component_id) for solution in self._solutions])
         return np.array(self.w), currents
+
+    def get_potential(self, node_id: str) -> FrequencyDomainFunction:
+        potentials = np.array([solution.get_potential(node_id) for solution in self._solutions])
+        return np.array(self.w), potentials
 
     def get_power(self, component_id: str) -> FrequencyDomainFunction:
         w, voltage = self.get_voltage(component_id)

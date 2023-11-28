@@ -91,6 +91,23 @@ def simple_analysis_element(element):
 @extension.source
 @simple_analysis_element
 class VoltageSource(schemdraw.elements.SourceV):
+    def __init__(self, *args, name: str, V: float, reverse: bool = False, precision: int = 3, **kwargs):
+        super().__init__(*args, reverse=not reverse, **kwargs)
+        self._V = V if not reverse else -V
+        label = dsp.print_real(V, unit='V', precision=precision)
+        self.label(f'{name}={label}', rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
+        self.segments.append(extension.voltage_arrow())
+
+    @property
+    def V(self) -> float:
+        return self._V
+
+    def values(self) -> dict[str, float]:
+        return {'V' : self.V}
+
+@extension.source
+@simple_analysis_element
+class ComplexVoltageSource(schemdraw.elements.SourceV):
     def __init__(self, *args, name: str, V: complex, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=not reverse, **kwargs)
         self._V = V if not reverse else -V
@@ -108,6 +125,23 @@ class VoltageSource(schemdraw.elements.SourceV):
 @extension.source
 @simple_analysis_element
 class CurrentSource(schemdraw.elements.SourceI):
+    def __init__(self, *args, I: float, name: str, reverse=False, precision=3, **kwargs):
+        super().__init__(*args, reverse=reverse, **kwargs)
+        self._I = I if not reverse else -I
+        label = dsp.print_complex(I, unit='A', precision=precision)
+        self.label(f'{name}={label}', loc='i_label', ofst=(0, 0.4), rotate=True, color=dsp.red)
+        self.segments.append(extension.current_arrow())
+
+    @property
+    def I(self) -> float:
+        return self._I
+
+    def values(self) -> dict[str, float]:
+        return {'I' : self.I}
+
+@extension.source
+@simple_analysis_element
+class ComplexCurrentSource(schemdraw.elements.SourceI):
     def __init__(self, *args, I: complex, name: str, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
         self._I = I if not reverse else -I
@@ -463,10 +497,11 @@ class Line(schemdraw.elements.lines.Line):
     def name(self) -> str:
         return ''
 
+@simple_analysis_element
 class Node(schemdraw.elements.Element):
-    def __init__(self, id: str = '', *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.node_id = id
+    def __init__(self, *args, name: str = '', **kwargs):
+        super().__init__(*args, name=name, **kwargs)
+        self.node_id = name
         self.params['theta'] = 0
         self.params['drop'] = (0, 0)
         self.anchors['start'] = (0, 0)
@@ -477,9 +512,32 @@ class Node(schemdraw.elements.Element):
         self.anchors['SE'] = (0.5, -0.3)
         self.anchors['SW'] = (-0.5, -0.3)
 
-    @property
-    def name(self) -> str:
-        return f'Node {self.node_id}'
+class LabelNode(Node):
+    def __init__(self, id_loc : str | dict[str, str] = '', *args, name: str = '', show=True, **kwargs):
+        super().__init__(*args, name=name, **kwargs)
+        locations = {
+            'W': {'loc': 'left', 'halign': 'right', 'valign': 'center'},
+            'N': {'loc': 'top', 'halign': 'center', 'valign': 'bottom'},
+            'NE': {'loc': 'NE', 'halign': 'left', 'valign': 'bottom'},
+            'NW': {'loc': 'NW', 'halign': 'right', 'valign': 'bottom'},
+            'E': {'loc': 'right', 'halign': 'left', 'valign': 'center'},
+            'S': {'loc': 'bottom', 'halign': 'center', 'valign': 'top'},
+            'SW': {'loc': 'SW', 'halign': 'right', 'valign': 'top'},
+            'SE': {'loc': 'SE', 'halign': 'left', 'valign': 'top'}
+        }
+        self.segments.append(schemdraw.SegmentCircle((0, 0), 0.12, fill='black'))
+        self.id_loc = {}
+        if isinstance(id_loc, str):
+            self.id_loc.update(locations.get(id_loc, {}))
+        else:
+            self.id_loc.update(id_loc)
+        if show:
+            self.show()
+
+    def show(self):
+        self.segments.append(schemdraw.SegmentCircle((0, 0), 0.12, fill='black'))
+        self.bbox = self.get_bbox(includetext=False)
+        self.label(f'{self.name}', **self.id_loc)
 
 class Switch(schemdraw.elements.elements.Element2Term):
     def __init__(self, name: str, *args, state: SwitchState = SwitchState.OPEN, **kwargs):
@@ -515,40 +573,9 @@ class Switch(schemdraw.elements.elements.Element2Term):
         if self.state == self.state.CLOSED:
             self.open()
 
-class LabelNode(Node):
-    def __init__(self, id : str = '', id_loc : str | dict[str, str] = '', *args, show=True, **kwargs):
-        super().__init__(id, *args, **kwargs)
-        locations = {
-            'W': {'loc': 'left', 'halign': 'right', 'valign': 'center'},
-            'N': {'loc': 'top', 'halign': 'center', 'valign': 'bottom'},
-            'NE': {'loc': 'NE', 'halign': 'left', 'valign': 'bottom'},
-            'NW': {'loc': 'NW', 'halign': 'right', 'valign': 'bottom'},
-            'E': {'loc': 'right', 'halign': 'left', 'valign': 'center'},
-            'S': {'loc': 'bottom', 'halign': 'center', 'valign': 'top'},
-            'SW': {'loc': 'SW', 'halign': 'left', 'valign': 'top'},
-            'SE': {'loc': 'SE', 'halign': 'right', 'valign': 'top'}
-        }
-        self.segments.append(schemdraw.SegmentCircle((0, 0), 0.12, fill='black'))
-        self.id_loc = {}
-        if isinstance(id_loc, str):
-            self.id_loc.update(locations.get(id_loc, {}))
-        else:
-            self.id_loc.update(id_loc)
-        if show:
-            self.show()
-
-    def show(self):
-        self.segments.append(schemdraw.SegmentCircle((0, 0), 0.12, fill='black'))
-        self.bbox = self.get_bbox(includetext=False)
-        self.label(f'{self.node_id}', **self.id_loc)
-
-    @property
-    def name(self) -> str:
-        return f'Node {self.node_id}'
-
 class Ground(Node):
     def __init__(self, id: str = '0', *args, **kwargs):
-        super().__init__(id, *args, **kwargs)
+        super().__init__(id, *args, name=id, **kwargs)
         gndgap = 0.12
         gnd_lead = 0.4
         resheight = schemdraw.elements.twoterm.resheight
@@ -631,7 +658,9 @@ i_label_args : dict[Any, dict[str, float]] = {
     Capacitor : {'ofst' : 1.4},
     Inductance : {'ofst' : 1.4},
     VoltageSource : {'ofst' : -2.8},
+    ComplexVoltageSource : {'ofst' : -2.8},
     CurrentSource : {'ofst' : -2.8},
+    ComplexCurrentSource : {'ofst' : -2.8},
     ACVoltageSource : {'ofst' : -3.8},
     RealVoltageSource: {'ofst' : -0.8},
     RealCurrentSource: {'ofst' : 1.4}

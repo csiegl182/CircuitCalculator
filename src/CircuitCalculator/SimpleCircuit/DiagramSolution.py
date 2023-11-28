@@ -4,7 +4,7 @@ from ..Circuit.solution import ComplexSolution
 
 from . import Elements as elm
 from . import Display as dsp
-from .DiagramTranslator import SchematicDiagramParser, circuit_translator, network_translator
+from .DiagramTranslator import SchematicDiagramParser, circuit_translator
 
 from dataclasses import dataclass
 from typing import Callable
@@ -43,6 +43,11 @@ class SchematicDiagramSolution:
         P_branch = self.solution.get_power(name)
         return elm.PowerLabel(element, label=self.power_display(P_branch), color=dsp.green)
 
+    def draw_potential(self, node: str, loc:str = '') -> elm.LabelNode:
+        element = self.diagram_parser.get_element(node)
+        node_potential = self.solution.get_potential(node_id=node)
+        return elm.LabelNode(id_loc=loc, name=self.voltage_display(node_potential), at=element.absdrop[0], color=dsp.blue)
+
 def time_domain_steady_state_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_solver, w: float = 0, sin: bool = False, deg: bool = False, hertz: bool = False) -> SchematicDiagramSolution:
     digagram_parser = SchematicDiagramParser(schematic)
     solution = ComplexSolution(circuit=circuit_translator(schematic), solver=solver, w=w)
@@ -67,8 +72,7 @@ def single_frequency_solution(schematic: elm.Schematic, solver: NetworkSolver = 
 
 def complex_network_dc_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_solver, precision: int = 3) -> SchematicDiagramSolution:
     diagram_parser = SchematicDiagramParser(schematic)
-    network = network_translator(schematic)
-    solution = solver(network)
+    solution = ComplexSolution(circuit=circuit_translator(schematic), solver=solver)
     return SchematicDiagramSolution(
         diagram_parser=diagram_parser,
         solution=solution,

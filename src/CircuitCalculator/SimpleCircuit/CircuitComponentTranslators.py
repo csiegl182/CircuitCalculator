@@ -8,6 +8,9 @@ from math import pi, inf
 def resistor_translator(element: elm.Resistor, nodes: tuple[str, str]) -> ccp.Component:
     return ccp.resistor(id=element.name, nodes=nodes, R=element.R)
 
+def impedance_translator(element: elm.Impedance, nodes: tuple[str, str]) -> ccp.Component:
+    return ccp.impedance(id=element.name, nodes=nodes, Z=element.Z)
+
 def conductance_translator(element: elm.Conductance, nodes: tuple[str, str]) -> ccp.Component:
     return ccp.conductance(nodes=nodes, id=element.name, G=element.G)
 
@@ -27,11 +30,25 @@ def dc_voltage_source_translator(element: elm.VoltageSource, nodes: tuple[str, s
         V=element.V.real if not element.is_reverse else -element.V.real
     )
 
+def complex_voltage_source_translator(element: elm.ComplexVoltageSource, nodes: tuple[str, str]) -> ccp.Component:
+    return ccp.complex_voltage_source(
+        nodes=nodes if not element.is_reverse else (nodes[1], nodes[0]),
+        id=element.name,
+        V=element.V if not element.is_reverse else -element.V
+    )
+
 def dc_current_source_translator(element: elm.CurrentSource, nodes: tuple[str, str]) -> ccp.Component:
     return ccp.dc_current_source(
         nodes=nodes if not element.is_reverse else (nodes[1], nodes[0]),
         id=element.name,
         I=element.I.real if not element.is_reverse else -element.I.real
+    )
+
+def complex_current_source_translator(element: elm.ComplexCurrentSource, nodes: tuple[str, str]) -> ccp.Component:
+    return ccp.dc_current_source(
+        nodes=nodes if not element.is_reverse else (nodes[1], nodes[0]),
+        id=element.name,
+        I=element.I if not element.is_reverse else -element.I
     )
 
 def ac_voltage_source_translator(element: elm.ACVoltageSource, nodes: tuple[str, str]) -> ccp.Component:
@@ -100,9 +117,12 @@ def none_translator(*_) -> None:
 
 circuit_translator_map : ElementTranslatorMap = {
     elm.Resistor : resistor_translator,
+    elm.Impedance : impedance_translator,
     elm.Conductance : conductance_translator,
     elm.VoltageSource : dc_voltage_source_translator,
+    elm.ComplexVoltageSource : complex_voltage_source_translator,
     elm.CurrentSource : dc_current_source_translator,
+    elm.ComplexCurrentSource : complex_current_source_translator,
     elm.ACVoltageSource : ac_voltage_source_translator,
     elm.ACCurrentSource : ac_current_source_translator,
     elm.RectVoltageSource : rect_voltage_source_translator,

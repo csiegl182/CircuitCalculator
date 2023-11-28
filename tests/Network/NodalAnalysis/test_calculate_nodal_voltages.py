@@ -21,7 +21,7 @@ def test_equation_array_is_solved_correctly() -> None:
 
 def test_only_finite_y_matrix_is_accepted() -> None:
     with pytest.raises(ValueError):
-        calculate_node_voltages(Y=np.array([[np.inf, 2], [3, 4]]), I=np.array([1, 2]))
+        calculate_node_voltages(Y=np.array([np.array([np.inf, 2]), [3, 4]]), I=np.array([1, 2]))
 
 def test_only_finite_i_vector_is_accepted() -> None:
     with pytest.raises(ValueError):
