@@ -1,4 +1,4 @@
-from .Elements import Schematic, SimpleCircuitElement
+from .Elements import Schematic
 from ..Circuit.serializers import dump_circuit
 from .DiagramTranslator import circuit_translator
 from . import Elements as simple_circuit_elements
@@ -6,7 +6,7 @@ import schemdraw.elements
 import schemdraw.util
 import schemdraw.transform
 import json
-from typing import Any, TypedDict, Callable, TypeVar, Optional
+from typing import Any, TypedDict, Callable, TypeVar
 
 class SchemdrawObjectProperties(TypedDict):
     type: str

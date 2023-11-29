@@ -20,6 +20,7 @@ Currently, there are three different ways to setup `Circuit` objects. The `Circu
 - [DC voltage and current sources](test-networks/03_simple_circuit/example_network_10.ipynb)
 - [Complex elements](test-networks/03_simple_circuit/example_network_12.ipynb)
 - [Switches](python/example_circuit_4.ipynb)
+- [Read and write Schematic objects into json files](simple_circuit/example_circuit_8.ipynb)
 
 ### Analysis of circuits
 
