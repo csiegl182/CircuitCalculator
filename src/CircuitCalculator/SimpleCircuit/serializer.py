@@ -14,14 +14,12 @@ class SchemdrawObjectProperties(TypedDict):
 
 class SimpleCircuitObjectProperties(SchemdrawObjectProperties):
     name: str
+    reverse: bool
 
 T = TypeVar('T')
 
 def schemdraw_object_properties(object: T, value_fcn: Callable[[T], dict[str, Any] | list]) -> SchemdrawObjectProperties:
     return SchemdrawObjectProperties(type=str(type(object).__name__), values=value_fcn(object))
-
-def simple_circuit_object_properties(object: SimpleCircuitElement, value_fcn: Callable[[Any], dict[str, Any]]) -> SimpleCircuitObjectProperties:
-    return SimpleCircuitObjectProperties(type=str(type(object).__name__), name=object.name, values=value_fcn(object))
 
 def listify_point(p: schemdraw.util.Point) -> list[float]:
     return [serialize_schemdraw_element(p.x), serialize_schemdraw_element(p.y)]
@@ -105,6 +103,7 @@ def dictify_element(e: Any) -> SimpleCircuitObjectProperties:
     return SimpleCircuitObjectProperties(
         type=str(type(e).__name__),
         name=e.name,
+        reverse=e.is_reverse,
         values={
             '_userparams' : serialize_schemdraw_element(e._userparams),
             'segments' : serialize_schemdraw_element(e.segments),
@@ -149,13 +148,14 @@ def simple_circuit_elements_mapping() -> dict[str, Any]:
 
 def undictify_element(element_dict: dict[str, Any], circuit_dict: dict[str, Any]) -> schemdraw.elements.Element:
     kwargs = deserialize(element_dict['values']['_userparams'])
-    kwargs.update({'name': element_dict['name']})
+    kwargs.update({'name': element_dict.get('name', '')})
+    kwargs.update({'reverse': element_dict.get('reverse', False)})
     if element_dict['name'] in circuit_dict.keys():
         kwargs.update(circuit_dict[element_dict['name']])
     try:
         element = simple_circuit_elements_mapping()[element_dict['type']](**kwargs)
     except KeyError:
-        element = simple_circuit_elements.Element(name='', **kwargs)
+        element = simple_circuit_elements.Element(**kwargs)
     element.segments=deserialize(element_dict['values']['segments'])
     element.params=deserialize(element_dict['values']['params'])
     element.anchors=deserialize(element_dict['values']['anchors'])
