@@ -65,7 +65,7 @@ class Schematic(schemdraw.Drawing):
         cpy = copy.deepcopy(self)
         cpy.save(fname, **kwargs)
 
-class SimpleAnalysisElement(ABC):
+class SimpleCircuitElement(ABC):
     def __init__(self, *, name: str, reverse: bool = False):
         self._name = name
         self._reverse = reverse
@@ -82,11 +82,16 @@ class SimpleAnalysisElement(ABC):
         ...
 
 def simple_analysis_element(element):
-    class decorated_element(element, SimpleAnalysisElement):
+    class decorated_element(element, SimpleCircuitElement):
         def __init__(self, *args, **kwargs):
             element.__init__(self, *args, **kwargs)
-            SimpleAnalysisElement.__init__(self, name=kwargs['name'], reverse=kwargs.get('reverse', False))
+            SimpleCircuitElement.__init__(self, name=kwargs['name'], reverse=kwargs.get('reverse', False))
     return decorated_element
+
+@simple_analysis_element
+class Element(schemdraw.elements.Element):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 @extension.source
 @simple_analysis_element
@@ -407,12 +412,12 @@ class Inductance(schemdraw.elements.Inductor):
     def values(self) -> dict[str, float]:
         return {'L$' : self._L}
 
-class RealCurrentSource(schemdraw.elements.Element2Term, SimpleAnalysisElement):
+class RealCurrentSource(schemdraw.elements.Element2Term, SimpleCircuitElement):
     def __init__(self, current_source: CurrentSource, resistor: Resistor, *args, zoom_resistor: float = 0.7, name: str = '', reverse: bool = False, **kwargs):
         if current_source.is_reverse:
             reverse = not reverse
         super().__init__(*args, reverse=reverse, **kwargs)
-        SimpleAnalysisElement.__init__(self, name=current_source.name, reverse=reverse)
+        SimpleCircuitElement.__init__(self, name=current_source.name, reverse=reverse)
         self.segments += segments_of(current_source)
         transform = schemdraw.transform.Transform(theta = 0, globalshift=((1-zoom_resistor)/2,-1.5), localshift=(0, 0), zoom=zoom_resistor)
         self.segments += [s.xform(transform) for s in segments_of(resistor)]
@@ -442,13 +447,13 @@ class RealCurrentSource(schemdraw.elements.Element2Term, SimpleAnalysisElement):
     def values(self) -> dict[str, complex]:
         return {'I' : self.I, 'R' : self.R}
 
-class RealVoltageSource(schemdraw.elements.Element2Term, SimpleAnalysisElement):
+class RealVoltageSource(schemdraw.elements.Element2Term, SimpleCircuitElement):
     def __init__(self, voltage_source: VoltageSource, resistor: Resistor, *args, reverse: bool = False, **kwargs):
         reverse_voltage_source = not voltage_source.is_reverse
         if reverse_voltage_source:
             reverse = not reverse
         schemdraw.elements.Element2Term.__init__(self, *args, reverse=reverse_voltage_source, **kwargs)
-        SimpleAnalysisElement.__init__(self, name=voltage_source.name, reverse=reverse_voltage_source)
+        SimpleCircuitElement.__init__(self, name=voltage_source.name, reverse=reverse_voltage_source)
         transform_resistor = schemdraw.transform.Transform(theta = 0, globalshift=(0, 0))
         transform_voltage_source = schemdraw.transform.Transform(theta = 0, globalshift=(3, 0))
         if reverse:

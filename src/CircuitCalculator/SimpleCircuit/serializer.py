@@ -1,118 +1,130 @@
-from .Elements import Schematic, SimpleAnalysisElement
+from .Elements import Schematic, SimpleCircuitElement
+from ..Circuit.serializers import dump_circuit
+from .DiagramTranslator import circuit_translator
+from . import Elements as simple_circuit_elements
 import schemdraw.elements
 import schemdraw.util
 import schemdraw.transform
 import json
-from typing import Any, TypedDict, Callable, TypeVar
+from typing import Any, TypedDict, Callable, TypeVar, Optional
 
-class ObjectProperties(TypedDict):
+class SchemdrawObjectProperties(TypedDict):
     type: str
     values: dict[str, Any] | list
 
+class SimpleCircuitObjectProperties(SchemdrawObjectProperties):
+    name: str
+
 T = TypeVar('T')
 
-def object_properies(object: T, value_fcn: Callable[[T], dict[str, Any] | list]) -> ObjectProperties:
-    return ObjectProperties(type=str(type(object).__name__), values=value_fcn(object))
+def schemdraw_object_properties(object: T, value_fcn: Callable[[T], dict[str, Any] | list]) -> SchemdrawObjectProperties:
+    return SchemdrawObjectProperties(type=str(type(object).__name__), values=value_fcn(object))
 
+def simple_circuit_object_properties(object: SimpleCircuitElement, value_fcn: Callable[[Any], dict[str, Any]]) -> SimpleCircuitObjectProperties:
+    return SimpleCircuitObjectProperties(type=str(type(object).__name__), name=object.name, values=value_fcn(object))
 
 def listify_point(p: schemdraw.util.Point) -> list[float]:
-    return [serialize(p.x), serialize(p.y)]
+    return [serialize_schemdraw_element(p.x), serialize_schemdraw_element(p.y)]
 
 def dictify_segment(s: schemdraw.segments.Segment) -> dict[str, Any]:
     return {
-        'path' : serialize(s.path),
-        'zorder' : serialize(s.zorder),
-        'color' : serialize(s.color),
-        'fill' : serialize(s.fill),
-        'lw' : serialize(s.lw),
-        'ls' : serialize(s.ls),
-        'arrow' : serialize(s.arrow),
-        'arrowwidth' : serialize(s.arrowwidth),
-        'arrowlength' : serialize(s.arrowlength),
-        'clip' : serialize(s.clip),
-        'capstyle' : serialize(s.capstyle),
-        'joinstyle' : serialize(s.joinstyle),
-        'visible' : serialize(s.visible)
+        'path' : serialize_schemdraw_element(s.path),
+        'zorder' : serialize_schemdraw_element(s.zorder),
+        'color' : serialize_schemdraw_element(s.color),
+        'fill' : serialize_schemdraw_element(s.fill),
+        'lw' : serialize_schemdraw_element(s.lw),
+        'ls' : serialize_schemdraw_element(s.ls),
+        'arrow' : serialize_schemdraw_element(s.arrow),
+        'arrowwidth' : serialize_schemdraw_element(s.arrowwidth),
+        'arrowlength' : serialize_schemdraw_element(s.arrowlength),
+        'clip' : serialize_schemdraw_element(s.clip),
+        'capstyle' : serialize_schemdraw_element(s.capstyle),
+        'joinstyle' : serialize_schemdraw_element(s.joinstyle),
+        'visible' : serialize_schemdraw_element(s.visible)
     }
 
 def dictify_segment_text(s: schemdraw.segments.SegmentText) -> dict[str, Any]:
     return {
-        'pos' : serialize(s.xy),
-        'label' : serialize(s.text),
-        'align' : serialize(s.align),
-        'font' : serialize(s.font),
-        'mathfont' : serialize(s.mathfont),
-        'fontsize' : serialize(s.fontsize),
-        'color' : serialize(s.color),
-        'rotation' : serialize(s.rotation),
-        'rotation_mode' : serialize(s.rotation_mode),
-        'rotation_global' : serialize(s.rotation_global),
-        'clip' : serialize(s.clip),
-        'zorder' : serialize(s.zorder),
-        'visible' : serialize(s.visible)
+        'pos' : serialize_schemdraw_element(s.xy),
+        'label' : serialize_schemdraw_element(s.text),
+        'align' : serialize_schemdraw_element(s.align),
+        'font' : serialize_schemdraw_element(s.font),
+        'mathfont' : serialize_schemdraw_element(s.mathfont),
+        'fontsize' : serialize_schemdraw_element(s.fontsize),
+        'color' : serialize_schemdraw_element(s.color),
+        'rotation' : serialize_schemdraw_element(s.rotation),
+        'rotation_mode' : serialize_schemdraw_element(s.rotation_mode),
+        'rotation_global' : serialize_schemdraw_element(s.rotation_global),
+        'clip' : serialize_schemdraw_element(s.clip),
+        'zorder' : serialize_schemdraw_element(s.zorder),
+        'visible' : serialize_schemdraw_element(s.visible)
         }
 
 def dictify_segment_circle(s: schemdraw.segments.SegmentCircle) -> dict[str, Any]:
     return {
-        'center' : serialize(s.center),
-        'radius' : serialize(s.radius),
-        'color' : serialize(s.color),
-        'lw' : serialize(s.lw),
-        'ls' : serialize(s.ls),
-        'fill' : serialize(s.fill),
-        'clip' : serialize(s.clip),
-        'zorder' : serialize(s.zorder),
-        'ref' : serialize(s.endref),
-        'visible' : serialize(s.visible)
+        'center' : serialize_schemdraw_element(s.center),
+        'radius' : serialize_schemdraw_element(s.radius),
+        'color' : serialize_schemdraw_element(s.color),
+        'lw' : serialize_schemdraw_element(s.lw),
+        'ls' : serialize_schemdraw_element(s.ls),
+        'fill' : serialize_schemdraw_element(s.fill),
+        'clip' : serialize_schemdraw_element(s.clip),
+        'zorder' : serialize_schemdraw_element(s.zorder),
+        'ref' : serialize_schemdraw_element(s.endref),
+        'visible' : serialize_schemdraw_element(s.visible)
         }
 
 def dictify_transform(t: schemdraw.transform.Transform) -> dict[str, Any]:
     return {
-        'theta' : serialize(t.theta),
-        'globalshift' : serialize(t.shift),
-        'localshift' : serialize(t.localshift),
-        'zoom' : serialize(t.zoom)
+        'theta' : serialize_schemdraw_element(t.theta),
+        'globalshift' : serialize_schemdraw_element(t.shift),
+        'localshift' : serialize_schemdraw_element(t.localshift),
+        'zoom' : serialize_schemdraw_element(t.zoom)
     }
 
-serializers = {
+schemdraw_serializers = {
     str: lambda x: x,
     int: lambda x: x,
     float: lambda x: x,
     bool: lambda x: x,
-    dict: lambda x: {k: serialize(v) for k, v in x.items()},
-    list: lambda x: [serialize(e) for e in x],
-    tuple: lambda x: [serialize(e) for e in x],
-    schemdraw.util.Point: lambda x: object_properies(x, listify_point),
-    schemdraw.segments.Segment: lambda x: object_properies(x, dictify_segment),
-    schemdraw.segments.SegmentText: lambda x: object_properies(x, dictify_segment_text),
-    schemdraw.segments.SegmentCircle: lambda x: object_properies(x, dictify_segment_circle),
-    schemdraw.transform.Transform: lambda x: object_properies(x, dictify_transform)
+    dict: lambda x: {k: serialize_schemdraw_element(v) for k, v in x.items()},
+    list: lambda x: [serialize_schemdraw_element(e) for e in x],
+    tuple: lambda x: [serialize_schemdraw_element(e) for e in x],
+    schemdraw.util.Point: lambda x: schemdraw_object_properties(x, listify_point),
+    schemdraw.segments.Segment: lambda x: schemdraw_object_properties(x, dictify_segment),
+    schemdraw.segments.SegmentText: lambda x: schemdraw_object_properties(x, dictify_segment_text),
+    schemdraw.segments.SegmentCircle: lambda x: schemdraw_object_properties(x, dictify_segment_circle),
+    schemdraw.transform.Transform: lambda x: schemdraw_object_properties(x, dictify_transform)
 }
 
-def serialize(e):
-    serialize = serializers.get(type(e), lambda _: None)
+def serialize_schemdraw_element(e):
+    serialize = schemdraw_serializers.get(type(e), lambda _: None)
     return serialize(e)
 
-def dictify_element(e: schemdraw.elements.Element) -> dict[str, Any]:
-    return {
-        '_userparams' : serialize(e._userparams),
-        'segments' : serialize(e.segments),
-        'params' : serialize(e.params),
-        'anchors' : serialize(e.anchors),
-        'absanchors' : serialize(e.absanchors),
-        'transform' : serialize(e.transform),
-        'absdrop' : serialize(e.absdrop)
-    }
+def dictify_element(e: Any) -> SimpleCircuitObjectProperties:
+    return SimpleCircuitObjectProperties(
+        type=str(type(e).__name__),
+        name=e.name,
+        values={
+            '_userparams' : serialize_schemdraw_element(e._userparams),
+            'segments' : serialize_schemdraw_element(e.segments),
+            'params' : serialize_schemdraw_element(e.params),
+            'anchors' : serialize_schemdraw_element(e.anchors),
+            'absanchors' : serialize_schemdraw_element(e.absanchors),
+            'transform' : serialize_schemdraw_element(e.transform),
+            'absdrop' : serialize_schemdraw_element(e.absdrop)
+        }
+    )
 
-def drawing_to_dict(d: schemdraw.Drawing) -> list[dict[str, Any]]:
+def schematic_to_dict(d: schemdraw.Drawing) -> list[SimpleCircuitObjectProperties]:
     return [dictify_element(e) for e in d.elements]
 
-deserializers = {
+schemdraw_deserializers = {
     str(schemdraw.segments.Segment.__name__) : lambda x: schemdraw.segments.Segment(**deserialize(x)), # type: ignore
     str(schemdraw.segments.SegmentText.__name__) : lambda x: schemdraw.segments.SegmentText(**deserialize(x)),
     str(schemdraw.segments.SegmentCircle.__name__) : lambda x: schemdraw.segments.SegmentCircle(**deserialize(x)),
     str(schemdraw.util.Point.__name__) : lambda *x: schemdraw.util.Point(*x),
-    str(schemdraw.transform.Transform.__name__) : lambda x: schemdraw.transform.Transform(**deserialize(x))
+    str(schemdraw.transform.Transform.__name__) : lambda x: schemdraw.transform.Transform(**deserialize(x)),
 }
 
 def deserialize(element: dict[str, Any] | list) -> Any:
@@ -120,29 +132,47 @@ def deserialize(element: dict[str, Any] | list) -> Any:
         return [deserialize(e) for e in element]
     if type(element) == dict:
         try:
-            return deserializers[element['type']](element['values'])
+            return schemdraw_deserializers[element['type']](element['values'])
         except KeyError:
             return {k: deserialize(v) for k, v in element.items()}
     return element
 
-def undictify_element(element_dict: dict[str, Any]) -> schemdraw.elements.Element:
-    element = schemdraw.elements.Element(**deserialize(element_dict['_userparams']))
-    element.segments=deserialize(element_dict['segments'])
-    element.params=deserialize(element_dict['params'])
-    element.anchors=deserialize(element_dict['anchors'])
-    element.absanchors=deserialize(element_dict['absanchors'])
-    element.transform=deserialize(element_dict['transform'])
-    element.absdrop=deserialize(element_dict['absdrop'])
+simple_circuit_element_list = [
+    simple_circuit_elements.VoltageSource,
+    simple_circuit_elements.Resistor,
+    simple_circuit_elements.Ground,
+    simple_circuit_elements.Line
+]
+
+def simple_circuit_elements_mapping() -> dict[str, Any]:
+    return {str(e.__name__) : e for e in simple_circuit_element_list}
+
+def undictify_element(element_dict: dict[str, Any], circuit_dict: dict[str, Any]) -> schemdraw.elements.Element:
+    kwargs = deserialize(element_dict['values']['_userparams'])
+    kwargs.update({'name': element_dict['name']})
+    if element_dict['name'] in circuit_dict.keys():
+        kwargs.update(circuit_dict[element_dict['name']])
+    try:
+        element = simple_circuit_elements_mapping()[element_dict['type']](**kwargs)
+    except KeyError:
+        element = simple_circuit_elements.Element(name='', **kwargs)
+    element.segments=deserialize(element_dict['values']['segments'])
+    element.params=deserialize(element_dict['values']['params'])
+    element.anchors=deserialize(element_dict['values']['anchors'])
+    element.absanchors=deserialize(element_dict['values']['absanchors'])
+    element.transform=deserialize(element_dict['values']['transform'])
+    element.absdrop=deserialize(element_dict['values']['absdrop'])
     return element
 
-def schematic(d: list[dict[str, Any]]) -> Schematic:
+def schematic(schematic_dict: dict[str, Any]) -> Schematic:
     schematic = Schematic()
-    schematic.elements.extend([undictify_element(e) for e in d])
+    circuit_dict = {c['id']: c['value'] for c in schematic_dict['circuit']}
+    schematic.elements.extend([undictify_element(e, circuit_dict) for e in schematic_dict['simple_circuit']])
     return schematic
 
-def dump_json(json_file: str, schematic: Schematic) -> None:
+def dump_json(json_file: str, schematic: Schematic, indent: int|None=None) -> None:
     with open(json_file, 'w') as file:
-        json.dump(drawing_to_dict(schematic), file)
+        json.dump({'circuit': dump_circuit(circuit_translator(schematic)), 'simple_circuit': schematic_to_dict(schematic)}, file, indent=indent)
 
 def load_json(json_file: str) -> Schematic:
     with open(json_file, 'r') as file:

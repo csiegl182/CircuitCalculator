@@ -139,4 +139,5 @@ circuit_translator_map : ElementTranslatorMap = {
     elm.VoltageLabel: none_translator,
     elm.CurrentLabel: none_translator,
     elm.PowerLabel: none_translator,
+    elm.Element: none_translator,
 }
