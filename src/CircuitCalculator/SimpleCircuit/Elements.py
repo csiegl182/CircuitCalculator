@@ -228,7 +228,30 @@ class Impedance(schemdraw.elements.Resistor):
         return 1/self._Z
 
     def values(self) -> dict[str, complex]:
-        return {'Z' : self._Z}
+        return {'Z' : self.Z}
+
+@extension.resistor
+@simple_circuit_element
+class Admittance(schemdraw.elements.Resistor):
+    def __init__(self, *args, Y: complex, name: str, show_name: bool = True, show_value: bool = True, precision: int = 3, reverse: bool = False, **kwargs):
+        super().__init__(*args, reverse=reverse, **kwargs)
+        self._Y = Y
+        label = ''
+        label += f'{name}' if show_name else ''
+        label += '=' if  show_name and show_value else ''
+        label += dsp.print_impedance(self.Z, precision=precision) if show_value else ''
+        self.label(label, rotate=True, loc='value_label', halign='center')
+
+    @property
+    def Z(self) -> complex:
+        return 1/self._Y
+
+    @property
+    def Y(self) -> complex:
+        return 1/self._Y
+
+    def values(self) -> dict[str, complex]:
+        return {'Y' : self.Y}
 
 @extension.source
 @simple_circuit_element
@@ -264,7 +287,7 @@ class ACVoltageSource(schemdraw.elements.SourceSin):
         return self._V
 
     def values(self) -> dict[str, complex]:
-        return {'U' : self.V}
+        return {'V' : self.V}
 
 @extension.source
 @simple_circuit_element
@@ -337,7 +360,7 @@ class RectVoltageSource(schemdraw.elements.SourceSquare):
         return self._V
 
     def values(self) -> dict[str, complex]:
-        return {'U' : self.V}
+        return {'V' : self.V}
 
 @simple_circuit_element
 class RectCurrentSource(schemdraw.elements.SourceSquare):
@@ -660,7 +683,9 @@ class PowerLabel(schemdraw.elements.Label):
 
 i_label_args : dict[Any, dict[str, float]] = {
     Resistor : {'ofst' : 1.4},
+    Conductance : {'ofst' : 1.4},
     Impedance : {'ofst' : 1.4},
+    Admittance : {'ofst' : 1.4},
     Capacitor : {'ofst' : 1.4},
     Inductance : {'ofst' : 1.4},
     VoltageSource : {'ofst' : -2.8},

@@ -138,7 +138,19 @@ def deserialize(element: dict[str, Any] | list) -> Any:
 
 simple_circuit_element_list = [
     simple_circuit_elements.VoltageSource,
+    simple_circuit_elements.CurrentSource,
+    simple_circuit_elements.ACVoltageSource,
+    simple_circuit_elements.ACCurrentSource,
+    simple_circuit_elements.RectVoltageSource,
+    simple_circuit_elements.RectCurrentSource,
+    simple_circuit_elements.ComplexVoltageSource,
+    simple_circuit_elements.ComplexCurrentSource,
     simple_circuit_elements.Resistor,
+    simple_circuit_elements.Conductance,
+    simple_circuit_elements.Impedance,
+    simple_circuit_elements.Admittance,
+    simple_circuit_elements.Capacitor,
+    simple_circuit_elements.Inductance,
     simple_circuit_elements.Ground,
     simple_circuit_elements.Line
 ]
