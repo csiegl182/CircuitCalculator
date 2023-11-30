@@ -65,7 +65,7 @@ class Schematic(schemdraw.Drawing):
         cpy = copy.deepcopy(self)
         cpy.save(fname, **kwargs)
 
-class SimpleAnalysisElement(ABC):
+class SimpleCircuitElement(ABC):
     def __init__(self, *, name: str, reverse: bool = False):
         self._name = name
         self._reverse = reverse
@@ -78,18 +78,24 @@ class SimpleAnalysisElement(ABC):
     def is_reverse(self) -> bool:
         return self._reverse
 
-    def values(self) -> dict[str, complex]:
+    @property
+    def type(self) -> str:
         ...
 
-def simple_analysis_element(element):
-    class decorated_element(element, SimpleAnalysisElement):
+def simple_circuit_element(element):
+    class decorated_element(element, SimpleCircuitElement):
         def __init__(self, *args, **kwargs):
             element.__init__(self, *args, **kwargs)
-            SimpleAnalysisElement.__init__(self, name=kwargs['name'], reverse=kwargs.get('reverse', False))
+            SimpleCircuitElement.__init__(self, name=kwargs.get('name', ''), reverse=kwargs.get('reverse', False))
     return decorated_element
 
+@simple_circuit_element
+class Element(schemdraw.elements.Element):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
 @extension.source
-@simple_analysis_element
+@simple_circuit_element
 class VoltageSource(schemdraw.elements.SourceV):
     def __init__(self, *args, name: str, V: float, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=not reverse, **kwargs)
@@ -102,11 +108,12 @@ class VoltageSource(schemdraw.elements.SourceV):
     def V(self) -> float:
         return self._V
 
-    def values(self) -> dict[str, float]:
-        return {'V' : self.V}
+    @property
+    def type(self) -> str:
+        return 'voltage_source'
 
 @extension.source
-@simple_analysis_element
+@simple_circuit_element
 class ComplexVoltageSource(schemdraw.elements.SourceV):
     def __init__(self, *args, name: str, V: complex, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=not reverse, **kwargs)
@@ -119,11 +126,12 @@ class ComplexVoltageSource(schemdraw.elements.SourceV):
     def V(self) -> complex:
         return self._V
 
-    def values(self) -> dict[str, complex]:
-        return {'V' : self.V}
+    @property
+    def type(self) -> str:
+        return 'complex_voltage_source'
 
 @extension.source
-@simple_analysis_element
+@simple_circuit_element
 class CurrentSource(schemdraw.elements.SourceI):
     def __init__(self, *args, I: float, name: str, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
@@ -136,11 +144,12 @@ class CurrentSource(schemdraw.elements.SourceI):
     def I(self) -> float:
         return self._I
 
-    def values(self) -> dict[str, float]:
-        return {'I' : self.I}
+    @property
+    def type(self) -> str:
+        return 'current_source'
 
 @extension.source
-@simple_analysis_element
+@simple_circuit_element
 class ComplexCurrentSource(schemdraw.elements.SourceI):
     def __init__(self, *args, I: complex, name: str, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
@@ -153,11 +162,12 @@ class ComplexCurrentSource(schemdraw.elements.SourceI):
     def I(self) -> complex:
         return self._I
 
-    def values(self) -> dict[str, complex]:
-        return {'I' : self.I}
+    @property
+    def type(self) -> str:
+        return 'complex_current_source'
 
 @extension.resistor
-@simple_analysis_element
+@simple_circuit_element
 class Resistor(schemdraw.elements.Resistor):
     def __init__(self, *args, R: float, name: str, show_name: bool = True, show_value: bool = True, reverse: bool = False, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
@@ -176,11 +186,12 @@ class Resistor(schemdraw.elements.Resistor):
     def G(self) -> float:
         return 1/self._R
 
-    def values(self) -> dict[str, float]:
-        return {'R' : self._R}
+    @property
+    def type(self) -> str:
+        return 'resistor'
 
 @extension.resistor
-@simple_analysis_element
+@simple_circuit_element
 class Conductance(schemdraw.elements.Resistor):
     def __init__(self, *args, G: float, name: str, show_name: bool = True, show_value: bool = True, reverse: bool = False, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
@@ -199,11 +210,12 @@ class Conductance(schemdraw.elements.Resistor):
     def G(self) -> float:
         return self._G
 
-    def values(self) -> dict[str, float]:
-        return {'G' : self._R}
+    @property
+    def type(self) -> str:
+        return 'conductance'
 
 @extension.resistor
-@simple_analysis_element
+@simple_circuit_element
 class Impedance(schemdraw.elements.Resistor):
     def __init__(self, *args, Z: complex, name: str, show_name: bool = True, show_value: bool = True, precision: int = 3, reverse: bool = False, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
@@ -222,11 +234,36 @@ class Impedance(schemdraw.elements.Resistor):
     def Y(self) -> complex:
         return 1/self._Z
 
-    def values(self) -> dict[str, complex]:
-        return {'Z' : self._Z}
+    @property
+    def type(self) -> str:
+        return 'impedance'
+
+@extension.resistor
+@simple_circuit_element
+class Admittance(schemdraw.elements.Resistor):
+    def __init__(self, *args, Y: complex, name: str, show_name: bool = True, show_value: bool = True, precision: int = 3, reverse: bool = False, **kwargs):
+        super().__init__(*args, reverse=reverse, **kwargs)
+        self._Y = Y
+        label = ''
+        label += f'{name}' if show_name else ''
+        label += '=' if  show_name and show_value else ''
+        label += dsp.print_impedance(self.Z, precision=precision) if show_value else ''
+        self.label(label, rotate=True, loc='value_label', halign='center')
+
+    @property
+    def Z(self) -> complex:
+        return 1/self._Y
+
+    @property
+    def Y(self) -> complex:
+        return 1/self._Y
+
+    @property
+    def type(self) -> str:
+        return 'admittance'
 
 @extension.source
-@simple_analysis_element
+@simple_circuit_element
 class ACVoltageSource(schemdraw.elements.SourceSin):
     def __init__(self, V: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
         super().__init__(*args, reverse=not reverse, **kwargs)
@@ -258,11 +295,12 @@ class ACVoltageSource(schemdraw.elements.SourceSin):
     def V(self) -> float:
         return self._V
 
-    def values(self) -> dict[str, complex]:
-        return {'U' : self.V}
+    @property
+    def type(self) -> str:
+        return 'ac_voltage_source'
 
 @extension.source
-@simple_analysis_element
+@simple_circuit_element
 class ACCurrentSource(schemdraw.elements.SourceSin):
     def __init__(self, *args, I: float, w: float, phi: float, name: str, sin=False, deg=False, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
@@ -295,11 +333,12 @@ class ACCurrentSource(schemdraw.elements.SourceSin):
     def I(self) -> float:
         return self._I
 
-    def values(self) -> dict[str, complex]:
-        return {'I' : self.I}
+    @property
+    def type(self) -> str:
+        return 'ac_current_source'
 
 @extension.source
-@simple_analysis_element
+@simple_circuit_element
 class RectVoltageSource(schemdraw.elements.SourceSquare):
     def __init__(self, V: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, **kwargs):
         super().__init__(*args, reverse=not reverse, **kwargs)
@@ -331,10 +370,11 @@ class RectVoltageSource(schemdraw.elements.SourceSquare):
     def V(self) -> float:
         return self._V
 
-    def values(self) -> dict[str, complex]:
-        return {'U' : self.V}
+    @property
+    def type(self) -> str:
+        return 'rect_voltage_source'
 
-@simple_analysis_element
+@simple_circuit_element
 class RectCurrentSource(schemdraw.elements.SourceSquare):
     def __init__(self, I: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, **kwargs):
         super().__init__(self, *args, reverse=reverse, **kwargs)
@@ -366,11 +406,12 @@ class RectCurrentSource(schemdraw.elements.SourceSquare):
     def I(self) -> float:
         return self._I
 
-    def values(self) -> dict[str, complex]:
-        return {'I' : self.I}
+    @property
+    def type(self) -> str:
+        return 'rect_current_source'
 
 @extension.capacitor
-@simple_analysis_element
+@simple_circuit_element
 class Capacitor(schemdraw.elements.Capacitor):
     def __init__(self, C: float, name: str, *args, show_name: bool = True, show_value: bool = True, reverse: bool = False, **kwargs):
         self._C = C
@@ -385,11 +426,12 @@ class Capacitor(schemdraw.elements.Capacitor):
     def C(self) -> float:
         return self._C
 
-    def values(self) -> dict[str, float]:
-        return {'C' : self._C}
+    @property
+    def type(self) -> str:
+        return 'capacitor'
 
 @extension.inductor
-@simple_analysis_element
+@simple_circuit_element
 class Inductance(schemdraw.elements.Inductor):
     def __init__(self, L: float, name: str, *args, show_name: bool = True, show_value: bool = True, label_offset: float = 0.2, reverse: bool = False, **kwargs):
         self._L = L
@@ -404,15 +446,16 @@ class Inductance(schemdraw.elements.Inductor):
     def L(self) -> float:
         return self._L
 
-    def values(self) -> dict[str, float]:
-        return {'L$' : self._L}
+    @property
+    def type(self) -> str:
+        return 'inductor'
 
-class RealCurrentSource(schemdraw.elements.Element2Term, SimpleAnalysisElement):
+class RealCurrentSource(schemdraw.elements.Element2Term, SimpleCircuitElement):
     def __init__(self, current_source: CurrentSource, resistor: Resistor, *args, zoom_resistor: float = 0.7, name: str = '', reverse: bool = False, **kwargs):
         if current_source.is_reverse:
             reverse = not reverse
         super().__init__(*args, reverse=reverse, **kwargs)
-        SimpleAnalysisElement.__init__(self, name=current_source.name, reverse=reverse)
+        SimpleCircuitElement.__init__(self, name=current_source.name, reverse=reverse)
         self.segments += segments_of(current_source)
         transform = schemdraw.transform.Transform(theta = 0, globalshift=((1-zoom_resistor)/2,-1.5), localshift=(0, 0), zoom=zoom_resistor)
         self.segments += [s.xform(transform) for s in segments_of(resistor)]
@@ -439,16 +482,17 @@ class RealCurrentSource(schemdraw.elements.Element2Term, SimpleAnalysisElement):
     def G(self) -> float:
         return 1/self._R
 
-    def values(self) -> dict[str, complex]:
-        return {'I' : self.I, 'R' : self.R}
+    @property
+    def type(self) -> str:
+        return 'real_current_source'
 
-class RealVoltageSource(schemdraw.elements.Element2Term, SimpleAnalysisElement):
+class RealVoltageSource(schemdraw.elements.Element2Term, SimpleCircuitElement):
     def __init__(self, voltage_source: VoltageSource, resistor: Resistor, *args, reverse: bool = False, **kwargs):
         reverse_voltage_source = not voltage_source.is_reverse
         if reverse_voltage_source:
             reverse = not reverse
         schemdraw.elements.Element2Term.__init__(self, *args, reverse=reverse_voltage_source, **kwargs)
-        SimpleAnalysisElement.__init__(self, name=voltage_source.name, reverse=reverse_voltage_source)
+        SimpleCircuitElement.__init__(self, name=voltage_source.name, reverse=reverse_voltage_source)
         transform_resistor = schemdraw.transform.Transform(theta = 0, globalshift=(0, 0))
         transform_voltage_source = schemdraw.transform.Transform(theta = 0, globalshift=(3, 0))
         if reverse:
@@ -486,9 +530,11 @@ class RealVoltageSource(schemdraw.elements.Element2Term, SimpleAnalysisElement):
     def G(self) -> float:
         return 1/self._R
 
-    def values(self) -> dict[str, float]:
-        return {'I' : self.I, 'R' : self.R}
+    @property
+    def type(self) -> str:
+        return 'real_voltage_source'
 
+@simple_circuit_element
 class Line(schemdraw.elements.lines.Line):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -497,7 +543,11 @@ class Line(schemdraw.elements.lines.Line):
     def name(self) -> str:
         return ''
 
-@simple_analysis_element
+    @property
+    def type(self) -> str:
+        return 'line'
+
+@simple_circuit_element
 class Node(schemdraw.elements.Element):
     def __init__(self, *args, name: str = '', **kwargs):
         super().__init__(*args, name=name, **kwargs)
@@ -511,6 +561,10 @@ class Node(schemdraw.elements.Element):
         self.anchors['NW'] = (-0.5, 0.1)
         self.anchors['SE'] = (0.5, -0.3)
         self.anchors['SW'] = (-0.5, -0.3)
+
+    @property
+    def type(self) -> str:
+        return 'node'
 
 class LabelNode(Node):
     def __init__(self, id_loc : str | dict[str, str] = '', *args, name: str = '', show=True, **kwargs):
@@ -539,6 +593,14 @@ class LabelNode(Node):
         self.bbox = self.get_bbox(includetext=False)
         self.label(f'{self.name}', **self.id_loc)
 
+    @property
+    def is_reverse(self) -> bool:
+        return False
+
+    @property
+    def type(self) -> str:
+        return 'label_node'
+
 class Switch(schemdraw.elements.elements.Element2Term):
     def __init__(self, name: str, *args, state: SwitchState = SwitchState.OPEN, **kwargs):
         super().__init__(*args, **kwargs)
@@ -557,6 +619,10 @@ class Switch(schemdraw.elements.elements.Element2Term):
     def name(self) -> str:
         return self._name
 
+    @property
+    def type(self) -> str:
+        return 'switch'
+
     def open(self) -> None:
         self.state = SwitchState.OPEN
         self.segments.pop()
@@ -574,8 +640,8 @@ class Switch(schemdraw.elements.elements.Element2Term):
             self.open()
 
 class Ground(Node):
-    def __init__(self, id: str = '0', *args, **kwargs):
-        super().__init__(id, *args, name=id, **kwargs)
+    def __init__(self, *args, name: str = '0', **kwargs):
+        super().__init__(*args, name=name, **kwargs)
         gndgap = 0.12
         gnd_lead = 0.4
         resheight = schemdraw.elements.twoterm.resheight
@@ -588,8 +654,8 @@ class Ground(Node):
              (resheight*.2, -gndgap*2-gnd_lead)]))
 
     @property
-    def name(self) -> str:
-        return 'Ground'
+    def type(self) -> str:
+        return 'ground'
 
     def up(self) -> schemdraw.elements.Element:
         return super().left()
@@ -654,7 +720,9 @@ class PowerLabel(schemdraw.elements.Label):
 
 i_label_args : dict[Any, dict[str, float]] = {
     Resistor : {'ofst' : 1.4},
+    Conductance : {'ofst' : 1.4},
     Impedance : {'ofst' : 1.4},
+    Admittance : {'ofst' : 1.4},
     Capacitor : {'ofst' : 1.4},
     Inductance : {'ofst' : 1.4},
     VoltageSource : {'ofst' : -2.8},

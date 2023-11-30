@@ -17,7 +17,7 @@ class DiagramTranslator:
     diagram_parser : SchematicDiagramParser
     translator_map : ElementTranslatorMap
 
-    def __call__(self, element: schemdraw.elements.Element) -> Branch | Component:
+    def __call__(self, element: schemdraw.elements.Element) -> Component | None:
         try:
             return self.translator_map[type(element)](element, tuple(map(self.diagram_parser._get_node_index, elm.get_nodes(element))))
         except KeyError:

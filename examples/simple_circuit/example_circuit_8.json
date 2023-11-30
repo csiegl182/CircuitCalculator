@@ -1,0 +1,1373 @@
+{
+    "circuit": [
+        {
+            "type": "dc_voltage_source",
+            "id": "Uq",
+            "nodes": [
+                "3",
+                "0"
+            ],
+            "value": {
+                "V": 1,
+                "R": 0,
+                "w": 0,
+                "phi": 0
+            }
+        },
+        {
+            "type": "resistor",
+            "id": "R1",
+            "nodes": [
+                "3",
+                "2"
+            ],
+            "value": {
+                "R": 2
+            }
+        },
+        {
+            "type": "resistor",
+            "id": "R2",
+            "nodes": [
+                "2",
+                "0"
+            ],
+            "value": {
+                "R": 4
+            }
+        },
+        {
+            "type": "ground",
+            "id": "0",
+            "nodes": [
+                "0"
+            ],
+            "value": {}
+        }
+    ],
+    "simple_circuit": [
+        {
+            "type": "voltage_source",
+            "name": "Uq",
+            "reverse": true,
+            "values": {
+                "_userparams": {
+                    "reverse": false
+                },
+                "segments": [
+                    {
+                        "type": "Segment",
+                        "values": {
+                            "path": [
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        -4.0,
+                                        0
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        0,
+                                        0
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        0,
+                                        0
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        NaN,
+                                        NaN
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        1,
+                                        0
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        1,
+                                        0
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        5.0,
+                                        0
+                                    ]
+                                }
+                            ],
+                            "zorder": null,
+                            "color": null,
+                            "fill": null,
+                            "lw": null,
+                            "ls": null,
+                            "arrow": null,
+                            "arrowwidth": 0.15,
+                            "arrowlength": 0.25,
+                            "clip": null,
+                            "capstyle": null,
+                            "joinstyle": null,
+                            "visible": true
+                        }
+                    },
+                    {
+                        "type": "SegmentCircle",
+                        "values": {
+                            "center": [
+                                0.5,
+                                0
+                            ],
+                            "radius": 0.5,
+                            "color": null,
+                            "lw": null,
+                            "ls": null,
+                            "fill": null,
+                            "clip": null,
+                            "zorder": null,
+                            "ref": null,
+                            "visible": true
+                        }
+                    },
+                    {
+                        "type": "Segment",
+                        "values": {
+                            "path": [
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        0,
+                                        0
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        1,
+                                        0
+                                    ]
+                                }
+                            ],
+                            "zorder": null,
+                            "color": null,
+                            "fill": null,
+                            "lw": null,
+                            "ls": null,
+                            "arrow": null,
+                            "arrowwidth": 0.15,
+                            "arrowlength": 0.25,
+                            "clip": null,
+                            "capstyle": null,
+                            "joinstyle": null,
+                            "visible": true
+                        }
+                    },
+                    {
+                        "type": "Segment",
+                        "values": {
+                            "path": [
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        1.5,
+                                        0.7
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        -0.5,
+                                        0.7
+                                    ]
+                                }
+                            ],
+                            "zorder": null,
+                            "color": "#02468F",
+                            "fill": null,
+                            "lw": null,
+                            "ls": null,
+                            "arrow": "->",
+                            "arrowwidth": 0.3,
+                            "arrowlength": 0.4,
+                            "clip": null,
+                            "capstyle": null,
+                            "joinstyle": null,
+                            "visible": true
+                        }
+                    },
+                    {
+                        "type": "SegmentText",
+                        "values": {
+                            "pos": {
+                                "type": "Point",
+                                "values": [
+                                    0.5,
+                                    1.2000000000000002
+                                ]
+                            },
+                            "label": "Uq=1.00V",
+                            "align": [
+                                "center",
+                                "center"
+                            ],
+                            "font": "sans-serif",
+                            "mathfont": null,
+                            "fontsize": 14.0,
+                            "color": "#02468F",
+                            "rotation": 90,
+                            "rotation_mode": null,
+                            "rotation_global": true,
+                            "clip": null,
+                            "zorder": null,
+                            "visible": true
+                        }
+                    }
+                ],
+                "params": {
+                    "theta": 90,
+                    "drop": {
+                        "type": "Point",
+                        "values": [
+                            5.0,
+                            0
+                        ]
+                    }
+                },
+                "anchors": {
+                    "value_label": [
+                        0.5,
+                        1.1
+                    ],
+                    "v_label": [
+                        0.5,
+                        -1.1
+                    ],
+                    "i_label": [
+                        1.2,
+                        0.3
+                    ],
+                    "s_label": [
+                        0.5,
+                        1.5
+                    ],
+                    "istart": {
+                        "type": "Point",
+                        "values": [
+                            0,
+                            0
+                        ]
+                    },
+                    "iend": {
+                        "type": "Point",
+                        "values": [
+                            1,
+                            0
+                        ]
+                    },
+                    "start": {
+                        "type": "Point",
+                        "values": [
+                            -4.0,
+                            0
+                        ]
+                    },
+                    "end": {
+                        "type": "Point",
+                        "values": [
+                            5.0,
+                            0
+                        ]
+                    },
+                    "center": {
+                        "type": "Point",
+                        "values": [
+                            0.5,
+                            0.0
+                        ]
+                    }
+                },
+                "absanchors": {
+                    "start": {
+                        "type": "Point",
+                        "values": [
+                            0.0,
+                            0.0
+                        ]
+                    },
+                    "end": {
+                        "type": "Point",
+                        "values": [
+                            5.51091059616309e-16,
+                            9.0
+                        ]
+                    },
+                    "center": {
+                        "type": "Point",
+                        "values": [
+                            2.755455298081545e-16,
+                            4.5
+                        ]
+                    },
+                    "value_label": {
+                        "type": "Point",
+                        "values": [
+                            -1.0999999999999999,
+                            4.5
+                        ]
+                    },
+                    "v_label": {
+                        "type": "Point",
+                        "values": [
+                            1.1000000000000003,
+                            4.5
+                        ]
+                    },
+                    "i_label": {
+                        "type": "Point",
+                        "values": [
+                            -0.29999999999999966,
+                            5.2
+                        ]
+                    },
+                    "s_label": {
+                        "type": "Point",
+                        "values": [
+                            -1.4999999999999998,
+                            4.5
+                        ]
+                    },
+                    "istart": {
+                        "type": "Point",
+                        "values": [
+                            2.4492935982947064e-16,
+                            4.0
+                        ]
+                    },
+                    "iend": {
+                        "type": "Point",
+                        "values": [
+                            3.061616997868383e-16,
+                            5.0
+                        ]
+                    },
+                    "xy": {
+                        "type": "Point",
+                        "values": [
+                            2.4492935982947064e-16,
+                            4.0
+                        ]
+                    }
+                },
+                "transform": {
+                    "type": "Transform",
+                    "values": {
+                        "theta": 90,
+                        "globalshift": {
+                            "type": "Point",
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        "localshift": {
+                            "type": "Point",
+                            "values": [
+                                4.0,
+                                0
+                            ]
+                        },
+                        "zoom": 1
+                    }
+                },
+                "absdrop": [
+                    {
+                        "type": "Point",
+                        "values": [
+                            5.51091059616309e-16,
+                            9.0
+                        ]
+                    },
+                    90
+                ]
+            }
+        },
+        {
+            "type": "resistor",
+            "name": "R1",
+            "reverse": false,
+            "values": {
+                "_userparams": {
+                    "reverse": false,
+                    "d": "right"
+                },
+                "segments": [
+                    {
+                        "type": "Segment",
+                        "values": {
+                            "path": [
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        -4.0,
+                                        0
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        0,
+                                        0
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        0,
+                                        0.25
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        1.0,
+                                        0.25
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        1.0,
+                                        -0.25
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        0,
+                                        -0.25
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        0,
+                                        0
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        NaN,
+                                        NaN
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        1.0,
+                                        0
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        5.0,
+                                        0
+                                    ]
+                                }
+                            ],
+                            "zorder": null,
+                            "color": null,
+                            "fill": null,
+                            "lw": null,
+                            "ls": null,
+                            "arrow": null,
+                            "arrowwidth": 0.15,
+                            "arrowlength": 0.25,
+                            "clip": null,
+                            "capstyle": null,
+                            "joinstyle": null,
+                            "visible": true
+                        }
+                    },
+                    {
+                        "type": "SegmentText",
+                        "values": {
+                            "pos": {
+                                "type": "Point",
+                                "values": [
+                                    0.5,
+                                    0.4
+                                ]
+                            },
+                            "label": "R1=2.00\u03a9",
+                            "align": [
+                                "center",
+                                "bottom"
+                            ],
+                            "font": "sans-serif",
+                            "mathfont": null,
+                            "fontsize": 14.0,
+                            "color": "black",
+                            "rotation": 0,
+                            "rotation_mode": null,
+                            "rotation_global": true,
+                            "clip": null,
+                            "zorder": null,
+                            "visible": true
+                        }
+                    }
+                ],
+                "params": {
+                    "drop": {
+                        "type": "Point",
+                        "values": [
+                            5.0,
+                            0
+                        ]
+                    }
+                },
+                "anchors": {
+                    "value_label": [
+                        0.5,
+                        0.3
+                    ],
+                    "v_label": [
+                        0.5,
+                        -1.1
+                    ],
+                    "s_label": [
+                        0.5,
+                        0.9
+                    ],
+                    "istart": {
+                        "type": "Point",
+                        "values": [
+                            0,
+                            0
+                        ]
+                    },
+                    "iend": {
+                        "type": "Point",
+                        "values": [
+                            1.0,
+                            0
+                        ]
+                    },
+                    "start": {
+                        "type": "Point",
+                        "values": [
+                            -4.0,
+                            0
+                        ]
+                    },
+                    "end": {
+                        "type": "Point",
+                        "values": [
+                            5.0,
+                            0
+                        ]
+                    },
+                    "center": {
+                        "type": "Point",
+                        "values": [
+                            0.5,
+                            0.0
+                        ]
+                    }
+                },
+                "absanchors": {
+                    "start": {
+                        "type": "Point",
+                        "values": [
+                            5.51091059616309e-16,
+                            9.0
+                        ]
+                    },
+                    "end": {
+                        "type": "Point",
+                        "values": [
+                            9.0,
+                            9.0
+                        ]
+                    },
+                    "center": {
+                        "type": "Point",
+                        "values": [
+                            4.500000000000001,
+                            9.0
+                        ]
+                    },
+                    "value_label": {
+                        "type": "Point",
+                        "values": [
+                            4.500000000000001,
+                            9.3
+                        ]
+                    },
+                    "v_label": {
+                        "type": "Point",
+                        "values": [
+                            4.500000000000001,
+                            7.9
+                        ]
+                    },
+                    "s_label": {
+                        "type": "Point",
+                        "values": [
+                            4.500000000000001,
+                            9.9
+                        ]
+                    },
+                    "istart": {
+                        "type": "Point",
+                        "values": [
+                            4.000000000000001,
+                            9.0
+                        ]
+                    },
+                    "iend": {
+                        "type": "Point",
+                        "values": [
+                            5.000000000000001,
+                            9.0
+                        ]
+                    },
+                    "xy": {
+                        "type": "Point",
+                        "values": [
+                            4.000000000000001,
+                            9.0
+                        ]
+                    }
+                },
+                "transform": {
+                    "type": "Transform",
+                    "values": {
+                        "theta": 0,
+                        "globalshift": {
+                            "type": "Point",
+                            "values": [
+                                5.51091059616309e-16,
+                                9.0
+                            ]
+                        },
+                        "localshift": {
+                            "type": "Point",
+                            "values": [
+                                4.0,
+                                0
+                            ]
+                        },
+                        "zoom": 1
+                    }
+                },
+                "absdrop": [
+                    {
+                        "type": "Point",
+                        "values": [
+                            9.0,
+                            9.0
+                        ]
+                    },
+                    0
+                ]
+            }
+        },
+        {
+            "type": "resistor",
+            "name": "R2",
+            "reverse": false,
+            "values": {
+                "_userparams": {
+                    "reverse": false,
+                    "d": "down"
+                },
+                "segments": [
+                    {
+                        "type": "Segment",
+                        "values": {
+                            "path": [
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        -4.0,
+                                        0
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        0,
+                                        0
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        0,
+                                        0.25
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        1.0,
+                                        0.25
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        1.0,
+                                        -0.25
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        0,
+                                        -0.25
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        0,
+                                        0
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        NaN,
+                                        NaN
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        1.0,
+                                        0
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        5.0,
+                                        0
+                                    ]
+                                }
+                            ],
+                            "zorder": null,
+                            "color": null,
+                            "fill": null,
+                            "lw": null,
+                            "ls": null,
+                            "arrow": null,
+                            "arrowwidth": 0.15,
+                            "arrowlength": 0.25,
+                            "clip": null,
+                            "capstyle": null,
+                            "joinstyle": null,
+                            "visible": true
+                        }
+                    },
+                    {
+                        "type": "SegmentText",
+                        "values": {
+                            "pos": {
+                                "type": "Point",
+                                "values": [
+                                    0.5,
+                                    -0.5
+                                ]
+                            },
+                            "label": "R2=4.00\u03a9",
+                            "align": [
+                                "center",
+                                "bottom"
+                            ],
+                            "font": "sans-serif",
+                            "mathfont": null,
+                            "fontsize": 14.0,
+                            "color": "black",
+                            "rotation": 90,
+                            "rotation_mode": null,
+                            "rotation_global": true,
+                            "clip": null,
+                            "zorder": null,
+                            "visible": true
+                        }
+                    }
+                ],
+                "params": {
+                    "drop": {
+                        "type": "Point",
+                        "values": [
+                            5.0,
+                            0
+                        ]
+                    }
+                },
+                "anchors": {
+                    "value_label": [
+                        0.5,
+                        -0.6
+                    ],
+                    "v_label": [
+                        0.5,
+                        0.3
+                    ],
+                    "s_label": [
+                        0.5,
+                        -1.2
+                    ],
+                    "istart": {
+                        "type": "Point",
+                        "values": [
+                            0,
+                            0
+                        ]
+                    },
+                    "iend": {
+                        "type": "Point",
+                        "values": [
+                            1.0,
+                            0
+                        ]
+                    },
+                    "start": {
+                        "type": "Point",
+                        "values": [
+                            -4.0,
+                            0
+                        ]
+                    },
+                    "end": {
+                        "type": "Point",
+                        "values": [
+                            5.0,
+                            0
+                        ]
+                    },
+                    "center": {
+                        "type": "Point",
+                        "values": [
+                            0.5,
+                            0.0
+                        ]
+                    }
+                },
+                "absanchors": {
+                    "start": {
+                        "type": "Point",
+                        "values": [
+                            9.0,
+                            9.0
+                        ]
+                    },
+                    "end": {
+                        "type": "Point",
+                        "values": [
+                            8.999999999999998,
+                            0.0
+                        ]
+                    },
+                    "center": {
+                        "type": "Point",
+                        "values": [
+                            9.0,
+                            4.5
+                        ]
+                    },
+                    "value_label": {
+                        "type": "Point",
+                        "values": [
+                            8.399999999999999,
+                            4.5
+                        ]
+                    },
+                    "v_label": {
+                        "type": "Point",
+                        "values": [
+                            9.299999999999999,
+                            4.5
+                        ]
+                    },
+                    "s_label": {
+                        "type": "Point",
+                        "values": [
+                            7.799999999999999,
+                            4.5
+                        ]
+                    },
+                    "istart": {
+                        "type": "Point",
+                        "values": [
+                            9.0,
+                            5.0
+                        ]
+                    },
+                    "iend": {
+                        "type": "Point",
+                        "values": [
+                            8.999999999999998,
+                            4.0
+                        ]
+                    },
+                    "xy": {
+                        "type": "Point",
+                        "values": [
+                            9.0,
+                            5.0
+                        ]
+                    }
+                },
+                "transform": {
+                    "type": "Transform",
+                    "values": {
+                        "theta": 270,
+                        "globalshift": {
+                            "type": "Point",
+                            "values": [
+                                9.0,
+                                9.0
+                            ]
+                        },
+                        "localshift": {
+                            "type": "Point",
+                            "values": [
+                                4.0,
+                                0
+                            ]
+                        },
+                        "zoom": 1
+                    }
+                },
+                "absdrop": [
+                    {
+                        "type": "Point",
+                        "values": [
+                            8.999999999999998,
+                            0.0
+                        ]
+                    },
+                    270
+                ]
+            }
+        },
+        {
+            "type": "line",
+            "name": "",
+            "reverse": false,
+            "values": {
+                "_userparams": {
+                    "d": "left"
+                },
+                "segments": [
+                    {
+                        "type": "Segment",
+                        "values": {
+                            "path": [
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        -4.5,
+                                        0
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        0,
+                                        0
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        4.5,
+                                        0
+                                    ]
+                                }
+                            ],
+                            "zorder": null,
+                            "color": null,
+                            "fill": null,
+                            "lw": null,
+                            "ls": null,
+                            "arrow": null,
+                            "arrowwidth": 0.15,
+                            "arrowlength": 0.25,
+                            "clip": null,
+                            "capstyle": null,
+                            "joinstyle": null,
+                            "visible": true
+                        }
+                    }
+                ],
+                "params": {
+                    "drop": {
+                        "type": "Point",
+                        "values": [
+                            4.5,
+                            0
+                        ]
+                    }
+                },
+                "anchors": {
+                    "istart": {
+                        "type": "Point",
+                        "values": [
+                            0,
+                            0
+                        ]
+                    },
+                    "iend": {
+                        "type": "Point",
+                        "values": [
+                            0,
+                            0
+                        ]
+                    },
+                    "start": {
+                        "type": "Point",
+                        "values": [
+                            -4.5,
+                            0
+                        ]
+                    },
+                    "end": {
+                        "type": "Point",
+                        "values": [
+                            4.5,
+                            0
+                        ]
+                    },
+                    "center": {
+                        "type": "Point",
+                        "values": [
+                            0.0,
+                            0.0
+                        ]
+                    }
+                },
+                "absanchors": {
+                    "start": {
+                        "type": "Point",
+                        "values": [
+                            8.999999999999998,
+                            0.0
+                        ]
+                    },
+                    "end": {
+                        "type": "Point",
+                        "values": [
+                            -1.7763568394002505e-15,
+                            1.102182119232618e-15
+                        ]
+                    },
+                    "center": {
+                        "type": "Point",
+                        "values": [
+                            4.499999999999998,
+                            5.51091059616309e-16
+                        ]
+                    },
+                    "istart": {
+                        "type": "Point",
+                        "values": [
+                            4.499999999999998,
+                            5.51091059616309e-16
+                        ]
+                    },
+                    "iend": {
+                        "type": "Point",
+                        "values": [
+                            4.499999999999998,
+                            5.51091059616309e-16
+                        ]
+                    },
+                    "xy": {
+                        "type": "Point",
+                        "values": [
+                            4.499999999999998,
+                            5.51091059616309e-16
+                        ]
+                    }
+                },
+                "transform": {
+                    "type": "Transform",
+                    "values": {
+                        "theta": 180,
+                        "globalshift": {
+                            "type": "Point",
+                            "values": [
+                                8.999999999999998,
+                                0.0
+                            ]
+                        },
+                        "localshift": {
+                            "type": "Point",
+                            "values": [
+                                4.5,
+                                0
+                            ]
+                        },
+                        "zoom": 1
+                    }
+                },
+                "absdrop": [
+                    {
+                        "type": "Point",
+                        "values": [
+                            -1.7763568394002505e-15,
+                            1.102182119232618e-15
+                        ]
+                    },
+                    180
+                ]
+            }
+        },
+        {
+            "type": "ground",
+            "name": "0",
+            "reverse": false,
+            "values": {
+                "_userparams": {
+                    "name": "0"
+                },
+                "segments": [
+                    {
+                        "type": "Segment",
+                        "values": {
+                            "path": [
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        0,
+                                        0
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        0,
+                                        -0.4
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        -0.25,
+                                        -0.4
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        0.25,
+                                        -0.4
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        NaN,
+                                        NaN
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        -0.175,
+                                        -0.52
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        0.175,
+                                        -0.52
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        NaN,
+                                        NaN
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        -0.05,
+                                        -0.64
+                                    ]
+                                },
+                                {
+                                    "type": "Point",
+                                    "values": [
+                                        0.05,
+                                        -0.64
+                                    ]
+                                }
+                            ],
+                            "zorder": null,
+                            "color": null,
+                            "fill": null,
+                            "lw": null,
+                            "ls": null,
+                            "arrow": null,
+                            "arrowwidth": 0.15,
+                            "arrowlength": 0.25,
+                            "clip": null,
+                            "capstyle": null,
+                            "joinstyle": null,
+                            "visible": true
+                        }
+                    }
+                ],
+                "params": {
+                    "theta": 0,
+                    "drop": [
+                        0,
+                        0
+                    ]
+                },
+                "anchors": {
+                    "start": [
+                        0,
+                        0
+                    ],
+                    "center": [
+                        0,
+                        0
+                    ],
+                    "end": [
+                        0,
+                        0
+                    ],
+                    "NE": [
+                        0.5,
+                        0.1
+                    ],
+                    "NW": [
+                        -0.5,
+                        0.1
+                    ],
+                    "SE": [
+                        0.5,
+                        -0.3
+                    ],
+                    "SW": [
+                        -0.5,
+                        -0.3
+                    ]
+                },
+                "absanchors": {
+                    "start": {
+                        "type": "Point",
+                        "values": [
+                            -1.7763568394002505e-15,
+                            1.102182119232618e-15
+                        ]
+                    },
+                    "center": {
+                        "type": "Point",
+                        "values": [
+                            -1.7763568394002505e-15,
+                            1.102182119232618e-15
+                        ]
+                    },
+                    "end": {
+                        "type": "Point",
+                        "values": [
+                            -1.7763568394002505e-15,
+                            1.102182119232618e-15
+                        ]
+                    },
+                    "NE": {
+                        "type": "Point",
+                        "values": [
+                            0.4999999999999982,
+                            0.1000000000000011
+                        ]
+                    },
+                    "NW": {
+                        "type": "Point",
+                        "values": [
+                            -0.5000000000000018,
+                            0.1000000000000011
+                        ]
+                    },
+                    "SE": {
+                        "type": "Point",
+                        "values": [
+                            0.4999999999999982,
+                            -0.2999999999999989
+                        ]
+                    },
+                    "SW": {
+                        "type": "Point",
+                        "values": [
+                            -0.5000000000000018,
+                            -0.2999999999999989
+                        ]
+                    },
+                    "xy": {
+                        "type": "Point",
+                        "values": [
+                            -1.7763568394002505e-15,
+                            1.102182119232618e-15
+                        ]
+                    }
+                },
+                "transform": {
+                    "type": "Transform",
+                    "values": {
+                        "theta": 0,
+                        "globalshift": {
+                            "type": "Point",
+                            "values": [
+                                -1.7763568394002505e-15,
+                                1.102182119232618e-15
+                            ]
+                        },
+                        "localshift": {
+                            "type": "Point",
+                            "values": [
+                                0,
+                                0
+                            ]
+                        },
+                        "zoom": 1
+                    }
+                },
+                "absdrop": [
+                    {
+                        "type": "Point",
+                        "values": [
+                            -1.7763568394002505e-15,
+                            1.102182119232618e-15
+                        ]
+                    },
+                    180
+                ]
+            }
+        }
+    ]
+}
