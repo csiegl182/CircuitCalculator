@@ -1,5 +1,5 @@
 from .network import Network
-from .NodalAnalysis import open_circuit_impedance, open_circuit_voltage
+from .NodalAnalysis.node_analysis import open_circuit_impedance, open_circuit_voltage
 
 class TheveninEquivalentSource:
     def __init__(self, network: Network, node1: str, node2: str) -> None:

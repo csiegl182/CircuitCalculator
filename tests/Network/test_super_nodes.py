@@ -1,5 +1,5 @@
 import pytest
-from CircuitCalculator.Network.supernodes import SuperNodes, AmbiguousElectricalPotential
+from CircuitCalculator.Network.NodalAnalysis.supernodes import SuperNodes, AmbiguousElectricalPotential
 from CircuitCalculator.Network.network import Network, Branch
 from CircuitCalculator.Network.elements import voltage_source, resistor
 

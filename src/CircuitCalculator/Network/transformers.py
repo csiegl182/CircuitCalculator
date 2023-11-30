@@ -1,6 +1,6 @@
 from .network import Network, Branch
 from .elements import NortenTheveninElement, is_ideal_current_source, is_ideal_voltage_source
-from .supernodes import SuperNodes
+from .NodalAnalysis.supernodes import SuperNodes
 
 def switch_ground_node(network: Network, new_ground: str) -> Network:
     return Network(network.branches, new_ground)

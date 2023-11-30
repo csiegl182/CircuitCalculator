@@ -1,4 +1,4 @@
-from .network import Network
+from ..network import Network
 from .supernodes import SuperNodes
 from typing import Callable
 

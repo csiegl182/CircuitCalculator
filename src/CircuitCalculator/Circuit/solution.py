@@ -1,6 +1,6 @@
 from .circuit import Circuit, transform, frequency_components
 from ..SignalProcessing.types import TimeDomainFunction, FrequencyDomainFunction
-from ..Network.NodalAnalysis import nodal_analysis_solver
+from ..Network.NodalAnalysis.node_analysis import nodal_analysis_solver
 from ..Network.solution import NetworkSolver
 from typing import Any
 from dataclasses import dataclass, field
