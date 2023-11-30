@@ -1,11 +1,15 @@
 from typing import Protocol
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import numpy as np
 
 class NortenTheveninElement(Protocol):
     @property
     def name(self) -> str:
         """Name of element"""
+        ...
+    @property
+    def type(self) -> str:
+        """Element type"""
         ...
     @property
     def Z(self) -> complex:
