@@ -78,7 +78,8 @@ class SimpleCircuitElement(ABC):
     def is_reverse(self) -> bool:
         return self._reverse
 
-    def values(self) -> dict[str, complex]:
+    @property
+    def type(self) -> str:
         ...
 
 def simple_circuit_element(element):
@@ -107,8 +108,9 @@ class VoltageSource(schemdraw.elements.SourceV):
     def V(self) -> float:
         return self._V
 
-    def values(self) -> dict[str, float]:
-        return {'V' : self.V}
+    @property
+    def type(self) -> str:
+        return 'voltage_source'
 
 @extension.source
 @simple_circuit_element
@@ -124,8 +126,9 @@ class ComplexVoltageSource(schemdraw.elements.SourceV):
     def V(self) -> complex:
         return self._V
 
-    def values(self) -> dict[str, complex]:
-        return {'V' : self.V}
+    @property
+    def type(self) -> str:
+        return 'complex_voltage_source'
 
 @extension.source
 @simple_circuit_element
@@ -141,8 +144,9 @@ class CurrentSource(schemdraw.elements.SourceI):
     def I(self) -> float:
         return self._I
 
-    def values(self) -> dict[str, float]:
-        return {'I' : self.I}
+    @property
+    def type(self) -> str:
+        return 'current_source'
 
 @extension.source
 @simple_circuit_element
@@ -158,8 +162,9 @@ class ComplexCurrentSource(schemdraw.elements.SourceI):
     def I(self) -> complex:
         return self._I
 
-    def values(self) -> dict[str, complex]:
-        return {'I' : self.I}
+    @property
+    def type(self) -> str:
+        return 'complex_current_source'
 
 @extension.resistor
 @simple_circuit_element
@@ -181,8 +186,9 @@ class Resistor(schemdraw.elements.Resistor):
     def G(self) -> float:
         return 1/self._R
 
-    def values(self) -> dict[str, float]:
-        return {'R' : self._R}
+    @property
+    def type(self) -> str:
+        return 'resistor'
 
 @extension.resistor
 @simple_circuit_element
@@ -204,8 +210,9 @@ class Conductance(schemdraw.elements.Resistor):
     def G(self) -> float:
         return self._G
 
-    def values(self) -> dict[str, float]:
-        return {'G' : self._R}
+    @property
+    def type(self) -> str:
+        return 'conductance'
 
 @extension.resistor
 @simple_circuit_element
@@ -227,8 +234,9 @@ class Impedance(schemdraw.elements.Resistor):
     def Y(self) -> complex:
         return 1/self._Z
 
-    def values(self) -> dict[str, complex]:
-        return {'Z' : self.Z}
+    @property
+    def type(self) -> str:
+        return 'impedance'
 
 @extension.resistor
 @simple_circuit_element
@@ -250,8 +258,9 @@ class Admittance(schemdraw.elements.Resistor):
     def Y(self) -> complex:
         return 1/self._Y
 
-    def values(self) -> dict[str, complex]:
-        return {'Y' : self.Y}
+    @property
+    def type(self) -> str:
+        return 'admittance'
 
 @extension.source
 @simple_circuit_element
@@ -286,8 +295,9 @@ class ACVoltageSource(schemdraw.elements.SourceSin):
     def V(self) -> float:
         return self._V
 
-    def values(self) -> dict[str, complex]:
-        return {'V' : self.V}
+    @property
+    def type(self) -> str:
+        return 'ac_voltage_source'
 
 @extension.source
 @simple_circuit_element
@@ -323,8 +333,9 @@ class ACCurrentSource(schemdraw.elements.SourceSin):
     def I(self) -> float:
         return self._I
 
-    def values(self) -> dict[str, complex]:
-        return {'I' : self.I}
+    @property
+    def type(self) -> str:
+        return 'ac_current_source'
 
 @extension.source
 @simple_circuit_element
@@ -359,8 +370,9 @@ class RectVoltageSource(schemdraw.elements.SourceSquare):
     def V(self) -> float:
         return self._V
 
-    def values(self) -> dict[str, complex]:
-        return {'V' : self.V}
+    @property
+    def type(self) -> str:
+        return 'rect_voltage_source'
 
 @simple_circuit_element
 class RectCurrentSource(schemdraw.elements.SourceSquare):
@@ -394,8 +406,9 @@ class RectCurrentSource(schemdraw.elements.SourceSquare):
     def I(self) -> float:
         return self._I
 
-    def values(self) -> dict[str, complex]:
-        return {'I' : self.I}
+    @property
+    def type(self) -> str:
+        return 'rect_current_source'
 
 @extension.capacitor
 @simple_circuit_element
@@ -413,8 +426,9 @@ class Capacitor(schemdraw.elements.Capacitor):
     def C(self) -> float:
         return self._C
 
-    def values(self) -> dict[str, float]:
-        return {'C' : self._C}
+    @property
+    def type(self) -> str:
+        return 'capacitor'
 
 @extension.inductor
 @simple_circuit_element
@@ -432,8 +446,9 @@ class Inductance(schemdraw.elements.Inductor):
     def L(self) -> float:
         return self._L
 
-    def values(self) -> dict[str, float]:
-        return {'L$' : self._L}
+    @property
+    def type(self) -> str:
+        return 'inductor'
 
 class RealCurrentSource(schemdraw.elements.Element2Term, SimpleCircuitElement):
     def __init__(self, current_source: CurrentSource, resistor: Resistor, *args, zoom_resistor: float = 0.7, name: str = '', reverse: bool = False, **kwargs):
@@ -467,8 +482,9 @@ class RealCurrentSource(schemdraw.elements.Element2Term, SimpleCircuitElement):
     def G(self) -> float:
         return 1/self._R
 
-    def values(self) -> dict[str, complex]:
-        return {'I' : self.I, 'R' : self.R}
+    @property
+    def type(self) -> str:
+        return 'real_current_source'
 
 class RealVoltageSource(schemdraw.elements.Element2Term, SimpleCircuitElement):
     def __init__(self, voltage_source: VoltageSource, resistor: Resistor, *args, reverse: bool = False, **kwargs):
@@ -514,8 +530,9 @@ class RealVoltageSource(schemdraw.elements.Element2Term, SimpleCircuitElement):
     def G(self) -> float:
         return 1/self._R
 
-    def values(self) -> dict[str, float]:
-        return {'I' : self.I, 'R' : self.R}
+    @property
+    def type(self) -> str:
+        return 'real_voltage_source'
 
 @simple_circuit_element
 class Line(schemdraw.elements.lines.Line):
@@ -525,6 +542,10 @@ class Line(schemdraw.elements.lines.Line):
     @property
     def name(self) -> str:
         return ''
+
+    @property
+    def type(self) -> str:
+        return 'line'
 
 @simple_circuit_element
 class Node(schemdraw.elements.Element):
@@ -540,6 +561,10 @@ class Node(schemdraw.elements.Element):
         self.anchors['NW'] = (-0.5, 0.1)
         self.anchors['SE'] = (0.5, -0.3)
         self.anchors['SW'] = (-0.5, -0.3)
+
+    @property
+    def type(self) -> str:
+        return 'node'
 
 class LabelNode(Node):
     def __init__(self, id_loc : str | dict[str, str] = '', *args, name: str = '', show=True, **kwargs):
@@ -572,6 +597,10 @@ class LabelNode(Node):
     def is_reverse(self) -> bool:
         return False
 
+    @property
+    def type(self) -> str:
+        return 'label_node'
+
 class Switch(schemdraw.elements.elements.Element2Term):
     def __init__(self, name: str, *args, state: SwitchState = SwitchState.OPEN, **kwargs):
         super().__init__(*args, **kwargs)
@@ -589,6 +618,10 @@ class Switch(schemdraw.elements.elements.Element2Term):
     @property
     def name(self) -> str:
         return self._name
+
+    @property
+    def type(self) -> str:
+        return 'switch'
 
     def open(self) -> None:
         self.state = SwitchState.OPEN
@@ -619,6 +652,10 @@ class Ground(Node):
              (resheight*.7, -gndgap-gnd_lead), gap,
              (-resheight*.2, -gndgap*2-gnd_lead),
              (resheight*.2, -gndgap*2-gnd_lead)]))
+
+    @property
+    def type(self) -> str:
+        return 'ground'
 
     def up(self) -> schemdraw.elements.Element:
         return super().left()

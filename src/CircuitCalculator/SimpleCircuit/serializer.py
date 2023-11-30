@@ -99,9 +99,9 @@ def serialize_schemdraw_element(e):
     serialize = schemdraw_serializers.get(type(e), lambda _: None)
     return serialize(e)
 
-def dictify_element(e: Any) -> SimpleCircuitObjectProperties:
+def dictify_element(e: schemdraw.elements.Element) -> SimpleCircuitObjectProperties:
     return SimpleCircuitObjectProperties(
-        type=str(type(e).__name__),
+        type=e.type,
         name=e.name,
         reverse=e.is_reverse,
         values={
@@ -136,27 +136,28 @@ def deserialize(element: dict[str, Any] | list) -> Any:
             return {k: deserialize(v) for k, v in element.items()}
     return element
 
-simple_circuit_element_list = [
-    simple_circuit_elements.VoltageSource,
-    simple_circuit_elements.CurrentSource,
-    simple_circuit_elements.ACVoltageSource,
-    simple_circuit_elements.ACCurrentSource,
-    simple_circuit_elements.RectVoltageSource,
-    simple_circuit_elements.RectCurrentSource,
-    simple_circuit_elements.ComplexVoltageSource,
-    simple_circuit_elements.ComplexCurrentSource,
-    simple_circuit_elements.Resistor,
-    simple_circuit_elements.Conductance,
-    simple_circuit_elements.Impedance,
-    simple_circuit_elements.Admittance,
-    simple_circuit_elements.Capacitor,
-    simple_circuit_elements.Inductance,
-    simple_circuit_elements.Ground,
-    simple_circuit_elements.Line
-]
+def combine_to_complex(real_imag: tuple[str, str], z: str, kv: dict[str, Any]) -> dict[str, Any]:
+    kv.update({z: complex(kv.pop(real_imag[0], 0), kv.pop(real_imag[1], 0))})
+    return kv
 
-def simple_circuit_elements_mapping() -> dict[str, Any]:
-    return {str(e.__name__) : e for e in simple_circuit_element_list}
+simple_circuit_element_types = {
+    'voltage_source' : lambda **kwargs: simple_circuit_elements.VoltageSource(**kwargs),
+    'current_source' : lambda **kwargs: simple_circuit_elements.CurrentSource(**kwargs),
+    'ac_voltage_source' : lambda **kwargs: simple_circuit_elements.ACVoltageSource(**kwargs),
+    'ac_current_source' : lambda **kwargs: simple_circuit_elements.ACCurrentSource(**kwargs),
+    'rect_voltage_source' : lambda **kwargs: simple_circuit_elements.RectVoltageSource(**kwargs),
+    'rect_current_source' : lambda **kwargs: simple_circuit_elements.RectCurrentSource(**kwargs),
+    'complex_voltage_source' : lambda **kwargs: simple_circuit_elements.ComplexVoltageSource(**combine_to_complex(('V_real', 'V_imag'), 'V', kwargs)),
+    'complex_current_source' : lambda **kwargs: simple_circuit_elements.ComplexCurrentSource(**combine_to_complex(('I_real', 'I_imag'), 'I', kwargs)), 
+    'resistor' : lambda **kwargs: simple_circuit_elements.Resistor(**kwargs),
+    'conductance' : lambda **kwargs: simple_circuit_elements.Conductance(**kwargs),
+    'impedance' : lambda **kwargs: simple_circuit_elements.Impedance(**combine_to_complex(('R', 'X'), 'Z', kwargs)),
+    'admittance' : lambda **kwargs: simple_circuit_elements.Admittance(**combine_to_complex(('G', 'B'), 'Y', kwargs)),
+    'capacitor' : lambda **kwargs: simple_circuit_elements.Capacitor(**kwargs),
+    'inductance' : lambda **kwargs: simple_circuit_elements.Inductance(**kwargs),
+    'ground' : lambda **kwargs: simple_circuit_elements.Ground(**kwargs),
+    'line' : lambda **kwargs: simple_circuit_elements.Line(**kwargs)
+}
 
 def undictify_element(element_dict: dict[str, Any], circuit_dict: dict[str, Any]) -> schemdraw.elements.Element:
     kwargs = deserialize(element_dict['values']['_userparams'])
@@ -165,7 +166,7 @@ def undictify_element(element_dict: dict[str, Any], circuit_dict: dict[str, Any]
     if element_dict['name'] in circuit_dict.keys():
         kwargs.update(circuit_dict[element_dict['name']])
     try:
-        element = simple_circuit_elements_mapping()[element_dict['type']](**kwargs)
+        element = simple_circuit_element_types[element_dict['type']](**kwargs)
     except KeyError:
         element = simple_circuit_elements.Element(**kwargs)
     element.segments=deserialize(element_dict['values']['segments'])

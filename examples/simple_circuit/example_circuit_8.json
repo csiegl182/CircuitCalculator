@@ -47,7 +47,7 @@
     ],
     "simple_circuit": [
         {
-            "type": "extended_source",
+            "type": "voltage_source",
             "name": "Uq",
             "reverse": true,
             "values": {
@@ -404,7 +404,7 @@
             }
         },
         {
-            "type": "extended_resistor",
+            "type": "resistor",
             "name": "R1",
             "reverse": false,
             "values": {
@@ -687,7 +687,7 @@
             }
         },
         {
-            "type": "extended_resistor",
+            "type": "resistor",
             "name": "R2",
             "reverse": false,
             "values": {
@@ -970,7 +970,7 @@
             }
         },
         {
-            "type": "decorated_element",
+            "type": "line",
             "name": "",
             "reverse": false,
             "values": {
@@ -1143,7 +1143,7 @@
             }
         },
         {
-            "type": "Ground",
+            "type": "ground",
             "name": "0",
             "reverse": false,
             "values": {
