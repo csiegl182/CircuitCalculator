@@ -1,6 +1,6 @@
 import numpy as np
 from ..network import Network
-from ..elements import is_ideal_current_source, is_ideal_voltage_source, is_current_source, is_voltage_source
+from ..elements import is_ideal_current_source, is_ideal_voltage_source, is_current_source, is_voltage_source, is_active
 from .supernodes import SuperNodes
 from . import labelmapper as map
 from .. import transformers as trf
@@ -56,6 +56,33 @@ def create_current_vector_from_network(network: Network, node_index_mapper: map.
         b[i] += currents_of_belonging_voltage_sources(ref_label)
     return b
         
+def create_source_incidence_matrix_from_network(network: Network, node_index_mapper: map.NodeIndexMapper = map.default) -> np.ndarray:
+    super_nodes = SuperNodes(network)
+    node_mapping = node_index_mapper(network)
+    sources = [b.id for b in network.branches if is_active(b.element)]
+    Q = np.zeros((len(node_mapping),len(sources)))
+    current_source_labels = [b.id for b in network.branches if is_current_source(b.element)]
+    voltage_source_labels = [b.id for b in network.branches if is_ideal_voltage_source(b.element)]
+    for cs_label in current_source_labels:
+        n1, n2 = network[cs_label].node1, network[cs_label].node2
+        if n1 in node_mapping.keys():
+            Q[node_mapping[n1]][sources.index(cs_label)] = -1
+        if n2 in node_mapping.keys():
+            Q[node_mapping[n2]][sources.index(cs_label)] = +1
+    for vs_label in voltage_source_labels:
+        n1, n2 = network[vs_label].node1, network[vs_label].node2
+        if n1 in super_nodes.active_nodes:
+            for n in [x for x in network.nodes_connected_to(n1) if not network.is_zero_node(x) and x != n2]:
+                Q[node_mapping[n]][sources.index(vs_label)] = sum([b.element.Y for b in network.branches_between(n1, n)])
+        if n2 in super_nodes.active_nodes:
+            for n in [x for x in network.nodes_connected_to(n2) if not network.is_zero_node(x) and x != n1]:
+                Q[node_mapping[n]][sources.index(vs_label)] = -sum([b.element.Y for b in network.branches_between(n2, n)])
+        if n1 in node_mapping.keys():
+            Q[node_mapping[n1]][sources.index(vs_label)] += +admittance_connected_to(network, n2)-admittance_between(network, n1, n2)
+        if n2 in node_mapping.keys():
+            Q[node_mapping[n2]][sources.index(vs_label)] += -admittance_connected_to(network, n1)+admittance_between(network, n1, n2)
+    return Q
+
 def open_circuit_impedance(network: Network, node1: str, node2: str, node_index_mapper: map.NodeIndexMapper = map.default) -> complex:
     if node1 == node2:
         return 0

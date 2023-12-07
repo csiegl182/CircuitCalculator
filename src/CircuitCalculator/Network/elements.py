@@ -1,5 +1,5 @@
 from typing import Protocol
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 import numpy as np
 
 class NortenTheveninElement(Protocol):
