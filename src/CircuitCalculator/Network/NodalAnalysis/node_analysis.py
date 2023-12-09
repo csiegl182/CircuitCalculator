@@ -65,6 +65,20 @@ def create_source_incidence_matrix_from_network(network: Network, node_index_map
         if network[source].node2 == node:
             return +1
         return 0
+    def admittance_to_active_node(network: Network, vs_label: str, node: str) -> complex:
+        n1, n2 = vs_network[vs_label].node1, vs_network[vs_label].node2
+        if n1 in super_nodes.active_nodes and n2 != node:
+            return admittance_between(network, n1, node)
+        if n2 in super_nodes.active_nodes and n1 != node:
+            return -admittance_between(network, n2, node)
+        return 0
+    def admittance_of_active_node_without_parallel(network: Network, vs_label: str, node: str) -> complex:
+        n1, n2 = network[vs_label].node1, network[vs_label].node2
+        if node == n1:
+            return admittance_connected_to(network, n2)-admittance_between(network, n1, n2)
+        if node == n2:
+            return -(admittance_connected_to(network, n1)-admittance_between(network, n1, n2))
+        return 0
     super_nodes = SuperNodes(network)
     node_mapping = node_index_mapper(network)
     current_source_labels = sorted([b.id for b in network.branches if is_current_source(b.element)])
@@ -75,15 +89,8 @@ def create_source_incidence_matrix_from_network(network: Network, node_index_map
         Q[i][j] = current_source_coefficient(cs_label, i_label)
     for (i_label, i), (vs_label, j) in itertools.product(node_mapping.items(), [(label, source_label_index(label)) for label in voltage_source_labels]):
         vs_network = trf.passive_network(network=network, keep=[network[vs_label].element])
-        n1, n2 = vs_network[vs_label].node1, vs_network[vs_label].node2
-        if n1 in super_nodes.active_nodes and n2 != i_label:
-            Q[i][j] += admittance_between(vs_network, i_label, n1)
-        if n2 in super_nodes.active_nodes and n1 != i_label:
-            Q[i][j] -= admittance_between(vs_network, i_label, n2)
-        if i_label == n1:
-            Q[i][j] += +admittance_connected_to(vs_network, n2)-admittance_between(vs_network, n1, n2)
-        if i_label == n2:
-            Q[i][j] -= +admittance_connected_to(vs_network, n1)-admittance_between(vs_network, n1, n2)
+        Q[i][j] = admittance_to_active_node(vs_network, vs_label, i_label)
+        Q[i][j] += admittance_of_active_node_without_parallel(vs_network, vs_label, i_label)
     return Q
 
 def open_circuit_impedance(network: Network, node1: str, node2: str, node_index_mapper: map.NodeIndexMapper = map.default) -> complex:
