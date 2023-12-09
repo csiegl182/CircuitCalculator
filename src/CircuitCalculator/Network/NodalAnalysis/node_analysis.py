@@ -57,50 +57,54 @@ def create_current_vector_from_network(network: Network, node_index_mapper: map.
     return b
         
 def create_source_incidence_matrix_from_network(network: Network, node_index_mapper: map.NodeIndexMapper = map.default) -> np.ndarray:
+    def source_label_index(label: str) -> int:
+        return source_labels.index(label)
+    def current_source_coefficient(source: str, node: str) -> int:
+        if network[source].node1 == node:
+            return -1
+        if network[source].node2 == node:
+            return +1
+        return 0
     super_nodes = SuperNodes(network)
     node_mapping = node_index_mapper(network)
     current_source_labels = sorted([b.id for b in network.branches if is_current_source(b.element)])
     voltage_source_labels = sorted([b.id for b in network.branches if is_ideal_voltage_source(b.element)])
     source_labels = current_source_labels+voltage_source_labels
     Q = np.zeros((len(node_mapping),len(source_labels)))
-    for cs_label in current_source_labels:
-        n1, n2 = network[cs_label].node1, network[cs_label].node2
-        if n1 in node_mapping.keys():
-            Q[node_mapping[n1]][source_labels.index(cs_label)] = -1
-        if n2 in node_mapping.keys():
-            Q[node_mapping[n2]][source_labels.index(cs_label)] = +1
+    for (i_label, i), (cs_label, j) in itertools.product(node_mapping.items(), [(label, source_label_index(label)) for label in current_source_labels]):
+        Q[i][j] = current_source_coefficient(cs_label, i_label)
     for vs_label in voltage_source_labels:
         n1, n2 = network[vs_label].node1, network[vs_label].node2
         if n1 in super_nodes.active_nodes:
             for n in [x for x in network.nodes_connected_to(n1) if x in node_mapping.keys() and x != n2]:
-                Q[node_mapping[n]][source_labels.index(vs_label)] = sum([b.element.Y for b in network.branches_between(n1, n)])
+                Q[node_mapping[n]][source_label_index(vs_label)] = sum([b.element.Y for b in network.branches_between(n1, n)])
             for n in [x for x in network.nodes_connected_to(n1) if x in super_nodes.active_nodes]:
                 nx = super_nodes.get_reference_node(n)
                 if network.is_zero_node(nx):
                     continue
                 if nx == n1:
                     for nn in [x for x in network.nodes_connected_to(n) if x in node_mapping.keys() and x != n]:
-                        Q[node_mapping[nn]][source_labels.index(vs_label)] = sum([b.element.Y for b in network.branches_between(n, nn)])
+                        Q[node_mapping[nn]][source_label_index(vs_label)] = sum([b.element.Y for b in network.branches_between(n, nn)])
                 else:
                     ix = node_mapping[nx]
-                    Q[ix][source_labels.index(vs_label)] += admittance_between(network, n1, n)
+                    Q[ix][source_label_index(vs_label)] += admittance_between(network, n1, n)
         if n2 in super_nodes.active_nodes:
             for n in [x for x in network.nodes_connected_to(n2) if x in node_mapping.keys() and x != n1]:
-                Q[node_mapping[n]][source_labels.index(vs_label)] = -sum([b.element.Y for b in network.branches_between(n2, n)])
+                Q[node_mapping[n]][source_label_index(vs_label)] = -sum([b.element.Y for b in network.branches_between(n2, n)])
             for n in [x for x in network.nodes_connected_to(n2) if x in super_nodes.active_nodes]:
                 nx = super_nodes.get_reference_node(n)
                 if network.is_zero_node(nx):
                     continue
                 if nx == n2:
                     for nn in [x for x in network.nodes_connected_to(n) if x in node_mapping.keys() and x != n]:
-                        Q[node_mapping[nn]][source_labels.index(vs_label)] = sum([b.element.Y for b in network.branches_between(n, nn)])
+                        Q[node_mapping[nn]][source_label_index(vs_label)] = sum([b.element.Y for b in network.branches_between(n, nn)])
                 else:
                     ix = node_mapping[nx]
-                    Q[ix][source_labels.index(vs_label)] -= admittance_between(network, n2, n)
+                    Q[ix][source_label_index(vs_label)] -= admittance_between(network, n2, n)
         if n1 in node_mapping.keys():
-            Q[node_mapping[n1]][source_labels.index(vs_label)] += +admittance_connected_to(network, n2)-admittance_between(network, n1, n2)
+            Q[node_mapping[n1]][source_label_index(vs_label)] += +admittance_connected_to(network, n2)-admittance_between(network, n1, n2)
         if n2 in node_mapping.keys():
-            Q[node_mapping[n2]][source_labels.index(vs_label)] += -admittance_connected_to(network, n1)+admittance_between(network, n1, n2)
+            Q[node_mapping[n2]][source_label_index(vs_label)] += -admittance_connected_to(network, n1)+admittance_between(network, n1, n2)
     return Q
 
 def open_circuit_impedance(network: Network, node1: str, node2: str, node_index_mapper: map.NodeIndexMapper = map.default) -> complex:
