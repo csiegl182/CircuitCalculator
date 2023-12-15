@@ -29,3 +29,66 @@ def create_state_space_input_update_matrix(network: Network, Cvalues: list[Branc
     A = np.linalg.inv(Delta*np.linalg.inv(Y)*Delta.T)*np.diag(invC)
     B = -A*Delta*np.linalg.inv(Y)*Q
     return A, B
+
+from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class StateSpaceModel:
+    network: Network
+    Cvalues: list[BranchValues]
+    node_index_mapper: map.NodeIndexMapper = map.default
+
+    @property
+    def node_mapping(self) -> dict[str, int]:
+        return self.node_index_mapper(self.network)
+
+    def element_incidence_matrix(self, values: list[BranchValues]) -> np.ndarray:
+        Delta = np.zeros((len(values), len(self.node_mapping)))
+        for (k, value), (i_label, i) in itertools.product(enumerate(values), self.node_mapping.items()):
+            if i_label == value['node1']:
+                Delta[k][i] = +1
+            if i_label == value['node2']:
+                Delta[k][i] = -1
+        return Delta
+
+    @property
+    def capacitor_incidence(self) -> np.ndarray:
+        return self.element_incidence_matrix(self.Cvalues)
+
+    @property
+    def inv_Y(self) -> np.ndarray:
+        return np.linalg.inv(create_node_matrix_from_network(network=self.network, node_index_mapper=self.node_index_mapper).real)
+
+    @property
+    def sorted_Y(self) -> np.ndarray:
+        Delta = self.capacitor_incidence
+        return np.linalg.inv(Delta@self.inv_Y@Delta.T)
+    
+    @property
+    def A(self) -> np.ndarray:
+       invC = np.array([-1/float(C['value']) for C in self.Cvalues])
+       return self.sorted_Y@np.diag(invC)
+
+    @property
+    def B(self) -> np.ndarray:
+        Q = create_source_incidence_matrix_from_network(network=self.network, node_index_mapper=self.node_index_mapper).real
+        Delta = self.capacitor_incidence
+        return -self.A@Delta@self.inv_Y@Q
+
+    @property
+    def C(self) -> np.ndarray:
+        Delta = np.matrix(self.capacitor_incidence)
+        return Delta.T*self.A
+
+    @property
+    def D(self) -> np.ndarray:
+        Delta = np.matrix(self.capacitor_incidence)
+        return Delta.T*self.A
+
+    @property
+    def state_labels(self) -> list[str]:
+        return ['v_'+C.id for C in []]
+
+    @property
+    def input_labels(self) -> list[str]:
+        return []
