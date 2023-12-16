@@ -77,13 +77,14 @@ class StateSpaceModel:
 
     @property
     def C(self) -> np.ndarray:
-        Delta = np.matrix(self.capacitor_incidence)
-        return Delta.T*self.A
+        Delta = self.capacitor_incidence
+        return self.inv_Y@Delta.T@self.sorted_Y
 
     @property
     def D(self) -> np.ndarray:
-        Delta = np.matrix(self.capacitor_incidence)
-        return Delta.T*self.A
+        Q = create_source_incidence_matrix_from_network(network=self.network, node_index_mapper=self.node_index_mapper).real
+        Delta = self.capacitor_incidence
+        return self.inv_Y@(Q-Delta.T@self.sorted_Y@Delta@self.inv_Y@Q)
 
     @property
     def state_labels(self) -> list[str]:

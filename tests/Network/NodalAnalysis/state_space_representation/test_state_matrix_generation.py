@@ -16,7 +16,7 @@ def test_state_state_matrix_of_transient_network_1() -> None:
         Branch('3', '0', open_circuit('C'))
     ])
     ss = StateSpaceModel(network, [BranchValues(value=C, node1='3', node2='0')])
-    assert_almost_equal(ss.A, np.array([[-1/(R1*R2/(R1+R2)+R3)/C]]), decimal=5)
+    assert_almost_equal(ss.A, np.array([[-(R1 + R2)/(C*(R1*R2 + R1*R3 + R2*R3))]]), decimal=5)
 
 def test_state_matrix_of_transient_network_2() -> None:
     Vs = 1
@@ -30,7 +30,8 @@ def test_state_matrix_of_transient_network_2() -> None:
         Branch('3', '0', resistor('R3', R=R3))
     ])
     ss = StateSpaceModel(network, [BranchValues(value=C, node1='2', node2='3')])
-    assert_almost_equal(ss.A, np.array([[-1/(R1*R2/(R1+R2)+R3)/C]]))
+    assert_almost_equal(ss.A, np.array([[-(R1 + R2)/(C*(R1*R2 + R1*R3 + R2*R3))]]), decimal=5)
+
 
 def test_state_matrix_of_transient_network_3() -> None:
     Vs = 1
