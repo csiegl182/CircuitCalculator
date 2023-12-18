@@ -4,7 +4,7 @@ from CircuitCalculator.Network.NodalAnalysis.state_space_model import StateSpace
 import numpy as np
 from numpy.testing import assert_almost_equal
 
-def test_state_state_matrix_of_transient_network_1() -> None:
+def test_state_matrix_of_transient_network_1() -> None:
     Vs = 1
     R1, R2, R3 = 10, 20, 30
     C = 1e-3
@@ -60,4 +60,4 @@ def test_state_matrix_of_transient_network_4() -> None:
         Branch('3', '0', open_circuit('C2'))
     ])
     ss = StateSpaceModel(network, [BranchValues(value=C1, node1='2', node2='3'), BranchValues(value=C2, node1='3', node2='0')])
-    assert_almost_equal(ss.A, np.array([[-1/R1/C1, -1/R1/C2], [-1/R1/C1, -(R1+R2)/C2/R1/R2]]))
+    assert_almost_equal(ss.A, np.array([[-1/R1/C1, -1/R1/C1], [-1/R1/C2, -(R1+R2)/C2/R1/R2]]))

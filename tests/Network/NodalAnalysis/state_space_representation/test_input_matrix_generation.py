@@ -59,4 +59,4 @@ def test_input_matrix_of_transient_network_4() -> None:
         Branch('3', '0', open_circuit('C2'))
     ])
     ss = StateSpaceModel(network, [BranchValues(value=C1, node1='2', node2='3'), BranchValues(value=C2, node1='3', node2='0')])
-    assert_almost_equal(ss.B, np.array([[1/R1/C1], [1/R1/C1]]))
+    assert_almost_equal(ss.B, np.array([[1/R1/C1], [1/R1/C2]]))
