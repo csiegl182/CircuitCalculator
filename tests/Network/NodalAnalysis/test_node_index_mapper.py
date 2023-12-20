@@ -1,4 +1,4 @@
-from CircuitCalculator.Network.NodalAnalysis.labelmapper import alphabetic_mapper
+from CircuitCalculator.Network.NodalAnalysis.labelmapper import alphabetic_node_mapper
 from CircuitCalculator.Network.network import Network, Branch
 from CircuitCalculator.Network.elements import resistor, voltage_source
 
@@ -15,7 +15,7 @@ def test_alphabetic_mapper_returns_mapping_in_alphabetic_order() -> None:
             Branch('0', '8', resistor('R8', 1))
         ]
     )
-    mapping = alphabetic_mapper(network)
+    mapping = alphabetic_node_mapper(network)
     assert mapping['1'] == 0
     assert mapping['2'] == 1
     assert mapping['3'] == 2
@@ -36,7 +36,7 @@ def test_alphabetic_mapper_has_no_mapping_for_zero_node() -> None:
         ],
         node_zero_label='2'
     )
-    mapping = alphabetic_mapper(network)
+    mapping = alphabetic_node_mapper(network)
     assert '2' not in mapping.keys()
 
 def test_mapping_ignores_active_nodes() -> None:
@@ -53,7 +53,7 @@ def test_mapping_ignores_active_nodes() -> None:
         ],
         node_zero_label='2'
     )
-    mapping = alphabetic_mapper(network)
+    mapping = alphabetic_node_mapper(network)
     assert mapping['1'] == 0
     assert mapping['3'] == 1
     assert mapping['4'] == 2
