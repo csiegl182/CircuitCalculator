@@ -1,6 +1,7 @@
 from .circuit import Circuit, transform, frequency_components
 from ..SignalProcessing.types import TimeDomainFunction, FrequencyDomainFunction
 from ..Network.NodalAnalysis.node_analysis import nodal_analysis_solver
+# from ..Network.NodalAnalysis.state_space_model import create_state_space_input_update_matrix
 from ..Network.solution import NetworkSolver
 from typing import Any
 from dataclasses import dataclass, field
@@ -118,3 +119,35 @@ class FrequencyDomainSolution(CircuitSolution):
         w, voltage = self.get_voltage(component_id)
         _, current = self.get_current(component_id)
         return w, voltage*np.conj(current)
+
+from typing import Callable
+from ..Network.NodalAnalysis.state_space_model import BranchValues
+
+# @dataclass
+# class TransientSolution(CircuitSolution):
+#     t_end: float = 1
+#     Ts: float = 0.2
+#     t0: float = 0
+
+#     def __post__init__(self):
+#         network = transform(self.circuit, w=[0])[0]
+#         all_Cs = [c for c in self.circuit.components if c.type == 'capacitor']
+#         A, B = create_state_space_input_update_matrix(
+#             network=network,
+#             Cvalues=[BranchValues(value=float(C.value['C']), node1=C.nodes[0], node2=C.nodes[1]) for C in all_Cs]
+#         )
+#         from scipy import signal
+
+#         Y = cre
+
+#         sys = signal.StateSpace(A, B, np.eye(A.shape[0]), np.zeros((A.shape[0], B.shape[1])))
+#         t = np.arange(self.t0, self.t_end, self.Ts)
+#         u = np.column_stack([np.array(t>0.1, dtype=float)])
+
+#         self._tout, self._yout, _ = signal.lsim(sys, u, t)
+
+#     def get_voltage(self, component_id: str) -> TimeDomainFunction:
+#         voltages = [solution.get_voltage(component_id) for solution in self._solutions]
+#         return np.vectorize(lambda t: np.array(np.sum([np.abs(V)*np.cos(w*t+np.angle(V)) for V, w in zip(voltages, self.w)])))
+        
+        
