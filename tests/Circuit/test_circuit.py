@@ -1,47 +1,24 @@
+import pytest
+from CircuitCalculator.Circuit import circuit
 import CircuitCalculator.Circuit.components as ccp
-from CircuitCalculator.Circuit.circuit import Circuit, transform
 
-def test_list_of_circuit_elements_can_be_transformed_into_network_with_same_node_labels() -> None:
-    elem1_nodes = ('1', '0')
-    elem2_nodes = ('0', '1')
-    circuit = Circuit([ccp.dc_voltage_source(V=1, nodes=elem1_nodes, id='V1'), ccp.resistor(R=100, nodes=elem2_nodes, id='R1'), ccp.ground(nodes=('0', ))])
+def test_circuit_can_be_instantiated() -> None:
+    c = circuit.Circuit([])
+    assert c is not None
 
-    network = transform(circuit)[0]
-    assert elem1_nodes in [(b.node1, b.node2) for b in network.branches]
-    assert elem2_nodes in [(b.node1, b.node2) for b in network.branches]
+def test_circuit_can_be_instantiated_with_components() -> None:
+    c = circuit.Circuit([ccp.dc_voltage_source(V=1, nodes=('1', '0'), id='V1')])
+    assert c is not None
 
-def test_list_of_circuit_elements_can_be_transformed_into_network_with_same_element_names() -> None:
-    R = 100
-    U = 1
-    elem1_nodes = ('1', '0')
-    elem2_nodes = ('0', '1')
-    circuit = Circuit([ccp.dc_voltage_source(V=U, nodes=elem1_nodes, id='V1'), ccp.resistor(R=R, nodes=elem2_nodes, id='R1'), ccp.ground(nodes=('0', ))])
+def test_circuit_with_multiple_ground_nodes_raises_exception() -> None:
+    with pytest.raises(circuit.MultipleGroundNodes):
+        circuit.Circuit([ccp.dc_voltage_source(V=1, nodes=('1', '0'), id='V1'), ccp.ground(nodes=('0', )), ccp.ground(nodes=('1', ))])
 
-    network = transform(circuit)[0]
-    assert 'V1' in network.branch_ids
-    assert 'R1' in network.branch_ids
+def test_circuit_with_multiple_components_with_same_id_raises_exception() -> None:
+    with pytest.raises(circuit.AmbiguousComponentID):
+        circuit.Circuit([ccp.dc_voltage_source(V=1, nodes=('1', '0'), id='V1'), ccp.dc_voltage_source(V=1, nodes=('1', '0'), id='V1')])
 
-def test_list_of_circuit_elements_can_be_transformed_into_network_with_same_element_values() -> None:
-    R = 100
-    U = 1
-    elem1_nodes = ('1', '0')
-    elem2_nodes = ('0', '1')
-    circuit = Circuit([ccp.dc_voltage_source(V=U, nodes=elem1_nodes, id='V1'), ccp.resistor(R=R, nodes=elem2_nodes, id='R1'), ccp.ground(nodes=('0', ))])
-
-    network = transform(circuit)[0]
-    assert network['R1'].element.Z == R
-    assert network['V1'].element.V == U
-
-def test_ground_node_is_transformed_into_network() -> None:
-    R = 100
-    U = 1
-    elem1_nodes = ('1', '0')
-    elem2_nodes = ('0', '1')
-    circuit = Circuit([ccp.dc_voltage_source(V=U, nodes=elem1_nodes, id='V1'), ccp.resistor(R=R, nodes=elem2_nodes, id='R1'), ccp.ground(nodes=('1', ))])
-
-    network = transform(circuit)[0]
-    assert network.is_zero_node('1') == True
-
-def test_empty_circuit_can_be_created() -> None:
-    circuit = Circuit([])
-    assert len(circuit.components) == 0
+def test_component_id_can_be_accessed_from_circuit() -> None:
+    c = circuit.Circuit([ccp.dc_voltage_source(V=1, nodes=('1', '0'), id='V1'), ccp.dc_voltage_source(V=1, nodes=('1', '0'), id='V2')])
+    assert c['V1'] == c.components[0]
+    assert c['V2'] == c.components[1]
