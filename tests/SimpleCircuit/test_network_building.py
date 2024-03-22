@@ -40,7 +40,6 @@ def test_single_electrical_potential_node_is_identified() -> None:
     schemdraw_network = SchematicDiagramParser(sd.drawing)
     assert schemdraw_network._get_equal_electrical_potential_nodes(sd.I1.end) == set([sd.I1.end])
 
-
 def test_equal_electrical_potential_nodes_are_identified() -> None:
     sd = SimpleDrawing()
     schemdraw_network = SchematicDiagramParser(sd.drawing)

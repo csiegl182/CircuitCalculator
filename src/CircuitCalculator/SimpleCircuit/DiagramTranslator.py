@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import schemdraw.elements
-from ..Network.network import Network, Branch
+from ..Network.network import Network
 from ..Circuit.circuit import Circuit, Component
 
 from . import Elements as elm
