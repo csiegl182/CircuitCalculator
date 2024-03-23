@@ -123,7 +123,6 @@ def remove_short_circuits(network: Network) -> Network:
 
 class NodalAnalysisSolution:
     def __init__(self, network : Network, node_mapper: map.NodeIndexMapper = map.default) -> None:
-        network = remove_short_circuits(network)
         Y = create_node_matrix_from_network(network, node_index_mapper=node_mapper)
         I = create_current_vector_from_network(network, node_index_mapper=node_mapper)
         self._network = network
