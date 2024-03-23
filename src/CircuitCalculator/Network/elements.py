@@ -8,6 +8,10 @@ class NortenTheveninElement(Protocol):
         """Name of element"""
         ...
     @property
+    def type(self) -> str:
+        """Specific element type"""
+        ...
+    @property
     def Z(self) -> complex:
         """Impedance value of element"""
         ...

@@ -1,0 +1,22 @@
+[
+    {
+        "type": "voltage_source",
+        "id": "Vs",
+        "N1": "1",
+        "N2": "0",
+        "V": {"real": 1, "imag": 0}
+    },
+    {
+        "type": "resistor",
+        "id": "R1",
+        "N1": "1",
+        "N2": "2",
+        "R": 10
+    },
+    {
+        "type": "short_circuit",
+        "id": "sc",
+        "N1": "2",
+        "N2": "0"
+    }
+]

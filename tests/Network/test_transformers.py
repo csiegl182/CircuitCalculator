@@ -125,11 +125,12 @@ def test_remove_network_element_removes_element() -> None:
     r2 = resistor('R2', R=2)
     network = Network(
         branches=[
-            Branch('0', '1', vs1),
+            Branch('4', '1', vs1),
             Branch('1', '2', vs2),
             Branch('2', '3', r1),
-            Branch('3', '0', r2),
-        ]
+            Branch('3', '4', r2),
+        ],
+        node_zero_label='4'
     )
     network = remove_element(network, 'Us1')
     with pytest.raises(KeyError):

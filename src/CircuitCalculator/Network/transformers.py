@@ -8,7 +8,7 @@ def switch_ground_node(network: Network, new_ground: str) -> Network:
 def remove_element(network: Network, element: str) -> Network:
     branches = list(network.branches)
     branches.remove(network[element])
-    return Network(branches)
+    return Network(branches, node_zero_label=network.node_zero_label)
 
 def remove_ideal_current_sources(network: Network, keep: list[NortenTheveninElement] = []) -> Network:
     return Network([b for b in network.branches if not is_ideal_current_source(b.element) or b.element in keep], node_zero_label=network.node_zero_label)

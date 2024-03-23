@@ -1,5 +1,5 @@
 import numpy as np
-from .network import Network
+from .network import Network, Branch
 from .elements import is_ideal_current_source, is_ideal_voltage_source, is_current_source, is_voltage_source
 from .supernodes import SuperNodes
 from . import labelmapper as map
@@ -105,8 +105,25 @@ def calculate_node_voltages(Y : np.ndarray, I : np.ndarray) -> np.ndarray:
         raise DimensionError('dim error')
     return np.linalg.solve(Y, I)
 
+## WORKAROUND
+def remove_short_circuits(network: Network) -> Network:
+    def map_nodes(branch: Branch, node: str, redundant_node: str) -> Branch:
+        if branch.node1 == redundant_node:
+            branch = Branch(node, branch.node2, branch.element)
+        if branch.node2 == redundant_node:
+            branch = Branch(branch.node1, node, branch.element)
+        return branch
+    short_ciruits = [b for b in network.branches if b.element.type == 'short_circuit']
+    while len(short_ciruits) > 0:
+        short_circuit = short_ciruits[0]
+        network = trf.remove_element(network, short_circuit.id)
+        network = Network([map_nodes(b, short_circuit.node1, short_circuit.node2) for b in network.branches], node_zero_label=network.node_zero_label if network.node_zero_label != short_circuit.node2 else short_circuit.node1)
+        short_ciruits = [b for b in network.branches if b.element.type == 'short_circuit']
+    return network
+
 class NodalAnalysisSolution:
     def __init__(self, network : Network, node_mapper: map.NodeIndexMapper = map.default) -> None:
+        network = remove_short_circuits(network)
         Y = create_node_matrix_from_network(network, node_index_mapper=node_mapper)
         I = create_current_vector_from_network(network, node_index_mapper=node_mapper)
         self._network = network

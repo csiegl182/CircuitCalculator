@@ -229,3 +229,17 @@ def test_network_14_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_current('Vs'), -0.06, decimal=3)
     np.testing.assert_almost_equal(solution.get_potential('0'), 0.00, decimal=2)
     np.testing.assert_almost_equal(solution.get_potential('1'), 0.40, decimal=2)
+
+## TODO
+def test_network_15_with_advanced_nodal_analysis() -> None:
+    network = load_network_from_json(str(json_root / 'example_network_15.json'))
+    solution = nodal_analysis_solver(network)
+    np.testing.assert_almost_equal(solution.get_voltage('R1'), 1.0, decimal=3)
+    np.testing.assert_almost_equal(solution.get_voltage('Vs'), 1.0, decimal=2)
+    # np.testing.assert_almost_equal(solution.get_voltage('sc'), 0.0, decimal=2)
+    np.testing.assert_almost_equal(solution.get_current('R1'), 0.1, decimal=3)
+    np.testing.assert_almost_equal(solution.get_current('Vs'), -0.1, decimal=3)
+    # np.testing.assert_almost_equal(solution.get_current('sc'), 1.0, decimal=3)
+    # np.testing.assert_almost_equal(solution.get_potential('0'), 0.00, decimal=2)
+    np.testing.assert_almost_equal(solution.get_potential('1'), 1.00, decimal=2)
+    np.testing.assert_almost_equal(solution.get_potential('2'), 0.00, decimal=2)
