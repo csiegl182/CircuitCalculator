@@ -1,0 +1,43 @@
+[
+    {
+        "type": "voltage_source",
+        "id": "Vs",
+        "N1": "1",
+        "N2": "0",
+        "V": {"real": 1, "imag": 0}
+    },
+    {
+        "type": "resistor",
+        "id": "R1",
+        "N1": "1",
+        "N2": "2",
+        "R": 10
+    },
+    {
+        "type": "resistor",
+        "id": "R2",
+        "N1": "2",
+        "N2": "0",
+        "R": 20
+    },
+    {
+        "type": "resistor",
+        "id": "R3",
+        "N1": "1",
+        "N2": "3",
+        "R": 30
+    },
+    {
+        "type": "resistor",
+        "id": "R4",
+        "N1": "3",
+        "N2": "0",
+        "R": 40
+    },
+    {
+        "type": "short_circuit",
+        "id": "sc",
+        "N1": "2",
+        "N2": "3"
+    }
+]

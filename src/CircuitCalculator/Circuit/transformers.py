@@ -161,6 +161,13 @@ def periodic_current_source(source: ccp.Component, w: float = 0, w_resolution: f
     )
     return ac_current_source(single_frequency_source, w, w_resolution)
 
+def short_circuit(short_circuit: ccp.Component, *_) -> ntw.Branch:
+    return ntw.Branch(
+        short_circuit.nodes[0],
+        short_circuit.nodes[1],
+        elm.short_circuit(short_circuit.id)
+    )
+
 transformers : dict[str, CircuitComponentTranslator] = {
     'resistor' : resistor,
     'impedance' : impedance,
@@ -173,5 +180,6 @@ transformers : dict[str, CircuitComponentTranslator] = {
     'ac_current_source' : ac_current_source,
     'complex_current_source' : complex_current_source,
     'periodic_voltage_source' : periodic_voltage_source,
-    'periodic_current_source' : periodic_current_source
+    'periodic_current_source' : periodic_current_source,
+    'short_circuit' : short_circuit
 }

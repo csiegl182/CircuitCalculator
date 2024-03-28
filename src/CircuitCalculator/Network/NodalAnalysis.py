@@ -1,5 +1,5 @@
 import numpy as np
-from .network import Network
+from .network import Network, Branch
 from .elements import is_ideal_current_source, is_ideal_voltage_source, is_current_source, is_voltage_source
 from .supernodes import SuperNodes
 from . import labelmapper as map

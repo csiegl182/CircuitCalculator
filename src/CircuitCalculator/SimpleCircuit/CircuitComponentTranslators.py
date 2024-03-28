@@ -107,6 +107,12 @@ def linear_voltage_source_translator(element: elm.RealVoltageSource, nodes: tupl
         R=element.R
     )
 
+def short_circuit_translator(element: elm.LabeledLine, nodes: tuple[str, ...]) -> ccp.Component:
+    return ccp.short_circuit(
+        nodes=(nodes[0], nodes[1]) if not element.is_reverse else (nodes[1], nodes[0]),
+        id=element.name,
+    )
+
 def switch_translator(element: elm.Switch, nodes: tuple[str, ...]) -> ccp.Component | None:
     if element.state == element.state.OPEN:
         return ccp.resistor(nodes=(nodes[0], nodes[1]), id=element.name, R=inf)
@@ -131,6 +137,7 @@ circuit_translator_map : ElementTranslatorMap = {
     elm.Inductance : inductance_translator,
     elm.Ground : ground_translator,
     elm.Line: none_translator,
+    elm.LabeledLine: short_circuit_translator,
     elm.Node: none_translator,
     elm.LabelNode: none_translator,
     elm.RealCurrentSource: linear_current_source_translator,

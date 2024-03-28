@@ -8,6 +8,10 @@ class NortenTheveninElement(Protocol):
         """Name of element"""
         ...
     @property
+    def type(self) -> str:
+        """Specific element type"""
+        ...
+    @property
     def Z(self) -> complex:
         """Impedance value of element"""
         ...
@@ -70,7 +74,7 @@ def impedance(name : str, Z : complex) -> NortenTheveninElement:
     return NortenElement(Z=Z, V=0, name=name, type='impedance')
 
 def admittance(name : str, Y : complex) -> NortenTheveninElement:
-    return TheveninElement( Y=Y, I=0, name=name, type='admittance')
+    return TheveninElement(Y=Y, I=0, name=name, type='admittance')
 
 def resistor(name : str, R : float) -> NortenTheveninElement:
     return NortenElement(Z=R, V=0, name=name, type='resistor')
@@ -120,11 +124,17 @@ def is_current_source(element: NortenTheveninElement) -> bool:
     return np.abs(element.I) > 0
 
 def is_ideal_voltage_source(element: NortenTheveninElement) -> bool:
-    return is_voltage_source(element) and element.Z==0
+    return np.abs(element.V) >= 0 and element.Z==0
 
 def is_ideal_current_source(element: NortenTheveninElement) -> bool:
-    return is_current_source(element)and element.Y==0
+    return np.abs(element.I) >= 0 and element.Y==0
 
 def is_active(element: NortenTheveninElement) -> bool:
     return is_voltage_source(element) or is_current_source(element)
+
+def is_short_circuit(element: NortenTheveninElement) -> bool:
+    return element.V == 0 and element.Z == 0
+
+def is_open_circuit(element: NortenTheveninElement) -> bool:
+    return element.I == 0 and element.Y == 0
 

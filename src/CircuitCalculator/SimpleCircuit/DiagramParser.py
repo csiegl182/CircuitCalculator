@@ -75,7 +75,7 @@ class SchematicDiagramParser:
 
     @property
     def ground(self) -> schemdraw.util.Point:
-        ground_nodes = [n for n in self.node_elements if type(n) == elm.Ground]
+        ground_nodes = [n for n in self.node_elements if isinstance(n, elm.Ground)]
         if len(ground_nodes) > 1:
             raise MultipleGroundNodes
         if len(ground_nodes) == 0:

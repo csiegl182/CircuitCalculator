@@ -5,6 +5,7 @@ import numpy as np
 from dataclasses import dataclass, field
 
 class MultipleGroundNodes(Exception): pass
+class AmbiguousComponentID(Exception): pass
 
 @dataclass
 class Circuit:
@@ -22,6 +23,12 @@ class Circuit:
             self.ground_node = self.components[0].nodes[0]
         else:
             self.ground_node = ground_nodes[0]
+        if len(set([component.id for component in self.components])) != len(self.components):
+            raise AmbiguousComponentID(f'Component list contains multiple components with the same ID.')
+
+    def __getitem__(self, key: str) -> Component:
+        index = [component.id for component in self.components].index(key)
+        return self.components[index]
 
 def w(f: float) -> float:
     return 2*np.pi*f
