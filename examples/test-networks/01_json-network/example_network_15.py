@@ -7,6 +7,6 @@ if __name__ == '__main__':
     for id in network.branch_ids:
         print(f'V({id})={solution.get_voltage(id):2.2f}V')
     for id in network.branch_ids:
-        print(f'I({id})={solution.get_current(id):2.2f}A')
+        print(f'I({id})={solution.get_current(id)*1000:2.2f}mA')
     for id in network.node_labels:
         print(f'V({id})={solution.get_potential(id):2.2f}V')

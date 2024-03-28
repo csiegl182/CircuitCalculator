@@ -74,7 +74,7 @@ def impedance(name : str, Z : complex) -> NortenTheveninElement:
     return NortenElement(Z=Z, V=0, name=name, type='impedance')
 
 def admittance(name : str, Y : complex) -> NortenTheveninElement:
-    return TheveninElement( Y=Y, I=0, name=name, type='admittance')
+    return TheveninElement(Y=Y, I=0, name=name, type='admittance')
 
 def resistor(name : str, R : float) -> NortenTheveninElement:
     return NortenElement(Z=R, V=0, name=name, type='resistor')
@@ -92,8 +92,7 @@ def open_circuit(name : str) -> NortenTheveninElement:
     return TheveninElement(I=0, Y=0, name=name, type='open_circuit')
 
 def short_circuit(name : str) -> NortenTheveninElement:
-    # return NortenElement(V=0, Z=0, name=name, type='short_circuit')
-    return NortenElement(V=1e-8, Z=0, name=name, type='voltage_source') # TODO: See issue on src/CircuitCalculator/Network/loaders.py
+    return NortenElement(V=0, Z=0, name=name, type='short_circuit')
 
 def impedance_value(R : float = 0.0, X : float = 0.0, absZ : float = -1.0, phi : float = 0.0, degree : bool = False) -> complex:
     if degree:
@@ -125,11 +124,17 @@ def is_current_source(element: NortenTheveninElement) -> bool:
     return np.abs(element.I) > 0
 
 def is_ideal_voltage_source(element: NortenTheveninElement) -> bool:
-    return is_voltage_source(element) and element.Z==0
+    return np.abs(element.V) >= 0 and element.Z==0
 
 def is_ideal_current_source(element: NortenTheveninElement) -> bool:
-    return is_current_source(element)and element.Y==0
+    return np.abs(element.I) >= 0 and element.Y==0
 
 def is_active(element: NortenTheveninElement) -> bool:
     return is_voltage_source(element) or is_current_source(element)
+
+def is_short_circuit(element: NortenTheveninElement) -> bool:
+    return element.V == 0 and element.Z == 0
+
+def is_open_circuit(element: NortenTheveninElement) -> bool:
+    return element.I == 0 and element.Y == 0
 

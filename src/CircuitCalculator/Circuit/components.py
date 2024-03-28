@@ -1,4 +1,3 @@
-import numpy as np
 from dataclasses import dataclass, field
 
 @dataclass(frozen=True)
@@ -127,6 +126,13 @@ def periodic_current_source(id: str, nodes: tuple[str, str], wavetype: str, I: f
                'G': G},
         nodes=nodes
         )
+
+def short_circuit(id: str, nodes: tuple[str, str]) -> Component:
+    return Component(
+        type='short_circuit',
+        id=id,
+        nodes=nodes
+    )        
 
 def ground(id: str='gnd', nodes: tuple[str]=('0',)) -> Component:
     return Component(

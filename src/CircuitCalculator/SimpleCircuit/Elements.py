@@ -547,6 +547,19 @@ class Line(schemdraw.elements.lines.Line):
     def type(self) -> str:
         return 'line'
 
+class LabeledLine(Line):
+    def __init__(self, *args, name: str, **kwargs):
+        super().__init__(*args, name=name, **kwargs)
+        self._name = name
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def type(self) -> str:
+        return 'labeled_line'
+
 @simple_circuit_element
 class Node(schemdraw.elements.Element):
     def __init__(self, *args, name: str = '', **kwargs):

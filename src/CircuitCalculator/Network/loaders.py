@@ -34,8 +34,7 @@ network_branch_translators : dict[str, Callable[..., elm.NortenTheveninElement]]
     "linear_voltage_source" : lambda **kwargs: elm.voltage_source(V=to_complex(kwargs.pop('V')), Z=to_complex(kwargs.pop('Z')), **kwargs),
     "voltage_source" : lambda **kwargs: elm.voltage_source(V=to_complex(kwargs.pop('V')), **kwargs),
     "real_voltage_source" : elm.voltage_source,
-    # "short_circuit" : elm.short_circuit,
-    "short_circuit" : lambda **kwargs: elm.voltage_source(V=1e-8, Z=0, **kwargs), ## TODO: Normally we should have V=0 here. However the short circuit is not considered to be a voltage source then. Identifying of voltage sources must be fixed to solve this issue.
+    "short_circuit" : elm.short_circuit,
     "open_circuit" : elm.open_circuit,
 }
 
