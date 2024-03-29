@@ -111,12 +111,12 @@ class SinFunction:
         return lambda t: self.amplitude*np.sin(2*np.pi/self.period*t + self.phase)
 
 class SinFunctionHarmonics(AbstractHarmonicCoefficients):
-    def _amplitude_coefficients(self, n: int) -> float:
+    def _amplitude_coefficient(self, n: int) -> float:
         if n == 1:
             return self.amplitude0
         return 0
 
-    def _phase_coefficients(self, n: int) -> float:
+    def _phase_coefficient(self, n: int) -> float:
         if n == 1:
             return self.phase0-np.pi/2
         return 0
@@ -146,6 +146,7 @@ class RectFunctionHarmonics(AbstractHarmonicCoefficients):
 
 fourier_series_mapping: dict[Type[PeriodicFunction], Type[HarmonicCoefficients]] = {
     CosFunction: CosFunctionHarmonics,
+    SinFunction: SinFunctionHarmonics,
     RectFunction: RectFunctionHarmonics
 }
 
