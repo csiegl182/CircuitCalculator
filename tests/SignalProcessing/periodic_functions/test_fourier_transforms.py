@@ -1,6 +1,6 @@
 import pytest
 from hypothesis import given, strategies as st
-from CircuitCalculator.SignalProcessing.periodic_functions import CosFunction, SinFunction, fourier_series, PeriodicFunction, RectFunction
+from CircuitCalculator.SignalProcessing.periodic_functions import CosFunction, SinFunction, fourier_series, PeriodicFunction, RectFunction, TriFunction
 import numpy as np
 
 def calc_fourier_coefficients_via_integration(p_fcn: PeriodicFunction, num_f_samples: int, num_t_samples: int = 1000) -> tuple[np.ndarray, np.ndarray]:
@@ -24,7 +24,7 @@ def test_first_100_coefficients_of_cos_function(T:float, A:float, phi:float) -> 
     np.testing.assert_allclose(bn, [-cos_coef.amplitude(n)*np.sin(cos_coef.phase(n)) for n in range(100)], atol=1e-2, rtol=1e-3)
 
 @given(st.floats(min_value=0.001, max_value=10, allow_subnormal=False, allow_infinity=False), st.floats(min_value=0.001, max_value=1e6, allow_subnormal=False), st.floats(min_value=0, max_value=2*np.pi, allow_subnormal=False))
-def test_first_100_coefficients_of_infunction(T:float, A:float, phi:float) -> None:
+def test_first_100_coefficients_of_sin_function(T:float, A:float, phi:float) -> None:
     sin_fcn = SinFunction(T, A, phi)
     sin_coef = fourier_series(sin_fcn)
 
@@ -42,3 +42,13 @@ def test_first_100_coefficients_of_rect_function(T:float, A:float, phi:float) ->
         
     np.testing.assert_allclose([rect_coef.amplitude(n)*np.cos(rect_coef.phase(n)) for n in range(100)], an, atol=1e-2, rtol=1e-3)
     np.testing.assert_allclose([-rect_coef.amplitude(n)*np.sin(rect_coef.phase(n)) for n in range(100)], bn, atol=1e-2, rtol=1e-3)
+
+@given(st.floats(min_value=0.001, max_value=10, allow_subnormal=False, allow_infinity=False), st.floats(min_value=0.001, max_value=1e6, allow_subnormal=False), st.floats(min_value=0, max_value=2*np.pi, allow_subnormal=False))
+def test_first_100_coefficients_of_tri_function(T:float, A:float, phi:float) -> None:
+    tri_fcn = TriFunction(T, A, phi)
+    tri_coef = fourier_series(tri_fcn)
+
+    an, bn = calc_fourier_coefficients_via_integration(tri_fcn, 100)
+        
+    np.testing.assert_allclose(an, [tri_coef.amplitude(n)*np.cos(tri_coef.phase(n)) for n in range(100)], atol=1e-2, rtol=1e-3)
+    np.testing.assert_allclose(bn, [-tri_coef.amplitude(n)*np.sin(tri_coef.phase(n)) for n in range(100)], atol=1e-2, rtol=1e-3)

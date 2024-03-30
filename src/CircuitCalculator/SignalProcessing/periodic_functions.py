@@ -35,7 +35,7 @@ class HarmonicCoefficients(Protocol):
         ...
 
 @dataclass
-class AbstractHarmonicCoefficients:
+class AbstractHarmonicCoefficients(ABC):
     amplitude0: float = 1
     phase0: float = 0
 
@@ -59,9 +59,9 @@ class AbstractHarmonicCoefficients:
 
 @dataclass
 class ConstantFunction:
-    period: float = 0
-    amplitude: float = 1
-    phase: float = 0
+    period: float = field(default=0)
+    amplitude: float = field(default=1)
+    phase: float = field(default=0)
     wavetype: str = 'const'
 
     @property
@@ -144,10 +144,37 @@ class RectFunctionHarmonics(AbstractHarmonicCoefficients):
             return 0
         return n*self.phase0-np.pi/2
 
+@dataclass
+class TriFunction:
+    period: float
+    amplitude: float
+    phase: float
+    wavetype: str = 'tri'
+
+    @property
+    def time_function(self) -> TimeDomainFunction:
+        t0 = self.phase/2/np.pi*self.period
+        mod = lambda t: np.mod(t, self.period)
+        return np.vectorize(lambda t: self.amplitude*(1-4/self.period*mod(t+t0)) if mod(t+t0) < self.period/2 else self.amplitude*(-3+4/self.period*(mod(t+t0))))
+
+class TriFunctionHarmonics(AbstractHarmonicCoefficients):
+    def _amplitude_coefficient(self, n: int) -> float:
+        if n%2 == 0:
+            return 0
+        return 4/n/np.pi*self.amplitude0
+
+    def _phase_coefficient(self, n: int) -> float:
+        if n%2 == 0:
+            return 0
+        return n*self.phase0-np.pi/2
+
+
 fourier_series_mapping: dict[Type[PeriodicFunction], Type[HarmonicCoefficients]] = {
+    ConstantFunction: ConstFunctionHarmonics,
     CosFunction: CosFunctionHarmonics,
     SinFunction: SinFunctionHarmonics,
-    RectFunction: RectFunctionHarmonics
+    RectFunction: RectFunctionHarmonics,
+    TriFunction: TriFunctionHarmonics
 }
 
 periodic_functions : PeriodicFunctionList = list(fourier_series_mapping.keys())
