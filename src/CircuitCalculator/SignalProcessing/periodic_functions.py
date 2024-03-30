@@ -49,6 +49,15 @@ class AbstractHarmonicCoefficients(ABC):
             raise ValueError('Fourier index must be positive.')
         return self._phase_coefficient(n)
 
+    def real(self, n: int) -> float:
+        return self.amplitude(n)*np.cos(self.phase(n))
+    
+    def imag(self, n: int) -> float:
+        return self.amplitude(n)*np.sin(self.phase(n))
+
+    def c(self, n: int) -> complex:
+        return self.amplitude(n)*np.exp(1j*self.phase(n))
+
     @abstractmethod
     def _amplitude_coefficient(self, n: int) -> float:
         ...
