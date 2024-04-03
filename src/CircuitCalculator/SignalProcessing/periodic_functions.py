@@ -105,7 +105,7 @@ class CosFunctionHarmonics(AbstractHarmonicCoefficients):
 
     def _phase_coefficient(self, n: int) -> float:
         if n == 1:
-            return self.phase0
+            return -self.phase0
         return 0
 
 @dataclass
@@ -127,7 +127,7 @@ class SinFunctionHarmonics(AbstractHarmonicCoefficients):
 
     def _phase_coefficient(self, n: int) -> float:
         if n == 1:
-            return self.phase0-np.pi/2
+            return np.pi/2-self.phase0
         return 0
 
 @dataclass
@@ -151,7 +151,7 @@ class RectFunctionHarmonics(AbstractHarmonicCoefficients):
     def _phase_coefficient(self, n: int) -> float:
         if n%2 == 0:
             return 0
-        return n*self.phase0-np.pi/2
+        return np.pi/2-n*self.phase0
 
 @dataclass
 class TriFunction:
@@ -170,13 +170,12 @@ class TriFunctionHarmonics(AbstractHarmonicCoefficients):
     def _amplitude_coefficient(self, n: int) -> float:
         if n%2 == 0:
             return 0
-        return 4/n/np.pi*self.amplitude0
+        return 8/n/n/np.pi/np.pi*self.amplitude0
 
     def _phase_coefficient(self, n: int) -> float:
         if n%2 == 0:
             return 0
-        return n*self.phase0-np.pi/2
-
+        return -n*self.phase0
 
 fourier_series_mapping: dict[Type[PeriodicFunction], Type[HarmonicCoefficients]] = {
     ConstantFunction: ConstFunctionHarmonics,
