@@ -34,6 +34,15 @@ class HarmonicCoefficients(Protocol):
     def phase(self, n: int) -> float:
         ...
 
+    def real(self, n: int) -> float:
+        ...
+    
+    def imag(self, n: int) -> float:
+        ...
+
+    def c(self, n: int) -> complex:
+        ...
+
 @dataclass
 class AbstractHarmonicCoefficients(ABC):
     amplitude0: float = 1
