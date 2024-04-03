@@ -56,7 +56,9 @@ class AbstractHarmonicCoefficients(ABC):
         return self.amplitude(n)*np.sin(self.phase(n))
 
     def c(self, n: int) -> complex:
-        return self.amplitude(n)*np.exp(1j*self.phase(n))
+        if n < 0:
+            return self.amplitude(-n)/2*np.exp(1j*self.phase(-n))
+        return self.amplitude(n)/2*np.exp(-1j*self.phase(n))
 
     @abstractmethod
     def _amplitude_coefficient(self, n: int) -> float:
@@ -177,12 +179,37 @@ class TriFunctionHarmonics(AbstractHarmonicCoefficients):
             return 0
         return -n*self.phase0
 
+@dataclass
+class SawFunction:
+    period: float
+    amplitude: float
+    phase: float
+    wavetype: str = 'saw'
+
+    @property
+    def time_function(self) -> TimeDomainFunction:
+        t0 = self.phase/2/np.pi*self.period
+        mod = lambda t: np.mod(t, self.period)
+        return np.vectorize(lambda t: self.amplitude*(2/self.period*mod(t+t0)-1))
+
+class SawFunctionHarmonics(AbstractHarmonicCoefficients):
+    def _amplitude_coefficient(self, n: int) -> float:
+        if n == 0:
+            return 0
+        return -2/n/np.pi*self.amplitude0
+
+    def _phase_coefficient(self, n: int) -> float:
+        if n == 0:
+            return 0
+        return np.pi/2-n*self.phase0
+
 fourier_series_mapping: dict[Type[PeriodicFunction], Type[HarmonicCoefficients]] = {
     ConstantFunction: ConstFunctionHarmonics,
     CosFunction: CosFunctionHarmonics,
     SinFunction: SinFunctionHarmonics,
     RectFunction: RectFunctionHarmonics,
-    TriFunction: TriFunctionHarmonics
+    TriFunction: TriFunctionHarmonics,
+    SawFunction: SawFunctionHarmonics,
 }
 
 periodic_functions : PeriodicFunctionList = list(fourier_series_mapping.keys())

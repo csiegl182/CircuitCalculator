@@ -27,7 +27,7 @@ def test_real_part_is_correct(A, phi) -> None:
     hi = HarmonicImplementation(A, phi)
     assert hi.real(0) == A*np.cos(phi)
 
-@given(st.floats(min_value=0, allow_subnormal=False), st.floats(min_value=0, max_value=2*np.pi, allow_subnormal=False))
+@given(st.floats(min_value=0, allow_subnormal=False, allow_infinity=False), st.floats(min_value=0, max_value=2*np.pi, allow_subnormal=False))
 def test_imag_part_is_correct(A, phi) -> None:
     class HarmonicImplementation(AbstractHarmonicCoefficients):
         def _amplitude_coefficient(self, _):
@@ -45,4 +45,4 @@ def test_complex_part_is_correct(A, phi) -> None:
         def _phase_coefficient(self, _):
             return self.phase0
     hi = HarmonicImplementation(A, phi)
-    assert hi.c(0) == A*np.exp(1j*phi)
+    assert hi.c(0) == A/2*np.exp(-1j*phi)
