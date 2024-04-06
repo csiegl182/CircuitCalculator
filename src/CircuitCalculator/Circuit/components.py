@@ -79,7 +79,7 @@ def complex_voltage_source(id: str, nodes: tuple[str, str], V: complex, Z: compl
         nodes=nodes
         )
 
-def periodic_voltage_source(id: str, nodes: tuple[str, str], wavetype: str, V: float, w: float, phi: float, R: float = 0) ->Component:
+def periodic_voltage_source(id: str, nodes: tuple[str, str], wavetype: str, V: float, w: float, phi: float = 0, R: float = 0) ->Component:
     return Component(
         type='periodic_voltage_source',
         id=id,
