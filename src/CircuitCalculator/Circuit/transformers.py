@@ -168,6 +168,13 @@ def short_circuit(short_circuit: ccp.Component, *_) -> ntw.Branch:
         elm.short_circuit(short_circuit.id)
     )
 
+def resistive_load(load: ccp.Component, *_) -> ntw.Branch:
+    return ntw.Branch(
+        load.nodes[0],
+        load.nodes[1],
+        elm.load(load.id, float(load.value['P']), float(load.value['V_ref']))
+    )
+
 transformers : dict[str, CircuitComponentTranslator] = {
     'resistor' : resistor,
     'impedance' : impedance,
@@ -181,5 +188,6 @@ transformers : dict[str, CircuitComponentTranslator] = {
     'complex_current_source' : complex_current_source,
     'periodic_voltage_source' : periodic_voltage_source,
     'periodic_current_source' : periodic_current_source,
-    'short_circuit' : short_circuit
+    'short_circuit' : short_circuit,
+    'resistive_load' : resistive_load
 }

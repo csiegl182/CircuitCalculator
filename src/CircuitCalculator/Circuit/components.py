@@ -115,7 +115,7 @@ def complex_current_source(id: str, nodes: tuple[str, str], I: complex, Y: compl
         nodes=nodes
         )
 
-def periodic_current_source(id: str, nodes: tuple[str, str], wavetype: str, I: float, w: float, phi: float, G: float = 0) ->Component:
+def periodic_current_source(id: str, nodes: tuple[str, str], wavetype: str, I: float, w: float, phi: float, G: float = 0) -> Component:
     return Component(
         type='periodic_current_source',
         id=id,
@@ -124,6 +124,14 @@ def periodic_current_source(id: str, nodes: tuple[str, str], wavetype: str, I: f
                'w': w,
                'phi': phi,
                'G': G},
+        nodes=nodes
+        )
+
+def resistive_load(id: str, nodes: tuple[str, str], P: float, V_ref: float) -> Component:
+    return Component(
+        type='resistive_load',
+        id=id,
+        value={'P': P, 'V_ref': V_ref},
         nodes=nodes
         )
 
