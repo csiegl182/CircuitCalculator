@@ -27,7 +27,7 @@ class SchematicDiagramSolution:
         V_branch = self.solution.get_voltage(name)
         if reverse:
             V_branch *= -1
-        return elm.VoltageLabel(element, label=self.voltage_display(V_branch), reverse=reverse if not element.is_reverse else not reverse, color=dsp.blue)
+        return elm.VoltageLabel(element, vlabel=self.voltage_display(V_branch), reverse=reverse if not element.is_reverse else not reverse, color=dsp.blue)
 
     def draw_current(self, name: str, reverse: bool = False, end: bool = False) -> elm.CurrentLabel:
         element = self.diagram_parser.get_element(name)
@@ -36,12 +36,12 @@ class SchematicDiagramSolution:
             I_branch *= -1
         if end:
             reverse = not reverse
-        return elm.CurrentLabel(element, label=self.current_display(I_branch), reverse=reverse if not element.is_reverse else not reverse, start=not end, color=dsp.red)
+        return elm.CurrentLabel(element, ilabel=self.current_display(I_branch), reverse=reverse if not element.is_reverse else not reverse, start=not end, color=dsp.red)
 
     def draw_power(self, name: str, reverse: bool = False) -> elm.PowerLabel:
         element = self.diagram_parser.get_element(name)
         P_branch = self.solution.get_power(name)
-        return elm.PowerLabel(element, label=self.power_display(P_branch), color=dsp.green)
+        return elm.PowerLabel(element, plabel=self.power_display(P_branch), color=dsp.green)
 
     def draw_potential(self, node: str, loc:str = '') -> elm.LabelNode:
         element = self.diagram_parser.get_element(node)

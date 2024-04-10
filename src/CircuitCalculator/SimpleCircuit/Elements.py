@@ -548,7 +548,7 @@ class Line(schemdraw.elements.lines.Line):
         return 'line'
 
 @simple_circuit_element
-class Lamp(schemdraw.elements.Lamp):
+class Lamp(schemdraw.elements.Lamp2):
     ...
 
 class LabeledLine(Line):
@@ -687,7 +687,7 @@ class Ground(Node):
         return super().up()
 
 class VoltageLabel(schemdraw.elements.CurrentLabel):
-    def __init__(self, at: schemdraw.elements.Element, label: str = '', label_loc: str = 'bottom', reverse: bool = False, **kwargs):
+    def __init__(self, at: schemdraw.elements.Element, vlabel: str = '', label_loc: str = 'bottom', reverse: bool = False, **kwargs):
         kwargs.update({'color': kwargs.get('color', dsp.blue)})
         kwargs.update({'headlength': kwargs.get('headlength', 0.4)})
         kwargs.update({'headwidth': kwargs.get('headwidth', 0.3)})
@@ -702,10 +702,10 @@ class VoltageLabel(schemdraw.elements.CurrentLabel):
         rotate = kwargs.get('rotate', True)
         if rotate == True and at.transform.theta == 270:
             rotate = 90
-        self.label(label, rotate=rotate, loc=label_loc, ofst=(0, -0.1))
+        self.label(vlabel, rotate=rotate, loc=label_loc, ofst=(0, -0.1))
 
 class CurrentLabel(schemdraw.elements.CurrentLabelInline):
-    def __init__(self, at: schemdraw.elements.Element, label: str = '', **kwargs):
+    def __init__(self, at: schemdraw.elements.Element, ilabel: str = '', **kwargs):
         kwargs.update(i_label_args.get(type(at), {}))
         kwargs.update({'color': kwargs.get('color', dsp.red)})
         kwargs.update({'headlength': kwargs.get('headlength', 0.4)})
@@ -719,10 +719,10 @@ class CurrentLabel(schemdraw.elements.CurrentLabelInline):
         kwargs.update({'start' : start, 'reverse' : reverse})
         super().__init__(**kwargs)
         self.at(at)
-        self.label(label)
+        self.label(ilabel)
 
 class PowerLabel(schemdraw.elements.Label):
-    def __init__(self, at: schemdraw.elements.Element, label: str = '', **kwargs):
+    def __init__(self, at: schemdraw.elements.Element, plabel: str = '', **kwargs):
         kwargs.update({'color': kwargs.get('color', dsp.green)})
         super().__init__(**kwargs)
         try:
@@ -733,7 +733,7 @@ class PowerLabel(schemdraw.elements.Label):
         rotate = kwargs.get('rotate', True)
         if rotate == True and at.transform.theta == 270:
             rotate = 90
-        self.label(label, rotate=rotate, halign='center')
+        self.label(plabel, rotate=rotate, halign='center')
 
 i_label_args : dict[Any, dict[str, float]] = {
     Resistor : {'ofst' : 1.4},

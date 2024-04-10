@@ -28,12 +28,12 @@ def resistor(element: Type[schemdraw.elements.Element]) -> Type[schemdraw.elemen
             self.anchors['s_label'] = (0.5, -1.2)
             return super().left()
 
-        def _place_label(self, *args, **kwargs):
+        def _place_label(self, label: schemdraw.elements.elements.Label, theta: float = 0):
             delta = self.end-self.start
             if abs(delta[1]) > abs(delta[0]): # portrait placing of resistor
                 if delta[1] < 0:
-                    kwargs.update({'rotation': 90})
-            super()._place_label(*args, **kwargs)
+                    theta = 90
+            super()._place_label(label=label, theta=theta)
     
     return extended_resistor
 
@@ -71,12 +71,12 @@ def capacitor(element: Type[schemdraw.elements.Element]) -> Type[schemdraw.eleme
             self.anchors['v_label'] = (0.0, 0.3)
             return super().left()
 
-        def _place_label(self, *args, **kwargs):
+        def _place_label(self, label: schemdraw.elements.elements.Label, theta: float = 0):
             delta = self.end-self.start
             if abs(delta[1]) > abs(delta[0]): # portrait placing of resistor
                 if delta[1] < 0:
-                    kwargs.update({'rotation': 90})
-            super()._place_label(*args, **kwargs)
+                    theta = 90
+            super()._place_label(label=label, theta=theta)
 
     return extended_inductor
 
@@ -100,12 +100,12 @@ def inductor(element: Type[schemdraw.elements.Element]) -> Type[schemdraw.elemen
             self.anchors['s_label'] = (0.5, -1.2)
             return super().left()
 
-        def _place_label(self, *args, **kwargs):
+        def _place_label(self, label: schemdraw.elements.elements.Label, theta: float = 0):
             delta = self.end-self.start
             if abs(delta[1]) > abs(delta[0]): # portrait placing of resistor
                 if delta[1] < 0:
-                    kwargs.update({'rotation': 90})
-            super()._place_label(*args, **kwargs)
+                    theta = 90
+            super()._place_label(label=label, theta=theta)
 
     return extended_inductor
 

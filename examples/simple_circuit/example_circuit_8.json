@@ -52,7 +52,17 @@
             "reverse": true,
             "values": {
                 "_userparams": {
-                    "reverse": false
+                    "V": 1,
+                    "reverse": false,
+                    "name": "Uq",
+                    "theta": 90,
+                    "drop": {
+                        "type": "Point",
+                        "values": [
+                            5.0,
+                            0
+                        ]
+                    }
                 },
                 "segments": [
                     {
@@ -235,16 +245,7 @@
                         }
                     }
                 ],
-                "params": {
-                    "theta": 90,
-                    "drop": {
-                        "type": "Point",
-                        "values": [
-                            5.0,
-                            0
-                        ]
-                    }
-                },
+                "params": null,
                 "anchors": {
                     "value_label": [
                         0.5,
@@ -409,8 +410,17 @@
             "reverse": false,
             "values": {
                 "_userparams": {
+                    "R": 2,
+                    "name": "R1",
                     "reverse": false,
-                    "d": "right"
+                    "d": "right",
+                    "drop": {
+                        "type": "Point",
+                        "values": [
+                            5.0,
+                            0
+                        ]
+                    }
                 },
                 "segments": [
                     {
@@ -530,15 +540,7 @@
                         }
                     }
                 ],
-                "params": {
-                    "drop": {
-                        "type": "Point",
-                        "values": [
-                            5.0,
-                            0
-                        ]
-                    }
-                },
+                "params": null,
                 "anchors": {
                     "value_label": [
                         0.5,
@@ -692,8 +694,17 @@
             "reverse": false,
             "values": {
                 "_userparams": {
+                    "R": 4,
+                    "name": "R2",
                     "reverse": false,
-                    "d": "down"
+                    "d": "down",
+                    "drop": {
+                        "type": "Point",
+                        "values": [
+                            5.0,
+                            0
+                        ]
+                    }
                 },
                 "segments": [
                     {
@@ -813,15 +824,7 @@
                         }
                     }
                 ],
-                "params": {
-                    "drop": {
-                        "type": "Point",
-                        "values": [
-                            5.0,
-                            0
-                        ]
-                    }
-                },
+                "params": null,
                 "anchors": {
                     "value_label": [
                         0.5,
@@ -975,7 +978,14 @@
             "reverse": false,
             "values": {
                 "_userparams": {
-                    "d": "left"
+                    "d": "left",
+                    "drop": {
+                        "type": "Point",
+                        "values": [
+                            4.5,
+                            0
+                        ]
+                    }
                 },
                 "segments": [
                     {
@@ -1019,15 +1029,7 @@
                         }
                     }
                 ],
-                "params": {
-                    "drop": {
-                        "type": "Point",
-                        "values": [
-                            4.5,
-                            0
-                        ]
-                    }
-                },
+                "params": null,
                 "anchors": {
                     "istart": {
                         "type": "Point",
@@ -1148,7 +1150,12 @@
             "reverse": false,
             "values": {
                 "_userparams": {
-                    "name": "0"
+                    "name": "0",
+                    "theta": 0,
+                    "drop": [
+                        0,
+                        0
+                    ]
                 },
                 "segments": [
                     {
@@ -1241,13 +1248,7 @@
                         }
                     }
                 ],
-                "params": {
-                    "theta": 0,
-                    "drop": [
-                        0,
-                        0
-                    ]
-                },
+                "params": null,
                 "anchors": {
                     "start": [
                         0,
