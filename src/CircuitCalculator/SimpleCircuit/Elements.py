@@ -547,9 +547,28 @@ class Line(schemdraw.elements.lines.Line):
     def type(self) -> str:
         return 'line'
 
+@extension.source
 @simple_circuit_element
 class Lamp(schemdraw.elements.Lamp2):
-    ...
+    def __init__(self, V_ref: float, P_ref: float, name: str, *args, show_name: bool = True, show_value: bool = True, reverse: bool = False, precision: int = 3, **kwargs):
+        super().__init__(*args, reverse=reverse, **kwargs)
+        label = dsp.print_real(P_ref, unit='W', precision=precision)
+        if show_name:
+            self.label(f'{name}={label}', rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
+        self._V_ref = V_ref
+        self._P_ref = P_ref
+
+    @property
+    def V_ref(self) -> float:
+        return self._V_ref
+
+    @property
+    def P_ref(self) -> float:
+        return self._P_ref
+
+    @property
+    def R(self) -> float:
+        return self._V_ref**2/self._P_ref
 
 class LabeledLine(Line):
     def __init__(self, *args, name: str, **kwargs):
