@@ -552,11 +552,13 @@ class Line(schemdraw.elements.lines.Line):
 class Lamp(schemdraw.elements.Lamp2):
     def __init__(self, V_ref: float, P_ref: float, name: str, *args, show_name: bool = True, show_value: bool = True, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
-        label = dsp.print_real(P_ref, unit='W', precision=precision)
-        if show_name:
-            self.label(f'{name}={label}', rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
         self._V_ref = V_ref
         self._P_ref = P_ref
+        label = ''
+        label += f'{name}' if show_name else ''
+        label += '=' if  show_name and show_value else ''
+        label += dsp.print_real(P_ref, unit='W', precision=precision) if show_value else ''
+        self.label(label, rotate=True, loc='value_label', halign='center', valign='center')
 
     @property
     def V_ref(self) -> float:

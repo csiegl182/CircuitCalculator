@@ -113,7 +113,7 @@ def lamp(element: Type[schemdraw.elements.Element]) -> Type[schemdraw.elements.E
     class extended_lamp(element):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            self.anchors['value_label'] = (0.5, 1.1)
+            self.anchors['value_label'] = (0.5, 0.8)
             self.anchors['v_label'] = (0.5, -1.1)
             self.anchors['i_label'] = (1.2, 0.3)
             self.anchors['s_label'] = (0.5, 1.5)
