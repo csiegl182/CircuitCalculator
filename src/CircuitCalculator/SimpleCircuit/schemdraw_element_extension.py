@@ -109,6 +109,21 @@ def inductor(element: Type[schemdraw.elements.Element]) -> Type[schemdraw.elemen
 
     return extended_inductor
 
+def lamp(element: Type[schemdraw.elements.Element]) -> Type[schemdraw.elements.Element]:
+    class extended_lamp(element):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.anchors['value_label'] = (0.5, 1.1)
+            self.anchors['v_label'] = (0.5, -1.1)
+            self.anchors['i_label'] = (1.2, 0.3)
+            self.anchors['s_label'] = (0.5, 1.5)
+
+        def down(self) -> schemdraw.elements.Element:
+            self.anchors['s_label'] = (0.5, -0.7)
+            return super().down()
+
+    return extended_lamp
+
 def voltage_arrow(start: tuple[float, float] = (1.5, 0.7), end: tuple[float, float] = (-0.5, 0.7), arrowwidth: float = 0.3, arrowlength: float = 0.4, color=dsp.blue) -> schemdraw.Segment:
     return schemdraw.Segment((start, end), arrow='->', arrowwidth=arrowwidth, arrowlength=arrowlength, color=color)
 

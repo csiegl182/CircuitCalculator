@@ -547,7 +547,7 @@ class Line(schemdraw.elements.lines.Line):
     def type(self) -> str:
         return 'line'
 
-@extension.source
+@extension.lamp
 @simple_circuit_element
 class Lamp(schemdraw.elements.Lamp2):
     def __init__(self, V_ref: float, P_ref: float, name: str, *args, show_name: bool = True, show_value: bool = True, reverse: bool = False, precision: int = 3, **kwargs):

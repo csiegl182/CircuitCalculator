@@ -127,6 +127,14 @@ def periodic_current_source(id: str, nodes: tuple[str, str], wavetype: str, I: f
         nodes=nodes
         )
 
+def lamp(id: str, nodes: tuple[str, str], P: float, V_ref: float) -> Component:
+    return Component(
+        type='lamp',
+        id=id,
+        value={'P': P, 'V_ref': V_ref},
+        nodes=nodes
+        )
+
 def resistive_load(id: str, nodes: tuple[str, str], P: float, V_ref: float) -> Component:
     return Component(
         type='resistive_load',

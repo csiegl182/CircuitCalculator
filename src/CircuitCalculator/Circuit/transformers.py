@@ -189,5 +189,6 @@ transformers : dict[str, CircuitComponentTranslator] = {
     'periodic_voltage_source' : periodic_voltage_source,
     'periodic_current_source' : periodic_current_source,
     'short_circuit' : short_circuit,
-    'resistive_load' : resistive_load
+    'resistive_load' : resistive_load,
+    'lamp' : resistive_load
 }

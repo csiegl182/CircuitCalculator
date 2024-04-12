@@ -21,7 +21,7 @@ def inductance_translator(element: elm.Inductance, nodes: tuple[str, ...]) -> cc
     return ccp.inductance(nodes=(nodes[0], nodes[1]), id=element.name, L=element.L)
 
 def lamp_translator(element: elm.Lamp, nodes: tuple[str, ...]) -> ccp.Component:
-    return ccp.resistive_load(nodes=(nodes[0], nodes[1]), id=element.name, P=element.P_ref, V_ref=element.V_ref)
+    return ccp.lamp(nodes=(nodes[0], nodes[1]), id=element.name, P=element.P_ref, V_ref=element.V_ref)
 
 def ground_translator(element: elm.Ground, nodes: tuple[str, ...]) -> ccp.Component:
     return ccp.ground(nodes=(nodes[0],), id=element.name)
