@@ -4,10 +4,14 @@ from ..Circuit.solution import ComplexSolution
 import schemdraw
 import matplotlib as mpl
 from typing import Callable
+import numpy as np
+
+def linear_colormap(start_color: tuple[float, float, float], end_color: tuple[float, float, float], num_samples: int) -> Callable[[float], tuple[float, float, float]]:
+    return mpl.colors.LinearSegmentedColormap.from_list('light_bulb', [start_color, end_color])
 
 def light_lamps(schematic: Schematic, on_threshold_percentage: float = 0.1, breakthrough_threshold_percentage: float = 1.2) -> None:
     def light_color(brightness: float) -> tuple[float, float, float]:
-        colormap: Callable[[float], tuple[float, float, float]] = mpl.colormaps['YlOrRd']
+        colormap: Callable[[float], tuple[float, float, float]] = linear_colormap((1.0, 0.62, 0.24), (0.97, 1.0, 0.52), 256)
         if brightness <= on_threshold_percentage:
             return (1, 1, 1)
         if brightness >= breakthrough_threshold_percentage:
