@@ -558,7 +558,7 @@ class Lamp(schemdraw.elements.Lamp2):
         label += f'{name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
         label += dsp.print_real(P_ref, unit='W', precision=precision) if show_value else ''
-        self.label(label, rotate=True, loc='value_label', halign='center', valign='center')
+        self.label(label, rotate=show_value, loc='value_label', halign='center', valign='center')
 
     @property
     def V_ref(self) -> float:
