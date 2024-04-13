@@ -7,6 +7,7 @@ import schemdraw.util
 import schemdraw.transform
 import json
 from typing import Any, TypedDict, Callable, TypeVar
+from collections import ChainMap
 
 class SchemdrawObjectProperties(TypedDict):
     type: str
@@ -88,6 +89,7 @@ schemdraw_serializers = {
     dict: lambda x: {k: serialize_schemdraw_element(v) for k, v in x.items()},
     list: lambda x: [serialize_schemdraw_element(e) for e in x],
     tuple: lambda x: [serialize_schemdraw_element(e) for e in x],
+    ChainMap: lambda x: dict(x),
     schemdraw.util.Point: lambda x: schemdraw_object_properties(x, listify_point),
     schemdraw.segments.Segment: lambda x: schemdraw_object_properties(x, dictify_segment),
     schemdraw.segments.SegmentText: lambda x: schemdraw_object_properties(x, dictify_segment_text),

@@ -56,7 +56,7 @@ def print_sinosoidal(value: complex, unit: str = '', precision: int = 3, w: floa
     label+= ')'
     return label
 
-def print_active_power(value: float, unit='W', precision: int = 3) -> str:
+def print_active_power(value: float, precision: int = 3) -> str:
     P = ScientificFloat(value=abs(value), unit='W', precision=precision, use_exp_prefix=True)
     P_sign = '↓' if value > 0 else '↑'
     label = f'{P}{P_sign}'

@@ -13,7 +13,7 @@ requires-python = ">=3.10"
 dependencies = [
     "numpy>=1.24.2",
     "matplotlib==3.5.2",
-    "schemdraw==0.17"
+    "schemdraw==0.18"
 ]
 
 [tool.pytest.ini_options]
