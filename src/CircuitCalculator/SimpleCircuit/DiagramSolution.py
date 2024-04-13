@@ -89,5 +89,5 @@ def real_network_dc_solution(schematic: elm.Schematic, solver: NetworkSolver = n
         solution=solution,
         voltage_display=partial(dsp.print_real, unit='V', precision=precision),
         current_display=partial(dsp.print_real, unit='A', precision=precision),
-        power_display=partial(dsp.print_active_power, unit='W', precision=precision)
+        power_display=lambda x: dsp.print_active_power(x.real, precision=precision)
     )
