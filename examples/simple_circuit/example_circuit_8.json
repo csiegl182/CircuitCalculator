@@ -245,7 +245,27 @@
                         }
                     }
                 ],
-                "params": null,
+                "params": {
+                    "unit": 9,
+                    "inches_per_unit": 0.5,
+                    "lblofst": 0.1,
+                    "fontsize": 14.0,
+                    "font": "sans-serif",
+                    "color": "black",
+                    "lw": 2.0,
+                    "ls": "-",
+                    "fill": null,
+                    "margin": 0.1,
+                    "dotradius": 0.075,
+                    "V": 1,
+                    "reverse": false,
+                    "name": "Uq",
+                    "theta": 90,
+                    "drop": [
+                        5.0,
+                        0
+                    ]
+                },
                 "anchors": {
                     "value_label": [
                         0.5,
@@ -540,7 +560,27 @@
                         }
                     }
                 ],
-                "params": null,
+                "params": {
+                    "unit": 9,
+                    "inches_per_unit": 0.5,
+                    "lblofst": 0.1,
+                    "fontsize": 14.0,
+                    "font": "sans-serif",
+                    "color": "black",
+                    "lw": 2.0,
+                    "ls": "-",
+                    "fill": null,
+                    "margin": 0.1,
+                    "dotradius": 0.075,
+                    "R": 2,
+                    "name": "R1",
+                    "reverse": false,
+                    "d": "right",
+                    "drop": [
+                        5.0,
+                        0
+                    ]
+                },
                 "anchors": {
                     "value_label": [
                         0.5,
@@ -824,7 +864,27 @@
                         }
                     }
                 ],
-                "params": null,
+                "params": {
+                    "unit": 9,
+                    "inches_per_unit": 0.5,
+                    "lblofst": 0.1,
+                    "fontsize": 14.0,
+                    "font": "sans-serif",
+                    "color": "black",
+                    "lw": 2.0,
+                    "ls": "-",
+                    "fill": null,
+                    "margin": 0.1,
+                    "dotradius": 0.075,
+                    "R": 4,
+                    "name": "R2",
+                    "reverse": false,
+                    "d": "down",
+                    "drop": [
+                        5.0,
+                        0
+                    ]
+                },
                 "anchors": {
                     "value_label": [
                         0.5,
@@ -1029,7 +1089,26 @@
                         }
                     }
                 ],
-                "params": null,
+                "params": {
+                    "unit": 9,
+                    "inches_per_unit": 0.5,
+                    "lblofst": 0.1,
+                    "fontsize": 14.0,
+                    "font": "sans-serif",
+                    "color": "black",
+                    "lw": 2.0,
+                    "ls": "-",
+                    "fill": null,
+                    "margin": 0.1,
+                    "dotradius": 0.075,
+                    "arrowwidth": 0.15,
+                    "arrowlength": 0.25,
+                    "d": "left",
+                    "drop": [
+                        4.5,
+                        0
+                    ]
+                },
                 "anchors": {
                     "istart": {
                         "type": "Point",
@@ -1248,7 +1327,24 @@
                         }
                     }
                 ],
-                "params": null,
+                "params": {
+                    "unit": 9,
+                    "inches_per_unit": 0.5,
+                    "lblofst": 0.1,
+                    "fontsize": 14.0,
+                    "font": "sans-serif",
+                    "color": "black",
+                    "lw": 2.0,
+                    "ls": "-",
+                    "fill": null,
+                    "margin": 0.1,
+                    "name": "0",
+                    "theta": 0,
+                    "drop": [
+                        0,
+                        0
+                    ]
+                },
                 "anchors": {
                     "start": [
                         0,
