@@ -6,6 +6,7 @@ from . import Display as dsp
 import numpy as np
 
 from typing import Any
+from collections import ChainMap
 from enum import Enum
 from abc import ABC
 
@@ -708,10 +709,8 @@ class Ground(Node):
         return super().up()
 
 class VoltageLabel(schemdraw.elements.CurrentLabel):
-    def __init__(self, at: schemdraw.elements.Element, vlabel: str = '', label_loc: str = 'bottom', reverse: bool = False, **kwargs):
-        kwargs.update({'color': kwargs.get('color', dsp.blue)})
-        kwargs.update({'headlength': kwargs.get('headlength', 0.4)})
-        kwargs.update({'headwidth': kwargs.get('headwidth', 0.3)})
+    def __init__(self, at: schemdraw.elements.Element, vlabel: str = '', label_loc: str = 'bottom', reverse: bool = False, color: str | tuple[float, float, float] = dsp.blue, **kwargs):
+        self.params = ChainMap({'headwidth': 0.3, 'headlength': 0.4, 'color': color}, self.params)
         if isinstance(at, RealVoltageSource):
             kwargs.update({'length': kwargs.get('length', 4)})
         super().__init__(reverse=reverse, **kwargs)

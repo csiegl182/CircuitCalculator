@@ -55,7 +55,6 @@
                     "V": 1,
                     "reverse": false,
                     "name": "Uq",
-                    "theta": 90,
                     "drop": {
                         "type": "Point",
                         "values": [
@@ -256,11 +255,12 @@
                     "ls": "-",
                     "fill": null,
                     "margin": 0.1,
+                    "leadcolor": null,
                     "dotradius": 0.075,
+                    "theta": 90,
                     "V": 1,
                     "reverse": false,
                     "name": "Uq",
-                    "theta": 90,
                     "drop": [
                         5.0,
                         0
@@ -409,7 +409,13 @@
                                 0
                             ]
                         },
-                        "zoom": 1
+                        "zoom": {
+                            "type": "Point",
+                            "values": [
+                                1,
+                                1
+                            ]
+                        }
                     }
                 },
                 "absdrop": [
@@ -571,6 +577,7 @@
                     "ls": "-",
                     "fill": null,
                     "margin": 0.1,
+                    "leadcolor": null,
                     "dotradius": 0.075,
                     "R": 2,
                     "name": "R1",
@@ -713,7 +720,13 @@
                                 0
                             ]
                         },
-                        "zoom": 1
+                        "zoom": {
+                            "type": "Point",
+                            "values": [
+                                1,
+                                1
+                            ]
+                        }
                     }
                 },
                 "absdrop": [
@@ -849,7 +862,7 @@
                             "label": "R2=4.00\u03a9",
                             "align": [
                                 "center",
-                                "bottom"
+                                "center"
                             ],
                             "font": "sans-serif",
                             "mathfont": null,
@@ -875,6 +888,7 @@
                     "ls": "-",
                     "fill": null,
                     "margin": 0.1,
+                    "leadcolor": null,
                     "dotradius": 0.075,
                     "R": 4,
                     "name": "R2",
@@ -1017,7 +1031,13 @@
                                 0
                             ]
                         },
-                        "zoom": 1
+                        "zoom": {
+                            "type": "Point",
+                            "values": [
+                                1,
+                                1
+                            ]
+                        }
                     }
                 },
                 "absdrop": [
@@ -1100,6 +1120,7 @@
                     "ls": "-",
                     "fill": null,
                     "margin": 0.1,
+                    "leadcolor": null,
                     "dotradius": 0.075,
                     "arrowwidth": 0.15,
                     "arrowlength": 0.25,
@@ -1208,7 +1229,13 @@
                                 0
                             ]
                         },
-                        "zoom": 1
+                        "zoom": {
+                            "type": "Point",
+                            "values": [
+                                1,
+                                1
+                            ]
+                        }
                     }
                 },
                 "absdrop": [
@@ -1451,7 +1478,13 @@
                                 0
                             ]
                         },
-                        "zoom": 1
+                        "zoom": {
+                            "type": "Point",
+                            "values": [
+                                1,
+                                1
+                            ]
+                        }
                     }
                 },
                 "absdrop": [

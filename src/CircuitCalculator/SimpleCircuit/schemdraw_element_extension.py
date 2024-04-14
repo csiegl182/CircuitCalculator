@@ -30,7 +30,7 @@ def resistor(element: Type[schemdraw.elements.Element]) -> Type[schemdraw.elemen
 
         def _place_label(self, label: schemdraw.elements.elements.Label, theta: float = 0):
             delta = self.end-self.start
-            if abs(delta[1]) > abs(delta[0]): # portrait placing of resistor
+            if abs(delta[1]) > abs(delta[0]): # portrait placing
                 if delta[1] < 0:
                     theta = 90
             super()._place_label(label=label, theta=theta)
@@ -73,7 +73,7 @@ def capacitor(element: Type[schemdraw.elements.Element]) -> Type[schemdraw.eleme
 
         def _place_label(self, label: schemdraw.elements.elements.Label, theta: float = 0):
             delta = self.end-self.start
-            if abs(delta[1]) > abs(delta[0]): # portrait placing of resistor
+            if abs(delta[1]) > abs(delta[0]): # portrait placing
                 if delta[1] < 0:
                     theta = 90
             super()._place_label(label=label, theta=theta)
@@ -102,7 +102,7 @@ def inductor(element: Type[schemdraw.elements.Element]) -> Type[schemdraw.elemen
 
         def _place_label(self, label: schemdraw.elements.elements.Label, theta: float = 0):
             delta = self.end-self.start
-            if abs(delta[1]) > abs(delta[0]): # portrait placing of resistor
+            if abs(delta[1]) > abs(delta[0]): # portrait placing
                 if delta[1] < 0:
                     theta = 90
             super()._place_label(label=label, theta=theta)
