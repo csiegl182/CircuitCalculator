@@ -261,10 +261,13 @@
                     "V": 1,
                     "reverse": false,
                     "name": "Uq",
-                    "drop": [
-                        5.0,
-                        0
-                    ]
+                    "drop": {
+                        "type": "Point",
+                        "values": [
+                            5.0,
+                            0
+                        ]
+                    }
                 },
                 "anchors": {
                     "value_label": [
@@ -583,10 +586,13 @@
                     "name": "R1",
                     "reverse": false,
                     "d": "right",
-                    "drop": [
-                        5.0,
-                        0
-                    ]
+                    "drop": {
+                        "type": "Point",
+                        "values": [
+                            5.0,
+                            0
+                        ]
+                    }
                 },
                 "anchors": {
                     "value_label": [
@@ -894,10 +900,13 @@
                     "name": "R2",
                     "reverse": false,
                     "d": "down",
-                    "drop": [
-                        5.0,
-                        0
-                    ]
+                    "drop": {
+                        "type": "Point",
+                        "values": [
+                            5.0,
+                            0
+                        ]
+                    }
                 },
                 "anchors": {
                     "value_label": [
@@ -1125,10 +1134,13 @@
                     "arrowwidth": 0.15,
                     "arrowlength": 0.25,
                     "d": "left",
-                    "drop": [
-                        4.5,
-                        0
-                    ]
+                    "drop": {
+                        "type": "Point",
+                        "values": [
+                            4.5,
+                            0
+                        ]
+                    }
                 },
                 "anchors": {
                     "istart": {
