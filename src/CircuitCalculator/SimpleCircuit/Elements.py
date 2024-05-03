@@ -451,25 +451,28 @@ class Inductance(schemdraw.elements.Inductor):
     def type(self) -> str:
         return 'inductor'
 
-class RealCurrentSource(schemdraw.elements.Element2Term, SimpleCircuitElement):
-    def __init__(self, current_source: CurrentSource, resistor: Resistor, *args, zoom_resistor: float = 0.7, name: str = '', reverse: bool = False, **kwargs):
-        if current_source.is_reverse:
-            reverse = not reverse
-        super().__init__(*args, reverse=reverse, **kwargs)
-        SimpleCircuitElement.__init__(self, name=current_source.name, reverse=reverse)
-        self.segments += segments_of(current_source)
-        transform = schemdraw.transform.Transform(theta = 0, globalshift=((1-zoom_resistor)/2,-1.5), localshift=(0, 0), zoom=zoom_resistor)
-        self.segments += [s.xform(transform) for s in segments_of(resistor)]
-        left_line = schemdraw.Segment([(-1, 0), (-1, -1.5), ((1-zoom_resistor)/2, -1.5)])
-        right_line = schemdraw.Segment([(2, 0), (2, -1.5), ((1+zoom_resistor)/2, -1.5)])
-        self.segments += [left_line, right_line]
-        self.anchors['value_label'] = (0.5, -1.2)
-        self.anchors['i_label'] = current_source.anchors['i_label']
-        self.anchors['v_label'] = (0.5, -2.4)
-        self._userlabels += current_source._userlabels
-        self._userlabels += resistor._userlabels
-        self._I = current_source.I
-        self._R = resistor.R
+@extension.linear_current_source
+@simple_circuit_element
+class RealCurrentSource(schemdraw.elements.compound.ElementCompound):
+    def __init__(self, name: str, I: float, R: float, *args, **kwargs):
+        self._I = I
+        self._R = R
+        self._name = name
+        super().__init__(*args, **kwargs)
+
+    def setup(self):
+        zoom_resistor = 0.7
+        cs = CurrentSource(I=self._I, name=self._name, d='r')
+        res = Resistor(R=self._R, name='R', l=zoom_resistor, d='r')
+        transform = schemdraw.transform.Transform(theta = 0, globalshift=(((-3-zoom_resistor)/2,-1.5)), localshift=(0, 0), zoom=zoom_resistor)
+        res.segments = [s.xform(transform) for s in res.segments]
+        res.anchors['value_label'] = (-1.5, -2.5)
+        self.add(cs)
+        self.add(res)
+        self.add(l_up:=schemdraw.elements.Line(d='r', l=1).at(res.end))
+        self.add(l_down:=schemdraw.elements.Line(d='l', l=1).at(res.start))
+        self.add(schemdraw.elements.Line(d='u', l=1.5).at(l_up.end))
+        self.add(schemdraw.elements.Line(d='u', l=1.5).at(l_down.end))
 
     @property
     def I(self) -> complex:
@@ -487,37 +490,25 @@ class RealCurrentSource(schemdraw.elements.Element2Term, SimpleCircuitElement):
     def type(self) -> str:
         return 'real_current_source'
 
-class RealVoltageSource(schemdraw.elements.Element2Term, SimpleCircuitElement):
-    def __init__(self, voltage_source: VoltageSource, resistor: Resistor, *args, reverse: bool = False, **kwargs):
-        reverse_voltage_source = not voltage_source.is_reverse
-        if reverse_voltage_source:
-            reverse = not reverse
-        schemdraw.elements.Element2Term.__init__(self, *args, reverse=reverse_voltage_source, **kwargs)
-        SimpleCircuitElement.__init__(self, name=voltage_source.name, reverse=reverse_voltage_source)
-        transform_resistor = schemdraw.transform.Transform(theta = 0, globalshift=(0, 0))
-        transform_voltage_source = schemdraw.transform.Transform(theta = 0, globalshift=(3, 0))
-        if reverse:
-            transform_resistor, transform_voltage_source = transform_voltage_source, transform_resistor
-        self.segments.append(schemdraw.segments.Segment([(0, 0), (0, 0), schemdraw.elements.elements.gap, (1, 0), (3, 0), schemdraw.elements.elements.gap, (4, 0), (4, 0)]))
-        self.segments.extend([s.xform(transform_resistor) for s in segments_of(resistor)])
-        self.segments.extend([s.xform(transform_voltage_source) for s in segments_of(voltage_source)])
-        for a, p in voltage_source.anchors.items():
-            self.anchors[a+'_vs'] = transform_voltage_source.transform(p)
-        for a, p in resistor.anchors.items():
-            self.anchors[a+'_res'] = transform_resistor.transform(p)
-        voltage_source_labels = [l for l in voltage_source._userlabels]
-        resistor_labels = [l for l in resistor._userlabels]
-        for l in voltage_source_labels:
-            if type(l.loc) == str:
-                l.loc += '_vs'
-        for l in resistor_labels:
-            if type(l.loc) == str:
-                l.loc += '_res'
-        self._userlabels += voltage_source._userlabels
-        self._userlabels += resistor._userlabels
-        self._V = -voltage_source.V
-        self._R = resistor.R
-        self.anchors['v_label'] = (2, -1.5)
+@extension.linear_voltage_source
+@simple_circuit_element
+class RealVoltageSource(schemdraw.elements.compound.ElementCompound):
+    def __init__(self, name: str, V: float, R: float, *args, **kwargs):
+        self._V = V
+        self._R = R
+        self._name = name
+        super().__init__(*args, **kwargs)
+
+    def setup(self):
+        zoom_resistor = 1 
+        vs = VoltageSource(V=self._V, name=self._name, d='l')
+        res = Resistor(R=self._R, name='R', l=zoom_resistor, d='l')
+        transform_resistor = schemdraw.transform.Transform(theta = 0, globalshift=(0, 0), zoom=zoom_resistor)
+        res.segments = [s.xform(transform_resistor) for s in res.segments]
+        res.anchors['value_label'] = (0.5, -0.8)
+        self.add(L:=schemdraw.elements.Line(d='l', l=1))
+        self.add(res.at(L.end))
+        self.add(vs)
 
     @property
     def V(self) -> complex:

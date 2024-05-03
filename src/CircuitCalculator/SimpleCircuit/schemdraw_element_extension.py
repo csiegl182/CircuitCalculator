@@ -109,6 +109,38 @@ def inductor(element: Type[schemdraw.elements.Element]) -> Type[schemdraw.elemen
 
     return extended_inductor
 
+def linear_current_source(element: Type[schemdraw.elements.Element]) -> Type[schemdraw.elements.Element]:
+    class extended_linear_source(element):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.anchors['value_label'] = (0.5, -1.2)
+            self.anchors['start'] = (0, 0)
+            self.anchors['center'] = (0, 1.5)
+            self.anchors['end'] = (3, 0)
+
+        def up(self) -> schemdraw.elements.Element:
+            self.anchors['value_label'] = (0.5, -0.6)
+            self.anchors['v_label'] = (1.5, -2.5)
+            self.anchors['s_label'] = (0.5, -1.2)
+            return super().up()
+
+    return extended_linear_source
+
+def linear_voltage_source(element: Type[schemdraw.elements.Element]) -> Type[schemdraw.elements.Element]:
+    class extended_linear_source(element):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.anchors['v_label'] = (2, -1.5)
+            self.anchors['start'] = (-5, 0)
+            self.anchors['center'] = (0, 1.5)
+            self.anchors['end'] = (0, 0)
+
+        def up(self) -> schemdraw.elements.Element:
+            self.anchors['v_label'] = (-1.5, -2.5)
+            return super().up()
+
+    return extended_linear_source
+
 def lamp(element: Type[schemdraw.elements.Element]) -> Type[schemdraw.elements.Element]:
     class extended_lamp(element):
         def __init__(self, *args, **kwargs):
