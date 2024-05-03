@@ -1,7 +1,7 @@
 from schemdraw.elements.twoterm import ResistorIEC
 from schemdraw.elements.sources import Source
 from schemdraw.transform import Transform
-from schemdraw.segments import Segment, SegmentArrow
+from schemdraw.segments import Segment
 
 class InductorDIN(ResistorIEC):
     def __init__(self, *d, **kwargs):
@@ -21,4 +21,4 @@ class SourceIDIN(Source):
 class SourceIDIN2(SourceIDIN):
     def __init__(self, *d, **kwargs):
         super().__init__(*d, **kwargs)
-        self.segments.append(SegmentArrow((1.2, 0.2), (1.7, 0.2)))
+        self.segments.append(Segment((1.2, 0.2), (1.7, 0.2), arrow='>'))
