@@ -8,13 +8,6 @@ from enum import Enum, auto
 from .supernodes import SuperNodes, voltage_source_labels_to_next_reference
 from ...SignalProcessing import state_space_model as sp
 
-@dataclass(frozen=True)
-class BranchValues:
-    value: float
-    id: str
-    node1: str # TODO: are these properties necessary?
-    node2: str
-
 class OutputType(Enum):
     VOLTAGE = auto()
     CURRENT = auto()
@@ -25,18 +18,18 @@ class Output:
     type: OutputType
     id: str
 
-def state_space_matrices_for_potentials(network: Network, c_values: list[BranchValues], node_index_mapper: map.NetworkMapper = map.default_node_mapper, source_index_mapper: map.SourceIndexMapper = map.default_source_mapper) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def state_space_matrices_for_potentials(network: Network, c_values: dict[str, float], node_index_mapper: map.NetworkMapper = map.default_node_mapper, source_index_mapper: map.SourceIndexMapper = map.default_source_mapper) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     node_mapping = node_index_mapper(network)
-    def element_incidence_matrix(values: list[BranchValues]) -> np.ndarray:
+    def element_incidence_matrix(values: dict[str, float]) -> np.ndarray:
         Delta = np.zeros((len(values), node_mapping.N))
         for (k, value), (i_label) in itertools.product(enumerate(values), node_mapping):
-            if i_label == value.node1:
+            if i_label == network[value].node1:
                 Delta[k][node_mapping(i_label)] = +1
-            if i_label == value.node2:
+            if i_label == network[value].node2:
                 Delta[k][node_mapping(i_label)] = -1
         return Delta
 
-    invC = np.diag([float(1/C.value) for C in c_values])
+    invC = np.diag([float(1/C) for C in c_values.values()])
     Delta = element_incidence_matrix(c_values)
     Q = create_source_incidence_matrix_from_network(
         network=network,
@@ -54,7 +47,7 @@ def state_space_matrices_for_potentials(network: Network, c_values: list[BranchV
 @dataclass(frozen=True)
 class NewNodalStateSpaceModel(sp.StateSpaceModel):
     network: Network
-    c_values: list[BranchValues]
+    c_values: dict[str, float]
     node_index_mapping: map.LabelMapping
     source_index_mapping: map.LabelMapping
 
@@ -71,9 +64,9 @@ class NewNodalStateSpaceModel(sp.StateSpaceModel):
         return c_pos - c_neg
 
     def c_row_current(self, branch_id: str) -> np.ndarray:
-        if branch_id in [c.id for c in self.c_values]:
-            idx = [c.id for c in self.c_values].index(branch_id)
-            C_ = self.c_values[idx].value*self.A[idx][:]
+        if branch_id in self.c_values:
+            idx = list(self.c_values.keys()).index(branch_id)
+            C_ = self.c_values[list(self.c_values.keys())[idx]]*self.A[idx][:]
         else:
             branch = self.network[branch_id]
             c_pos = self.c_row_for_potential(branch.node1)
@@ -99,9 +92,9 @@ class NewNodalStateSpaceModel(sp.StateSpaceModel):
         return d_pos - d_neg
 
     def d_row_current(self, branch_id: str) -> np.ndarray:
-        if branch_id in [c.id for c in self.c_values]:
-            idx = [c.id for c in self.c_values].index(branch_id)
-            D_ = self.c_values[idx].value*self.B[idx][:]
+        if branch_id in self.c_values:
+            idx = list(self.c_values.keys()).index(branch_id)
+            D_ = self.c_values[list(self.c_values.keys())[idx]]*self.B[idx][:]
         else:
             if branch_id in self.source_index_mapping:
                 D_ = np.zeros(self.n_inputs)
@@ -113,7 +106,7 @@ class NewNodalStateSpaceModel(sp.StateSpaceModel):
                 D_ = (d_pos - d_neg)/branch.element.Z
         return D_
 
-def nodal_state_space_model(network: Network, c_values: list[BranchValues], node_index_mapper: map.NetworkMapper = map.default_node_mapper, source_index_mapper: map.SourceIndexMapper = map.default_source_mapper) -> NewNodalStateSpaceModel:
+def nodal_state_space_model(network: Network, c_values: dict[str, float], node_index_mapper: map.NetworkMapper = map.default_node_mapper, source_index_mapper: map.SourceIndexMapper = map.default_source_mapper) -> NewNodalStateSpaceModel:
     A, B, C, D = state_space_matrices_for_potentials(
         network=network,
         c_values=c_values,
