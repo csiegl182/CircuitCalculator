@@ -1,5 +1,5 @@
 from ..network import Network
-from ..elements import is_ideal_voltage_source
+from ..elements import is_ideal_voltage_source, is_ideal_current_source
 from .solution import NodalAnalysisSolution
 from .state_space_model import NodalStateSpaceModel, BranchValues
 from scipy import signal
@@ -22,7 +22,8 @@ class TransientAnalysisSolution(NodalAnalysisSolution):
         ss = NodalStateSpaceModel(network=self.network, c_values=self.c_values, node_index_mapper=self.node_mapper, source_index_mapper=self.source_index_mapper)
         sys = signal.StateSpace(ss.A, ss.B, ss.C, ss.D)
         t = np.arange(self.t_lim[0], self.t_lim[1], self.Ts)
-        self.time, self.phi, _ = signal.lsim(sys, np.column_stack([self.input[s](t) for s in sources]), t)
+        self.time, self.phi, self.x = signal.lsim(sys, np.column_stack([self.input[s](t) for s in sources]), t)
+        self.i_c = (self.x*ss.A+ss.B*self.input[sources[0]](t))*self.c_values[0].value
 
     def get_potential(self, node_id: str) -> Any:
         V_active = np.zeros(shape=self.time.shape)
@@ -34,7 +35,23 @@ class TransientAnalysisSolution(NodalAnalysisSolution):
         return self.phi[:,self._node_mapping[node_id]] + V_active
 
     def get_current(self, branch_id: str) -> Any:
-        return 0
+        branch = self.network[branch_id]
+        if is_ideal_current_source(branch.element):
+            return self.input[branch_id](self.time)
+        if branch.id in [c.id for c in self.c_values]:
+            return self.i_c
+        return self.get_voltage(branch_id)/branch.element.Z
+        if is_ideal_voltage_source(branch.element):
+            Z = element_impedance(self.network, branch_id)
+            I_branch_element = -branch.element.V/Z
+            I_other_elements = short_circuit_current(
+                trf.remove_element(self.network, branch_id),
+                branch.node1,
+                branch.node2)
+            return  I_branch_element+I_other_elements
+        if is_voltage_source(branch.element):
+            return -(self.get_voltage(branch_id)+branch.element.V)/branch.element.Z
+        return self.get_voltage(branch_id)/branch.element.Z
 
 def voltage_to_next_reference(network: Network, super_nodes: SuperNodes, active_node: str, input: dict[str, np.ndarray]) -> Any:
     def voltage_between(node1: str, node2: str) -> str:

@@ -19,7 +19,8 @@ def test_solution_of_example_network_1() -> None:
     ])
     Ri = R3+R1*R2/(R1+R2)
     tau = Ri*C
-    solution = TransientAnalysisSolution(network, c_values=[BranchValues(C, '3', '0')], input={'Vs': functools.partial(step, t0=0.1)}, t_lim=(0, 0.5), Ts=1e-4)
+    input = {'Vs': functools.partial(step, t0=0.1)}
+    solution = TransientAnalysisSolution(network, c_values=[BranchValues(value=C, id='C', node1='3', node2='0')], input=input, t_lim=(0, 0.5), Ts=1e-4)
     t = solution.time
     uc_ref = np.zeros(t.size)
     uc_ref[t>0.1] = Vs*R2/(R1+R2)*(1-np.exp(-(t[t>0.1]-0.1)/tau))
@@ -29,3 +30,15 @@ def test_solution_of_example_network_1() -> None:
     np.testing.assert_allclose(solution.get_voltage('R1'), R1*((uc_ref+R3*ic_ref)/R2+ic_ref), atol=1e-3)
     np.testing.assert_allclose(solution.get_voltage('R2'), uc_ref+R3*ic_ref, atol=1e-3)
     np.testing.assert_allclose(solution.get_voltage('R3'), R3*ic_ref, atol=1e-3)
+    np.testing.assert_allclose(solution.get_current('C')[0], ic_ref, atol=1e-3)
+    np.testing.assert_allclose(solution.get_current('R1'), ((uc_ref+R3*ic_ref)/R2+ic_ref), atol=1e-3)
+    np.testing.assert_allclose(solution.get_current('R2'), (uc_ref+R3*ic_ref)/R2, atol=1e-3)
+    np.testing.assert_allclose(solution.get_current('R3'), ic_ref, atol=1e-3)
+    np.testing.assert_allclose(solution.get_potential('0'), np.zeros(t.size), atol=1e-3)
+    np.testing.assert_allclose(solution.get_potential('1'), input['Vs'](t), atol=1e-3)
+    np.testing.assert_allclose(solution.get_potential('2'), uc_ref+R3*ic_ref, atol=1e-3)
+    np.testing.assert_allclose(solution.get_potential('3'), uc_ref, atol=1e-3)
+    np.testing.assert_allclose(solution.get_power('C')[0], uc_ref*ic_ref, atol=1e-3)
+    np.testing.assert_allclose(solution.get_power('R1'), R1*((uc_ref+R3*ic_ref)/R2+ic_ref)*((uc_ref+R3*ic_ref)/R2+ic_ref), atol=1e-3)
+    np.testing.assert_allclose(solution.get_power('R2'), (uc_ref+R3*ic_ref)*(uc_ref+R3*ic_ref)/R2, atol=1e-3)
+    np.testing.assert_allclose(solution.get_power('R3'), R3*ic_ref*ic_ref, atol=1e-3)

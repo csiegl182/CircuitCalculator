@@ -8,6 +8,7 @@ import itertools
 @dataclass(frozen=True)
 class BranchValues:
     value: float
+    id: str
     node1: str
     node2: str
 
