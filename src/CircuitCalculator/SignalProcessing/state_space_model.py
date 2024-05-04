@@ -18,3 +18,15 @@ class StateSpaceModel:
         #     raise ValueError('Number of columns of matrix B must be equal to number of rows of matrix A')
         # if self.C.shape[1] != self.A.shape[0]:
         #     raise ValueError('Number of coluns of matrix B must be equal to number of rows of matrix A')
+
+    @property
+    def n_states(self) -> int:
+        return self.A.shape[0]
+
+    @property
+    def n_input(self) -> int:
+        return self.B.shape[1]
+
+    @property
+    def n_output(self) -> int:
+        return self.C.shape[0]
