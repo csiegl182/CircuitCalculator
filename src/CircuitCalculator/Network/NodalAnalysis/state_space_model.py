@@ -88,4 +88,4 @@ class NodalStateSpaceModel:
 
     @property
     def input_labels(self) -> list[str]:
-        return []
+        return [label for label in self.source_index_mapper(self.network)]
