@@ -8,10 +8,10 @@ from .supernodes import SuperNodes
 @dataclass
 class NodalAnalysisSolution(ABC):
     network: Network
-    node_mapper: map.NodeIndexMapper = map.default_node_mapper
+    node_mapper: map.NetworkMapper = map.default_node_mapper
 
     @property
-    def _node_mapping(self) -> dict[str, int]:
+    def _node_mapping(self) -> map.LabelMapping:
         return self.node_mapper(self.network)
 
     @property

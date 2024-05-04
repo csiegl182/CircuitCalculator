@@ -19,23 +19,23 @@ def admittance_between(network: Network, node1: str, node2: str) -> complex:
 def connected_nodes(network: Network, node: str) -> list[str]:
     return [b.node1 if b.node1 != node else b.node2 for b in network.branches_connected_to(node)]
 
-def create_node_matrix_from_network(network: Network, node_index_mapper: map.NodeIndexMapper = map.default_node_mapper) -> np.ndarray:
+def create_node_matrix_from_network(network: Network, node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> np.ndarray:
     def node_matrix_element(i_label:str, j_label:str) -> complex:
         if i_label == j_label:
             return admittance_connected_to(passive_net, i_label)
         return -admittance_between(passive_net, i_label, j_label)
     passive_net = trf.passive_network(network)
     node_mapping = node_index_mapper(network)
-    Y = np.zeros((len(node_mapping), len(node_mapping)), dtype=complex)
-    for (i_label, i), (j_label, j) in itertools.product(node_mapping.items(), repeat=2):
-        Y[i, j] = node_matrix_element(i_label, j_label)
+    Y = np.zeros((node_mapping.N, node_mapping.N), dtype=complex)
+    for i_label, j_label in itertools.product(node_mapping, repeat=2):
+        Y[node_mapping(i_label, j_label)] = node_matrix_element(i_label, j_label)
     return Y
 
-def create_current_vector_from_network(network: Network, node_index_mapper: map.NodeIndexMapper = map.default_node_mapper) -> np.ndarray:
+def create_current_vector_from_network(network: Network, node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> np.ndarray:
     super_nodes = SuperNodes(network)
     node_mapping = node_index_mapper(network)
-    reference_node_mapping = {n: i for n, i in node_mapping.items() if super_nodes.is_reference(n)}
-    b = np.zeros(len(node_mapping), dtype=complex)
+    reference_node_mapping = map.filter_mapping(node_mapping, super_nodes.is_reference)
+    b = np.zeros(node_mapping.N, dtype=complex)
     def current_sources(node: str) -> complex:
         current_sources = [b for b in network.branches_connected_to(node) if is_current_source(b.element)]
         return sum([-cs.element.I if cs.node1 == node else cs.element.I for cs in current_sources])
@@ -47,18 +47,16 @@ def create_current_vector_from_network(network: Network, node_index_mapper: map.
         an = super_nodes.active_node(reference_node)
         connected_admittances_without_parallel_one = admittance_connected_to(network, an)-admittance_between(network, an, reference_node)
         return -voltage_to_next_reference(network, super_nodes, an)*connected_admittances_without_parallel_one
-    for i_label, i in node_mapping.items():
-        b[i] = current_sources(i_label)
-        b[i] += currents_of_connected_active_nodes(i_label)
-    for ref_label, i in reference_node_mapping.items():
-        b[i] += current_sources(super_nodes.active_node(ref_label))
-        b[i] += currents_of_connected_active_nodes(super_nodes.active_node(ref_label))
-        b[i] += currents_of_belonging_voltage_sources(ref_label)
+    for label in node_mapping:
+        b[node_mapping(label)] = current_sources(label)
+        b[node_mapping(label)] += currents_of_connected_active_nodes(label)
+    for label in reference_node_mapping:
+        b[node_mapping(label)] += current_sources(super_nodes.active_node(label))
+        b[node_mapping(label)] += currents_of_connected_active_nodes(super_nodes.active_node(label))
+        b[node_mapping(label)] += currents_of_belonging_voltage_sources(label)
     return b
         
-def create_source_incidence_matrix_from_network(network: Network, node_index_mapper: map.NodeIndexMapper = map.default_node_mapper, source_index_mapper: map.SourceIndexMapper = map.default_source_mapper) -> np.ndarray:
-    def source_label_index(label: str) -> int:
-        return source_labels.index(label)
+def create_source_incidence_matrix_from_network(network: Network, node_index_mapper: map.NetworkMapper = map.default_node_mapper, source_index_mapper: map.NetworkMapper = map.default_source_mapper) -> np.ndarray:
     def current_source_coefficient(source: str, node: str) -> int:
         if network[source].node1 == node:
             return -1
@@ -89,13 +87,13 @@ def create_source_incidence_matrix_from_network(network: Network, node_index_map
         return 0
     super_nodes = SuperNodes(network)
     node_mapping = node_index_mapper(network)
-    source_labels = source_index_mapper(network)
-    Q = np.zeros((len(node_mapping),len(source_labels)))
-    for (n_label, n), (s_label, s) in itertools.product(node_mapping.items(), [(label, source_label_index(label)) for label in source_labels]):
-        Q[n][s] = incidence_entry(n_label, s_label)
+    source_mapping = source_index_mapper(network)
+    Q = np.zeros((node_mapping.N, source_mapping.N))
+    for n_label, s_label in itertools.product(node_mapping, source_mapping):
+        Q[node_mapping(n_label)][source_mapping(s_label)] = incidence_entry(n_label, s_label)
     return Q
 
-def open_circuit_impedance(network: Network, node1: str, node2: str, node_index_mapper: map.NodeIndexMapper = map.default_node_mapper) -> complex:
+def open_circuit_impedance(network: Network, node1: str, node2: str, node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> complex:
     if node1 == node2:
         return 0
     if any([is_ideal_voltage_source(b.element) for b in network.branches_between(node1, node2)]):
@@ -109,7 +107,7 @@ def open_circuit_impedance(network: Network, node1: str, node2: str, node_index_
     i1 = node_index_mapper(network)[node1]
     return Z[i1][i1]
 
-def element_impedance(network: Network, element: str, node_index_mapper: map.NodeIndexMapper = map.default_node_mapper) -> complex:
+def element_impedance(network: Network, element: str, node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> complex:
     return open_circuit_impedance(
         network=trf.remove_element(network, element),
         node1=network[element].node1,

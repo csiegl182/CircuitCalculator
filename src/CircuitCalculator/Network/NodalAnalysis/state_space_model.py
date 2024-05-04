@@ -29,7 +29,7 @@ class NodalStateSpaceModel:
     network: Network
     c_values: list[BranchValues]
     output_values: list[Output]
-    node_index_mapper: map.NodeIndexMapper = map.default_node_mapper
+    node_index_mapper: map.NetworkMapper = map.default_node_mapper
     source_index_mapper: map.SourceIndexMapper = map.default_source_mapper
 
     @property
@@ -111,7 +111,7 @@ class NodalStateSpaceModel:
     def number_of_inputs(self) -> int:
         return len(self.input_labels)
 
-def state_space_matrices(network: Network, c_values: list[BranchValues], node_index_mapper: map.NodeIndexMapper = map.default_node_mapper, source_index_mapper: map.SourceIndexMapper = map.default_source_mapper) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def state_space_matrices(network: Network, c_values: list[BranchValues], node_index_mapper: map.NetworkMapper = map.default_node_mapper, source_index_mapper: map.SourceIndexMapper = map.default_source_mapper) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     node_mapping = node_index_mapper(network)
     def element_incidence_matrix(values: list[BranchValues]) -> np.ndarray:
         Delta = np.zeros((len(values), len(node_mapping)))
@@ -137,7 +137,7 @@ def state_space_matrices(network: Network, c_values: list[BranchValues], node_in
     D = inv_Y @ (Q-Delta.T @ sorted_Y @ Delta @ inv_Y @ Q)
     return A, B, C, D
 
-def c_row_for_potential(node_id: str, network: Network, node_index_mapper: map.NodeIndexMapper = map.default_node_mapper, source_index_mapper: map.SourceIndexMapper = map.default_source_mapper, c_values: list[BranchValues]= []) -> np.ndarray:
+def c_row_for_potential(node_id: str, network: Network, node_index_mapper: map.NetworkMapper = map.default_node_mapper, source_index_mapper: map.SourceIndexMapper = map.default_source_mapper, c_values: list[BranchValues]= []) -> np.ndarray:
     _, _, C, _ = state_space_matrices(network, c_values, node_index_mapper=node_index_mapper, source_index_mapper=source_index_mapper)
     node_mapping = node_index_mapper(network)
     if node_id in node_mapping.keys():
@@ -145,7 +145,7 @@ def c_row_for_potential(node_id: str, network: Network, node_index_mapper: map.N
         return C[:][idx]
     return np.zeros(C.shape[1])
 
-def d_row_for_potential(node_id: str, network: Network, node_index_mapper: map.NodeIndexMapper = map.default_node_mapper, source_index_mapper: map.SourceIndexMapper = map.default_source_mapper, c_values: list[BranchValues]= []) -> np.ndarray:
+def d_row_for_potential(node_id: str, network: Network, node_index_mapper: map.NetworkMapper = map.default_node_mapper, source_index_mapper: map.SourceIndexMapper = map.default_source_mapper, c_values: list[BranchValues]= []) -> np.ndarray:
     _, _, _, D = state_space_matrices(network, c_values, node_index_mapper=node_index_mapper, source_index_mapper=source_index_mapper)
     node_mapping = node_index_mapper(network)
     if node_id in node_mapping.keys():

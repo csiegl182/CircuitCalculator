@@ -37,7 +37,7 @@ def test_alphabetic_mapper_has_no_mapping_for_zero_node() -> None:
         node_zero_label='2'
     )
     mapping = alphabetic_node_mapper(network)
-    assert '2' not in mapping.keys()
+    assert '2' not in mapping.keys
 
 def test_mapping_ignores_active_nodes() -> None:
     network = Network(
