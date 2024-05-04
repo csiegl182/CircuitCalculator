@@ -114,12 +114,12 @@ class NodalStateSpaceModel:
 def state_space_matrices(network: Network, c_values: list[BranchValues], node_index_mapper: map.NetworkMapper = map.default_node_mapper, source_index_mapper: map.SourceIndexMapper = map.default_source_mapper) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     node_mapping = node_index_mapper(network)
     def element_incidence_matrix(values: list[BranchValues]) -> np.ndarray:
-        Delta = np.zeros((len(values), len(node_mapping)))
-        for (k, value), (i_label, i) in itertools.product(enumerate(values), node_mapping.items()):
+        Delta = np.zeros((len(values), node_mapping.N))
+        for (k, value), (i_label) in itertools.product(enumerate(values), node_mapping):
             if i_label == value.node1:
-                Delta[k][i] = +1
+                Delta[k][node_mapping(i_label)] = +1
             if i_label == value.node2:
-                Delta[k][i] = -1
+                Delta[k][node_mapping(i_label)] = -1
         return Delta
 
     invC = np.diag([float(1/C.value) for C in c_values])
@@ -140,7 +140,7 @@ def state_space_matrices(network: Network, c_values: list[BranchValues], node_in
 def c_row_for_potential(node_id: str, network: Network, node_index_mapper: map.NetworkMapper = map.default_node_mapper, source_index_mapper: map.SourceIndexMapper = map.default_source_mapper, c_values: list[BranchValues]= []) -> np.ndarray:
     _, _, C, _ = state_space_matrices(network, c_values, node_index_mapper=node_index_mapper, source_index_mapper=source_index_mapper)
     node_mapping = node_index_mapper(network)
-    if node_id in node_mapping.keys():
+    if node_id in node_mapping:
         idx = node_mapping[node_id]
         return C[:][idx]
     return np.zeros(C.shape[1])
@@ -148,12 +148,13 @@ def c_row_for_potential(node_id: str, network: Network, node_index_mapper: map.N
 def d_row_for_potential(node_id: str, network: Network, node_index_mapper: map.NetworkMapper = map.default_node_mapper, source_index_mapper: map.SourceIndexMapper = map.default_source_mapper, c_values: list[BranchValues]= []) -> np.ndarray:
     _, _, _, D = state_space_matrices(network, c_values, node_index_mapper=node_index_mapper, source_index_mapper=source_index_mapper)
     node_mapping = node_index_mapper(network)
-    if node_id in node_mapping.keys():
+    source_mapping = source_index_mapper(network)
+    if node_id in node_mapping:
         idx = node_mapping[node_id]
         return D[:][idx]
     if network.is_zero_node(node_id):
         return np.zeros(D.shape[1])
-    source_indices = [source_index_mapper(network).index(source) for source in voltage_source_labels_to_next_reference(network, SuperNodes(network), node_id)]
+    source_indices = [source_mapping[source] for source in voltage_source_labels_to_next_reference(network, SuperNodes(network), node_id)]
     D = np.zeros(D.shape[1])
     D[source_indices] = 1
     return D
