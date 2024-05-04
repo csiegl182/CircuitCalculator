@@ -1,6 +1,6 @@
 from CircuitCalculator.Network.network import Network, Branch
 from CircuitCalculator.Network.elements import resistor, voltage_source
-from CircuitCalculator.Network.NodalAnalysis.node_analysis import open_circuit_voltage
+from CircuitCalculator.Network.NodalAnalysis.bias_point_analysis import open_circuit_voltage
 from numpy.testing import assert_almost_equal
 
 def test_open_circuit_voltage_of_equal_nodes_is_zero() -> None:

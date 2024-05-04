@@ -1,6 +1,6 @@
 from .circuit import Circuit, transform, frequency_components
 from ..SignalProcessing.types import TimeDomainFunction, FrequencyDomainFunction
-from ..Network.NodalAnalysis.node_analysis import nodal_analysis_solver
+from ..Network.NodalAnalysis.bias_point_analysis import nodal_analysis_bias_point_solver
 # from ..Network.NodalAnalysis.state_space_model import create_state_space_input_update_matrix
 from ..Network.solution import NetworkSolver
 from typing import Any
@@ -11,7 +11,7 @@ import numpy as np
 @dataclass
 class CircuitSolution(ABC):
     circuit: Circuit = field(default_factory=lambda : Circuit([]))
-    solver: NetworkSolver = field(default=nodal_analysis_solver)
+    solver: NetworkSolver = field(default=nodal_analysis_bias_point_solver)
 
     @abstractmethod
     def get_voltage(self, id: str) -> Any:

@@ -1,10 +1,10 @@
 import numpy as np
+
 from ..network import Network
-from ..elements import is_ideal_current_source, is_ideal_voltage_source, is_current_source, is_voltage_source
+from ..elements import is_ideal_voltage_source, is_current_source
 from .supernodes import SuperNodes
 from . import labelmapper as map
 from .. import transformers as trf
-from ..solution import NetworkSolution
 import itertools
 
 class DimensionError(Exception):
@@ -117,19 +117,6 @@ def element_impedance(network: Network, element: str, node_index_mapper: map.Nod
         node_index_mapper=node_index_mapper
     )
 
-def open_circuit_voltage(network: Network, node1: str, node2: str) -> complex:
-    if node1 == node2:
-        return 0
-    solution = NodalAnalysisSolution(network)
-    phi1 = solution.get_potential(node_id=node1)
-    phi2 = solution.get_potential(node_id=node2)
-    return phi1-phi2
-
-def short_circuit_current(network: Network, node1: str, node2: str) -> complex:
-    Z = open_circuit_impedance(network, node1, node2)
-    V = open_circuit_voltage(network, node1, node2)
-    return V/Z
-
 def calculate_node_voltages(Y : np.ndarray, I : np.ndarray) -> np.ndarray:
     if np.any(np.logical_not(np.isfinite(Y))):
         raise ValueError
@@ -143,59 +130,3 @@ def calculate_node_voltages(Y : np.ndarray, I : np.ndarray) -> np.ndarray:
     if n != m:
         raise DimensionError('dim error')
     return np.linalg.solve(Y, I)
-
-class NodalAnalysisSolution:
-    def __init__(self, network : Network, node_mapper: map.NodeIndexMapper = map.default_node_mapper) -> None:
-        Y = create_node_matrix_from_network(network, node_index_mapper=node_mapper)
-        I = create_current_vector_from_network(network, node_index_mapper=node_mapper)
-        self._network = network
-        self._super_nodes = SuperNodes(network)
-        self._node_mapping = node_mapper(network)
-        try:
-            self._solution_vector = calculate_node_voltages(Y, I)
-        except np.linalg.LinAlgError:
-            self._solution_vector = np.zeros(np.size(I))
-        if np.any(np.isnan(self._solution_vector)):
-            self._solution_vector = np.zeros(np.size(I))
-
-    def _select_active_node(self, branch_id: str) -> str:
-        branch = self._network[branch_id]
-        if self._super_nodes.is_active(branch.node1):
-            return branch.node1
-        return branch.node2
-
-    def get_potential(self, node_id: str) -> complex:
-        V_active = 0+0j
-        if self._super_nodes.is_active(node_id):
-            V_active = self._super_nodes.voltage_to_next_reference(node_id)
-            node_id = self._super_nodes.next_reference(node_id)
-        if self._network.is_zero_node(node_id):
-            return V_active
-        return self._solution_vector[self._node_mapping[node_id]] + V_active
-    
-    def get_voltage(self, branch_id: str) -> complex:
-        phi1 = self.get_potential(self._network[branch_id].node1)
-        phi2 = self.get_potential(self._network[branch_id].node2)
-        return phi1-phi2
-
-    def get_current(self, branch_id: str) -> complex:
-        branch = self._network[branch_id]
-        if is_ideal_current_source(branch.element):
-            return branch.element.I
-        if is_ideal_voltage_source(branch.element):
-            Z = element_impedance(self._network, branch_id)
-            I_branch_element = -branch.element.V/Z
-            I_other_elements = short_circuit_current(
-                trf.remove_element(self._network, branch_id),
-                branch.node1,
-                branch.node2)
-            return  I_branch_element+I_other_elements
-        if is_voltage_source(branch.element):
-            return -(self.get_voltage(branch_id)+branch.element.V)/branch.element.Z
-        return self.get_voltage(branch_id)/branch.element.Z
-
-    def get_power(self, branch_id: str) -> complex:
-        return self.get_voltage(branch_id)*self.get_current(branch_id).conjugate()
-
-def nodal_analysis_solver(network: Network) -> NetworkSolution:
-    return NodalAnalysisSolution(network)

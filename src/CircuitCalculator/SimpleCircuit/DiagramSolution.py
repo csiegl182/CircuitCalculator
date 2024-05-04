@@ -1,5 +1,5 @@
 from ..Network.solution import NetworkSolver, NetworkSolution
-from ..Network.NodalAnalysis.node_analysis import nodal_analysis_solver
+from ..Network.NodalAnalysis.bias_point_analysis import nodal_analysis_bias_point_solver
 from ..Circuit.solution import ComplexSolution
 
 from . import Elements as elm
@@ -48,7 +48,7 @@ class SchematicDiagramSolution:
         node_potential = self.solution.get_potential(node_id=node)
         return elm.LabelNode(id_loc=loc, name=self.voltage_display(node_potential), at=element.absdrop[0], color=dsp.blue)
 
-def time_domain_steady_state_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_solver, w: float = 0, sin: bool = False, deg: bool = False, hertz: bool = False) -> SchematicDiagramSolution:
+def time_domain_steady_state_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_bias_point_solver, w: float = 0, sin: bool = False, deg: bool = False, hertz: bool = False) -> SchematicDiagramSolution:
     digagram_parser = SchematicDiagramParser(schematic)
     solution = ComplexSolution(circuit=circuit_translator(schematic), solver=solver, w=w)
     return SchematicDiagramSolution(
@@ -59,7 +59,7 @@ def time_domain_steady_state_solution(schematic: elm.Schematic, solver: NetworkS
         power_display=dsp.print_active_reactive_power
     )
 
-def single_frequency_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_solver, w: float = 0, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
+def single_frequency_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_bias_point_solver, w: float = 0, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
     diagram_parser = SchematicDiagramParser(schematic)
     solution = ComplexSolution(circuit=circuit_translator(schematic), solver=solver, w=w)
     return SchematicDiagramSolution(
@@ -70,7 +70,7 @@ def single_frequency_solution(schematic: elm.Schematic, solver: NetworkSolver = 
         power_display=partial(dsp.print_complex, unit='VA', precision=precision, polar=polar, deg=deg)
     )
 
-def complex_network_dc_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_solver, precision: int = 3) -> SchematicDiagramSolution:
+def complex_network_dc_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_bias_point_solver, precision: int = 3) -> SchematicDiagramSolution:
     diagram_parser = SchematicDiagramParser(schematic)
     solution = ComplexSolution(circuit=circuit_translator(schematic), solver=solver)
     return SchematicDiagramSolution(
@@ -81,7 +81,7 @@ def complex_network_dc_solution(schematic: elm.Schematic, solver: NetworkSolver 
         power_display=partial(dsp.print_complex, unit='VA', precision=precision)
     )
 
-def real_network_dc_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_solver, precision: int = 3) -> SchematicDiagramSolution:
+def real_network_dc_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_bias_point_solver, precision: int = 3) -> SchematicDiagramSolution:
     diagram_parser = SchematicDiagramParser(schematic)
     solution = ComplexSolution(circuit=circuit_translator(schematic), solver=solver)
     return SchematicDiagramSolution(
