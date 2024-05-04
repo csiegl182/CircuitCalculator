@@ -24,15 +24,6 @@ class Output:
     type: OutputType
     id: str
 
-def create_element_incidence_matrix(values: list[BranchValues], node_mapping: dict[str, int]) -> np.ndarray:
-    Delta = np.zeros((len(values), len(node_mapping)))
-    for (k, value), (i_label, i) in itertools.product(enumerate(values), node_mapping.items()):
-        if i_label == value.node1:
-            Delta[k][i] = +1
-        if i_label == value.node2:
-            Delta[k][i] = -1
-    return Delta
-
 @dataclass(frozen=True)
 class NodalStateSpaceModel:
     network: Network
@@ -41,32 +32,6 @@ class NodalStateSpaceModel:
     node_index_mapper: map.NodeIndexMapper = map.default_node_mapper
     source_index_mapper: map.SourceIndexMapper = map.default_source_mapper
 
-    @property
-    def node_mapping(self) -> dict[str, int]:
-        return self.node_index_mapper(self.network)
-
-    def element_incidence_matrix(self, values: list[BranchValues]) -> np.ndarray:
-        Delta = np.zeros((len(values), len(self.node_mapping)))
-        for (k, value), (i_label, i) in itertools.product(enumerate(values), self.node_mapping.items()):
-            if i_label == value.node1:
-                Delta[k][i] = +1
-            if i_label == value.node2:
-                Delta[k][i] = -1
-        return Delta
-
-    @property
-    def capacitor_incidence(self) -> np.ndarray:
-        return self.element_incidence_matrix(self.c_values)
-
-    @property
-    def inv_Y(self) -> np.ndarray:
-        return np.linalg.inv(create_node_matrix_from_network(network=self.network, node_index_mapper=self.node_index_mapper).real)
-
-    @property
-    def sorted_Y(self) -> np.ndarray:
-        Delta = self.capacitor_incidence
-        return np.linalg.inv(Delta@self.inv_Y@Delta.T)
-    
     @property
     def A(self) -> np.ndarray:
         A, _, _, _ = state_space_matrices(self.network, self.c_values, node_index_mapper=self.node_index_mapper, source_index_mapper=self.source_index_mapper)
