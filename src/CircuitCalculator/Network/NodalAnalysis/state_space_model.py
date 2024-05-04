@@ -66,8 +66,8 @@ class StateSpaceModel:
     
     @property
     def A(self) -> np.ndarray:
-       invC = np.array([-1/float(C['value']) for C in self.Cvalues])
-       return self.sorted_Y@np.diag(invC)
+        invC = np.diag([float(1/C['value']) for C in self.Cvalues])
+        return -invC@self.sorted_Y
 
     @property
     def B(self) -> np.ndarray:
