@@ -1,4 +1,3 @@
-from . import labelmapper as map
 from .node_analysis import calculate_node_voltages, create_current_vector_from_network, create_node_matrix_from_network, element_impedance, open_circuit_impedance
 from .. import transformers as trf
 from ..elements import is_ideal_current_source, is_ideal_voltage_source, is_voltage_source
@@ -7,6 +6,7 @@ from ..solution import NetworkSolution
 from .solution import NodalAnalysisSolution
 import numpy as np
 from dataclasses import dataclass
+from .supernodes import voltage_to_next_reference
 
 @dataclass
 class NodalAnalysisBiasPointSolution(NodalAnalysisSolution):
@@ -29,8 +29,8 @@ class NodalAnalysisBiasPointSolution(NodalAnalysisSolution):
     def get_potential(self, node_id: str) -> complex:
         V_active = 0+0j
         if self._super_nodes.is_active(node_id):
-            V_active = self._super_nodes.voltage_to_next_reference(node_id)
-            node_id = self._super_nodes.next_reference(node_id)
+            V_active = voltage_to_next_reference(self.network, self._super_nodes, node_id)
+            node_id = self._super_nodes.non_active_reference_node(node_id)
         if self.network.is_zero_node(node_id):
             return V_active
         return self._solution_vector[self._node_mapping[node_id]] + V_active

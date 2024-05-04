@@ -2,7 +2,7 @@ import numpy as np
 
 from ..network import Network
 from ..elements import is_ideal_voltage_source, is_current_source
-from .supernodes import SuperNodes
+from .supernodes import SuperNodes, voltage_to_next_reference
 from . import labelmapper as map
 from .. import transformers as trf
 import itertools
@@ -42,17 +42,17 @@ def create_current_vector_from_network(network: Network, node_index_mapper: map.
     def currents_of_connected_active_nodes(node: str) -> complex:
         connected_active_nodes = {n for n in connected_nodes(network, node) if super_nodes.is_active(n)}
         connected_active_nodes = {n for n in connected_active_nodes if not super_nodes.belong_to_same(n, node)}
-        return sum([super_nodes.voltage_to_next_reference(cn)*admittance_between(network, cn, node) for cn in connected_active_nodes])
+        return sum([voltage_to_next_reference(network, super_nodes, cn)*admittance_between(network, cn, node) for cn in connected_active_nodes])
     def currents_of_belonging_voltage_sources(reference_node: str) -> complex:
-        an = super_nodes.get_active_node(reference_node)
+        an = super_nodes.active_node(reference_node)
         connected_admittances_without_parallel_one = admittance_connected_to(network, an)-admittance_between(network, an, reference_node)
-        return -super_nodes.voltage_to_next_reference(an)*connected_admittances_without_parallel_one
+        return -voltage_to_next_reference(network, super_nodes, an)*connected_admittances_without_parallel_one
     for i_label, i in node_mapping.items():
         b[i] = current_sources(i_label)
         b[i] += currents_of_connected_active_nodes(i_label)
     for ref_label, i in reference_node_mapping.items():
-        b[i] += current_sources(super_nodes.get_active_node(ref_label))
-        b[i] += currents_of_connected_active_nodes(super_nodes.get_active_node(ref_label))
+        b[i] += current_sources(super_nodes.active_node(ref_label))
+        b[i] += currents_of_connected_active_nodes(super_nodes.active_node(ref_label))
         b[i] += currents_of_belonging_voltage_sources(ref_label)
     return b
         

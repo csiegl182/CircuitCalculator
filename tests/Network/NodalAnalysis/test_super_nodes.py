@@ -74,8 +74,8 @@ def test_get_supernode_counterparts_identifies_all_counterparts() -> None:
         Branch('3', '0', r2),
     ])
     nodes = SuperNodes(network)
-    assert nodes.get_reference_node('1') == '0'
-    assert nodes.get_reference_node('2') == '3'
+    assert nodes.reference_node('1') == '0'
+    assert nodes.reference_node('2') == '3'
 
 def test_get_supernode_counterparts_returns_zero_node() -> None:
     vs1 = voltage_source('Us1', 1)
@@ -83,7 +83,7 @@ def test_get_supernode_counterparts_returns_zero_node() -> None:
         Branch('0', '1', vs1)
     ])
     nodes = SuperNodes(network)
-    assert network.is_zero_node(nodes.get_reference_node('1'))
+    assert network.is_zero_node(nodes.reference_node('1'))
     
 def test_get_counterparts_of_non_active_node_raises_value_error() -> None:
     vs1 = voltage_source('Us1', 1)
@@ -100,7 +100,7 @@ def test_get_counterparts_of_non_active_node_raises_value_error() -> None:
     ])
     nodes = SuperNodes(network)
     with pytest.raises(ValueError):
-        nodes.get_reference_node('2')
+        nodes.reference_node('2')
 
 def test_nodes_belonging_to_one_supernode() -> None:
     vs = voltage_source('Us1', 1)
@@ -181,3 +181,31 @@ def test_active_node_is_reference_node_of_another_supernode_and_its_active_node(
     ])
     nodes = SuperNodes(network)
     assert nodes.belong_to_same(active_node='1', reference_node='2') == False
+
+def test_given_two_serial_voltage_sources_non_active_reference_node_is_detected() -> None:
+    vs1 = voltage_source('Us1', 1)
+    vs2 = voltage_source('Us2', 2)
+    r1 = resistor('R1', 2)
+    r2 = resistor('R2', 2)
+    network = Network([
+        Branch('1', '0', vs1),
+        Branch('2', '1', vs2),
+        Branch('2', '3', r1),
+        Branch('3', '0', r2),
+    ])
+    nodes = SuperNodes(network)
+    assert nodes.non_active_reference_node('2') == '0'
+
+def test_given_two_serial_voltage_sources_path_of_reference_nodes_is_generated() -> None:
+    vs1 = voltage_source('Us1', 1)
+    vs2 = voltage_source('Us2', 2)
+    r1 = resistor('R1', 2)
+    r2 = resistor('R2', 2)
+    network = Network([
+        Branch('1', '0', vs1),
+        Branch('2', '1', vs2),
+        Branch('2', '3', r1),
+        Branch('3', '0', r2),
+    ])
+    nodes = SuperNodes(network)
+    assert nodes.nodes_to_non_active_reference_node('2') == ['2', '1', '0']

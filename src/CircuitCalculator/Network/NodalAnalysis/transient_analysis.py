@@ -26,7 +26,7 @@ class TransientAnalysisSolution(NodalAnalysisSolution):
         V_active = np.zeros(shape=self.time.shape)
         if self._super_nodes.is_active(node_id):
             V_active = self._super_nodes.voltage_to_next_reference(node_id)
-            node_id = self._super_nodes.next_reference(node_id)
+            node_id = self._super_nodes.non_active_reference_node(node_id)
         if self.network.is_zero_node(node_id):
             return V_active
         return self.phi[:,self._node_mapping[node_id]] + V_active
