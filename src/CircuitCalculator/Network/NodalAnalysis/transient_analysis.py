@@ -1,4 +1,5 @@
 from ..network import Network
+from ..elements import is_ideal_voltage_source
 from .solution import NodalAnalysisSolution
 from .state_space_model import NodalStateSpaceModel, BranchValues
 from scipy import signal
@@ -6,6 +7,7 @@ from typing import Any, Callable
 from . import labelmapper as map
 import numpy as np
 from dataclasses import dataclass, field
+from .supernodes import SuperNodes
 
 @dataclass
 class TransientAnalysisSolution(NodalAnalysisSolution):
@@ -25,7 +27,7 @@ class TransientAnalysisSolution(NodalAnalysisSolution):
     def get_potential(self, node_id: str) -> Any:
         V_active = np.zeros(shape=self.time.shape)
         if self._super_nodes.is_active(node_id):
-            V_active = self._super_nodes.voltage_to_next_reference(node_id)
+            V_active = voltage_to_next_reference(self.network, SuperNodes(self.network), node_id, {k: self.input[k](self.time) for k in self.input})
             node_id = self._super_nodes.non_active_reference_node(node_id)
         if self.network.is_zero_node(node_id):
             return V_active
@@ -33,6 +35,16 @@ class TransientAnalysisSolution(NodalAnalysisSolution):
 
     def get_current(self, branch_id: str) -> Any:
         return 0
+
+def voltage_to_next_reference(network: Network, super_nodes: SuperNodes, active_node: str, input: dict[str, np.ndarray]) -> Any:
+    def voltage_between(node1: str, node2: str) -> str:
+        branches = network.branches_between(node1, node2)
+        voltage_sources = [b for b in branches if is_ideal_voltage_source(b.element)]
+        if len(voltage_sources) != 1:
+            raise Exception
+        return voltage_sources[0].id
+    voltage_source_node_pairs = zip(super_nodes.nodes_to_non_active_reference_node(active_node)[:-1], super_nodes.nodes_to_non_active_reference_node(active_node)[1:])
+    return sum([input[voltage_between(n1, n2)] for n1, n2 in voltage_source_node_pairs])
 
 # def transient_analysis_solver(network: Network) -> NetworkSolution:
 #     return TransientAnalysisSolution(network)
