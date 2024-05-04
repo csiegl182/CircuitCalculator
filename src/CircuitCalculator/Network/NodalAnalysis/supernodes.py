@@ -1,7 +1,6 @@
 from ..network import Network, ideal_voltage_sources
 from ..elements import is_ideal_voltage_source
 from dataclasses import dataclass
-import numpy as np
 
 class AmbiguousElectricalPotential(Exception): pass
 
@@ -83,3 +82,13 @@ def voltage_to_next_reference(network: Network, super_nodes: SuperNodes, active_
         return voltage_source.element.V
     voltage_source_node_pairs = zip(super_nodes.nodes_to_non_active_reference_node(active_node)[:-1], super_nodes.nodes_to_non_active_reference_node(active_node)[1:])
     return sum([voltage_between(n1, n2) for n1, n2 in voltage_source_node_pairs])
+
+def voltage_source_labels_to_next_reference(network: Network, super_nodes: SuperNodes, active_node: str) -> list[str]:
+    def voltage_source_between(node1: str, node2: str) -> str:
+        branches = network.branches_between(node1, node2)
+        voltage_sources = [b for b in branches if is_ideal_voltage_source(b.element)]
+        if len(voltage_sources) != 1:
+            raise AmbiguousElectricalPotential
+        return voltage_sources[0].id
+    voltage_source_node_pairs = zip(super_nodes.nodes_to_non_active_reference_node(active_node)[:-1], super_nodes.nodes_to_non_active_reference_node(active_node)[1:])
+    return [voltage_source_between(n1, n2) for n1, n2 in voltage_source_node_pairs]
