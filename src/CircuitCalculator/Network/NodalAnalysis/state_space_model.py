@@ -8,16 +8,6 @@ from enum import Enum, auto
 from .supernodes import SuperNodes, voltage_source_labels_to_next_reference
 from ...SignalProcessing import state_space_model as sp
 
-class OutputType(Enum):
-    VOLTAGE = auto()
-    CURRENT = auto()
-    POTENTIAL = auto()
-
-@dataclass(frozen=True)
-class Output:
-    type: OutputType
-    id: str
-
 def state_space_matrices_for_potentials(network: Network, c_values: dict[str, float], node_index_mapper: map.NetworkMapper = map.default_node_mapper, source_index_mapper: map.SourceIndexMapper = map.default_source_mapper) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     node_mapping = node_index_mapper(network)
     def element_incidence_matrix(values: dict[str, float]) -> np.ndarray:
