@@ -1,5 +1,5 @@
-from .network import Network, ideal_voltage_sources
-from .elements import NortenTheveninElement
+from ..network import Network, ideal_voltage_sources
+from ..elements import NortenTheveninElement
 from dataclasses import dataclass
 import numpy as np
 

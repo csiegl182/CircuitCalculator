@@ -1,5 +1,5 @@
 from CircuitCalculator.Network.loaders import load_network_from_json
-from CircuitCalculator.Network.NodalAnalysis import nodal_analysis_solver, open_circuit_impedance
+from CircuitCalculator.Network.NodalAnalysis.node_analysis import nodal_analysis_solver, open_circuit_impedance
 import numpy as np
 from pathlib import Path
 

@@ -1,5 +1,5 @@
 from ..Network.solution import NetworkSolver, NetworkSolution
-from ..Network.NodalAnalysis import nodal_analysis_solver
+from ..Network.NodalAnalysis.node_analysis import nodal_analysis_solver
 from ..Circuit.solution import ComplexSolution
 
 from . import Elements as elm
