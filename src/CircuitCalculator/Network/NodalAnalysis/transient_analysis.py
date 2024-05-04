@@ -4,7 +4,7 @@ from .solution import NodalAnalysisSolution
 from .state_space_model import NodalStateSpaceModel, BranchValues
 from scipy import signal
 from typing import Any, Callable
-from . import labelmapper as map
+from . import label_mapping as map
 import numpy as np
 from dataclasses import dataclass, field
 from .supernodes import SuperNodes

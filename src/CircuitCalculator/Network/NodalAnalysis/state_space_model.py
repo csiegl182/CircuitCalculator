@@ -1,5 +1,5 @@
 from ..network import Network
-from . import labelmapper as map
+from . import label_mapping as map
 from .node_analysis import create_node_matrix_from_network, create_source_incidence_matrix_from_network
 import numpy as np
 from dataclasses import dataclass

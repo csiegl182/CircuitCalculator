@@ -1,6 +1,6 @@
 from CircuitCalculator.Network.network import Network, Branch
 from CircuitCalculator.Network.elements import voltage_source, current_source
-from CircuitCalculator.Network.NodalAnalysis.labelmapper import alphabetic_source_mapper
+from CircuitCalculator.Network.NodalAnalysis.label_mapping import alphabetic_source_mapper
 
 def test_alphabetic_source_mapping_sorts_current_sources_before_voltage_sources() -> None:
     network = Network([

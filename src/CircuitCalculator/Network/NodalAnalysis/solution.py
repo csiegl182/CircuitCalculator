@@ -2,7 +2,7 @@ from typing import Any
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from ..network import Network
-from . import labelmapper as map
+from . import label_mapping as map
 from .supernodes import SuperNodes
 
 @dataclass

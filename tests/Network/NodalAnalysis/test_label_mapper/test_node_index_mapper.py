@@ -1,4 +1,4 @@
-from CircuitCalculator.Network.NodalAnalysis.labelmapper import alphabetic_node_mapper
+from CircuitCalculator.Network.NodalAnalysis.label_mapping import alphabetic_node_mapper
 from CircuitCalculator.Network.network import Network, Branch
 from CircuitCalculator.Network.elements import resistor, voltage_source
 

@@ -1,4 +1,4 @@
-from CircuitCalculator.Network.NodalAnalysis.labelmapper import LabelMapping, filter_mapping
+from CircuitCalculator.Network.NodalAnalysis.label_mapping import LabelMapping, filter_mapping
 import pytest
 
 def test_label_mapper_returns_filtered_object() -> None:

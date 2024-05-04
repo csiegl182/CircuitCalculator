@@ -3,7 +3,7 @@ import numpy as np
 from ..network import Network
 from ..elements import is_ideal_voltage_source, is_current_source
 from .supernodes import SuperNodes, voltage_to_next_reference
-from . import labelmapper as map
+from . import label_mapping as map
 from .. import transformers as trf
 import itertools
 

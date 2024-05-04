@@ -1,4 +1,4 @@
-from CircuitCalculator.Network.NodalAnalysis.labelmapper import LabelMapping, DistinctValues
+from CircuitCalculator.Network.NodalAnalysis.label_mapping import LabelMapping, DistinctValues
 import pytest
 
 def test_label_mapping_returns_single_values() -> None:
