@@ -1,5 +1,4 @@
 from CircuitCalculator.Network.NodalAnalysis.transient_analysis import TransientAnalysisSolution
-from CircuitCalculator.Network.NodalAnalysis.state_space_model import BranchValues
 from CircuitCalculator.SignalProcessing.one_sided_functions import step
 from CircuitCalculator.Network.network import Network, Branch
 from CircuitCalculator.Network.elements import voltage_source, open_circuit, resistor
@@ -20,7 +19,7 @@ def test_solution_of_example_network_1() -> None:
     Ri = R3+R1*R2/(R1+R2)
     tau = Ri*C
     input = {'Vs': functools.partial(step, t0=0.1)}
-    solution = TransientAnalysisSolution(network, c_values=[BranchValues(value=C, id='C', node1='3', node2='0')], input=input, t_lim=(0, 0.5), Ts=1e-4)
+    solution = TransientAnalysisSolution(network, c_values={'C' : C}, input=input, t_lim=(0, 0.5), Ts=1e-4)
     t = solution.time
     uc_ref = np.zeros(t.size)
     uc_ref[t>0.1] = Vs*R2/(R1+R2)*(1-np.exp(-(t[t>0.1]-0.1)/tau))

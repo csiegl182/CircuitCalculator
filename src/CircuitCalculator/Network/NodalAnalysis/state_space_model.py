@@ -1,12 +1,11 @@
-from ..network import Network
-from . import label_mapping as map
 from .node_analysis import create_node_matrix_from_network, create_source_incidence_matrix_from_network
-import numpy as np
-from dataclasses import dataclass
-import itertools
-from enum import Enum, auto
 from .supernodes import SuperNodes, voltage_source_labels_to_next_reference
+from . import label_mapping as map
+from ..network import Network
 from ...SignalProcessing import state_space_model as sp
+import numpy as np
+import itertools
+from dataclasses import dataclass
 
 def state_space_matrices_for_potentials(network: Network, c_values: dict[str, float], node_index_mapper: map.NetworkMapper = map.default_node_mapper, source_index_mapper: map.SourceIndexMapper = map.default_source_mapper) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     node_mapping = node_index_mapper(network)
@@ -35,7 +34,7 @@ def state_space_matrices_for_potentials(network: Network, c_values: dict[str, fl
     return A, B, C, D
 
 @dataclass(frozen=True)
-class NewNodalStateSpaceModel(sp.StateSpaceModel):
+class NodalStateSpaceModel(sp.StateSpaceModel):
     network: Network
     c_values: dict[str, float]
     node_index_mapping: map.LabelMapping
@@ -43,8 +42,7 @@ class NewNodalStateSpaceModel(sp.StateSpaceModel):
 
     def c_row_for_potential(self, node_id: str) -> np.ndarray:
         if node_id in self.node_index_mapping:
-            idx = self.node_index_mapping[node_id]
-            return self.C[:][idx]
+            return self.C[:][self.node_index_mapping(node_id)]
         return np.zeros(self.C.shape[1])
 
     def c_row_voltage(self, branch_id: str) -> np.ndarray:
@@ -56,18 +54,15 @@ class NewNodalStateSpaceModel(sp.StateSpaceModel):
     def c_row_current(self, branch_id: str) -> np.ndarray:
         if branch_id in self.c_values:
             idx = list(self.c_values.keys()).index(branch_id)
-            C_ = self.c_values[list(self.c_values.keys())[idx]]*self.A[idx][:]
-        else:
-            branch = self.network[branch_id]
-            c_pos = self.c_row_for_potential(branch.node1)
-            c_neg = self.c_row_for_potential(branch.node2)
-            C_ = (c_pos - c_neg)/branch.element.Z
-        return C_
+            return self.c_values[branch_id]*self.A[idx][:]
+        branch = self.network[branch_id]
+        c_pos = self.c_row_for_potential(branch.node1)
+        c_neg = self.c_row_for_potential(branch.node2)
+        return (c_pos - c_neg)/branch.element.Z
 
     def d_row_for_potential(self, node_id: str) -> np.ndarray:
         if node_id in self.node_index_mapping:
-            idx = self.node_index_mapping[node_id]
-            return self.D[:][idx]
+            return self.D[:][self.node_index_mapping(node_id)]
         if self.network.is_zero_node(node_id):
             return np.zeros(self.D.shape[1])
         source_indices = [self.source_index_mapping[source] for source in voltage_source_labels_to_next_reference(self.network, SuperNodes(self.network), node_id)]
@@ -84,26 +79,24 @@ class NewNodalStateSpaceModel(sp.StateSpaceModel):
     def d_row_current(self, branch_id: str) -> np.ndarray:
         if branch_id in self.c_values:
             idx = list(self.c_values.keys()).index(branch_id)
-            D_ = self.c_values[list(self.c_values.keys())[idx]]*self.B[idx][:]
-        else:
-            if branch_id in self.source_index_mapping:
-                D_ = np.zeros(self.n_inputs)
-                D_[self.source_index_mapping[branch_id]] = 1
-            else:
-                branch = self.network[branch_id]
-                d_pos = self.d_row_for_potential(branch.node1)
-                d_neg = self.d_row_for_potential(branch.node2)
-                D_ = (d_pos - d_neg)/branch.element.Z
-        return D_
+            return self.c_values[branch_id]*self.B[idx][:]
+        if branch_id in self.source_index_mapping:
+            D_ = np.zeros(self.n_inputs)
+            D_[self.source_index_mapping[branch_id]] = 1
+            return D_
+        branch = self.network[branch_id]
+        d_pos = self.d_row_for_potential(branch.node1)
+        d_neg = self.d_row_for_potential(branch.node2)
+        return (d_pos - d_neg)/branch.element.Z
 
-def nodal_state_space_model(network: Network, c_values: dict[str, float], node_index_mapper: map.NetworkMapper = map.default_node_mapper, source_index_mapper: map.SourceIndexMapper = map.default_source_mapper) -> NewNodalStateSpaceModel:
+def nodal_state_space_model(network: Network, c_values: dict[str, float], node_index_mapper: map.NetworkMapper = map.default_node_mapper, source_index_mapper: map.SourceIndexMapper = map.default_source_mapper) -> NodalStateSpaceModel:
     A, B, C, D = state_space_matrices_for_potentials(
         network=network,
         c_values=c_values,
         node_index_mapper=node_index_mapper,
         source_index_mapper=source_index_mapper
     )
-    return NewNodalStateSpaceModel(
+    return NodalStateSpaceModel(
         A=A, B=B, C=C, D=D,
         network=network,
         c_values=c_values,

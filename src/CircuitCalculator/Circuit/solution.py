@@ -1,7 +1,6 @@
 from .circuit import Circuit, transform, frequency_components
 from ..SignalProcessing.types import TimeDomainFunction, FrequencyDomainFunction
 from ..Network.NodalAnalysis.bias_point_analysis import nodal_analysis_bias_point_solver
-# from ..Network.NodalAnalysis.state_space_model import create_state_space_input_update_matrix
 from ..Network.solution import NetworkSolver
 from typing import Any
 from dataclasses import dataclass, field
@@ -119,9 +118,6 @@ class FrequencyDomainSolution(CircuitSolution):
         w, voltage = self.get_voltage(component_id)
         _, current = self.get_current(component_id)
         return w, voltage*np.conj(current)
-
-from typing import Callable
-from ..Network.NodalAnalysis.state_space_model import BranchValues
 
 # @dataclass
 # class TransientSolution(CircuitSolution):
