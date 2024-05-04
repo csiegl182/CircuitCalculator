@@ -449,7 +449,7 @@ class Inductance(schemdraw.elements.Inductor):
 
     @property
     def type(self) -> str:
-        return 'inductor'
+        return 'inductance'
 
 @extension.linear_current_source
 @simple_circuit_element
