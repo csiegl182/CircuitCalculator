@@ -2,13 +2,21 @@ from typing import Any
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from ..network import Network
-from .. import elements as elm
-from .. import transformers as trf
-from .node_analysis import element_impedance, open_circuit_impedance
+from . import labelmapper as map
+from .supernodes import SuperNodes
 
 @dataclass
 class NodalAnalysisSolution(ABC):
     network: Network
+    node_mapper: map.NodeIndexMapper = map.default_node_mapper
+
+    @property
+    def _node_mapping(self) -> dict[str, int]:
+        return self.node_mapper(self.network)
+
+    @property
+    def _super_nodes(self) -> SuperNodes:
+        return SuperNodes(self.network)
 
     @abstractmethod
     def get_potential(self, node_id: str) -> Any:

@@ -1,6 +1,5 @@
 from . import labelmapper as map
 from .node_analysis import calculate_node_voltages, create_current_vector_from_network, create_node_matrix_from_network, element_impedance, open_circuit_impedance
-from .supernodes import SuperNodes
 from .. import transformers as trf
 from ..elements import is_ideal_current_source, is_ideal_voltage_source, is_voltage_source
 from ..network import Network
@@ -11,8 +10,6 @@ from dataclasses import dataclass
 
 @dataclass
 class NodalAnalysisBiasPointSolution(NodalAnalysisSolution):
-    node_mapper: map.NodeIndexMapper = map.default_node_mapper
-
     def __post_init__(self) -> None:
         Y = create_node_matrix_from_network(self.network, node_index_mapper=self.node_mapper)
         I = create_current_vector_from_network(self.network, node_index_mapper=self.node_mapper)
@@ -22,14 +19,6 @@ class NodalAnalysisBiasPointSolution(NodalAnalysisSolution):
             self._solution_vector = np.zeros(np.size(I))
         if np.any(np.isnan(self._solution_vector)):
             self._solution_vector = np.zeros(np.size(I))
-
-    @property
-    def _super_nodes(self) -> SuperNodes:
-        return SuperNodes(self.network)
-
-    @property
-    def _node_mapping(self) -> dict[str, int]:
-        return self.node_mapper(self.network)
 
     def _select_active_node(self, branch_id: str) -> str:
         branch = self.network[branch_id]
