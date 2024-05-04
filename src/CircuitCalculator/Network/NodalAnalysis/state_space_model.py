@@ -86,10 +86,13 @@ class NodalStateSpaceModel:
                     idx = [c.id for c in self.c_values].index(i_id)
                     D_[i][:] = self.c_values[idx].value*B[idx][:]
                 else:
-                    branch = self.network[i_id]
-                    d_pos = d_row_for_potential(branch.node1, self.network, self.node_index_mapper, self.source_index_mapper, self.c_values)
-                    d_neg = d_row_for_potential(branch.node2, self.network, self.node_index_mapper, self.source_index_mapper, self.c_values)
-                    D_[i][:] = (d_pos - d_neg)/branch.element.Z
+                    if i_id in self.source_index_mapper(self.network):
+                        D_[i][self.source_index_mapper(self.network).index(i_id)] = 1
+                    else:
+                        branch = self.network[i_id]
+                        d_pos = d_row_for_potential(branch.node1, self.network, self.node_index_mapper, self.source_index_mapper, self.c_values)
+                        d_neg = d_row_for_potential(branch.node2, self.network, self.node_index_mapper, self.source_index_mapper, self.c_values)
+                        D_[i][:] = (d_pos - d_neg)/branch.element.Z
         return D_
 
     @property
