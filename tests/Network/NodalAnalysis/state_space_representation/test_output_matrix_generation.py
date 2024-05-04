@@ -4,7 +4,7 @@ from CircuitCalculator.Network.NodalAnalysis.state_space_model import StateSpace
 import numpy as np
 from numpy.testing import assert_almost_equal
 
-def test_input_matrix_of_transient_network_1() -> None:
+def test_state_state_matrix_of_transient_network_1() -> None:
     Vs = 1
     R1, R2, R3 = 10, 20, 30
     C = 1e-3
@@ -16,9 +16,9 @@ def test_input_matrix_of_transient_network_1() -> None:
         Branch('3', '0', open_circuit('C'))
     ])
     ss = StateSpaceModel(network, [BranchValues(value=C, node1='3', node2='0')])
-    assert_almost_equal(ss.B, np.array([[R2/(C*(R1*R2 + R1*R3 + R2*R3))]]))
+    assert_almost_equal(ss.C, np.array([[1-R3*(R1+R2)/(R1*R2+R2*R3+R1*R3)], [1]]), decimal=5)
 
-def test_input_matrix_of_transient_network_2() -> None:
+def test_state_matrix_of_transient_network_2() -> None:
     Vs = 1
     R1, R2, R3 = 10, 20, 30
     C = 1e-3
@@ -30,9 +30,9 @@ def test_input_matrix_of_transient_network_2() -> None:
         Branch('3', '0', resistor('R3', R=R3))
     ])
     ss = StateSpaceModel(network, [BranchValues(value=C, node1='2', node2='3')])
-    assert_almost_equal(ss.B, np.array([[R2/(C*(R1*R2 + R1*R3 + R2*R3))]]))
+    assert_almost_equal(ss.C, np.array([[-1/(R1*R2/(R1+R2)+R3)/C]]))
 
-def test_input_matrix_of_transient_network_3() -> None:
+def test_state_matrix_of_transient_network_3() -> None:
     Vs = 1
     Is = 1
     R1, R2 = 10, 20
@@ -45,9 +45,9 @@ def test_input_matrix_of_transient_network_3() -> None:
         Branch('0', '3', current_source('Is', I=Is))
     ])
     ss = StateSpaceModel(network, [BranchValues(value=C, node1='2', node2='3')])
-    assert_almost_equal(ss.B, np.array([[-R2/(R1+R2)/C, 1/(R1+R2)/C]]))
+    assert_almost_equal(ss.C, np.array([[-1/(R1+R2)/C]]))
 
-def test_input_matrix_of_transient_network_4() -> None:
+def test_state_matrix_of_transient_network_4() -> None:
     Vs = 1
     R1, R2 = 10, 20
     C1, C2 = 5e-3, 1e-3
@@ -59,4 +59,4 @@ def test_input_matrix_of_transient_network_4() -> None:
         Branch('3', '0', open_circuit('C2'))
     ])
     ss = StateSpaceModel(network, [BranchValues(value=C1, node1='2', node2='3'), BranchValues(value=C2, node1='3', node2='0')])
-    assert_almost_equal(ss.B, np.array([[1/R1/C1], [1/R1/C1]]))
+    assert_almost_equal(ss.C, np.array([[-1/R1/C1, -1/R1/C2], [-1/R1/C1, -(R1+R2)/C2/R1/R2]]))
