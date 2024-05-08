@@ -13,10 +13,10 @@ def remove_element(network: Network, element: str) -> Network:
 def remove_open_circuit_elements(network: Network) -> Network:
     return Network([b for b in network.branches if not is_open_circuit(b.element)], node_zero_label=network.node_zero_label)
 
-def remove_short_circuit_elements(network: Network) -> Network:
+def remove_short_circuit_elements(network: Network, keep: list[NortenTheveninElement] = []) -> Network:
     branches = network.branches
     super_nodes = SuperNodes(network)
-    short_circuits = [b for b in network.branches if is_short_circuit(b.element)]
+    short_circuits = [b for b in network.branches if is_short_circuit(b.element) and b.element not in keep]
     short_circuit_nodes = [(vs.node1, vs.node2) if super_nodes.is_active(vs.node1) else (vs.node2, vs.node1) for vs in short_circuits]
     for an, rn in short_circuit_nodes:
         branches = [Branch(rn, b.node2, b.element) if b.node1 == an else b for b in branches]
@@ -56,7 +56,7 @@ def remove_ideal_current_sources(network: Network, keep: list[NortenTheveninElem
     return remove_open_circuit_elements(open_circuitify_current_sources(network, keep=keep))
 
 def remove_ideal_voltage_sources(network: Network, keep: list[NortenTheveninElement] = []) -> Network:
-    return remove_short_circuit_elements(short_circuitify_voltage_sources(network, keep=keep))
+    return remove_short_circuit_elements(short_circuitify_voltage_sources(network, keep=keep), keep=keep)
 
 def passive_network(network: Network, keep: list[NortenTheveninElement] = []) -> Network:
     return remove_ideal_voltage_sources(remove_ideal_current_sources(network, keep=keep), keep=keep)
