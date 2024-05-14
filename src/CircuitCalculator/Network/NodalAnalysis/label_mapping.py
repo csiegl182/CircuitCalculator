@@ -42,8 +42,7 @@ NetworkMapper = Callable[[Network], LabelMapping]
 SourceIndexMapper = Callable[[Network], LabelMapping]
 
 def alphabetic_node_mapper(network: Network) -> LabelMapping:
-    super_nodes = SuperNodes(network=network)
-    node_labels_without_zero = [label for label in sorted(network.node_labels) if label != network.node_zero_label and not super_nodes.is_active(label)] 
+    node_labels_without_zero = [label for label in sorted(network.node_labels) if label != network.node_zero_label] 
     return LabelMapping({k: v for v, k in enumerate(node_labels_without_zero)})
 
 default_node_mapper = alphabetic_node_mapper

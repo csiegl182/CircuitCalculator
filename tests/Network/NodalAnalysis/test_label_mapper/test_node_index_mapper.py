@@ -38,24 +38,3 @@ def test_alphabetic_mapper_has_no_mapping_for_zero_node() -> None:
     )
     mapping = alphabetic_node_mapper(network)
     assert '2' not in mapping.keys
-
-def test_mapping_ignores_active_nodes() -> None:
-    network = Network(
-        [
-            Branch('0', '1', voltage_source('U1', 1)),
-            Branch('4', '5', resistor('R1', 1)),
-            Branch('2', '1', resistor('R2', 1)),
-            Branch('1', '3', resistor('R3', 1)),
-            Branch('3', '5', resistor('R4', 1)),
-            Branch('4', '3', resistor('R5', 1)),
-            Branch('2', '5', resistor('R6', 1)),
-            Branch('0', '5', resistor('R7', 1))
-        ],
-        node_zero_label='2'
-    )
-    mapping = alphabetic_node_mapper(network)
-    assert mapping['1'] == 0
-    assert mapping['3'] == 1
-    assert mapping['4'] == 2
-    assert mapping['5'] == 3
-

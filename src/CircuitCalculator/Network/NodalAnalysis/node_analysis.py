@@ -22,10 +22,10 @@ def connected_nodes(network: Network, node: str) -> list[str]:
 def create_node_matrix_from_network(network: Network, node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> np.ndarray:
     def node_matrix_element(i_label:str, j_label:str) -> complex:
         if i_label == j_label:
-            return admittance_connected_to(passive_net, i_label)
-        return -admittance_between(passive_net, i_label, j_label)
-    passive_net = trf.passive_network(network)
+            return admittance_connected_to(no_voltage_sources_network, i_label)
+        return -admittance_between(no_voltage_sources_network, i_label, j_label)
     node_mapping = node_index_mapper(network)
+    no_voltage_sources_network = Network(branches=[b for b in network.branches if not is_ideal_voltage_source(b.element)], node_zero_label=network.node_zero_label)
     Y = np.zeros((node_mapping.N, node_mapping.N), dtype=complex)
     for i_label, j_label in itertools.product(node_mapping, repeat=2):
         Y[node_mapping(i_label, j_label)] = node_matrix_element(i_label, j_label)

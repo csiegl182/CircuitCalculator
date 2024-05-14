@@ -5,7 +5,12 @@ import numpy as np
 
 def test_node_admittance_matrix_is_correct() -> None:
     Y_12, Y_20, Y_23, Y_34, Y_40 = 1, 2, 3, 4, 5
-    Y_ref = np.array([[Y_12, -Y_12, 0, 0], [-Y_12, Y_12+Y_20+Y_23, -Y_23, 0], [0, -Y_23, Y_23+Y_34, -Y_34], [0, 0, -Y_34, Y_34+Y_40]])
+    Y_ref = np.array([
+        [ Y_20+Y_40,     0,          -Y_20,         0,     -Y_40],
+        [         0,  Y_12,          -Y_12,         0,         0],
+        [     -Y_20, -Y_12, Y_12+Y_20+Y_23,     -Y_23,         0],
+        [         0,     0,          -Y_23, Y_23+Y_34,     -Y_34],
+        [     -Y_40,     0,              0,     -Y_34, Y_34+Y_40]])
 
     network = Network([
         Branch('1', '2', conductor('Y_12', Y_12)),
@@ -20,7 +25,11 @@ def test_node_admittance_matrix_is_correct() -> None:
 
 def test_node_admittance_matrix_sorts_node_indices() -> None:
     Y_10, Y_20, Y_12 = 1, 2, 3
-    Y_ref = np.array([[Y_10+Y_12, -Y_12], [-Y_12, Y_20+Y_12]])
+    Y_ref = np.array([
+        [Y_10+Y_20,     -Y_10,     -Y_20],
+        [    -Y_10, Y_10+Y_12,     -Y_12],
+        [    -Y_20,     -Y_12, Y_20+Y_12]
+        ])
 
     network = Network([
         Branch('1', '0', conductor('Y_10', Y_10)),
