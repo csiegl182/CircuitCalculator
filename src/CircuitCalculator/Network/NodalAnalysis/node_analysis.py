@@ -19,7 +19,7 @@ def admittance_between(network: Network, node1: str, node2: str) -> complex:
 def connected_nodes(network: Network, node: str) -> list[str]:
     return [b.node1 if b.node1 != node else b.node2 for b in network.branches_connected_to(node)]
 
-def create_node_matrix_from_network(network: Network, node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> np.ndarray:
+def node_admittance_matrix(network: Network, node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> np.ndarray:
     def node_matrix_element(i_label:str, j_label:str) -> complex:
         if i_label == j_label:
             return admittance_connected_to(no_voltage_sources_network, i_label)
@@ -102,7 +102,7 @@ def open_circuit_impedance(network: Network, node1: str, node2: str, node_index_
         node1, node2 = node2, node1
     network = trf.switch_ground_node(network=network, new_ground=node2)
     network = trf.passive_network(network)
-    Y = create_node_matrix_from_network(network, node_index_mapper=node_index_mapper)
+    Y = node_admittance_matrix(network, node_index_mapper=node_index_mapper)
     Z = np.linalg.inv(Y)
     i1 = node_index_mapper(network)[node1]
     return Z[i1][i1]

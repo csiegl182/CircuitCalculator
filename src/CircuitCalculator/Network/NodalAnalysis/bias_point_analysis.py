@@ -1,4 +1,4 @@
-from .node_analysis import calculate_node_voltages, create_current_vector_from_network, create_node_matrix_from_network, element_impedance, open_circuit_impedance
+from .node_analysis import calculate_node_voltages, create_current_vector_from_network, node_admittance_matrix, element_impedance, open_circuit_impedance
 from .. import transformers as trf
 from ..elements import is_ideal_current_source, is_ideal_voltage_source, is_voltage_source
 from ..network import Network
@@ -11,7 +11,7 @@ from .supernodes import voltage_to_next_reference
 @dataclass
 class NodalAnalysisBiasPointSolution(NodalAnalysisSolution):
     def __post_init__(self) -> None:
-        Y = create_node_matrix_from_network(self.network, node_index_mapper=self.node_mapper)
+        Y = node_admittance_matrix(self.network, node_index_mapper=self.node_mapper)
         I = create_current_vector_from_network(self.network, node_index_mapper=self.node_mapper)
         try:
             self._solution_vector = calculate_node_voltages(Y, I)

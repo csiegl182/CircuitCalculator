@@ -1,4 +1,4 @@
-from CircuitCalculator.Network.NodalAnalysis.node_analysis import create_node_matrix_from_network
+from CircuitCalculator.Network.NodalAnalysis.node_analysis import node_admittance_matrix
 from CircuitCalculator.Network.network import Network, Branch
 from CircuitCalculator.Network.elements import resistor, voltage_source, current_source
 import numpy as np
@@ -13,7 +13,7 @@ def test_create_node_matrix_from_reference_network_1() -> None:
             Branch('1', '0', resistor('R', R=R))
         ]
     )
-    Y = create_node_matrix_from_network(network)
+    Y = node_admittance_matrix(network)
     Y_ref = np.array([
         [G]
         ], dtype=complex)
@@ -29,7 +29,7 @@ def test_create_node_matrix_from_reference_network_2() -> None:
             Branch('1', '0', resistor('R1', R=R))
         ]
     )
-    Y = create_node_matrix_from_network(network)
+    Y = node_admittance_matrix(network)
     Y_ref = np.array([
         [G]
         ], dtype=complex)
@@ -46,7 +46,7 @@ def test_create_node_matrix_from_reference_network_3() -> None:
             Branch('2', '0', resistor('R2', R=R2))
         ]
     )
-    Y = create_node_matrix_from_network(network)
+    Y = node_admittance_matrix(network)
     Y_ref = np.array([
         [G1+Gi,   -G1],
         [  -G1, G1+G2]
@@ -65,7 +65,7 @@ def test_create_node_matrix_from_reference_network_4() -> None:
             Branch('2', '0', resistor('R3', R=R3))
         ]
     )
-    Y = create_node_matrix_from_network(network)
+    Y = node_admittance_matrix(network)
     Y_ref = np.array([
         [G1+G2,    -G2],
         [  -G2,  G2+G3]
@@ -87,7 +87,7 @@ def test_create_node_matrix_from_reference_network_5() -> None:
             Branch('0', '4', voltage_source('Uq2', V=Uq2))
         ]
     )
-    Y = create_node_matrix_from_network(network)
+    Y = node_admittance_matrix(network)
     Y_ref = np.array([
         [ G1,      -G1,     0,     0],
         [-G1, G1+G2+G3,   -G3,     0],
@@ -111,7 +111,7 @@ def test_create_node_matrix_from_reference_network_6() -> None:
             Branch('3', '2', voltage_source('Uq2', V=U2))
         ]
     )
-    Y = create_node_matrix_from_network(network)
+    Y = node_admittance_matrix(network)
     Y_ref = np.array([
         [ G1,      -G1,     0,     0],
         [-G1, G1+G2+G3,   -G3,     0],
@@ -136,7 +136,7 @@ def test_create_node_matrix_from_reference_network_7() -> None:
             Branch('3', '5', current_source('Is4', I=I4))
         ]
     )
-    Y = create_node_matrix_from_network(network)
+    Y = node_admittance_matrix(network)
     Y_ref = np.array([
         [G1+G2,   0, -G2,   0,     0],
         [    0,  G3,   0,   0,   -G3],
@@ -162,7 +162,7 @@ def test_create_node_matrix_from_reference_network_10() -> None:
             Branch('2', '4', resistor('R5', R=R5)),
         ]
     )
-    Y = create_node_matrix_from_network(network)
+    Y = node_admittance_matrix(network)
     Y_ref = np.array([
         [G1+G2,      -G2,   0,     0],
         [  -G2, G2+G4+G5, -G4,   -G5],
@@ -186,7 +186,7 @@ def test_create_node_matrix_from_reference_network_11() -> None:
         ],
         node_zero_label='0'
     )
-    Y = create_node_matrix_from_network(network)
+    Y = node_admittance_matrix(network)
     Y_ref = np.array([
         [G1+G2,   -G2,   0],
         [  -G2, G2+G3,   0],
@@ -207,7 +207,7 @@ def test_create_node_matrix_from_reference_network_13() -> None:
         ],
         node_zero_label='0'
     )
-    Y = create_node_matrix_from_network(network)
+    Y = node_admittance_matrix(network)
     Y_ref = np.array([
         [ G1+G2,   -G1-G2],
         [-G1-G2, G1+G2+G3]

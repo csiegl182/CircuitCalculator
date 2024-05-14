@@ -1,4 +1,4 @@
-from .node_analysis import create_node_matrix_from_network, create_source_incidence_matrix_from_network
+from .node_analysis import node_admittance_matrix, create_source_incidence_matrix_from_network
 from .supernodes import SuperNodes, voltage_source_labels_to_next_reference
 from . import label_mapping as map
 from ..network import Network
@@ -24,7 +24,7 @@ def state_space_matrices_for_potentials(network: Network, c_values: dict[str, fl
         network=network,
         node_index_mapper=node_index_mapper,
         source_index_mapper=source_index_mapper).real
-    inv_Y = np.linalg.inv(create_node_matrix_from_network(network=network, node_index_mapper=node_index_mapper).real)
+    inv_Y = np.linalg.inv(node_admittance_matrix(network=network, node_index_mapper=node_index_mapper).real)
     sorted_Y = np.linalg.inv(Delta @ inv_Y @ Delta.T)
 
     A =  -invC @ sorted_Y
