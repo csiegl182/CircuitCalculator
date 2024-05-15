@@ -1,24 +1,31 @@
-from .node_analysis import calculate_node_voltages, create_current_vector_from_network, node_admittance_matrix, element_impedance, open_circuit_impedance
+from .node_analysis import nodal_analysis_coefficient_matrix, nodal_analysis_constants_vector, open_circuit_impedance
 from .. import transformers as trf
-from ..elements import is_ideal_current_source, is_ideal_voltage_source, is_voltage_source
+from ..elements import is_ideal_current_source, is_current_source
 from ..network import Network
 from ..solution import NetworkSolution
 from .solution import NodalAnalysisSolution
 import numpy as np
 from dataclasses import dataclass
-from .supernodes import voltage_to_next_reference
 
 @dataclass
 class NodalAnalysisBiasPointSolution(NodalAnalysisSolution):
     def __post_init__(self) -> None:
-        Y = node_admittance_matrix(self.network, node_index_mapper=self.node_mapper)
-        I = create_current_vector_from_network(self.network, node_index_mapper=self.node_mapper)
+        A = nodal_analysis_coefficient_matrix(self.network, node_mapper=self.node_mapper)
+        b = nodal_analysis_constants_vector(self.network, node_mapper=self.node_mapper)
         try:
-            self._solution_vector = calculate_node_voltages(Y, I)
+            self._solution_vector = np.linalg.solve(A, b)
         except np.linalg.LinAlgError:
-            self._solution_vector = np.zeros(np.size(I))
+            self._solution_vector = np.zeros(np.size(b))
         if np.any(np.isnan(self._solution_vector)):
-            self._solution_vector = np.zeros(np.size(I))
+            self._solution_vector = np.zeros(np.size(b))
+
+    @property
+    def _potentials(self) -> np.ndarray:
+        return self._solution_vector[:self._node_mapping.N]
+
+    @property
+    def _voltage_source_currents(self) -> np.ndarray:
+        return self._solution_vector[-self._voltage_source_mapping.N:]
 
     def _select_active_node(self, branch_id: str) -> str:
         branch = self.network[branch_id]
@@ -27,28 +34,18 @@ class NodalAnalysisBiasPointSolution(NodalAnalysisSolution):
         return branch.node2
 
     def get_potential(self, node_id: str) -> complex:
-        V_active = 0+0j
-        if self._super_nodes.is_active(node_id):
-            V_active = voltage_to_next_reference(self.network, self._super_nodes, node_id)
-            node_id = self._super_nodes.non_active_reference_node(node_id)
-        if self.network.is_zero_node(node_id):
-            return V_active
-        return self._solution_vector[self._node_mapping[node_id]] + V_active
+        if node_id == self.network.node_zero_label:
+            return 0
+        return self._potentials[self._node_mapping[node_id]]
 
     def get_current(self, branch_id: str) -> complex:
+        if branch_id in self._voltage_source_mapping.keys:
+            return self._voltage_source_currents[self._voltage_source_mapping[branch_id]]
+        if is_ideal_current_source(self.network[branch_id].element):
+            return self.network[branch_id].element.I
+        if is_current_source(self.network[branch_id].element):
+            return - (self.network[branch_id].element.I + self.get_voltage(branch_id)/self.network[branch_id].element.Z)
         branch = self.network[branch_id]
-        if is_ideal_current_source(branch.element):
-            return branch.element.I
-        if is_ideal_voltage_source(branch.element):
-            Z = element_impedance(self.network, branch_id)
-            I_branch_element = -branch.element.V/Z
-            I_other_elements = short_circuit_current(
-                trf.remove_element(self.network, branch_id),
-                branch.node1,
-                branch.node2)
-            return  I_branch_element+I_other_elements
-        if is_voltage_source(branch.element):
-            return -(self.get_voltage(branch_id)+branch.element.V)/branch.element.Z
         return self.get_voltage(branch_id)/branch.element.Z
 
 def open_circuit_voltage(network: Network, node1: str, node2: str) -> complex:

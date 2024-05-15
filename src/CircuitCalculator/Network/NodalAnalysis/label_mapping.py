@@ -51,6 +51,10 @@ def alphabetic_source_mapper(network: Network) -> LabelMapping:
     sorted_soruce_labels = sorted(current_source_labels+voltage_source_labels)
     return LabelMapping({k: v for v, k in enumerate(sorted_soruce_labels)})
 
+def alphabetic_current_source_mapper(network: Network) -> LabelMapping:
+    voltage_source_labels = sorted([b.id for b in network.branches if is_current_source(b.element)])
+    return LabelMapping({k: v for v, k in enumerate(voltage_source_labels)})
+
 def alphabetic_voltage_source_mapper(network: Network) -> LabelMapping:
     voltage_source_labels = sorted([b.id for b in network.branches if is_ideal_voltage_source(b.element)])
     return LabelMapping({k: v for v, k in enumerate(voltage_source_labels)})

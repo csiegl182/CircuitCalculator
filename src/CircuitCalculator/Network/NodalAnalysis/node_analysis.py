@@ -45,15 +45,15 @@ def voltage_source_incidence_matrix(network: Network, node_mapper: map.NetworkMa
         A[node_index[node], vs_index[vs]] = voltage_source_direction(vs, node)
     return A
 
-def nodal_analysis_coefficient_matrix(network: Network, node_mapper: map.NetworkMapper = map.default_node_mapper, source_mapper: map.SourceIndexMapper = map.default_source_mapper) -> np.ndarray:
+def nodal_analysis_coefficient_matrix(network: Network, node_mapper: map.NetworkMapper = map.default_node_mapper, source_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper) -> np.ndarray:
     Y = node_admittance_matrix(network, node_mapper)
     B = voltage_source_incidence_matrix(network, node_mapper, source_mapper)
     Z = np.zeros((B.shape[1], B.shape[1]))
-    return np.vstack((np.hstack((Y, B)), np.hstack((-B.T, Z))))
+    return np.vstack((np.hstack((Y, B)), np.hstack((B.T, Z))))
 
-def source_incidence_matrix(network: Network, node_mapper: map.NetworkMapper = map.default_node_mapper, source_mapper: map.SourceIndexMapper = map.default_source_mapper) -> np.ndarray:
+def source_incidence_matrix(network: Network, node_mapper: map.NetworkMapper = map.default_node_mapper, source_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper) -> np.ndarray:
     node_index = node_mapper(network)
-    cs_index = map.filter_mapping(source_mapper(network), lambda x: is_current_source(network[x].element))
+    cs_index = source_mapper(network)
     Q = np.zeros((node_index.N, cs_index.N))
     for cs in cs_index.keys:
         source_element = network[cs]
@@ -63,16 +63,19 @@ def source_incidence_matrix(network: Network, node_mapper: map.NetworkMapper = m
             Q[node_index[source_element.node2]][cs_index[cs]] = 1
     return Q
 
-def current_source_vector(network: Network, source_mapper: map.SourceIndexMapper = map.default_source_mapper) -> np.ndarray:
+def current_source_vector(network: Network, source_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper) -> np.ndarray:
     cs_index = map.filter_mapping(source_mapper(network), lambda x: is_current_source(network[x].element))
     return np.array([network[x].element.I for x in cs_index.keys])
 
-def nodal_analysis_constants_vector(network: Network, node_mapper: map.NetworkMapper = map.default_node_mapper, source_mapper: map.SourceIndexMapper = map.default_source_mapper) -> np.ndarray:
+def current_source_incidence_vector(network: Network, node_mapper: map.NetworkMapper = map.default_node_mapper, source_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper) -> np.ndarray:
     Q = source_incidence_matrix(network, node_mapper=node_mapper, source_mapper=source_mapper)
     Is = current_source_vector(network, source_mapper=source_mapper)
-    I = Q@Is
+    return Q@Is
 
-    vs_mapping = source_mapper(network)
+def nodal_analysis_constants_vector(network: Network, node_mapper: map.NetworkMapper = map.default_node_mapper, current_source_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper, voltage_source_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper) -> np.ndarray:
+    I = current_source_incidence_vector(network, node_mapper, current_source_mapper)
+
+    vs_mapping = voltage_source_mapper(network)
     V = np.array([network[vs].element.V for vs in vs_mapping.keys])
     return np.hstack((I, V))
 

@@ -9,10 +9,20 @@ from .supernodes import SuperNodes
 class NodalAnalysisSolution(ABC):
     network: Network
     node_mapper: map.NetworkMapper = map.default_node_mapper
+    current_source_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper
+    voltage_source_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper
 
     @property
     def _node_mapping(self) -> map.LabelMapping:
         return self.node_mapper(self.network)
+
+    @property
+    def _current_source_mapping(self) -> map.LabelMapping:
+        return self.current_source_mapper(self.network)
+
+    @property
+    def _voltage_source_mapping(self) -> map.LabelMapping:
+        return self.voltage_source_mapper(self.network)
 
     @property
     def _super_nodes(self) -> SuperNodes:

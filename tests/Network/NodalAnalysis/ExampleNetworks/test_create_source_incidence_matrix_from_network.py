@@ -1,4 +1,4 @@
-from CircuitCalculator.Network.NodalAnalysis.node_analysis import create_source_incidence_matrix_from_network, source_incidence_matrix
+from CircuitCalculator.Network.NodalAnalysis.node_analysis import source_incidence_matrix
 from CircuitCalculator.Network.network import Network, Branch
 from CircuitCalculator.Network.elements import resistor, voltage_source, current_source
 import numpy as np
