@@ -16,7 +16,7 @@ def test_feedtrough_matrix_of_transient_network_1() -> None:
         Branch('3', '0', open_circuit('C'))
     ])
     _, _, _, D = state_space_matrices_for_potentials(network, c_values={'C' : C})
-    assert_almost_equal(D, np.array([[R2*R3/(R1*R2+R2*R3+R1*R3)], [0]]), decimal=5)
+    assert_almost_equal(D, np.array([[1], [R2*R3/(R1*R2+R2*R3+R1*R3)], [0], [-(R2+R3)/(R1*R2+R2*R3+R1*R3)]]), decimal=5)
 
 def test_feedthrough_matrix_of_transient_network_2() -> None:
     Vs = 1

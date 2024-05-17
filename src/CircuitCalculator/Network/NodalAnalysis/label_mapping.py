@@ -1,6 +1,5 @@
 from ..network import Network
 from ..elements import is_current_source, is_ideal_voltage_source
-from .supernodes import SuperNodes
 from typing import Callable
 from dataclasses import dataclass
 

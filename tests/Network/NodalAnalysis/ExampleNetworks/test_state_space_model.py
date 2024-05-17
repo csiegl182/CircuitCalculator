@@ -21,6 +21,7 @@ def test_example_circuit_1() -> None:
         cmp.capacitor(id='C', C=C, nodes=('3', '0')),
         cmp.ground(nodes=('0',))
     ])
+    ### TODO Fix for current of ideal voltage source!!!
     ss = state_space_model_v2(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vs', 'R1', 'R2', 'R3', 'C'], current_ids=['R1', 'R2', 'R3', 'C'])
     sys = signal.StateSpace(ss.A, ss.B, ss.C, ss.D)
 
@@ -43,6 +44,8 @@ def test_example_circuit_1() -> None:
     i2_ref = u2_ref/R2
     i3_ref = u3_ref/R3
     ic_ref = C*V*R2/(R1+R2)/tau*np.exp(-(tout-t0)/tau)
+
+    assert False
 
     np.testing.assert_allclose(yout[:,0], phi1_ref, atol=1e-2)
     np.testing.assert_allclose(yout[:,1], phi2_ref, atol=1e-2)
@@ -95,6 +98,8 @@ def test_example_circuit_2() -> None:
     i1_ref = u1_ref/R1
     i2_ref = u2_ref/R2
     i3_ref = u3_ref/R3
+
+    assert False
 
     np.testing.assert_allclose(yout[:,0], phi1_ref, atol=1e-2)
     np.testing.assert_allclose(yout[:,1], phi2_ref, atol=1e-2)
@@ -154,6 +159,8 @@ def test_example_circuit_3() -> None:
 
     i1_ref = u1_ref/R1
     i2_ref = u2_ref/R2
+
+    assert False
 
     np.testing.assert_allclose(yout[:,0], phi1_ref, atol=1e-2)
     np.testing.assert_allclose(yout[:,1], phi2_ref, atol=1e-2)
@@ -223,6 +230,8 @@ def test_example_circuit_4() -> None:
 
     ic2_ref = np.zeros(t.size)
     ic2_ref[t>t0] = C2*V0*c/a/b * (np.exp(s3*t_ref)*s3-np.exp(s4*t_ref)*s4)/(s3-s4)
+
+    assert False
 
     np.testing.assert_allclose(yout[:,0], phi1_ref, atol=1e-2)
     np.testing.assert_allclose(yout[:,1], phi2_ref, atol=1e-2)

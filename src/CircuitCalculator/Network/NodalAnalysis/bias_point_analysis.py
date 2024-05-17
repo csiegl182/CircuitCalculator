@@ -1,5 +1,4 @@
 from .node_analysis import nodal_analysis_coefficient_matrix, nodal_analysis_constants_vector, open_circuit_impedance
-from .. import transformers as trf
 from ..elements import is_ideal_current_source, is_current_source
 from ..network import Network
 from ..solution import NetworkSolution
