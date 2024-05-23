@@ -631,6 +631,7 @@ class LabelNode(Node):
     def type(self) -> str:
         return 'label_node'
 
+@simple_circuit_element
 class Switch(schemdraw.elements.elements.Element2Term):
     def __init__(self, name: str, *args, state: SwitchState = SwitchState.OPEN, **kwargs):
         super().__init__(*args, **kwargs)
