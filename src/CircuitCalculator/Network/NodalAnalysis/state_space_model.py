@@ -57,7 +57,7 @@ class NodalStateSpaceModel(sp.StateSpaceModel):
             idx = list(self.c_values.keys()).index(branch_id)
             return self.c_values[branch_id]*self.A[idx][:]
         if branch_id in self.source_index_mapping:
-            return self.C[self.source_index_mapping[branch_id]][:]
+            return self.C[self.source_index_mapping[branch_id]+self.node_index_mapping.N][:]
         branch = self.network[branch_id]
         c_pos = self.c_row_for_potential(branch.node1)
         c_neg = self.c_row_for_potential(branch.node2)
@@ -84,9 +84,7 @@ class NodalStateSpaceModel(sp.StateSpaceModel):
             idx = list(self.c_values.keys()).index(branch_id)
             return self.c_values[branch_id]*self.B[idx][:]
         if branch_id in self.source_index_mapping:
-            D_ = np.zeros(self.n_inputs)
-            D_[self.source_index_mapping[branch_id]] = 1
-            return D_
+            return self.D[self.source_index_mapping[branch_id]+self.node_index_mapping.N][:]
         branch = self.network[branch_id]
         d_pos = self.d_row_for_potential(branch.node1)
         d_neg = self.d_row_for_potential(branch.node2)
