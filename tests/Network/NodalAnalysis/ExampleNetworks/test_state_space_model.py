@@ -1,6 +1,6 @@
 from CircuitCalculator.Circuit.circuit import Circuit
 import CircuitCalculator.Circuit.components as cmp
-from CircuitCalculator.Circuit.state_space_model import state_space_model_v2
+from CircuitCalculator.Circuit.state_space_model import state_space_model
 import numpy as np
 from scipy import signal
 
@@ -21,7 +21,7 @@ def test_example_circuit_1() -> None:
         cmp.capacitor(id='C', C=C, nodes=('3', '0')),
         cmp.ground(nodes=('0',))
     ])
-    ss = state_space_model_v2(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vs', 'R1', 'R2', 'R3', 'C'], current_ids=['Vs', 'R1', 'R2', 'R3', 'C'])
+    ss = state_space_model(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vs', 'R1', 'R2', 'R3', 'C'], current_ids=['Vs', 'R1', 'R2', 'R3', 'C'])
     sys = signal.StateSpace(ss.A, ss.B, ss.C, ss.D)
 
     tout, yout, _ = signal.lsim(sys, V, t)
@@ -76,7 +76,7 @@ def test_example_circuit_2() -> None:
         cmp.ground(nodes=('0',))
     ])
 
-    ss = state_space_model_v2(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vs', 'R1', 'R2', 'R3', 'C'], current_ids=['Vs', 'R1', 'R2', 'R3', 'C'])
+    ss = state_space_model(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vs', 'R1', 'R2', 'R3', 'C'], current_ids=['Vs', 'R1', 'R2', 'R3', 'C'])
     sys = signal.StateSpace(ss.A, ss.B, ss.C, ss.D)
     tout, yout, _ = signal.lsim(sys, V, t)
 
@@ -132,7 +132,7 @@ def test_example_circuit_3() -> None:
         cmp.ground(nodes=('0',))
     ])
 
-    ss = state_space_model_v2(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vs', 'R1', 'R2', 'C'], current_ids=['Vs', 'R1', 'R2', 'C', 'Is'])
+    ss = state_space_model(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vs', 'R1', 'R2', 'C'], current_ids=['Vs', 'R1', 'R2', 'C', 'Is'])
     sys = signal.StateSpace(ss.A, ss.B, ss.C, ss.D)
     tout, yout, _ = signal.lsim(sys, np.column_stack([I, V]), t)
 
@@ -189,7 +189,7 @@ def test_example_circuit_4() -> None:
         cmp.ground(nodes=('0',))
     ])
 
-    ss = state_space_model_v2(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vs', 'R1', 'R2', 'C1', 'C2'], current_ids=['Vs', 'R1', 'R2', 'C1', 'C2'])
+    ss = state_space_model(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vs', 'R1', 'R2', 'C1', 'C2'], current_ids=['Vs', 'R1', 'R2', 'C1', 'C2'])
     sys = signal.StateSpace(ss.A, ss.B, ss.C, ss.D)
     tout, yout, _ = signal.lsim(sys, V, t)
 
