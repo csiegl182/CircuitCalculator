@@ -2,7 +2,6 @@ import numpy as np
 import itertools
 from dataclasses import dataclass
 from .node_analysis import source_incidence_matrix, nodal_analysis_coefficient_matrix
-from .supernodes import SuperNodes, voltage_source_labels_to_next_reference
 from . import label_mapping as map
 from ..elements import is_ideal_voltage_source
 from ..network import Network

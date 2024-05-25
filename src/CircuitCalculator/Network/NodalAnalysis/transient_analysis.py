@@ -1,7 +1,7 @@
 from ..network import Network
+from ..NodalAnalysis.state_space_model import nodal_state_space_model
 from ..elements import is_ideal_voltage_source, is_ideal_current_source
 from .solution import NodalAnalysisSolution
-from .state_space_model import NodalStateSpaceModel, BranchValues
 from scipy import signal
 from typing import Any, Callable
 from . import label_mapping as map
@@ -12,18 +12,18 @@ from .supernodes import SuperNodes
 @dataclass
 class TransientAnalysisSolution(NodalAnalysisSolution):
     source_index_mapper: map.SourceIndexMapper = map.default_source_mapper
-    c_values: list[BranchValues] = field(default_factory=list)
+    c_values: dict[str, float] = field(default_factory=dict)
     t_lim: tuple[float, float] = (0, 1)
     Ts: float = 1e-3
     input: dict[str, Callable[[np.ndarray], np.ndarray]] = field(default_factory=dict)
     
     def __post_init__(self) -> None:
         sources = map.default_source_mapper(self.network)
-        ss = NodalStateSpaceModel(network=self.network, c_values=self.c_values, node_index_mapper=self.node_mapper, source_index_mapper=self.source_index_mapper)
+        ss = nodal_state_space_model(network=self.network, c_values=self.c_values)
         sys = signal.StateSpace(ss.A, ss.B, ss.C, ss.D)
         t = np.arange(self.t_lim[0], self.t_lim[1], self.Ts)
-        self.time, self.phi, self.x = signal.lsim(sys, np.column_stack([self.input[s](t) for s in sources]), t)
-        self.i_c = (self.x*ss.A+ss.B*self.input[sources[0]](t))*self.c_values[0].value
+        self.time, self.y, self.x = signal.lsim(sys, np.column_stack([self.input[s](t) for s in sources]), t)
+        self.i_c = (self.x*ss.A+ss.B*self.input['Vs'](t))*self.c_values['C']
 
     def get_potential(self, node_id: str) -> Any:
         V_active = np.zeros(shape=self.time.shape)
@@ -32,14 +32,14 @@ class TransientAnalysisSolution(NodalAnalysisSolution):
             node_id = self._super_nodes.non_active_reference_node(node_id)
         if self.network.is_zero_node(node_id):
             return V_active
-        return self.phi[:,self._node_mapping[node_id]] + V_active
+        return self.y[:,self._node_mapping[node_id]] + V_active
 
     def get_current(self, branch_id: str) -> Any:
         branch = self.network[branch_id]
+        if branch.id in self.c_values.keys():
+            return self.i_c
         if is_ideal_current_source(branch.element):
             return self.input[branch_id](self.time)
-        if branch.id in [c.id for c in self.c_values]:
-            return self.i_c
         return self.get_voltage(branch_id)/branch.element.Z
         if is_ideal_voltage_source(branch.element):
             Z = element_impedance(self.network, branch_id)
