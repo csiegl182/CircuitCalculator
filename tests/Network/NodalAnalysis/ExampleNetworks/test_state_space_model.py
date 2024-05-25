@@ -132,7 +132,7 @@ def test_example_circuit_3() -> None:
         cmp.ground(nodes=('0',))
     ])
 
-    ss = state_space_model(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vs', 'R1', 'R2', 'C'], current_ids=['Vs', 'R1', 'R2', 'C', 'Is'])
+    ss = state_space_model(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vs', 'R1', 'R2', 'C', 'Is'], current_ids=['Vs', 'R1', 'R2', 'C', 'Is'])
     sys = signal.StateSpace(ss.A, ss.B, ss.C, ss.D)
     tout, yout, _ = signal.lsim(sys, np.column_stack([I, V]), t)
 
@@ -164,11 +164,12 @@ def test_example_circuit_3() -> None:
     np.testing.assert_allclose(yout[:,4], u1_ref, atol=1e-2)
     np.testing.assert_allclose(yout[:,5], u2_ref, atol=1e-2)
     np.testing.assert_allclose(yout[:,6], uc_ref, atol=1e-2)
-    np.testing.assert_allclose(yout[:,7], -i1_ref, atol=1e-2)
-    np.testing.assert_allclose(yout[:,8], i1_ref, atol=1e-2)
-    np.testing.assert_allclose(yout[:,9], i2_ref, atol=1e-2)
-    np.testing.assert_allclose(yout[:,10], ic_ref, atol=1e-2)
-    np.testing.assert_allclose(yout[:,11], I, atol=1e-2)
+    np.testing.assert_allclose(yout[:,7], -u2_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,8], -i1_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,9], i1_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,10], i2_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,11], ic_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,12], I, atol=1e-2)
 
 def test_example_circuit_4() -> None:
     V0 = 1
