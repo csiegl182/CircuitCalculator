@@ -23,7 +23,7 @@ def state_space_matrices(network: Network, c_values: dict[str, float], node_mapp
     Qi = source_incidence_matrix(
          network=network,
          node_mapper=node_mapper,
-         source_mapper=current_source_mapper).real
+         source_mapper=current_source_mapper)
     Q = np.vstack((np.hstack((Qi, np.zeros((Qi.shape[0], voltage_source_mapper(network).N)))), np.hstack((np.zeros((1, Qi.shape[1])), np.eye(voltage_source_mapper(network).N)))))
     inv_Y = np.linalg.inv(nodal_analysis_coefficient_matrix(network=network, node_mapper=node_mapper).real)
     sorted_Y = np.linalg.inv(Delta @ inv_Y @ Delta.T)
@@ -62,7 +62,7 @@ class NodalStateSpaceModel(sp.StateSpaceModel):
         return c_pos - c_neg
 
     def c_row_current(self, branch_id: str) -> np.ndarray:
-        voltage_source_mapping = map.filter_mapping(self.voltage_source_index_mapping, lambda x: is_ideal_voltage_source(self.network[x].element))
+        voltage_source_mapping = map.filter(self.voltage_source_index_mapping, lambda x: is_ideal_voltage_source(self.network[x].element))
         if branch_id in self.c_values:
             idx = list(self.c_values.keys()).index(branch_id)
             return self.c_values[branch_id]*self.A[idx][:]

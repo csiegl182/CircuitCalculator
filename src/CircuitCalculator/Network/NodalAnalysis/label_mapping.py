@@ -25,13 +25,17 @@ class LabelMapping:
         return list(self.mapping.keys())
 
     @property
+    def values(self) -> list[int]:
+        return list(self.mapping.values())
+
+    @property
     def N(self) -> int:
         return len(self.mapping)
 
     def __iter__(self):
         return iter(self.mapping.keys())
 
-def filter_mapping(mapping: LabelMapping, filter_fcn: Callable[[str], bool]) -> LabelMapping:
+def filter(mapping: LabelMapping, filter_fcn: Callable[[str], bool]) -> LabelMapping:
     return LabelMapping({k: mapping[k] for k in mapping.keys if filter_fcn(k)})
     
 
@@ -51,8 +55,8 @@ def alphabetic_source_mapper(network: Network) -> LabelMapping:
     return LabelMapping({k: v for v, k in enumerate(sorted_soruce_labels)})
 
 def alphabetic_current_source_mapper(network: Network) -> LabelMapping:
-    voltage_source_labels = sorted([b.id for b in network.branches if is_current_source(b.element)])
-    return LabelMapping({k: v for v, k in enumerate(voltage_source_labels)})
+    current_source_labels = sorted([b.id for b in network.branches if is_current_source(b.element)])
+    return LabelMapping({k: v for v, k in enumerate(current_source_labels)})
 
 def alphabetic_voltage_source_mapper(network: Network) -> LabelMapping:
     voltage_source_labels = sorted([b.id for b in network.branches if is_ideal_voltage_source(b.element)])

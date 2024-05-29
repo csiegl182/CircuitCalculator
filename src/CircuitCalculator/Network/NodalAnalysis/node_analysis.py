@@ -38,7 +38,7 @@ def voltage_source_incidence_matrix(network: Network, node_mapper: map.NetworkMa
             return -1
         return 0
     node_index = node_mapper(network)
-    vs_index = map.filter_mapping(source_mapper(network), lambda x: is_ideal_voltage_source(network[x].element))
+    vs_index = source_mapper(network)
     A = np.zeros((node_index.N, vs_index.N))
     for node, vs in itertools.product(node_index.keys, vs_index.keys):
         A[node_index[node], vs_index[vs]] = voltage_source_direction(vs, node)
@@ -63,7 +63,7 @@ def source_incidence_matrix(network: Network, node_mapper: map.NetworkMapper = m
     return Q
 
 def current_source_vector(network: Network, source_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper) -> np.ndarray:
-    cs_index = map.filter_mapping(source_mapper(network), lambda x: is_current_source(network[x].element))
+    cs_index = map.filter(source_mapper(network), lambda x: is_current_source(network[x].element))
     return np.array([network[x].element.I for x in cs_index.keys])
 
 def current_source_incidence_vector(network: Network, node_mapper: map.NetworkMapper = map.default_node_mapper, source_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper) -> np.ndarray:
