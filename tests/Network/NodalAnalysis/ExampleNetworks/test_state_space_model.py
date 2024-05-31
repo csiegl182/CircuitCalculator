@@ -241,3 +241,254 @@ def test_example_circuit_4() -> None:
     np.testing.assert_allclose(yout[:,10], i2_ref, atol=1e-2)
     np.testing.assert_allclose(yout[:,11], ic1_ref, atol=1e-2)
     np.testing.assert_allclose(yout[:,12], ic2_ref, atol=1e-2)
+
+def test_example_circuit_5() -> None:
+    V0 = 5
+    R1, R2, R3 = 10, 20, 30
+    L = 0.1
+    t_max = 0.02
+    t0 = 0.001
+    Ts = t_max/5000
+    t = np.arange(0, t_max, Ts)
+    V = V0*np.heaviside(t-t0, 1)
+    circuit = Circuit([
+        cmp.dc_voltage_source(id='Vq', V=V0, nodes=('1', '0')),
+        cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
+        cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
+        cmp.resistor(id='R3', R=R3, nodes=('2', '3')),
+        cmp.inductance(id='L', L=L, nodes=('3', '0')),
+        cmp.ground(nodes=('0',))
+    ])
+
+    ssm = state_space_model(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vq', 'R1', 'R2', 'R3', 'L'], current_ids=['R1', 'R2', 'R3', 'L', 'Vq'])
+    sys = signal.StateSpace(ssm.A, ssm.B, ssm.C, ssm.D)
+    tout, yout, _ = signal.lsim(sys, V, t)
+
+    def pll(R1, R2):
+        return R1*R2/(R1+R2)
+
+    Ri = pll(R1, R2)+R3
+    tau = L/Ri
+
+    iL_ref = V*R2/(R1*R2+R1*R3+R2*R3)*(1-np.exp(-(tout-t0)/tau))
+    uL_ref = V*R2/(R1*R2+R1*R3+R2*R3)*np.exp(-(tout-t0)/tau)*L/tau
+
+    phi3_ref = uL_ref
+    phi2_ref = R3*iL_ref+phi3_ref
+    phi1_ref = V
+
+    uR1_ref = phi1_ref-phi2_ref
+    uR2_ref = phi2_ref
+    uR3_ref = phi2_ref-phi3_ref
+
+    iS_ref = (phi2_ref-phi1_ref)/R1
+    iR1_ref = -iS_ref
+    iR2_ref = iR1_ref - iL_ref
+    iR3_ref = iL_ref
+
+    np.testing.assert_allclose(yout[:,0], phi1_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,1], phi2_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,2], phi3_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,3], V, atol=1e-2)
+    np.testing.assert_allclose(yout[:,4], uR1_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,5], uR2_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,6], uR3_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,7], uL_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,8], iR1_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,9], iR2_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,10], iR3_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,11], iL_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,12], iS_ref, atol=1e-2)
+
+def test_example_circuit_6() -> None:
+    R1, R2, R3 = 10, 20, 30
+    L = 0.1
+    V0 = 5
+    t_max = 0.02
+    t0 = 0.001
+    Ts = t_max/5000
+    t = np.arange(0, t_max, Ts)
+    V = V0*np.heaviside(t-t0, 1)
+    circuit = Circuit([
+        cmp.dc_voltage_source(id='Vq', V=V0, nodes=('1', '0')),
+        cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
+        cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
+        cmp.inductance(id='L', L=L, nodes=('2', '3')),
+        cmp.resistor(id='R3', R=R3, nodes=('3', '0')),
+        cmp.ground(nodes=('0',))
+    ])
+
+    ssm = state_space_model(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vq', 'R1', 'R2', 'R3', 'L'], current_ids=['R1', 'R2', 'R3', 'L', 'Vq'])
+    sys = signal.StateSpace(ssm.A, ssm.B, ssm.C, ssm.D)
+    tout, yout, _ = signal.lsim(sys, V, t)
+
+    def pll(R1, R2):
+        return R1*R2/(R1+R2)
+
+    Ri = pll(R1, R2)+R3
+    tau = L/Ri
+
+    iL_ref = V*R2/(R1*R2+R1*R3+R2*R3)*(1-np.exp(-(tout-t0)/tau))
+    uL_ref = V*R2/(R1*R2+R1*R3+R2*R3)*L/tau*np.exp(-(tout-t0)/tau)
+
+    phi3_ref = R3*iL_ref
+    phi2_ref = phi3_ref + uL_ref
+    phi1_ref = V
+
+    uR1_ref = phi1_ref - phi2_ref
+    uR2_ref = phi2_ref
+    uR3_ref = phi3_ref
+
+    iS_ref = (phi2_ref-phi1_ref)/R1
+    iR1_ref = -iS_ref
+    iR2_ref = uR2_ref/R2
+    iR3_ref = iL_ref
+
+    np.testing.assert_allclose(yout[:,0], phi1_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,1], phi2_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,2], phi3_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,3], V, atol=1e-2)
+    np.testing.assert_allclose(yout[:,4], uR1_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,5], uR2_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,6], uR3_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,7], uL_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,8], iR1_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,9], iR2_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,10], iR3_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,11], iL_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,12], iS_ref, atol=1e-2)
+
+def test_example_circuit_7() -> None:
+    R1, R2, R3 = 10, 20, 30
+    L = 0.1
+    V0 = 5
+    I0 = 1
+    t_max = 0.02
+    t0 = 0.001
+    t1 = 0.01
+    Ts = t_max/50000
+    t = np.arange(0, t_max, Ts)
+    V = V0*np.heaviside(t-t0, 1)
+    I = I0*np.heaviside(t-t1, 1)
+    circuit = Circuit([
+        cmp.dc_voltage_source(id='Vq', V=V0, nodes=('1', '0')),
+        cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
+        cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
+        cmp.inductance(id='L', L=L, nodes=('2', '3')),
+        cmp.resistor(id='R3', R=R3, nodes=('3', '0')),
+        cmp.dc_current_source(id='Iq', I=I0, nodes=('0', '3')),
+        cmp.ground(nodes=('0',))
+    ])
+    
+    ssm = state_space_model(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vq', 'R1', 'R2', 'R3', 'L', 'Iq'], current_ids=['R1', 'R2', 'R3', 'L', 'Vq', 'Iq'])
+    sys = signal.StateSpace(ssm.A, ssm.B, ssm.C, ssm.D)
+    tout, yout, _ = signal.lsim(sys, np.column_stack((I,V)), t)
+
+    def pll(R1, R2):
+        return R1*R2/(R1+R2)
+
+    Ri = pll(R1, R2)+R3
+    tau = L/Ri
+
+    iL_ref = np.zeros(tout.size)
+    iL_ref[tout>t0] = V0*R2/(R1*R2+R1*R3+R2*R3)*(1-np.exp(-(tout[tout>t0]-t0)/tau))
+    iL_ref[tout>t1] = iL_ref[tout>t1] - I0*R3/(pll(R1, R2)+R3)*(1-np.exp(-(tout[tout>t1]-t1)/tau))
+
+    uL_ref = np.zeros(tout.size)
+    uL_ref[tout>=t0] = V0*R2/(R1*R2+R1*R3+R2*R3)*np.exp(-(tout[tout>=t0]-t0)/tau)*L/tau
+    uL_ref[tout>=t1] = uL_ref[tout>=t1] - I0*R3/(pll(R1, R2)+R3)*np.exp(-(tout[tout>=t1]-t1)/tau)*L/tau
+
+    phi3_ref = R3*(iL_ref+I)
+    phi2_ref = phi3_ref + uL_ref
+    phi1_ref = V
+
+    uR1_ref = phi1_ref-phi2_ref
+    uR2_ref = phi2_ref
+    uR3_ref = phi3_ref
+    uIq_ref = -phi3_ref
+
+    iS_ref = (phi2_ref-phi1_ref)/R1
+    iR1_ref = -iS_ref
+    iR2_ref = iR1_ref - iL_ref
+    iR3_ref = iL_ref + I
+
+    np.testing.assert_allclose(yout[:,0], phi1_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,1], phi2_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,2], phi3_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,3], V, atol=1e-2)
+    np.testing.assert_allclose(yout[:,4], uR1_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,5], uR2_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,6], uR3_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,7], uL_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,8], uIq_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,9], iR1_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,10], iR2_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,11], iR3_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,12], iL_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,13], iS_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,14], I, atol=1e-2)
+
+def test_example_circuit_8() -> None:
+    R1, R2 = 10, 20
+    L1, L2 = 0.1, 0.2
+    V0 = 5
+    t_max = 0.02
+    t0 = 0.001
+    Ts = t_max/5000
+    t = np.arange(0, t_max, Ts)
+    V = V0*np.heaviside(t-t0, 1)
+    circuit = Circuit([
+        cmp.dc_voltage_source(id='Vq', V=V0, nodes=('1', '0')),
+        cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
+        cmp.inductance(id='L1', L=L1, nodes=('2', '3')),
+        cmp.resistor(id='R2', R=R2, nodes=('3', '0')),
+        cmp.inductance(id='L2', L=L2, nodes=('3', '0')),
+        cmp.ground(nodes=('0',))
+    ])
+
+    ssm = state_space_model(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vq', 'R1', 'R2', 'L1', 'L2'], current_ids=['R1', 'R2', 'L1', 'L2', 'Vq'])
+    sys = signal.StateSpace(ssm.A, ssm.B, ssm.C, ssm.D)
+    tout, yout, _ = signal.lsim(sys, V, t)
+
+    def quad_equation(b, c):
+        return (-b+np.sqrt(b**2-4*c))/2, (-b-np.sqrt(b**2-4*c))/2
+
+    x1, x2 = quad_equation(R2/L1+R1/L1+R2/L2, R1*R2/L1/L2)
+
+    t_ref = tout[tout>t0]-t0
+
+    phi3_ref = np.zeros(tout.size)
+    phi3_ref[tout>t0] = V0*R2/L1 * (np.exp(x1*t_ref)-np.exp(x2*t_ref))/(x1-x2)
+
+    iL1_ref = np.zeros(tout.size)
+    iL1_ref[tout>t0] = V0*R2/L1/L2*(x2*np.exp(x1*t_ref)-x1*np.exp(x2*t_ref)-x2+x1)/(x1*x2*(x1-x2)) + V0/L1*(np.exp(x2*t_ref)-np.exp(x1*t_ref))/(x2-x1)
+
+    iL2_ref = iL1_ref - phi3_ref/R2
+
+    iR1_ref = iL1_ref
+    iR2_ref = iL1_ref - iL2_ref
+
+    phi2_ref = V-iL1_ref*R1
+    phi1_ref = V
+
+    uR1_ref = phi1_ref - phi2_ref
+    uR2_ref = phi3_ref
+
+    uL1_ref = phi2_ref - phi3_ref
+    uL2_ref = phi3_ref
+
+    iS_ref = -iL1_ref
+
+    np.testing.assert_allclose(yout[:,0], phi1_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,1], phi2_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,2], phi3_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,3], V, atol=1e-2)
+    np.testing.assert_allclose(yout[:,4], uR1_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,5], uR2_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,6], uL1_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,7], uL2_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,8], iR1_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,9], iR2_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,10], iL1_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,11], iL2_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,12], iS_ref, atol=1e-2)
