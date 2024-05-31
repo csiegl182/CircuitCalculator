@@ -7,7 +7,7 @@ from ..elements import is_ideal_voltage_source
 from ..network import Network
 from ...SignalProcessing import state_space_model as sp
 
-def state_space_matrices(network: Network, c_values: dict[str, float], node_mapper: map.NetworkMapper = map.default_node_mapper, current_source_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper, voltage_source_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def state_space_matrices(network: Network, c_values: dict[str, float] = {}, l_values: dict[str, float] = {}, node_mapper: map.NetworkMapper = map.default_node_mapper, current_source_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper, voltage_source_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     node_mapping = node_mapper(network)
     def element_incidence_matrix(values: dict[str, float]) -> np.ndarray:
         Delta = np.zeros((len(values), node_mapping.N))
@@ -18,26 +18,55 @@ def state_space_matrices(network: Network, c_values: dict[str, float], node_mapp
                 Delta[k][node_mapping(i_label)] = -1
         return np.hstack((Delta, np.zeros((Delta.shape[0], voltage_source_mapper(network).N))))
 
-    invC = np.diag([float(1/C) for C in c_values.values()])
-    Delta = element_incidence_matrix(c_values)
-    Qi = source_incidence_matrix(
-         network=network,
-         node_mapper=node_mapper,
-         source_mapper=current_source_mapper)
-    Q = np.vstack((np.hstack((Qi, np.zeros((Qi.shape[0], voltage_source_mapper(network).N)))), np.hstack((np.zeros((1, Qi.shape[1])), np.eye(voltage_source_mapper(network).N)))))
-    inv_Y = np.linalg.inv(nodal_analysis_coefficient_matrix(network=network, node_mapper=node_mapper).real)
-    sorted_Y = np.linalg.inv(Delta @ inv_Y @ Delta.T)
+    if c_values:
+        invC = np.diag([float(1/C) for C in c_values.values()])
+        Delta = element_incidence_matrix(c_values)
+        Qi = source_incidence_matrix(
+            network=network,
+            node_mapper=node_mapper,
+            source_mapper=current_source_mapper)
+        Q = np.vstack((np.hstack((Qi, np.zeros((Qi.shape[0], voltage_source_mapper(network).N)))), np.hstack((np.zeros((1, Qi.shape[1])), np.eye(voltage_source_mapper(network).N)))))
+        inv_Y = np.linalg.inv(nodal_analysis_coefficient_matrix(network=network, node_mapper=node_mapper).real)
+        sorted_Y = np.linalg.inv(Delta @ inv_Y @ Delta.T)
 
-    A = -invC @ sorted_Y
-    B = -A @ Delta @ inv_Y @ Q
-    C = inv_Y @ Delta.T @ sorted_Y
-    D = inv_Y @ (Q-Delta.T @ sorted_Y @ Delta @ inv_Y @ Q)
+        A = -invC @ sorted_Y
+        B = -A @ Delta @ inv_Y @ Q
+        C = inv_Y @ Delta.T @ sorted_Y
+        D = inv_Y @ (Q-Delta.T @ sorted_Y @ Delta @ inv_Y @ Q)
+        return A, B, C, D
+
+    A_tilde = nodal_analysis_coefficient_matrix(network).real
+
+    source_mapping_all = map.default_source_mapper(network)
+    Qi = source_incidence_matrix(
+            network=network)
+
+    voltage_source_mapping_all = voltage_source_mapper(network)
+
+    Q = np.zeros((voltage_source_mapping_all.N, voltage_source_mapping_all.N), dtype=int)
+    for i in voltage_source_mapping_all.values:
+        Q[i][i] = 1
+    Q = np.vstack((np.hstack( (Qi, np.zeros((Qi.shape[0], Q.shape[1]) ))),
+                np.hstack( (np.zeros((Q.shape[0], Qi.shape[1])), Q) )))
+
+    QS = Q[:,[source_mapping_all[l] for l in source_mapping_all if l not in l_values]]
+    QL = Q[:,[source_mapping_all[l] for l in source_mapping_all if l in l_values]]
+
+    L_inv = np.diag([1/L for L in l_values.values()])
+
+    A = L_inv@np.linalg.inv(QL.T@np.linalg.inv(A_tilde)@QL)
+    B = -A @ QL.T@np.linalg.inv(A_tilde)@QS
+
+    C = np.linalg.inv(A_tilde)@QL@np.linalg.inv(L_inv)@A
+    D = np.linalg.inv(A_tilde)@(QS+QL@np.linalg.inv(L_inv)@B)
+    
     return A, B, C, D
 
 @dataclass(frozen=True)
 class NodalStateSpaceModel(sp.StateSpaceModel):
     network: Network
     c_values: dict[str, float]
+    l_values: dict[str, float]
     node_index_mapping: map.LabelMapping
     voltage_source_index_mapping: map.LabelMapping
     current_source_index_mapping: map.LabelMapping
@@ -99,10 +128,11 @@ class NodalStateSpaceModel(sp.StateSpaceModel):
         d_neg = self.d_row_for_potential(branch.node2)
         return (d_pos - d_neg)/branch.element.Z
 
-def nodal_state_space_model(network: Network, c_values: dict[str, float], node_index_mapper: map.NetworkMapper = map.default_node_mapper, voltage_source_index_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper, current_source_index_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper) -> NodalStateSpaceModel:
+def nodal_state_space_model(network: Network, c_values: dict[str, float] = {}, l_values: dict[str, float] = {}, node_index_mapper: map.NetworkMapper = map.default_node_mapper, voltage_source_index_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper, current_source_index_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper) -> NodalStateSpaceModel:
     A, B, C, D = state_space_matrices(
         network=network,
         c_values=c_values,
+        l_values=l_values,
         node_mapper=node_index_mapper,
         voltage_source_mapper=voltage_source_index_mapper,
         current_source_mapper=current_source_index_mapper
@@ -111,6 +141,7 @@ def nodal_state_space_model(network: Network, c_values: dict[str, float], node_i
         A=A, B=B, C=C, D=D,
         network=network,
         c_values=c_values,
+        l_values=l_values,
         node_index_mapping=node_index_mapper(network),
         voltage_source_index_mapping=voltage_source_index_mapper(network),
         current_source_index_mapping=current_source_index_mapper(network),

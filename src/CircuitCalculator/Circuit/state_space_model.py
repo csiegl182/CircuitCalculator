@@ -7,6 +7,7 @@ def state_space_model(circuit: Circuit, potential_nodes: list[str] = [], voltage
     ssm = nodal_state_space_model(
         network=transform_circuit(circuit, w=0),
         c_values={C.id : float(C.value['C']) for C in [c for c in circuit.components if c.type == 'capacitor']},
+        l_values={L.id : float(L.value['L']) for L in [c for c in circuit.components if c.type == 'inductance']}
     )
 
     C = np.ndarray(shape=(0, ssm.n_states))
