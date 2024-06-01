@@ -492,3 +492,54 @@ def test_example_circuit_8() -> None:
     np.testing.assert_allclose(yout[:,10], iL1_ref, atol=1e-2)
     np.testing.assert_allclose(yout[:,11], iL2_ref, atol=1e-2)
     np.testing.assert_allclose(yout[:,12], iS_ref, atol=1e-2)
+
+def test_example_circuit_9() -> None:
+    R = 2
+    L = 2e-3
+    C = 0.5e-3
+    t_max = 0.02
+    V0 = 5
+    t0 = 0.001
+    Ts = t_max/5000
+    t = np.arange(0, t_max, Ts)
+    V = V0*np.heaviside(t-t0, 1)
+    circuit = Circuit([
+        cmp.dc_voltage_source(id='Vq', V=V0, nodes=('1', '0')),
+        cmp.resistor(id='R', R=R, nodes=('1', '2')),
+        cmp.inductance(id='L', L=L, nodes=('2', '3')),
+        cmp.capacitor(id='C', C=C, nodes=('3', '0')),
+        cmp.ground(nodes=('0',))
+    ])
+
+    ssm = state_space_model(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vq', 'R', 'L', 'C'], current_ids=['R', 'L', 'C', 'Vq'])
+    sys = signal.StateSpace(ssm.A, ssm.B, ssm.C, ssm.D)
+    tout, yout, xout = signal.lsim(sys, V, t)
+
+    w0 = 1/np.sqrt(L*C)
+    d = R/2/L
+    we = np.sqrt(w0**2-d**2)
+
+    tref = tout-t0
+
+    i_ref = V/we/L*np.exp(-d*tref)*np.sin(we*tref)
+
+    uR_ref = i_ref*R
+    uL_ref = V/we*(-d*np.exp(-d*tref)*np.sin(we*tref)+np.exp(-d*tref)*np.cos(we*tref)*we)
+
+    phi1_ref = V
+    phi2_ref = V-i_ref*R
+    phi3_ref = phi2_ref-uL_ref
+
+    uC_ref = phi3_ref
+
+    np.testing.assert_allclose(yout[:,0], phi1_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,1], phi2_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,2], phi3_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,3], V, atol=1e-2)
+    np.testing.assert_allclose(yout[:,4], uR_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,5], uL_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,6], uC_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,7], i_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,8], i_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,9], i_ref, atol=1e-2)
+    np.testing.assert_allclose(yout[:,10], -i_ref, atol=1e-2)

@@ -119,3 +119,17 @@ def test_state_matrix_of_transient_network_8() -> None:
     ])
     A, _, _, _ = state_space_matrices(network, l_values={'L1' : L1, 'L2' : L2})
     assert_almost_equal(A, np.array([[-(R1+R2)/L1, R2/L1], [R2/L2, -R2/L2]]))
+
+def test_state_matrix_of_transient_network_9() -> None:
+    R = 2
+    L = 2e-3
+    C = 0.5e-3
+    V0 = 5
+    network = Network([
+        Branch('1', '0', voltage_source('Vq', V=V0)), 
+        Branch('1', '2', resistor('R', R=R)),
+        Branch('2', '3', short_circuit('L')),
+        Branch('3', '0', open_circuit('C'))
+    ])
+    A, _, _, _ = state_space_matrices(network, c_values={'C': C}, l_values={'L' : L})
+    assert_almost_equal(A, np.array([[0, 1/C], [-1/L, -R/L]]))
