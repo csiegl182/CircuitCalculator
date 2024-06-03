@@ -153,13 +153,13 @@ class TransientSolution(CircuitSolution):
         return self._tout
 
     def get_potential(self, node_id: str) -> TimeDomainSeries:
-        return self._tout, np.reshape(self._ssm.c_row_for_potential(node_id)@self._x + self._ssm.d_row_for_potential(node_id)@self._u, (-1, 1))
+        return self._tout, np.reshape(self._ssm.c_row_for_potential(node_id)@self._x + self._ssm.d_row_for_potential(node_id)@self._u, (-1,))
 
     def get_voltage(self, component_id: str) -> TimeDomainSeries:
-        return self._tout, np.reshape(self._ssm.c_row_voltage(component_id)@self._x + self._ssm.d_row_voltage(component_id)@self._u, (-1, 1))
+        return self._tout, np.reshape(self._ssm.c_row_voltage(component_id)@self._x + self._ssm.d_row_voltage(component_id)@self._u, (-1,))
 
     def get_current(self, component_id: str) -> TimeDomainSeries:
-        return self._tout, np.reshape(self._ssm.c_row_current(component_id)@self._x + self._ssm.d_row_current(component_id)@self._u, (-1, 1))
+        return self._tout, np.reshape(self._ssm.c_row_current(component_id)@self._x + self._ssm.d_row_current(component_id)@self._u, (-1,))
 
     def get_power(self, component_id: str) -> TimeDomainSeries:
         return self._tout, self.get_voltage(component_id)[1]*self.get_current(component_id)[1]
