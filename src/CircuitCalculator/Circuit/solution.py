@@ -1,6 +1,8 @@
 from .circuit import Circuit, transform, frequency_components
-from ..SignalProcessing.types import TimeDomainFunction, FrequencyDomainFunction
+from ..SignalProcessing.types import TimeDomainFunction, FrequencyDomainSeries, TimeDomainSeries, StateSpaceSolver
+from ..SignalProcessing.state_space_model import StateSpaceModel, continuous_state_space_solver
 from ..Network.NodalAnalysis.bias_point_analysis import nodal_analysis_bias_point_solver
+from ..Network.NodalAnalysis.state_space_model import nodal_state_space_model
 from ..Network.solution import NetworkSolver
 from typing import Any
 from dataclasses import dataclass, field
@@ -9,8 +11,7 @@ import numpy as np
 
 @dataclass
 class CircuitSolution(ABC):
-    circuit: Circuit = field(default_factory=lambda : Circuit([]))
-    solver: NetworkSolver = field(default=nodal_analysis_bias_point_solver)
+    circuit: Circuit
 
     @abstractmethod
     def get_voltage(self, id: str) -> Any:
@@ -30,6 +31,8 @@ class CircuitSolution(ABC):
 
 @dataclass
 class DCSolution(CircuitSolution):
+    solver: NetworkSolver = field(default=nodal_analysis_bias_point_solver)
+
     def __post_init__(self):
         network = transform(self.circuit, w=[0])[0]
         self._solution = self.solver(network)
@@ -48,6 +51,7 @@ class DCSolution(CircuitSolution):
 
 @dataclass
 class ComplexSolution(CircuitSolution):
+    solver: NetworkSolver = field(default=nodal_analysis_bias_point_solver)
     w: float = 0
 
     def __post_init__(self):
@@ -70,6 +74,7 @@ class ComplexSolution(CircuitSolution):
 class TimeDomainSolution(CircuitSolution):
     w_max: float = field(default=0)
     w: list[float] = field(default_factory=list, init=False)
+    solver: NetworkSolver = field(default=nodal_analysis_bias_point_solver)
 
     def __post_init__(self):
         self.w = frequency_components(self.circuit, self.w_max)
@@ -96,54 +101,67 @@ class TimeDomainSolution(CircuitSolution):
 @dataclass
 class FrequencyDomainSolution(CircuitSolution):
     w_max: float = field(default=0)
+    solver: NetworkSolver = field(default=nodal_analysis_bias_point_solver)
 
     def __post_init__(self):
         self.w = frequency_components(self.circuit, self.w_max)
         networks = transform(self.circuit, w=self.w)
         self._solutions = [self.solver(network) for network in networks]
 
-    def get_voltage(self, component_id: str) -> FrequencyDomainFunction:
+    def get_voltage(self, component_id: str) -> FrequencyDomainSeries:
         voltages = np.array([solution.get_voltage(component_id) for solution in self._solutions])
         return np.array(self.w), voltages
 
-    def get_current(self, component_id: str) -> FrequencyDomainFunction:
+    def get_current(self, component_id: str) -> FrequencyDomainSeries:
         currents = np.array([solution.get_current(component_id) for solution in self._solutions])
         return np.array(self.w), currents
 
-    def get_potential(self, node_id: str) -> FrequencyDomainFunction:
+    def get_potential(self, node_id: str) -> FrequencyDomainSeries:
         potentials = np.array([solution.get_potential(node_id) for solution in self._solutions])
         return np.array(self.w), potentials
 
-    def get_power(self, component_id: str) -> FrequencyDomainFunction:
+    def get_power(self, component_id: str) -> FrequencyDomainSeries:
         w, voltage = self.get_voltage(component_id)
         _, current = self.get_current(component_id)
         return w, voltage*np.conj(current)
 
-# @dataclass
-# class TransientSolution(CircuitSolution):
-#     t_end: float = 1
-#     Ts: float = 0.2
-#     t0: float = 0
 
-#     def __post__init__(self):
-#         network = transform(self.circuit, w=[0])[0]
-#         all_Cs = [c for c in self.circuit.components if c.type == 'capacitor']
-#         A, B = create_state_space_input_update_matrix(
-#             network=network,
-#             Cvalues=[BranchValues(value=float(C.value['C']), node1=C.nodes[0], node2=C.nodes[1]) for C in all_Cs]
-#         )
-#         from scipy import signal
+@dataclass
+class TransientSolution(CircuitSolution):
+    t_vec: np.ndarray = field(default_factory=lambda : np.empty((0,1)))
+    input: dict[str, TimeDomainFunction] = field(default_factory=dict)
+    solver: StateSpaceSolver = field(default=continuous_state_space_solver)
 
-#         Y = cre
+    def __post_init__(self):
+        network = transform(self.circuit, w=[0])[0]
 
-#         sys = signal.StateSpace(A, B, np.eye(A.shape[0]), np.zeros((A.shape[0], B.shape[1])))
-#         t = np.arange(self.t0, self.t_end, self.Ts)
-#         u = np.column_stack([np.array(t>0.1, dtype=float)])
+        C_values = {c.id: float(c.value['C']) for c in self.circuit.components if c.type == 'capacitor'}
+        L_values = {c.id: float(c.value['L']) for c in self.circuit.components if c.type == 'inductance'}
 
-#         self._tout, self._yout, _ = signal.lsim(sys, u, t)
+        self._ssm = nodal_state_space_model(network, c_values=C_values, l_values=L_values)
+        self._u = np.array([self.input[input_id](self.t_vec) for input_id in self._ssm.sources])
+        self._tout, self._x, _ = self.solver(
+            StateSpaceModel(A=self._ssm.A, B=self._ssm.B, C=np.eye(self._ssm.A.shape[0]), D=np.zeros((self._ssm.A.shape[0], self._ssm.B.shape[1]))),
+            self._u.T,
+            self.t_vec,
+            np.zeros((self._ssm.A.shape[0], 1))
+        )
+        self._x = np.reshape(self._x, (self._x.shape[0], self._ssm.A.shape[0])).T
 
-#     def get_voltage(self, component_id: str) -> TimeDomainFunction:
-#         voltages = [solution.get_voltage(component_id) for solution in self._solutions]
-#         return np.vectorize(lambda t: np.array(np.sum([np.abs(V)*np.cos(w*t+np.angle(V)) for V, w in zip(voltages, self.w)])))
+    @property
+    def t(self) -> np.ndarray:
+        return self._tout
+
+    def get_potential(self, node_id: str) -> TimeDomainSeries:
+        return self._tout, np.reshape(self._ssm.c_row_for_potential(node_id)@self._x + self._ssm.d_row_for_potential(node_id)@self._u, (-1, 1))
+
+    def get_voltage(self, component_id: str) -> TimeDomainSeries:
+        return self._tout, np.reshape(self._ssm.c_row_voltage(component_id)@self._x + self._ssm.d_row_voltage(component_id)@self._u, (-1, 1))
+
+    def get_current(self, component_id: str) -> TimeDomainSeries:
+        return self._tout, np.reshape(self._ssm.c_row_current(component_id)@self._x + self._ssm.d_row_current(component_id)@self._u, (-1, 1))
+
+    def get_power(self, component_id: str) -> TimeDomainSeries:
+        return self._tout, self.get_voltage(component_id)[1]*self.get_current(component_id)[1]
         
         

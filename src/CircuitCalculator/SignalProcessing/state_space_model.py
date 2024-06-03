@@ -1,5 +1,6 @@
 import numpy as np
 from dataclasses import dataclass
+import scipy.signal
 
 @dataclass(frozen=True)
 class StateSpaceModel:
@@ -31,3 +32,7 @@ class StateSpaceModel:
     @property
     def n_outputs(self) -> int:
         return self.C.shape[0]
+
+def continuous_state_space_solver(ssm: StateSpaceModel, y: np.ndarray, t: np.ndarray, x0: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    sys = scipy.signal.StateSpace(ssm.A, ssm.B, ssm.C, ssm.D)
+    return scipy.signal.lsim(sys, y, t)

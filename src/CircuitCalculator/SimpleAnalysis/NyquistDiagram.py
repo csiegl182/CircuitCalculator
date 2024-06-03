@@ -1,5 +1,5 @@
 from . import layout
-from ..Circuit.solution import FrequencyDomainSolution, FrequencyDomainFunction
+from ..Circuit.solution import FrequencyDomainSolution, FrequencyDomainSeries
 import functools
 from typing import Callable, Dict, TypedDict
 import numpy as np
@@ -24,7 +24,7 @@ def plot_nyquist_by_value(z:list[complex], **kwargs) -> layout.PlotFcn:
     return plot_pointer
 
 class NyquistDiagramProperties(TypedDict):
-    fd_fcn: Callable[[str], FrequencyDomainFunction]
+    fd_fcn: Callable[[str], FrequencyDomainSeries]
     label_fcn: Callable[[str], str]
     xlabel:str
     ylabel:str

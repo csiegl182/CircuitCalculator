@@ -59,8 +59,8 @@ class NodalStateSpaceModel(sp.StateSpaceModel):
 
     def _row_for_potential(self, node_id: str, matrix: np.ndarray) -> np.ndarray:
         if node_id in self.node_index_mapping:
-            return matrix[:][self.node_index_mapping(node_id)]
-        return np.zeros(matrix.shape[1])
+            return matrix[:][self.node_index_mapping[node_id]:self.node_index_mapping[node_id]+1]
+        return np.zeros((1,matrix.shape[1]))
 
     def c_row_for_potential(self, node_id: str) -> np.ndarray:
         return self._row_for_potential(node_id, self.C)
@@ -113,6 +113,10 @@ class NodalStateSpaceModel(sp.StateSpaceModel):
         d_pos = self.d_row_for_potential(branch.node1)
         d_neg = self.d_row_for_potential(branch.node2)
         return (d_pos - d_neg)/branch.element.Z
+
+    @property
+    def sources(self) -> list[str]:
+        return list(self.current_source_index_mapping.keys) + list(self.voltage_source_index_mapping.keys)
 
 def nodal_state_space_model(network: Network, c_values: dict[str, float] = {}, l_values: dict[str, float] = {}, node_index_mapper: map.NetworkMapper = map.default_node_mapper, voltage_source_index_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper, current_source_index_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper) -> NodalStateSpaceModel:
     A, B, C, D = state_space_matrices(
