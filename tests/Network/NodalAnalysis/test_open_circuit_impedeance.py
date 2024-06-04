@@ -1,6 +1,6 @@
 from CircuitCalculator.Network.network import Network, Branch
 from CircuitCalculator.Network.elements import resistor, voltage_source
-from CircuitCalculator.Network.NodalAnalysis import open_circuit_impedance
+from CircuitCalculator.Network.NodalAnalysis.node_analysis import open_circuit_impedance
 from numpy.testing import assert_almost_equal
 
 def test_total_impedeance_returns_zero_on_equal_nodes() -> None:

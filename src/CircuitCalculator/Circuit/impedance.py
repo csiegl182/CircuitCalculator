@@ -1,6 +1,6 @@
 import numpy as np
 from .circuit import Circuit, transform_circuit
-from ..Network import NodalAnalysis as ntw_imp
+from ..Network.NodalAnalysis import node_analysis as ntw_imp
 
 def open_circuit_impedance(circuit: Circuit, node1: str, node2: str, w: np.ndarray = np.array([0])) -> np.ndarray:
     return np.array([ntw_imp.open_circuit_impedance(transform_circuit(circuit, w0), node1, node2) for w0 in w])

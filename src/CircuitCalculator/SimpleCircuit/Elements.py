@@ -54,7 +54,7 @@ class Schematic(schemdraw.Drawing):
         return self.elements[index]
 
     def clear_labels(self) -> None:
-        self.elements = [e for e in self.elements if not isinstance(e, VoltageLabel) and not isinstance(e, CurrentLabel)]
+        self.elements = [e for e in self.elements if not isinstance(e, VoltageLabel) and not isinstance(e, CurrentLabel) and not isinstance(e, PowerLabel)]
 
     def draw(self, *args, **kwargs):
         if self.fig is not None:
@@ -449,7 +449,7 @@ class Inductance(schemdraw.elements.Inductor):
 
     @property
     def type(self) -> str:
-        return 'inductor'
+        return 'inductance'
 
 @extension.linear_current_source
 @simple_circuit_element
@@ -631,6 +631,7 @@ class LabelNode(Node):
     def type(self) -> str:
         return 'label_node'
 
+@simple_circuit_element
 class Switch(schemdraw.elements.elements.Element2Term):
     def __init__(self, name: str, *args, state: SwitchState = SwitchState.OPEN, **kwargs):
         super().__init__(*args, **kwargs)

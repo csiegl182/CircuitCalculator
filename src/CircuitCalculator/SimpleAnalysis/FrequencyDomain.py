@@ -1,5 +1,5 @@
 from . import layout
-from ..Circuit.solution import FrequencyDomainSolution, FrequencyDomainFunction
+from ..Circuit.solution import FrequencyDomainSolution, FrequencyDomainSeries
 from typing import Callable, TypedDict
 import numpy as np
 import functools
@@ -17,7 +17,7 @@ def plot_frequencies_by_id(
     def plot_frequencies(
             fig:layout.Figure,
             ax:layout.Axes,
-            fd_fcn:Callable[[str], FrequencyDomainFunction]=lambda _: (np.array(0), np.array(0)),
+            fd_fcn:Callable[[str], FrequencyDomainSeries]=lambda _: (np.array(0), np.array(0)),
             label_fcn:Callable[[str], str]=lambda _: '',
             **_) -> layout.FigureAxes:
         if 'label' not in kwargs.keys():
@@ -29,7 +29,7 @@ def plot_frequencies_by_id(
     return plot_frequencies
 
 def plot_frequencies_by_fcn(
-        fd_fcn:FrequencyDomainFunction,
+        fd_fcn:FrequencyDomainSeries,
         **kwargs) -> layout.PlotFcn:
     def plot_frequencies(fig:layout.Figure, ax:layout.Axes, **_) -> layout.FigureAxes:
         plot_discrete_frequencies_fcn(ax[-2], fd_fcn[0], np.abs(fd_fcn[1]), **kwargs)
@@ -38,7 +38,7 @@ def plot_frequencies_by_fcn(
     return plot_frequencies
 
 class FrequencyDomainPlotProperties(TypedDict):
-    fd_fcn: Callable[[str], FrequencyDomainFunction]
+    fd_fcn: Callable[[str], FrequencyDomainSeries]
     label_fcn: Callable[[str], str]
     ylabel:str
 

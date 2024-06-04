@@ -1,9 +1,9 @@
-from CircuitCalculator.Network.NodalAnalysis import create_node_matrix_from_network
+from CircuitCalculator.Network.NodalAnalysis.node_analysis import voltage_source_incidence_matrix
 from CircuitCalculator.Network.network import Network, Branch
 from CircuitCalculator.Network.elements import resistor, voltage_source, current_source
 import numpy as np
 
-def test_create_node_matrix_from_reference_network_1() -> None:
+def test_voltage_source_incidence_matrix_from_reference_network_1() -> None:
     Vq = 1+0j
     R = 1
     network = Network(
@@ -12,11 +12,13 @@ def test_create_node_matrix_from_reference_network_1() -> None:
             Branch('1', '0', resistor('R', R=R))
         ]
     )
-    Y = create_node_matrix_from_network(network)
-    Y_ref = np.empty(shape=(0,0), dtype=complex)
-    np.testing.assert_almost_equal(Y, Y_ref)
+    A = voltage_source_incidence_matrix(network)
+    A_ref = np.array([
+        [1]
+        ], dtype=complex)
+    np.testing.assert_almost_equal(A, A_ref)
 
-def test_create_node_matrix_from_reference_network_2() -> None:
+def test_voltage_source_incidence_matrix_from_reference_network_2() -> None:
     Iq = 1+0j
     R = 1
     network = Network(
@@ -25,13 +27,14 @@ def test_create_node_matrix_from_reference_network_2() -> None:
             Branch('1', '0', resistor('R1', R=R))
         ]
     )
-    Y = create_node_matrix_from_network(network)
-    Y_ref = np.array([[R]], dtype=complex)
-    np.testing.assert_almost_equal(Y, Y_ref)
+    A = voltage_source_incidence_matrix(network)
+    A_ref = np.array([
+        []
+        ], dtype=complex)
+    np.testing.assert_almost_equal(A, A_ref)
 
-def test_create_node_matrix_from_reference_network_3() -> None:
+def test_voltage_source_incidence_matrix_from_reference_network_3() -> None:
     R1, R2, Ri = 10, 20, 100
-    G1, G2, Gi = 1/R1, 1/R2, 1/Ri
     Iq = 1
     network = Network(
         [
@@ -40,15 +43,15 @@ def test_create_node_matrix_from_reference_network_3() -> None:
             Branch('2', '0', resistor('R2', R=R2))
         ]
     )
-    Y = create_node_matrix_from_network(network)
-    Y_ref = np.array([[G1+Gi, -G1],
-                      [-G1, G1+G2]],
-                      dtype=complex)
-    np.testing.assert_almost_equal(Y, Y_ref)
+    A = voltage_source_incidence_matrix(network)
+    A_ref = np.array([
+        [],
+        []
+        ], dtype=complex)
+    np.testing.assert_almost_equal(A, A_ref)
 
-def test_create_node_matrix_from_reference_network_4() -> None:
+def test_voltage_source_incidence_matrix_from_reference_network_4() -> None:
     R1, R2, R3 = 10, 20, 30
-    G1, G2, G3 = 1/R1, 1/R2, 1/R3
     Uq = 1
     network = Network(
         [
@@ -58,14 +61,15 @@ def test_create_node_matrix_from_reference_network_4() -> None:
             Branch('2', '0', resistor('R3', R=R3))
         ]
     )
-    Y = create_node_matrix_from_network(network)
-    Y_ref = np.array([[G2+G3]],
-                      dtype=complex)
-    np.testing.assert_almost_equal(Y, Y_ref)
+    A = voltage_source_incidence_matrix(network)
+    A_ref = np.array([
+        [1],
+        [0]
+        ], dtype=complex)
+    np.testing.assert_almost_equal(A, A_ref)
 
-def test_create_node_matrix_from_reference_network_5() -> None:
+def test_voltage_source_incidence_matrix_from_reference_network_5() -> None:
     R1, R2, R3, R4, R5 = 10, 20, 30, 40, 50
-    G1, G2, G3, G4, G5 = 1/R1, 1/R2, 1/R3, 1/R4, 1/R5
     Uq1, Uq2 = 1, 2
     network = Network(
         [
@@ -78,15 +82,17 @@ def test_create_node_matrix_from_reference_network_5() -> None:
             Branch('0', '4', voltage_source('Uq2', V=Uq2))
         ]
     )
-    Y = create_node_matrix_from_network(network)
-    Y_ref = np.array([[G1+G2+G3, -G3],
-                      [-G3, G3+G4]],
-                      dtype=complex)
-    np.testing.assert_almost_equal(Y, Y_ref)
+    A = voltage_source_incidence_matrix(network)
+    A_ref = np.array([
+        [1,  0],
+        [0,  0],
+        [0,  0],
+        [0, -1]
+        ], dtype=complex)
+    np.testing.assert_almost_equal(A, A_ref)
 
-def test_create_node_matrix_from_reference_network_6() -> None:
+def test_voltage_source_incidence_matrix_from_reference_network_6() -> None:
     R1, R2, R3, R4, R5 = 10, 20, 30, 40, 50
-    G1, G2, G3, G4, G5 = 1/R1, 1/R2, 1/R3, 1/R4, 1/R5
     U1, U2 = 1, 2
     network = Network(
         [
@@ -99,15 +105,17 @@ def test_create_node_matrix_from_reference_network_6() -> None:
             Branch('3', '2', voltage_source('Uq2', V=U2))
         ]
     )
-    Y = create_node_matrix_from_network(network)
-    Y_ref = np.array([[G1+G2+G4, -G4],
-                      [-G4, G4+G5]],
-                      dtype=complex)
-    np.testing.assert_almost_equal(Y, Y_ref.real)
+    A = voltage_source_incidence_matrix(network)
+    A_ref = np.array([
+        [1,  0],
+        [0, -1],
+        [0,  1],
+        [0,  0]
+        ], dtype=complex)
+    np.testing.assert_almost_equal(A, A_ref.real)
 
-def test_create_node_matrix_from_reference_network_7() -> None:
+def test_voltage_source_incidence_matrix_from_reference_network_7() -> None:
     R1, R2, R3, R4 = 10, 20, 30, 40
-    G1, G2, G3, G4 = 1/R1, 1/R2, 1/R3, 1/R4
     U1, U2, U3, I4 = 1, 2, 3, 0.1
     network = Network(
         [
@@ -121,15 +129,18 @@ def test_create_node_matrix_from_reference_network_7() -> None:
             Branch('3', '5', current_source('Is4', I=I4))
         ]
     )
-    Y = create_node_matrix_from_network(network)
-    Y_ref = np.array([[G1+G2+G3, -G2],
-                      [-G2, G2+G4]],
-                      dtype=complex)
-    np.testing.assert_almost_equal(Y, Y_ref)
+    A = voltage_source_incidence_matrix(network)
+    A_ref = np.array([
+        [ 0, -1,  0],
+        [ 0,  1,  0],
+        [ 0,  0, -1],
+        [ 0,  0,  1],
+        [-1,  0,  0]
+        ], dtype=complex)
+    np.testing.assert_almost_equal(A, A_ref)
 
-def test_create_node_matrix_from_reference_network_10() -> None:
+def test_voltage_source_incidence_matrix_from_reference_network_10() -> None:
     R1, R2, R3, R4, R5 = 10, 20, 30, 40, 50
-    G3, G4, G5 = 1/R3, 1/R4, 1/R5
     U1, U2, I3 = 1, 2, 0.1
     network = Network(
         [
@@ -143,13 +154,16 @@ def test_create_node_matrix_from_reference_network_10() -> None:
             Branch('2', '4', resistor('R5', R=R5)),
         ]
     )
-    Y = create_node_matrix_from_network(network)
-    Y_ref = np.array([[G4, 0],
-                      [0, G3+G5]],
-                      dtype=complex)
-    np.testing.assert_almost_equal(Y, Y_ref)
+    A = voltage_source_incidence_matrix(network)
+    A_ref = np.array([
+        [1, -1],
+        [0,  1],
+        [0,  0],
+        [0,  0]
+        ], dtype=complex)
+    np.testing.assert_almost_equal(A, A_ref)
 
-def test_create_node_matrix_from_reference_network_11() -> None:
+def test_voltage_source_incidence_matrix_from_reference_network_11() -> None:
     R1, R2, R3, R4 = 15, 5, 20, 20
     G1, G2, G3, G4 = 1/R1, 1/R2, 1/R3, 1/R4
     U, I = 120, 4
@@ -164,13 +178,15 @@ def test_create_node_matrix_from_reference_network_11() -> None:
         ],
         node_zero_label='0'
     )
-    Y = create_node_matrix_from_network(network)
-    Y_ref = np.array([[G1+G2, -G2],
-                      [-G2, G2+G3+G4]],
-                      dtype=complex)
-    np.testing.assert_almost_equal(Y, Y_ref)
+    A = voltage_source_incidence_matrix(network)
+    A_ref = np.array([
+        [ 0],
+        [-1],
+        [ 1]
+        ], dtype=complex)
+    np.testing.assert_almost_equal(A, A_ref)
 
-def test_create_node_matrix_from_reference_network_13() -> None:
+def test_voltage_source_incidence_matrix_from_reference_network_13() -> None:
     R1, R2, R3 = 10, 20, 30
     G1, G2, G3 = 1/R1, 1/R2, 1/R3
     V = 1
@@ -183,7 +199,9 @@ def test_create_node_matrix_from_reference_network_13() -> None:
         ],
         node_zero_label='0'
     )
-    Y = create_node_matrix_from_network(network)
-    Y_ref = np.array([[G1+G2+G3]],
-                      dtype=complex)
-    np.testing.assert_almost_equal(Y, Y_ref)
+    A = voltage_source_incidence_matrix(network)
+    A_ref = np.array([
+        [1],
+        [0]
+        ], dtype=complex)
+    np.testing.assert_almost_equal(A, A_ref)

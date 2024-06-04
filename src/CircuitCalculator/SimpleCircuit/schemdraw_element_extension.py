@@ -52,7 +52,7 @@ def source(element: Type[schemdraw.elements.Element]) -> Type[schemdraw.elements
     return extended_source
 
 def capacitor(element: Type[schemdraw.elements.Element]) -> Type[schemdraw.elements.Element]:
-    class extended_inductor(element):
+    class extended_capacitor(element):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.anchors['value_label'] = (0.0, 0.3)
@@ -75,10 +75,9 @@ def capacitor(element: Type[schemdraw.elements.Element]) -> Type[schemdraw.eleme
             delta = self.end-self.start
             if abs(delta[1]) > abs(delta[0]): # portrait placing
                 if delta[1] < 0:
-                    theta = 90
-            super()._place_label(label=label, theta=theta)
-
-    return extended_inductor
+                    kwargs.update({'rotation': 90})
+            super()._place_label(*args, **kwargs)
+    return extended_capacitor
 
 def inductor(element: Type[schemdraw.elements.Element]) -> Type[schemdraw.elements.Element]:
     class extended_inductor(element):
@@ -104,9 +103,8 @@ def inductor(element: Type[schemdraw.elements.Element]) -> Type[schemdraw.elemen
             delta = self.end-self.start
             if abs(delta[1]) > abs(delta[0]): # portrait placing
                 if delta[1] < 0:
-                    theta = 90
-            super()._place_label(label=label, theta=theta)
-
+                    kwargs.update({'rotation': 90})
+            super()._place_label(*args, **kwargs)
     return extended_inductor
 
 def linear_current_source(element: Type[schemdraw.elements.Element]) -> Type[schemdraw.elements.Element]:
