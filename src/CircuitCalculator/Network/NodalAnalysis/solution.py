@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from ..network import Network
 from . import label_mapping as map
-from .supernodes import SuperNodes
 
 @dataclass
 class NodalAnalysisSolution(ABC):
@@ -23,10 +22,6 @@ class NodalAnalysisSolution(ABC):
     @property
     def _voltage_source_mapping(self) -> map.LabelMapping:
         return self.voltage_source_mapper(self.network)
-
-    @property
-    def _super_nodes(self) -> SuperNodes:
-        return SuperNodes(self.network)
 
     @abstractmethod
     def get_potential(self, node_id: str) -> Any:
