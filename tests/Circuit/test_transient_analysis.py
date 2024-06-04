@@ -21,7 +21,7 @@ def test_transient_analysis_of_example_network_1() -> None:
     t_max = 0.3
     t_vec = np.arange(0, t_max, Ts)
     input = {'Vs': lambda t: Vs*step(t, t0=t0)}
-    solution = TransientSolution(circuit, input=input, t_vec=t_vec)
+    solution = TransientSolution(circuit, input=input, tin=t_vec)
 
     Ri = R1*R2/(R1+R2)+R3
     tau = Ri*C

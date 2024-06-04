@@ -116,7 +116,9 @@ class NodalStateSpaceModel(sp.StateSpaceModel):
 
     @property
     def sources(self) -> list[str]:
-        return list(self.current_source_index_mapping.keys) + list(self.voltage_source_index_mapping.keys)
+        current_sources = self.current_source_index_mapping.keys
+        voltage_sources = [vs for vs in self.voltage_source_index_mapping.keys if vs not in self.l_values]
+        return current_sources+voltage_sources
 
 def nodal_state_space_model(network: Network, c_values: dict[str, float] = {}, l_values: dict[str, float] = {}, node_index_mapper: map.NetworkMapper = map.default_node_mapper, voltage_source_index_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper, current_source_index_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper) -> NodalStateSpaceModel:
     A, B, C, D = state_space_matrices(

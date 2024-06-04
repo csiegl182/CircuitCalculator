@@ -128,7 +128,7 @@ class FrequencyDomainSolution(CircuitSolution):
 
 @dataclass
 class TransientSolution(CircuitSolution):
-    t_vec: np.ndarray = field(default_factory=lambda : np.empty((0,1)))
+    tin: np.ndarray = field(default_factory=lambda : np.empty((0,1)))
     input: dict[str, TimeDomainFunction] = field(default_factory=dict)
     solver: StateSpaceSolver = field(default=continuous_state_space_solver)
 
@@ -139,11 +139,11 @@ class TransientSolution(CircuitSolution):
         L_values = {c.id: float(c.value['L']) for c in self.circuit.components if c.type == 'inductance'}
 
         self._ssm = nodal_state_space_model(network, c_values=C_values, l_values=L_values)
-        self._u = np.array([self.input[input_id](self.t_vec) for input_id in self._ssm.sources])
+        self._u = np.array([self.input[input_id](self.tin) for input_id in self._ssm.sources])
         self._tout, self._x, _ = self.solver(
             StateSpaceModel(A=self._ssm.A, B=self._ssm.B, C=np.eye(self._ssm.A.shape[0]), D=np.zeros((self._ssm.A.shape[0], self._ssm.B.shape[1]))),
             self._u.T,
-            self.t_vec,
+            self.tin,
             np.zeros((self._ssm.A.shape[0], 1))
         )
         self._x = np.reshape(self._x, (self._x.shape[0], self._ssm.A.shape[0])).T
