@@ -40,12 +40,17 @@ def state_space_matrices(network: Network, c_values: dict[str, float] = {}, l_va
     QS, QL = source_and_inductance_incidence_matrix(l_values)
     DQ = np.hstack((Delta.T, QL))
     Lambda = value_matrix(c_values, l_values)
+    invLambda = np.diag([1/L for L in np.diag(Lambda)])
 
-    A = np.linalg.inv(DQ.T @ np.linalg.inv(A_tilde) @ DQ @ Lambda)
-    B = -A @ DQ.T @ np.linalg.inv(A_tilde) @ QS
-    C = np.linalg.inv(A_tilde) @ DQ @ Lambda @ A
-    D = np.linalg.inv(A_tilde) @ (QS + DQ @ Lambda @ B)
-    
+    inv_A_tilde = np.linalg.inv(A_tilde)
+    transformed_inv_A_tilde = DQ.T @ inv_A_tilde
+    sorted_A_tilde = np.linalg.inv(transformed_inv_A_tilde @ DQ)
+
+    A = invLambda @ sorted_A_tilde
+    C = transformed_inv_A_tilde.T @ sorted_A_tilde
+    B = (-invLambda @ C.T) @ QS
+    D = (inv_A_tilde - transformed_inv_A_tilde.T @ C.T) @ QS
+
     return A, B, C, D
 
 @dataclass(frozen=True)
