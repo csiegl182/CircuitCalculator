@@ -378,7 +378,7 @@ class RectVoltageSource(schemdraw.elements.SourceSquare):
 @simple_circuit_element
 class RectCurrentSource(schemdraw.elements.SourceSquare):
     def __init__(self, I: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, **kwargs):
-        super().__init__(self, *args, reverse=reverse, **kwargs)
+        super().__init__(*args, reverse=reverse, **kwargs)
         self._I = I if not reverse else -I
         self._w = w
         self._phi = phi
