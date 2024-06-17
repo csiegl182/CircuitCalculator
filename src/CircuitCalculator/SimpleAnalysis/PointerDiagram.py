@@ -30,7 +30,7 @@ class PlotPointerDiagramProperties(TypedDict):
 def plot_pointers_factory(
         *args,
         type:str='default',
-        solution:ComplexSolution=ComplexSolution(),
+        solution:ComplexSolution,
         pd_lim:tuple[float, float, float, float]=(-1, 1, -1, 1),
         xlabel:str='',
         ylabel:str='') -> layout.PlotFcn:

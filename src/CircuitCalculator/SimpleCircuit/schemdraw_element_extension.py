@@ -14,19 +14,20 @@ def resistor(element: Type[schemdraw.elements.Element2Term]) -> Type[schemdraw.e
             self.anchors['value_label'] = (0.5, -0.6)
             self.anchors['v_label'] = (0.5, 0.3)
             self.anchors['s_label'] = (0.5, -1.2)
-            return super().down()
+            return super().down(length=length)
 
         def up(self, length: Optional[float] = None) -> schemdraw.elements.Element:
             self.anchors['value_label'] = (0.5, 0.4)
             self.anchors['v_label'] = (0.5, -1.1)
             self.anchors['s_label'] = (0.5, -1.2)
-            return super().up()
+            return super().up(length=length)
 
         def left(self, length: Optional[float] = None) -> schemdraw.elements.Element:
             self.anchors['value_label'] = (0.5, -0.9)
             self.anchors['v_label'] = (0.5, 0.3)
             self.anchors['s_label'] = (0.5, -1.2)
-            return super().left()
+            print('bar')
+            return super().left(length=length)
 
         def _place_label(self, label: schemdraw.elements.elements.Label, theta: float = 0):
             delta = self.end-self.start
@@ -75,8 +76,8 @@ def capacitor(element: Type[schemdraw.elements.Element2Term]) -> Type[schemdraw.
             delta = self.end-self.start
             if abs(delta[1]) > abs(delta[0]): # portrait placing
                 if delta[1] < 0:
-                    kwargs.update({'rotation': 90})
-            super()._place_label(*args, **kwargs)
+                    theta = 90
+            super()._place_label(label, theta)
     return extended_capacitor
 
 def inductor(element: Type[schemdraw.elements.Element2Term]) -> Type[schemdraw.elements.Element2Term]:
@@ -103,8 +104,8 @@ def inductor(element: Type[schemdraw.elements.Element2Term]) -> Type[schemdraw.e
             delta = self.end-self.start
             if abs(delta[1]) > abs(delta[0]): # portrait placing
                 if delta[1] < 0:
-                    kwargs.update({'rotation': 90})
-            super()._place_label(*args, **kwargs)
+                    theta = 90
+            super()._place_label(label, theta)
     return extended_inductor
 
 def linear_current_source(element: Type[schemdraw.elements.Element2Term]) -> Type[schemdraw.elements.Element2Term]:
