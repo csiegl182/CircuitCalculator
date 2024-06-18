@@ -4,11 +4,13 @@ import functools
 from typing import Callable, Dict, TypedDict
 from ..Circuit.solution import ComplexSolution
 
-def plot_pointer_by_id(id:str, origin:str='', scaling:float=1, **kwargs) -> layout.PlotFcn:
+def plot_pointer_by_id(id:str, origin:str='', scaling:float=1, reverse:bool=False, **kwargs) -> layout.PlotFcn:
     def plot_pointer(fig:layout.Figure, ax:layout.Axes, *, pointer_fcn:Callable[[str], complex]=lambda _: 0+0j, label_fcn:Callable[[str], str]=lambda _: '') -> layout.FigureAxes:
         z0 = 0 if origin == '' else complex(pointer_fcn(origin))
         z1 = complex(pointer_fcn(id))
         z1 *= scaling
+        if reverse:
+            z1 = -z1
         if 'label' not in kwargs.keys():
             kwargs.update({'label':label_fcn(id)})
         complex_pointer(ax[0], z0, z0+z1, **kwargs)
