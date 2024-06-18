@@ -710,7 +710,7 @@ class VoltageLabel(schemdraw.elements.CurrentLabel):
             self.at(at.v_label)
             self.theta(at.transform.theta)
         except AttributeError:
-            self.at(at)
+            self.at(at.center)
         rotate = kwargs.get('rotate', True)
         if rotate == True and at.transform.theta == 270:
             rotate = 90
