@@ -26,7 +26,6 @@ def resistor(element: Type[schemdraw.elements.Element2Term]) -> Type[schemdraw.e
             self.anchors['value_label'] = (0.5, -0.9)
             self.anchors['v_label'] = (0.5, 0.3)
             self.anchors['s_label'] = (0.5, -1.2)
-            print('bar')
             return super().left(length=length)
 
         def _place_label(self, label: schemdraw.elements.elements.Label, theta: float = 0):
