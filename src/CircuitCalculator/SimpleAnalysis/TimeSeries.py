@@ -51,7 +51,7 @@ class PlotTimeSeriesProperties(TypedDict):
 def plot_timeseries_factory(
         *args,
         type:str='default',
-        solution:TimeDomainSolution=TimeDomainSolution(),
+        solution:TimeDomainSolution,
         tmax:float=-1,
         tmin:float=0,
         xlabel:str='t→',
