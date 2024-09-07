@@ -1,6 +1,6 @@
 from ..Network.solution import NetworkSolver, NetworkSolution
 from ..Network.NodalAnalysis.bias_point_analysis import nodal_analysis_bias_point_solver
-from ..Circuit.solution import ComplexSolution
+from ..Circuit.solution import ComplexSolution, DCSolution
 
 from . import Elements as elm
 from . import Display as dsp
@@ -83,7 +83,7 @@ def complex_network_dc_solution(schematic: elm.Schematic, solver: NetworkSolver 
 
 def real_network_dc_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_bias_point_solver, precision: int = 3) -> SchematicDiagramSolution:
     diagram_parser = SchematicDiagramParser(schematic)
-    solution = ComplexSolution(circuit=circuit_translator(schematic), solver=solver)
+    solution = DCSolution(circuit=circuit_translator(schematic), solver=solver)
     return SchematicDiagramSolution(
         diagram_parser=diagram_parser,
         solution=solution,
