@@ -45,7 +45,7 @@ class FrequencyDomainPlotProperties(TypedDict):
 def plot_frequencydomain_factory(
         *args,
         type:str='default',
-        solution:FrequencyDomainSolution=FrequencyDomainSolution(),
+        solution:FrequencyDomainSolution,
         wmin:float=0,
         wmax:float=-1,
         abs_min:float=0,
