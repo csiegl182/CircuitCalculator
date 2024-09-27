@@ -266,15 +266,18 @@ class Admittance(schemdraw.elements.Resistor):
 @extension.source
 @simple_circuit_element
 class ACVoltageSource(schemdraw.elements.SourceSin):
-    def __init__(self, V: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
+    def __init__(self, V: float, w: float, phi: float, name: str, *args, show_name: bool = True, show_value: bool = True, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
         super().__init__(*args, reverse=not reverse, **kwargs)
         self._V = V if not reverse else -V
         self._w = w
         self._phi = phi
         self._deg = deg
         self._sin = sin
-        label = dsp.print_sinosoidal(V*np.exp(1j*phi), unit='V', precision=precision, w=w, deg=deg)
-        self.label(f'{name}={label}', rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
+        label = ''
+        label += f'{name}' if show_name else ''
+        label += '=' if  show_name and show_value else ''
+        label += dsp.print_sinosoidal(V*np.exp(1j*phi), unit='V', precision=precision, w=w, deg=deg) if show_value else ''
+        self.label(label, rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
 
     @property
     def w(self) -> float:
@@ -303,15 +306,18 @@ class ACVoltageSource(schemdraw.elements.SourceSin):
 @extension.source
 @simple_circuit_element
 class ACCurrentSource(schemdraw.elements.SourceSin):
-    def __init__(self, *args, I: float, w: float, phi: float, name: str, sin=False, deg=False, reverse=False, precision=3, **kwargs):
+    def __init__(self, *args, I: float, w: float, phi: float, name: str, show_name: bool = True, show_value: bool = True, sin=False, deg=False, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
         self._I = I if not reverse else -I
         self._w = w
         self._phi = phi
         self._deg = deg
         self._sin = sin
-        label = dsp.print_sinosoidal(I*np.exp((1j*phi)), unit='A', precision=precision, w=w, deg=deg)
-        self.label(f'{name}={label}', loc='i_label', ofst=(0, 0.4), rotate=True, color=dsp.red)
+        label = ''
+        label += f'{name}' if show_name else ''
+        label += '=' if  show_name and show_value else ''
+        label += dsp.print_sinosoidal(I*np.exp((1j*phi)), unit='A', precision=precision, w=w, deg=deg) if show_value else ''
+        self.label(label, loc='i_label', ofst=(0, 0.4), rotate=True, color=dsp.red)
         self.segments.append(extension.current_arrow())
 
     @property
