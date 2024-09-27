@@ -266,18 +266,19 @@ class Admittance(schemdraw.elements.Resistor):
 @extension.source
 @simple_circuit_element
 class ACVoltageSource(schemdraw.elements.SourceSin):
-    def __init__(self, V: float, w: float, phi: float, name: str, *args, show_name: bool = True, show_value: bool = True, sin=False, deg=False, reverse=False, precision=3, label_offset: float = 0.2, **kwargs):
+    def __init__(self, V: float, w: float, phi: float, name: str, *args, show_name: bool = True, show_value: bool = True, sin=False, deg=False, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=not reverse, **kwargs)
         self._V = V if not reverse else -V
         self._w = w
         self._phi = phi
         self._deg = deg
         self._sin = sin
+        self.segments.append(extension.voltage_arrow())
         label = ''
         label += f'{name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
         label += dsp.print_sinosoidal(V*np.exp(1j*phi), unit='V', precision=precision, w=w, deg=deg) if show_value else ''
-        self.label(label, rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
+        self.label(label, rotate=True, color=dsp.blue, loc='value_label', halign='center')
 
     @property
     def w(self) -> float:
