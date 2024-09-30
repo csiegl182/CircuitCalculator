@@ -273,11 +273,13 @@ class ACVoltageSource(schemdraw.elements.SourceSin):
         self._phi = phi
         self._deg = deg
         self._sin = sin
+        if self._sin:
+            self._phi -= np.pi/2
         self.segments.append(extension.voltage_arrow())
         label = ''
         label += f'{name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
-        label += dsp.print_sinosoidal(V*np.exp(1j*phi), unit='V', precision=precision, w=w, deg=deg) if show_value else ''
+        label += dsp.print_sinosoidal(V*np.exp(1j*self._phi), unit='V', precision=precision, w=w, deg=deg) if show_value else ''
         self.label(label, rotate=True, color=dsp.blue, loc='value_label', halign='center')
 
     @property
@@ -314,10 +316,12 @@ class ACCurrentSource(schemdraw.elements.SourceSin):
         self._phi = phi
         self._deg = deg
         self._sin = sin
+        if self._sin:
+            self._phi -= np.pi/2
         label = ''
         label += f'{name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
-        label += dsp.print_sinosoidal(I*np.exp((1j*phi)), unit='A', precision=precision, w=w, deg=deg) if show_value else ''
+        label += dsp.print_sinosoidal(I*np.exp((1j*self._phi)), unit='A', precision=precision, w=w, deg=deg) if show_value else ''
         self.label(label, loc='i_label', ofst=(0, 0.4), rotate=True, color=dsp.red)
         self.segments.append(extension.current_arrow())
 
