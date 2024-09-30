@@ -111,11 +111,14 @@ class TimeDomainSolution(CircuitSolution):
 class FrequencyDomainSolution(CircuitSolution):
     w_max: float = field(default=0)
     solver: NetworkSolver = field(default=nodal_analysis_bias_point_solver)
-    peak_values: bool = False
+    one_sided: bool = field(default=True)
 
     def __post_init__(self):
-        self.w = frequency_components(self.circuit, self.w_max)
-        self._solutions = [ComplexSolution(circuit=self.circuit, solver=self.solver, w=w, peak_values=self.peak_values) for w in self.w]
+        self.w = np.array(frequency_components(self.circuit, self.w_max))
+        self._solutions = np.array([ComplexSolution(circuit=self.circuit, solver=self.solver, w=w, peak_values=True) for w in self.w])
+        if not self.one_sided:
+            self.w = np.concatenate((-self.w[-1:0:-1], self.w))
+            self._solutions = 1/2*np.concatenate((np.conj(self._solutions[-1:0:-1]), self._solutions))
 
     def get_voltage(self, component_id: str) -> FrequencyDomainSeries:
         voltages = np.array([solution.get_voltage(component_id) for solution in self._solutions])
