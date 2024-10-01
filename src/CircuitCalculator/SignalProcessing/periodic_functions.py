@@ -111,7 +111,7 @@ class CosFunction:
 
     @property
     def time_function(self) -> TimeDomainFunction:
-        return lambda t: self.amplitude*np.cos(2*np.pi/self.period*t + self.phase) + self.offset
+        return lambda t: self.amplitude*np.cos(2*np.pi/self.period*t - self.phase) + self.offset
 
 class CosFunctionHarmonics(AbstractHarmonicCoefficients):
     def _amplitude_coefficient(self, n: int) -> float:
@@ -123,7 +123,7 @@ class CosFunctionHarmonics(AbstractHarmonicCoefficients):
 
     def _phase_coefficient(self, n: int) -> float:
         if n == 1:
-            return -self.phase0
+            return self.phase0
         return 0
 
 @dataclass
@@ -136,7 +136,7 @@ class SinFunction:
 
     @property
     def time_function(self) -> TimeDomainFunction:
-        return lambda t: self.amplitude*np.sin(2*np.pi/self.period*t + self.phase) + self.offset
+        return lambda t: self.amplitude*np.sin(2*np.pi/self.period*t - self.phase) + self.offset
 
 class SinFunctionHarmonics(AbstractHarmonicCoefficients):
     def _amplitude_coefficient(self, n: int) -> float:
@@ -148,7 +148,7 @@ class SinFunctionHarmonics(AbstractHarmonicCoefficients):
 
     def _phase_coefficient(self, n: int) -> float:
         if n == 1:
-            return np.pi/2-self.phase0
+            return np.pi/2+self.phase0
         return 0
 
 @dataclass
@@ -161,11 +161,13 @@ class RectFunction:
 
     @property
     def time_function(self) -> TimeDomainFunction:
-        t0 = self.phase/2/np.pi*self.period
+        t0 = -self.phase/2/np.pi*self.period
         return np.vectorize(lambda t: self.amplitude + self.offset if (t+t0) % self.period < self.period/2 else -self.amplitude + self.offset)
 
 class RectFunctionHarmonics(AbstractHarmonicCoefficients):
     def _amplitude_coefficient(self, n: int) -> float:
+        if n == 0:
+            return self.offset0
         if n%2 == 0:
             return 0
         return 4/n/np.pi*self.amplitude0
@@ -173,7 +175,7 @@ class RectFunctionHarmonics(AbstractHarmonicCoefficients):
     def _phase_coefficient(self, n: int) -> float:
         if n%2 == 0:
             return 0
-        return np.pi/2-n*self.phase0
+        return np.pi/2+n*self.phase0
 
 @dataclass
 class TriFunction:
@@ -219,7 +221,7 @@ class SawFunction:
 class SawFunctionHarmonics(AbstractHarmonicCoefficients):
     def _amplitude_coefficient(self, n: int) -> float:
         if n == 0:
-            return 0
+            return self.offset0
         return -2/n/np.pi*self.amplitude0
 
     def _phase_coefficient(self, n: int) -> float:
