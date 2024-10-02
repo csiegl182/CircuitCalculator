@@ -36,10 +36,10 @@ class HarmonicCoefficients(Protocol):
     def phase(self, n: int) -> float:
         ...
 
-    def real(self, n: int) -> float:
+    def a(self, n: int) -> float:
         ...
     
-    def imag(self, n: int) -> float:
+    def b(self, n: int) -> float:
         ...
 
     def c(self, n: int) -> complex:
@@ -61,10 +61,10 @@ class AbstractHarmonicCoefficients(ABC):
             raise ValueError('Fourier index must be positive.')
         return self._phase_coefficient(n)
 
-    def real(self, n: int) -> float:
+    def a(self, n: int) -> float:
         return self.amplitude(n)*np.cos(self.phase(n))
     
-    def imag(self, n: int) -> float:
+    def b(self, n: int) -> float:
         return self.amplitude(n)*np.sin(self.phase(n))
 
     def c(self, n: int) -> complex:
