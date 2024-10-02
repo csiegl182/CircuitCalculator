@@ -15,6 +15,7 @@ class PeriodicFunction(Protocol):
     period: float
     amplitude: float
     phase: float
+    offset: float = 0
     wavetype: str = ''
 
     @property
@@ -27,6 +28,7 @@ PeriodicFunctionList = list[Type[PeriodicFunction]]
 class HarmonicCoefficients(Protocol):
     amplitude0: float
     phase0: float
+    offset0: float
 
     def amplitude(self, n: int) -> float:
         ...
@@ -34,10 +36,10 @@ class HarmonicCoefficients(Protocol):
     def phase(self, n: int) -> float:
         ...
 
-    def real(self, n: int) -> float:
+    def a(self, n: int) -> float:
         ...
     
-    def imag(self, n: int) -> float:
+    def b(self, n: int) -> float:
         ...
 
     def c(self, n: int) -> complex:
@@ -47,6 +49,7 @@ class HarmonicCoefficients(Protocol):
 class AbstractHarmonicCoefficients(ABC):
     amplitude0: float = 1
     phase0: float = 0
+    offset0: float = 0
 
     def amplitude(self, n: int) -> float:
         if n < 0:
@@ -58,10 +61,10 @@ class AbstractHarmonicCoefficients(ABC):
             raise ValueError('Fourier index must be positive.')
         return self._phase_coefficient(n)
 
-    def real(self, n: int) -> float:
+    def a(self, n: int) -> float:
         return self.amplitude(n)*np.cos(self.phase(n))
     
-    def imag(self, n: int) -> float:
+    def b(self, n: int) -> float:
         return self.amplitude(n)*np.sin(self.phase(n))
 
     def c(self, n: int) -> complex:
@@ -79,9 +82,10 @@ class AbstractHarmonicCoefficients(ABC):
 
 @dataclass
 class ConstantFunction:
-    period: float = field(default=0)
-    amplitude: float = field(default=1)
-    phase: float = field(default=0)
+    period: float = 0
+    amplitude: float = 1
+    phase: float = 0
+    offset: float = 0
     wavetype: str = 'const'
 
     @property
@@ -101,60 +105,69 @@ class ConstFunctionHarmonics(AbstractHarmonicCoefficients):
 class CosFunction:
     period: float
     amplitude: float
-    phase: float = field(default=0)
+    phase: float = 0
+    offset: float = 0
     wavetype: str = 'cos'
 
     @property
     def time_function(self) -> TimeDomainFunction:
-        return lambda t: self.amplitude*np.cos(2*np.pi/self.period*t + self.phase)
+        return lambda t: self.amplitude*np.cos(2*np.pi/self.period*t - self.phase) + self.offset
 
 class CosFunctionHarmonics(AbstractHarmonicCoefficients):
     def _amplitude_coefficient(self, n: int) -> float:
+        if n == 0:
+            return self.offset0
         if n == 1:
             return self.amplitude0
         return 0
 
     def _phase_coefficient(self, n: int) -> float:
         if n == 1:
-            return -self.phase0
+            return self.phase0
         return 0
 
 @dataclass
 class SinFunction:
     period: float
     amplitude: float
-    phase: float = field(default=0)
+    phase: float = 0
+    offset: float = 0
     wavetype: str = 'sin'
 
     @property
     def time_function(self) -> TimeDomainFunction:
-        return lambda t: self.amplitude*np.sin(2*np.pi/self.period*t + self.phase)
+        return lambda t: self.amplitude*np.sin(2*np.pi/self.period*t - self.phase) + self.offset
 
 class SinFunctionHarmonics(AbstractHarmonicCoefficients):
     def _amplitude_coefficient(self, n: int) -> float:
+        if n == 0:
+            return self.offset0
         if n == 1:
             return self.amplitude0
         return 0
 
     def _phase_coefficient(self, n: int) -> float:
         if n == 1:
-            return np.pi/2-self.phase0
+            return np.pi/2+self.phase0
         return 0
 
 @dataclass
 class RectFunction:
     period: float
     amplitude: float
-    phase: float
+    phase: float = 0
+    offset: float = 0
     wavetype: str = 'rect'
 
     @property
     def time_function(self) -> TimeDomainFunction:
-        t0 = self.phase/2/np.pi*self.period
-        return np.vectorize(lambda t: self.amplitude if (t+t0) % self.period < self.period/2 else -self.amplitude)
+        t0 = -self.phase/2/np.pi*self.period
+        return np.vectorize(lambda t: self.amplitude + self.offset if (t+t0) % self.period < self.period/2 else -self.amplitude + self.offset)
 
 class RectFunctionHarmonics(AbstractHarmonicCoefficients):
     def _amplitude_coefficient(self, n: int) -> float:
+        if n == 0:
+            return self.offset0
         if n%2 == 0:
             return 0
         return 4/n/np.pi*self.amplitude0
@@ -162,23 +175,26 @@ class RectFunctionHarmonics(AbstractHarmonicCoefficients):
     def _phase_coefficient(self, n: int) -> float:
         if n%2 == 0:
             return 0
-        return np.pi/2-n*self.phase0
+        return np.pi/2+n*self.phase0
 
 @dataclass
 class TriFunction:
     period: float
     amplitude: float
     phase: float
+    offset: float = 0
     wavetype: str = 'tri'
 
     @property
     def time_function(self) -> TimeDomainFunction:
         t0 = self.phase/2/np.pi*self.period
         mod = lambda t: np.mod(t, self.period)
-        return np.vectorize(lambda t: self.amplitude*(1-4/self.period*mod(t+t0)) if mod(t+t0) < self.period/2 else self.amplitude*(-3+4/self.period*(mod(t+t0))))
+        return np.vectorize(lambda t: self.amplitude*(1-4/self.period*mod(t+t0))+self.offset if mod(t+t0) < self.period/2 else self.amplitude*(-3+4/self.period*(mod(t+t0)))+self.offset)
 
 class TriFunctionHarmonics(AbstractHarmonicCoefficients):
     def _amplitude_coefficient(self, n: int) -> float:
+        if n == 0:
+            return self.offset0
         if n%2 == 0:
             return 0
         return 8/n/n/np.pi/np.pi*self.amplitude0
@@ -193,18 +209,19 @@ class SawFunction:
     period: float
     amplitude: float
     phase: float
+    offset: float = 0
     wavetype: str = 'saw'
 
     @property
     def time_function(self) -> TimeDomainFunction:
         t0 = self.phase/2/np.pi*self.period
         mod = lambda t: np.mod(t, self.period)
-        return np.vectorize(lambda t: self.amplitude*(2/self.period*mod(t+t0)-1))
+        return np.vectorize(lambda t: self.amplitude*(2/self.period*mod(t+t0)-1)+self.offset)
 
 class SawFunctionHarmonics(AbstractHarmonicCoefficients):
     def _amplitude_coefficient(self, n: int) -> float:
         if n == 0:
-            return 0
+            return self.offset0
         return -2/n/np.pi*self.amplitude0
 
     def _phase_coefficient(self, n: int) -> float:
@@ -225,7 +242,7 @@ periodic_functions : PeriodicFunctionList = list(fourier_series_mapping.keys())
 
 def fourier_series(time_function: PeriodicFunction) -> HarmonicCoefficients:
     try:
-        return fourier_series_mapping[type(time_function)](amplitude0=time_function.amplitude, phase0=time_function.phase)
+        return fourier_series_mapping[type(time_function)](amplitude0=time_function.amplitude, phase0=time_function.phase, offset0=time_function.offset)
     except KeyError:
         raise TransformationError(f'No fourier coefficents found for time function of type {type(time_function).__name__}')
 
