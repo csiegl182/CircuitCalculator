@@ -386,6 +386,81 @@ class RectVoltageSource(schemdraw.elements.SourceSquare):
     def type(self) -> str:
         return 'rect_voltage_source'
 
+@extension.source
+@simple_circuit_element
+class TriangleVoltageSource(schemdraw.elements.SourceTriangle):
+    def __init__(self, V: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, **kwargs):
+        super().__init__(*args, reverse=not reverse, **kwargs)
+        self._V = V if not reverse else -V
+        self._w = w
+        self._phi = phi
+        self._deg = deg
+        self._sin = sin
+        self.segments.append(extension.voltage_arrow())
+        self.label(f'{name}', loc='value_label', halign='center', rotate=True, color=dsp.blue)
+
+    @property
+    def w(self) -> float:
+        return self._w
+
+    @property
+    def phi(self) -> float:
+        return self._phi
+
+    @property
+    def sin(self) -> bool:
+        return self._sin
+
+    @property
+    def deg(self) -> bool:
+        return self._deg
+
+    @property
+    def V(self) -> float:
+        return self._V
+
+    @property
+    def type(self) -> str:
+        return 'tri_voltage_source'
+
+@extension.source
+@simple_circuit_element
+class SawtoothVoltageSource(schemdraw.elements.Source):
+    def __init__(self, V: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, **kwargs):
+        super().__init__(*args, reverse=not reverse, **kwargs)
+        self._V = V if not reverse else -V
+        self._w = w
+        self._phi = phi
+        self._deg = deg
+        self._sin = sin
+        self.segments.append(extension.voltage_arrow())
+        self.label(f'{name}', loc='value_label', halign='center', rotate=True, color=dsp.blue)
+
+    @property
+    def w(self) -> float:
+        return self._w
+
+    @property
+    def phi(self) -> float:
+        return self._phi
+
+    @property
+    def sin(self) -> bool:
+        return self._sin
+
+    @property
+    def deg(self) -> bool:
+        return self._deg
+
+    @property
+    def V(self) -> float:
+        return self._V
+
+    @property
+    def type(self) -> str:
+        return 'saw_voltage_source'
+
+@extension.source
 @simple_circuit_element
 class RectCurrentSource(schemdraw.elements.SourceSquare):
     def __init__(self, I: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, **kwargs):
@@ -421,6 +496,80 @@ class RectCurrentSource(schemdraw.elements.SourceSquare):
     @property
     def type(self) -> str:
         return 'rect_current_source'
+
+@extension.source
+@simple_circuit_element
+class TriangleCurrentSource(schemdraw.elements.SourceTriangle):
+    def __init__(self, I: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, **kwargs):
+        super().__init__(*args, reverse=reverse, **kwargs)
+        self._I = I if not reverse else -I
+        self._w = w
+        self._phi = phi
+        self._deg = deg
+        self._sin = sin
+        self.segments.append(extension.current_arrow())
+        self.label(f'{name}', loc='i_label', halign='center', rotate=True, color=dsp.red)
+
+    @property
+    def w(self) -> float:
+        return self._w
+
+    @property
+    def phi(self) -> float:
+        return self._phi
+
+    @property
+    def sin(self) -> bool:
+        return self._sin
+
+    @property
+    def deg(self) -> bool:
+        return self._deg
+
+    @property
+    def I(self) -> float:
+        return self._I
+
+    @property
+    def type(self) -> str:
+        return 'tri_current_source'
+
+@extension.source
+@simple_circuit_element
+class SawtoothCurrentSource(schemdraw.elements.Source):
+    def __init__(self, I: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, **kwargs):
+        super().__init__(*args, reverse=reverse, **kwargs)
+        self._I = I if not reverse else -I
+        self._w = w
+        self._phi = phi
+        self._deg = deg
+        self._sin = sin
+        self.segments.append(extension.current_arrow())
+        self.label(f'{name}', loc='i_label', halign='center', rotate=True, color=dsp.red)
+
+    @property
+    def w(self) -> float:
+        return self._w
+
+    @property
+    def phi(self) -> float:
+        return self._phi
+
+    @property
+    def sin(self) -> bool:
+        return self._sin
+
+    @property
+    def deg(self) -> bool:
+        return self._deg
+
+    @property
+    def I(self) -> float:
+        return self._I
+
+    @property
+    def type(self) -> str:
+        return 'saw_current_source'
 
 @extension.capacitor
 @simple_circuit_element
