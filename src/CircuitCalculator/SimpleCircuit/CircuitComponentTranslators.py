@@ -75,7 +75,7 @@ def ac_current_source_translator(element: elm.ACCurrentSource, nodes: tuple[str,
 def rect_voltage_source_translator(element: elm.RectVoltageSource, nodes: tuple[str, ...]) -> ccp.Component:
     from ..SignalProcessing.periodic_functions import RectFunction
     return ccp.periodic_voltage_source(
-        nodes=(nodes[1], nodes[0]) if not element.is_reverse else (nodes[0], nodes[1]),
+        nodes=(nodes[0], nodes[1]) if not element.is_reverse else (nodes[1], nodes[0]),
         id=element.name,
         wavetype=RectFunction.wavetype,
         V=element.V if not element.is_reverse else -element.V,
@@ -86,7 +86,7 @@ def rect_voltage_source_translator(element: elm.RectVoltageSource, nodes: tuple[
 def rect_current_source_translator(element: elm.RectCurrentSource, nodes: tuple[str, ...]) -> ccp.Component:
     from ..SignalProcessing.periodic_functions import RectFunction
     return ccp.periodic_current_source(
-        nodes=(nodes[1], nodes[0]) if not element.is_reverse else (nodes[0], nodes[1]),
+        nodes=(nodes[0], nodes[1]) if not element.is_reverse else (nodes[1], nodes[0]),
         id=element.name,
         wavetype=RectFunction.wavetype,
         I=element.I if not element.is_reverse else -element.I,
@@ -97,7 +97,7 @@ def rect_current_source_translator(element: elm.RectCurrentSource, nodes: tuple[
 def tri_voltage_source_translator(element: elm.TriangleVoltageSource, nodes: tuple[str, ...]) -> ccp.Component:
     from ..SignalProcessing.periodic_functions import TriFunction
     return ccp.periodic_voltage_source(
-        nodes=(nodes[1], nodes[0]) if not element.is_reverse else (nodes[0], nodes[1]),
+        nodes=(nodes[0], nodes[1]) if not element.is_reverse else (nodes[1], nodes[0]),
         id=element.name,
         wavetype=TriFunction.wavetype,
         V=element.V if not element.is_reverse else -element.V,
@@ -108,7 +108,7 @@ def tri_voltage_source_translator(element: elm.TriangleVoltageSource, nodes: tup
 def tri_current_source_translator(element: elm.TriangleCurrentSource, nodes: tuple[str, ...]) -> ccp.Component:
     from ..SignalProcessing.periodic_functions import TriFunction
     return ccp.periodic_current_source(
-        nodes=(nodes[1], nodes[0]) if not element.is_reverse else (nodes[0], nodes[1]),
+        nodes=(nodes[0], nodes[1]) if not element.is_reverse else (nodes[1], nodes[0]),
         id=element.name,
         wavetype=TriFunction.wavetype,
         I=element.I if not element.is_reverse else -element.I,
@@ -119,7 +119,7 @@ def tri_current_source_translator(element: elm.TriangleCurrentSource, nodes: tup
 def saw_voltage_source_translator(element: elm.SawtoothVoltageSource, nodes: tuple[str, ...]) -> ccp.Component:
     from ..SignalProcessing.periodic_functions import SawFunction
     return ccp.periodic_voltage_source(
-        nodes=(nodes[1], nodes[0]) if not element.is_reverse else (nodes[0], nodes[1]),
+        nodes=(nodes[0], nodes[1]) if not element.is_reverse else (nodes[1], nodes[0]),
         id=element.name,
         wavetype=SawFunction.wavetype,
         V=element.V if not element.is_reverse else -element.V,
@@ -130,7 +130,7 @@ def saw_voltage_source_translator(element: elm.SawtoothVoltageSource, nodes: tup
 def saw_current_source_translator(element: elm.SawtoothCurrentSource, nodes: tuple[str, ...]) -> ccp.Component:
     from ..SignalProcessing.periodic_functions import SawFunction
     return ccp.periodic_current_source(
-        nodes=(nodes[1], nodes[0]) if not element.is_reverse else (nodes[0], nodes[1]),
+        nodes=(nodes[0], nodes[1]) if not element.is_reverse else (nodes[1], nodes[0]),
         id=element.name,
         wavetype=SawFunction.wavetype,
         I=element.I if not element.is_reverse else -element.I,
