@@ -75,7 +75,7 @@ def ac_current_source_translator(element: elm.ACCurrentSource, nodes: tuple[str,
 def rect_voltage_source_translator(element: elm.RectVoltageSource, nodes: tuple[str, ...]) -> ccp.Component:
     from ..SignalProcessing.periodic_functions import RectFunction
     return ccp.periodic_voltage_source(
-        nodes=(nodes[1], nodes[0]) if not element.is_reverse else (nodes[0], nodes[1]),
+        nodes=(nodes[0], nodes[1]) if not element.is_reverse else (nodes[1], nodes[0]),
         id=element.name,
         wavetype=RectFunction.wavetype,
         V=element.V if not element.is_reverse else -element.V,
@@ -83,12 +83,56 @@ def rect_voltage_source_translator(element: elm.RectVoltageSource, nodes: tuple[
         phi=element.phi*pi/180 if element.deg else element.phi
     )
 
-def rect_current_source_translator(element: elm.RectVoltageSource, nodes: tuple[str, ...]) -> ccp.Component:
+def rect_current_source_translator(element: elm.RectCurrentSource, nodes: tuple[str, ...]) -> ccp.Component:
     from ..SignalProcessing.periodic_functions import RectFunction
     return ccp.periodic_current_source(
-        nodes=(nodes[1], nodes[0]) if not element.is_reverse else (nodes[0], nodes[1]),
+        nodes=(nodes[0], nodes[1]) if not element.is_reverse else (nodes[1], nodes[0]),
         id=element.name,
         wavetype=RectFunction.wavetype,
+        I=element.I if not element.is_reverse else -element.I,
+        w=element.w,
+        phi=element.phi*pi/180 if element.deg else element.phi
+    )
+
+def tri_voltage_source_translator(element: elm.TriangleVoltageSource, nodes: tuple[str, ...]) -> ccp.Component:
+    from ..SignalProcessing.periodic_functions import TriFunction
+    return ccp.periodic_voltage_source(
+        nodes=(nodes[0], nodes[1]) if not element.is_reverse else (nodes[1], nodes[0]),
+        id=element.name,
+        wavetype=TriFunction.wavetype,
+        V=element.V if not element.is_reverse else -element.V,
+        w=element.w,
+        phi=element.phi*pi/180 if element.deg else element.phi
+    )
+
+def tri_current_source_translator(element: elm.TriangleCurrentSource, nodes: tuple[str, ...]) -> ccp.Component:
+    from ..SignalProcessing.periodic_functions import TriFunction
+    return ccp.periodic_current_source(
+        nodes=(nodes[0], nodes[1]) if not element.is_reverse else (nodes[1], nodes[0]),
+        id=element.name,
+        wavetype=TriFunction.wavetype,
+        I=element.I if not element.is_reverse else -element.I,
+        w=element.w,
+        phi=element.phi*pi/180 if element.deg else element.phi
+    )
+
+def saw_voltage_source_translator(element: elm.SawtoothVoltageSource, nodes: tuple[str, ...]) -> ccp.Component:
+    from ..SignalProcessing.periodic_functions import SawFunction
+    return ccp.periodic_voltage_source(
+        nodes=(nodes[0], nodes[1]) if not element.is_reverse else (nodes[1], nodes[0]),
+        id=element.name,
+        wavetype=SawFunction.wavetype,
+        V=element.V if not element.is_reverse else -element.V,
+        w=element.w,
+        phi=element.phi*pi/180 if element.deg else element.phi
+    )
+
+def saw_current_source_translator(element: elm.SawtoothCurrentSource, nodes: tuple[str, ...]) -> ccp.Component:
+    from ..SignalProcessing.periodic_functions import SawFunction
+    return ccp.periodic_current_source(
+        nodes=(nodes[0], nodes[1]) if not element.is_reverse else (nodes[1], nodes[0]),
+        id=element.name,
+        wavetype=SawFunction.wavetype,
         I=element.I if not element.is_reverse else -element.I,
         w=element.w,
         phi=element.phi*pi/180 if element.deg else element.phi
@@ -136,6 +180,10 @@ circuit_translator_map : ElementTranslatorMap = {
     elm.ACCurrentSource : ac_current_source_translator,
     elm.RectVoltageSource : rect_voltage_source_translator,
     elm.RectCurrentSource : rect_current_source_translator,
+    elm.TriangleVoltageSource : tri_voltage_source_translator,
+    elm.TriangleCurrentSource : tri_current_source_translator,
+    elm.SawtoothVoltageSource : saw_voltage_source_translator,
+    elm.SawtoothCurrentSource : saw_current_source_translator,
     elm.Capacitor : capacitor_translator,
     elm.Inductance : inductance_translator,
     elm.Lamp : lamp_translator,

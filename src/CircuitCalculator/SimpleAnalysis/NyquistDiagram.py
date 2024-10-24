@@ -32,7 +32,7 @@ class NyquistDiagramProperties(TypedDict):
 def plot_nyquist_diagram_factory(
         *args,
         type:str='default',
-        solution:FrequencyDomainSolution=FrequencyDomainSolution(),
+        solution:FrequencyDomainSolution,
         ax_lim:tuple[float, float, float, float]=(-1, 1, -1, 1),
         xlabel:str='',
         ylabel:str='') -> layout.PlotFcn:
