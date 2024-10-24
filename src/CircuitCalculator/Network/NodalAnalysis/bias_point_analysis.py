@@ -26,12 +26,6 @@ class NodalAnalysisBiasPointSolution(NodalAnalysisSolution):
     def _voltage_source_currents(self) -> np.ndarray:
         return self._solution_vector[-self._voltage_source_mapping.N:]
 
-    def _select_active_node(self, branch_id: str) -> str:
-        branch = self.network[branch_id]
-        if self._super_nodes.is_active(branch.node1):
-            return branch.node1
-        return branch.node2
-
     def get_potential(self, node_id: str) -> complex:
         if node_id == self.network.node_zero_label:
             return 0
