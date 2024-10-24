@@ -433,6 +433,7 @@ class SawtoothVoltageSource(schemdraw.elements.Source):
         self._phi = phi
         self._deg = deg
         self._sin = sin
+        self.segments.append(schemdraw.segments.Segment([(0.3, 0.2), (0.7, 0), (0.3, 0), (0.7, -0.2), (0.3, -0.2)]))
         self.segments.append(extension.voltage_arrow())
         self.label(f'{name}', loc='value_label', halign='center', rotate=True, color=dsp.blue)
 
@@ -544,6 +545,7 @@ class SawtoothCurrentSource(schemdraw.elements.Source):
         self._phi = phi
         self._deg = deg
         self._sin = sin
+        self.segments.append(schemdraw.segments.Segment([(0.3, 0.2), (0.7, 0), (0.3, 0), (0.7, -0.2), (0.3, -0.2)]))
         self.segments.append(extension.current_arrow())
         self.label(f'{name}', loc='i_label', halign='center', rotate=True, color=dsp.red)
 
