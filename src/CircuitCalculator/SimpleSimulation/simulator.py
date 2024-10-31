@@ -6,7 +6,7 @@ import CircuitCalculator.SimpleCircuit.Elements as elm
 
 element_handlers = {
     'resistor': lambda kwargs: element_factory(elm.Resistor, **kwargs),
-    'line': lambda kwargs: element_factory(elm.LabeledLine, **kwargs),
+    'line': lambda kwargs: element_factory(elm.LabeledLine, **kwargs) if 'name' in kwargs.keys() else element_factory(elm.Line, **kwargs),
     'node': lambda kwargs: element_factory(elm.Node, **kwargs),
     'ground': lambda kwargs: element_factory(elm.Ground, **kwargs),
     'voltage_source': lambda kwargs: element_factory(elm.VoltageSource, **kwargs),

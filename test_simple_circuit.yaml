@@ -27,7 +27,6 @@ circuit:
       R: 30
       direction: down
     - type: line
-      name: jfdkla
       direction: left
     - type: ground
       name: GND
