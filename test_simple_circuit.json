@@ -1,0 +1,65 @@
+{
+    "circuit": {
+        "unit": 5,
+        "elements": [
+            {
+                "type": "voltage_source",
+                "V": 1,
+                "name": "Vq",
+                "reverse": true,
+                "direction": "up",
+                "length": 1
+            },
+            {
+                "type": "node",
+                "name": "b",
+                "id_loc": "SE"
+            },
+            {
+                "type": "line",
+                "direction": "right",
+                "length": 0.5
+            },
+            {
+                "type": "resistor",
+                "R": 1,
+                "name": "R",
+                "direction": "down"
+            },
+            {
+                "type": "line",
+                "direction": "left",
+                "length": 0.5
+            },
+            {
+                "type": "ground"
+            }
+        ]
+    },
+    "analysis": {
+        "dc_solution": {
+            "voltages": [
+                {
+                    "name": "Vq"
+                },
+                {
+                    "name": "R"
+                }
+            ],
+            "currents": [
+                {
+                    "name": "Vq",
+                    "reverse": true
+                },
+                {
+                    "name": "R"
+                }
+            ],
+            "potentials": [
+                {
+                    "name": "b"
+                }
+            ]
+        }
+    }
+}

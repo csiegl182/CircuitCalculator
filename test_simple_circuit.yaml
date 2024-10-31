@@ -1,0 +1,46 @@
+circuit:
+  unit: 7
+  elements:
+    - type: voltage_source
+      V: 1
+      name: Vq
+      reverse: true
+      direction: up
+    - type: line
+      name: L1
+      direction: right
+      length: 0.5
+    - type: resistor
+      name: R1
+      R: 10
+      direction: down
+    - type: line
+      direction: left
+      length: 0.5
+    - type: resistor
+      name: R2
+      R: 20
+      place_after: L1
+      direction: right
+    - type: resistor
+      name: R3
+      R: 30
+      direction: down
+    - type: line
+      name: jfdkla
+      direction: left
+    - type: ground
+      name: GND
+analysis:
+  dc_solution:
+    voltages:
+      - name: Vq
+      - name: R1
+      - name: R2
+      - name: R3
+    currents:
+      - name: Vq
+        reverse: true
+      - name: R1
+      - name: R2
+      - name: R3

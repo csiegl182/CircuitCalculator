@@ -43,9 +43,9 @@ class SchematicDiagramSolution:
         P_branch = self.solution.get_power(name)
         return elm.PowerLabel(element, plabel=self.power_display(P_branch), color=dsp.green)
 
-    def draw_potential(self, node: str, loc:str = '') -> elm.LabelNode:
-        element = self.diagram_parser.get_element(node)
-        node_potential = self.solution.get_potential(node_id=node)
+    def draw_potential(self, name: str, loc:str = '') -> elm.LabelNode:
+        element = self.diagram_parser.get_element(name)
+        node_potential = self.solution.get_potential(node_id=name)
         return elm.LabelNode(id_loc=loc, name=self.voltage_display(node_potential), at=element.absdrop[0], color=dsp.blue)
 
 def time_domain_steady_state_solution(schematic: elm.Schematic, solver: NetworkSolver = nodal_analysis_bias_point_solver, w: float = 0, sin: bool = False, deg: bool = False, hertz: bool = False) -> SchematicDiagramSolution:
