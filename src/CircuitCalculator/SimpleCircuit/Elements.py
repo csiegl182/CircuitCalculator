@@ -885,8 +885,8 @@ class CurrentLabel(schemdraw.elements.CurrentLabelInline):
         kwargs.update({'color': kwargs.get('color', dsp.red)})
         kwargs.update({'headlength': kwargs.get('headlength', 0.4)})
         kwargs.update({'headwidth': kwargs.get('headwidth', 0.3)})
-        totlen = at._userparams.get('l', at._userparams.get('unit', 3))
-        kwargs.update({'ofst': totlen/4-0.15+kwargs.get('ofst', 0)})
+        totlen = at.params.get('l', at.params.get('unit', 7))
+        kwargs.update({'ofst': totlen/4-kwargs['headlength']/2})
         start = kwargs.get('start', True)
         reverse = kwargs.get('reverse', False)
         if isinstance(at, RealVoltageSource) or isinstance(at, RealCurrentSource): # when replacing CurrentLabelInline this dependency may be removed
@@ -911,7 +911,7 @@ class PowerLabel(schemdraw.elements.Label):
         self.label(plabel, rotate=rotate, halign='center')
 
 i_label_args : dict[Any, dict[str, float]] = {
-    Resistor : {'ofst' : 1.4},
+    Resistor : {'ofst' : 0},
     Conductance : {'ofst' : 1.4},
     Impedance : {'ofst' : 1.4},
     Admittance : {'ofst' : 1.4},
