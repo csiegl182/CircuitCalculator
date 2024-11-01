@@ -1,0 +1,62 @@
+circuit:
+  unit: 8
+  elements:
+    - type: voltage_source
+      V: 1
+      name: U1
+      reverse: true
+      direction: up
+    - type: resistor
+      name: R1
+      R: 10
+      direction: right
+    - type: node
+      name: a
+    - type: resistor
+      name: R3
+      R: 30
+      direction: right
+    - type: resistor
+      name: R4
+      R: 40
+      direction: down
+    - type: resistor
+      name: R5
+      R: 50
+      direction: left
+    - type: line
+      direction: left
+    - type: resistor
+      name: R2
+      R: 20
+      direction: down
+      place_after: R1
+    - type: line
+      place_after: R4
+      direction: down
+    - type: voltage_source
+      V: 2
+      name: U2
+      reverse: true
+      direction: left
+    - type: line
+      direction: left
+    - type: ground
+      name: GND
+    - type: line
+      direction: up
+analysis:
+  dc_solution:
+    voltages:
+      - name: R1
+      - name: R2
+      - name: R5
+    currents:
+      - name: R1
+      - name: R2
+      - name: R4
+      - name: R5
+      - name: U2
+        reverse: true
+    potentials:
+      - name: a

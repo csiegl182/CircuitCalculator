@@ -95,8 +95,8 @@ class Element(schemdraw.elements.Element):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-@extension.source
 @simple_circuit_element
+@extension.source
 class VoltageSource(schemdraw.elements.SourceV):
     def __init__(self, *args, name: str, V: float, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=not reverse, **kwargs)
@@ -113,8 +113,8 @@ class VoltageSource(schemdraw.elements.SourceV):
     def type(self) -> str:
         return 'voltage_source'
 
-@extension.source
 @simple_circuit_element
+@extension.source
 class ComplexVoltageSource(schemdraw.elements.SourceV):
     def __init__(self, *args, name: str, V: complex, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=not reverse, **kwargs)
@@ -131,8 +131,8 @@ class ComplexVoltageSource(schemdraw.elements.SourceV):
     def type(self) -> str:
         return 'complex_voltage_source'
 
-@extension.source
 @simple_circuit_element
+@extension.source
 class CurrentSource(schemdraw.elements.SourceI):
     def __init__(self, *args, I: float, name: str, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
@@ -149,8 +149,8 @@ class CurrentSource(schemdraw.elements.SourceI):
     def type(self) -> str:
         return 'current_source'
 
-@extension.source
 @simple_circuit_element
+@extension.source
 class ComplexCurrentSource(schemdraw.elements.SourceI):
     def __init__(self, *args, I: complex, name: str, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
@@ -167,8 +167,8 @@ class ComplexCurrentSource(schemdraw.elements.SourceI):
     def type(self) -> str:
         return 'complex_current_source'
 
-@extension.resistor
 @simple_circuit_element
+@extension.resistor
 class Resistor(schemdraw.elements.Resistor):
     def __init__(self, *args, R: float, name: str, show_name: bool = True, show_value: bool = True, reverse: bool = False, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
@@ -191,8 +191,8 @@ class Resistor(schemdraw.elements.Resistor):
     def type(self) -> str:
         return 'resistor'
 
-@extension.resistor
 @simple_circuit_element
+@extension.resistor
 class Conductance(schemdraw.elements.Resistor):
     def __init__(self, *args, G: float, name: str, show_name: bool = True, show_value: bool = True, reverse: bool = False, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
@@ -215,8 +215,8 @@ class Conductance(schemdraw.elements.Resistor):
     def type(self) -> str:
         return 'conductance'
 
-@extension.resistor
 @simple_circuit_element
+@extension.resistor
 class Impedance(schemdraw.elements.Resistor):
     def __init__(self, *args, Z: complex, name: str, show_name: bool = True, show_value: bool = True, precision: int = 3, reverse: bool = False, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
@@ -239,8 +239,8 @@ class Impedance(schemdraw.elements.Resistor):
     def type(self) -> str:
         return 'impedance'
 
-@extension.resistor
 @simple_circuit_element
+@extension.resistor
 class Admittance(schemdraw.elements.Resistor):
     def __init__(self, *args, Y: complex, name: str, show_name: bool = True, show_value: bool = True, precision: int = 3, reverse: bool = False, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
@@ -263,8 +263,8 @@ class Admittance(schemdraw.elements.Resistor):
     def type(self) -> str:
         return 'admittance'
 
-@extension.source
 @simple_circuit_element
+@extension.source
 class ACVoltageSource(schemdraw.elements.SourceSin):
     def __init__(self, V: float, w: float, phi: float, name: str, *args, show_name: bool = True, show_value: bool = True, sin=False, deg=False, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=not reverse, **kwargs)
@@ -306,8 +306,8 @@ class ACVoltageSource(schemdraw.elements.SourceSin):
     def type(self) -> str:
         return 'ac_voltage_source'
 
-@extension.source
 @simple_circuit_element
+@extension.source
 class ACCurrentSource(schemdraw.elements.SourceSin):
     def __init__(self, *args, I: float, w: float, phi: float, name: str, show_name: bool = True, show_value: bool = True, sin=False, deg=False, reverse=False, precision=3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
@@ -575,6 +575,7 @@ class SawtoothCurrentSource(schemdraw.elements.Source):
 
 @extension.capacitor
 @simple_circuit_element
+@extension.capacitor
 class Capacitor(schemdraw.elements.Capacitor):
     def __init__(self, C: float, name: str, *args, show_name: bool = True, show_value: bool = True, reverse: bool = False, **kwargs):
         self._C = C
@@ -593,8 +594,8 @@ class Capacitor(schemdraw.elements.Capacitor):
     def type(self) -> str:
         return 'capacitor'
 
-@extension.inductor
 @simple_circuit_element
+@extension.inductor
 class Inductance(schemdraw.elements.Inductor):
     def __init__(self, L: float, name: str, *args, show_name: bool = True, show_value: bool = True, label_offset: float = 0.2, reverse: bool = False, **kwargs):
         self._L = L
@@ -884,8 +885,8 @@ class CurrentLabel(schemdraw.elements.CurrentLabelInline):
         kwargs.update({'color': kwargs.get('color', dsp.red)})
         kwargs.update({'headlength': kwargs.get('headlength', 0.4)})
         kwargs.update({'headwidth': kwargs.get('headwidth', 0.3)})
-        totlen = at._userparams.get('l', at._userparams.get('unit', 3))
-        kwargs.update({'ofst': totlen/4-0.15+kwargs.get('ofst', 0)})
+        totlen = at.params.get('l', at.params.get('unit', 7))
+        kwargs.update({'ofst': totlen/4-kwargs['headlength']/2})
         start = kwargs.get('start', True)
         reverse = kwargs.get('reverse', False)
         if isinstance(at, RealVoltageSource) or isinstance(at, RealCurrentSource): # when replacing CurrentLabelInline this dependency may be removed
@@ -910,7 +911,7 @@ class PowerLabel(schemdraw.elements.Label):
         self.label(plabel, rotate=rotate, halign='center')
 
 i_label_args : dict[Any, dict[str, float]] = {
-    Resistor : {'ofst' : 1.4},
+    Resistor : {'ofst' : 0},
     Conductance : {'ofst' : 1.4},
     Impedance : {'ofst' : 1.4},
     Admittance : {'ofst' : 1.4},

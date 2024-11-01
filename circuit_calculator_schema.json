@@ -1,0 +1,114 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Circuit Configuration",
+    "type": "object",
+    "properties": {
+      "circuit": {
+        "type": "object",
+        "properties": {
+          "unit": {
+            "type": "integer",
+            "description": "The unit of measurement for the circuit.",
+            "default": 7
+          },
+          "elements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "The type of the element.",
+                  "enum": ["voltage_source", "resistor", "capacitor", "inductor", "line", "node", "ground"]
+                },
+                "name": {
+                  "type": "string",
+                  "description": "The name of the element."
+                },
+                "direction": {
+                  "type": "string",
+                  "description": "The direction of the element."
+                },
+                "length": {
+                  "type": "number",
+                  "description": "The length of the element."
+                },
+                "place_after": {
+                  "type": "string",
+                  "description": "The name of the element after which this element should be placed."
+                }
+              },
+              "required": ["type"]
+            }
+          }
+        },
+        "required": ["elements"]
+      },
+      "analysis": {
+        "type": "object",
+        "properties": {
+          "dc_solution": {
+            "type": "object",
+            "properties": {
+              "voltages": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "number"
+                    }
+                  }
+                }
+              },
+              "currents": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "number"
+                    }
+                  }
+                }
+              },
+              "potentials": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "number"
+                    }
+                  }
+                }
+              },
+              "powers": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
