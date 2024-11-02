@@ -6,7 +6,7 @@ requires = [
 
 [project]
 name = "CircuitCalculator"
-version = "0.4.0"
+version = "0.4.1"
 description = "Library for analysing and calculating electric networks."
 readme = "README.md"
 requires-python = ">=3.10"
