@@ -3,6 +3,7 @@ import yaml
 from typing import Optional
 from CircuitCalculator.SimpleCircuit.DiagramSolution import real_network_dc_solution
 import CircuitCalculator.SimpleCircuit.Elements as elm
+from matplotlib.axes import Axes
 
 element_handlers = {
     'resistor': lambda kwargs: element_factory(elm.Resistor, **kwargs),
@@ -43,17 +44,8 @@ def get_placed_element(schematic: elm.Schematic, label: Optional[str] = None) ->
         return None
     return schematic.elements[[se.name for se in schematic.elements].index(label)]
 
-def analyze_circuit(data: dict) -> None:
-    circuit_definiton = data.get('circuit', {'unit': 7, 'elements': []})
-    unit = circuit_definiton['unit']
-    elements = circuit_definiton['elements']
-    if len(elements) == 0:
-        raise ValueError('No elements in circuit definition')
-
-    analysis = data.get('analysis', {})
-    dc_solution = analysis.get('dc_solution', [])
-
-    with elm.Schematic(unit=unit) as schematic:
+def analyze_circuit(data: dict, ax: Optional[Axes] = None) -> None:
+    def fill(schematic: elm.Schematic, elements: list[elm.Element], unit: float) -> None:
         for e in elements:
             se = transform_to_schematic_element(e)
             se = apply_direction_and_length(se, e.get('direction', ''), e.get('length', 1), unit)
@@ -69,6 +61,22 @@ def analyze_circuit(data: dict) -> None:
                 schematic += schematic_solution.draw_potential(**p)
             for p in dc_solution.get('powers', {}):
                 schematic += schematic_solution.draw_power(**p)
+    circuit_definiton = data.get('circuit', {'unit': 7, 'elements': []})
+    unit = circuit_definiton['unit']
+    elements = circuit_definiton['elements']
+    if len(elements) == 0:
+        raise ValueError('No elements in circuit definition')
+
+    analysis = data.get('analysis', {})
+    dc_solution = analysis.get('dc_solution', [])
+
+    if ax is None:
+        with elm.Schematic(unit=unit) as schematic:
+            fill(schematic=schematic, elements=elements, unit=unit)
+    else:
+        schematic = elm.Schematic(unit=unit, canvas=ax)
+        fill(schematic=schematic, elements=elements, unit=unit)
+        schematic.draw(show=False)
 
 def json_loader(file: str) -> dict:
     with open(file) as f:
