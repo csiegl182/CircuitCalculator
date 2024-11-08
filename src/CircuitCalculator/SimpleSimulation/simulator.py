@@ -44,7 +44,7 @@ def get_placed_element(schematic: elm.Schematic, label: Optional[str] = None) ->
         return None
     return schematic.elements[[se.name for se in schematic.elements].index(label)]
 
-def analyze_circuit(data: dict, ax: Optional[Axes] = None) -> None:
+def simulate(data: dict, circuit_ax: Optional[Axes] = None) -> None:
     def fill(schematic: elm.Schematic, elements: list[elm.Element], unit: float) -> None:
         for e in elements:
             se = transform_to_schematic_element(e)
@@ -70,13 +70,13 @@ def analyze_circuit(data: dict, ax: Optional[Axes] = None) -> None:
     analysis = data.get('analysis', {})
     dc_solution = analysis.get('dc_solution', [])
 
-    if ax is None:
+    if circuit_ax is None:
         with elm.Schematic(unit=unit) as schematic:
             fill(schematic=schematic, elements=elements, unit=unit)
-    else:
-        schematic = elm.Schematic(unit=unit, canvas=ax)
-        fill(schematic=schematic, elements=elements, unit=unit)
-        schematic.draw(show=False)
+        return
+    schematic = elm.Schematic(unit=unit, canvas=circuit_ax)
+    fill(schematic=schematic, elements=elements, unit=unit)
+    schematic.draw(show=False)
 
 def json_loader(file: str) -> dict:
     with open(file) as f:
@@ -97,6 +97,6 @@ def load_simulation_data(file: str) -> dict:
         pass
     raise ValueError('File has unknown data format')
 
-def simulate(file: str) -> None:
-    data = load_simulation_data(file)
-    analyze_circuit(data)
+def simulate_file(name: str) -> None:
+    data = load_simulation_data(name)
+    simulate(data)
