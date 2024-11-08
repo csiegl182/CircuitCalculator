@@ -53,7 +53,7 @@ def test_complex_value_as_polar_in_rad_with_exp_prefix_and_unit() -> None:
 def test_complex_value_as_polar_in_deg() -> None:
     z = (1+1j)/1.414
     str_repr = str(ScientificComplex(z, polar=True, deg=True))
-    assert str_repr == '1.00∠45.00'
+    assert str_repr == '1.00∠45.00°'
 
 def test_complex_value_hides_small_angles_in_rad() -> None:
     z = 1+0.00001j
