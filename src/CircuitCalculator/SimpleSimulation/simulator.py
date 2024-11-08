@@ -1,7 +1,7 @@
 import json
 import yaml
 from typing import Optional
-from CircuitCalculator.SimpleCircuit.DiagramSolution import real_network_dc_solution
+from CircuitCalculator.SimpleCircuit.DiagramSolution import real_solution
 import CircuitCalculator.SimpleCircuit.Elements as elm
 from matplotlib.axes import Axes
 
@@ -52,7 +52,7 @@ def simulate(data: dict, circuit_ax: Optional[Axes] = None) -> None:
             se = apply_position(se, get_placed_element(schematic, e.get('place_after', None)))
             schematic += se
         if dc_solution:
-            schematic_solution = real_network_dc_solution(schematic=schematic)
+            schematic_solution = real_solution(schematic=schematic)
             for v in dc_solution.get('voltages', []):
                 schematic += schematic_solution.draw_voltage(**v)
             for c in dc_solution.get('currents', {}):

@@ -163,7 +163,7 @@ class SchematicDiagramSolution:
         phi_label = self.solution.get_potential(name=name)
         return elm.LabelNode(id_loc=loc, name=phi_label, at=element.absdrop[0], color=dsp.blue)
 
-def time_domain_steady_state_solution(schematic: elm.Schematic, w: float = 0, sin: bool = False, deg: bool = False, hertz: bool = False) -> SchematicDiagramSolution:
+def single_frequency_time_domain_steady_state_solution(schematic: elm.Schematic, w: float = 0, sin: bool = False, deg: bool = False, hertz: bool = False) -> SchematicDiagramSolution:
     digagram_parser = SchematicDiagramParser(schematic)
     solution = TimeDomainSteadyStateDiagramSolution(
         solution=ComplexSolution(circuit=circuit_translator(schematic), w=w),
@@ -176,7 +176,7 @@ def time_domain_steady_state_solution(schematic: elm.Schematic, w: float = 0, si
         solution=solution
     )
 
-def single_frequency_solution(schematic: elm.Schematic, w: float = 0, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
+def single_frequency_complex_solution(schematic: elm.Schematic, w: float = 0, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
     diagram_parser = SchematicDiagramParser(schematic)
     solution = ComplexNetworkDiagramSolution(
         solution=ComplexSolution(circuit=circuit_translator(schematic), w=w),
@@ -189,7 +189,7 @@ def single_frequency_solution(schematic: elm.Schematic, w: float = 0, precision:
         solution=solution,
     )
 
-def complex_network_dc_solution(schematic: elm.Schematic, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
+def complex_solution(schematic: elm.Schematic, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
     diagram_parser = SchematicDiagramParser(schematic)
     solution = ComplexNetworkDiagramSolution(
         solution=ComplexSolution(circuit=circuit_translator(schematic)),
@@ -202,7 +202,7 @@ def complex_network_dc_solution(schematic: elm.Schematic, precision: int = 3, po
         solution=solution,
     )
 
-def real_network_dc_solution(schematic: elm.Schematic, precision: int = 3) -> SchematicDiagramSolution:
+def real_solution(schematic: elm.Schematic, precision: int = 3) -> SchematicDiagramSolution:
     diagram_parser = SchematicDiagramParser(schematic)
     solution = RealNetworkDiagramSolution(
         solution=DCSolution(circuit=circuit_translator(schematic)),
