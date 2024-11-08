@@ -60,3 +60,6 @@ analysis:
         reverse: true
     potentials:
       - name: a
+    powers:
+      - name: U1
+      - name: R1 
