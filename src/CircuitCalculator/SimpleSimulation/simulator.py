@@ -1,7 +1,6 @@
-import json
-import yaml
 from typing import Optional
-from CircuitCalculator.SimpleCircuit.DiagramSolution import real_solution
+from .file_loaders import load_simulation_data
+from .schematic import create_schematic
 import CircuitCalculator.SimpleCircuit.Elements as elm
 from matplotlib.axes import Axes
 
@@ -45,57 +44,10 @@ def get_placed_element(schematic: elm.Schematic, label: Optional[str] = None) ->
     return schematic.elements[[se.name for se in schematic.elements].index(label)]
 
 def simulate(data: dict, circuit_ax: Optional[Axes] = None) -> None:
-    def fill(schematic: elm.Schematic, elements: list[elm.Element], unit: float) -> None:
-        for e in elements:
-            se = transform_to_schematic_element(e)
-            se = apply_direction_and_length(se, e.get('direction', ''), e.get('length', 1), unit)
-            se = apply_position(se, get_placed_element(schematic, e.get('place_after', None)))
-            schematic += se
-        if dc_solution:
-            schematic_solution = real_solution(schematic=schematic)
-            for v in dc_solution.get('voltages', []):
-                schematic += schematic_solution.draw_voltage(**v)
-            for c in dc_solution.get('currents', {}):
-                schematic += schematic_solution.draw_current(**c)
-            for p in dc_solution.get('potentials', {}):
-                schematic += schematic_solution.draw_potential(**p)
-            for p in dc_solution.get('powers', {}):
-                schematic += schematic_solution.draw_power(**p)
-    circuit_definiton = data.get('circuit', {'unit': 7, 'elements': []})
-    unit = circuit_definiton['unit']
-    elements = circuit_definiton['elements']
-    if len(elements) == 0:
+    circuit_definiton = data.get('circuit', {'unit': 7, 'elements': [], 'solution': {'type': None}})
+    if len(circuit_definiton['elements']) == 0:
         raise ValueError('No elements in circuit definition')
-
-    analysis = data.get('analysis', {})
-    dc_solution = analysis.get('dc_solution', [])
-
-    if circuit_ax is None:
-        with elm.Schematic(unit=unit) as schematic:
-            fill(schematic=schematic, elements=elements, unit=unit)
-        return
-    schematic = elm.Schematic(unit=unit, canvas=circuit_ax)
-    fill(schematic=schematic, elements=elements, unit=unit)
-    schematic.draw(show=False)
-
-def json_loader(file: str) -> dict:
-    with open(file) as f:
-        return json.load(f)
-
-def yaml_loader(file: str) -> dict:
-    with open(file) as f:
-        return yaml.safe_load(f)
-
-def load_simulation_data(file: str) -> dict:
-    try:
-        return json_loader(file)
-    except json.JSONDecodeError:
-        pass
-    try:
-        return yaml_loader(file)
-    except yaml.YAMLError:
-        pass
-    raise ValueError('File has unknown data format')
+    create_schematic(circuit_definiton, circuit_ax)
 
 def simulate_file(name: str) -> None:
     data = load_simulation_data(name)

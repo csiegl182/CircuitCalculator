@@ -17,6 +17,16 @@ class DiagramSolution(Protocol):
     def get_potential(self, name: str) -> str:
         ...
 
+class EmptyDiagramSolution:
+    def get_voltage(self, name: str, reverse: bool) -> str:
+        return ''
+    def get_current(self, name: str, reverse: bool) -> str:
+        return ''
+    def get_power(self, name: str, reverse: bool) -> str:
+        return ''
+    def get_potential(self, name: str) -> str:
+        return ''
+
 @dataclass
 class TimeDomainSteadyStateDiagramSolution:
     solution: ComplexSolution
@@ -162,6 +172,12 @@ class SchematicDiagramSolution:
         element = self.diagram_parser.get_element(name)
         phi_label = self.solution.get_potential(name=name)
         return elm.LabelNode(id_loc=loc, name=phi_label, at=element.absdrop[0], color=dsp.blue)
+
+def empty_solution(schematic: elm.Schematic) -> SchematicDiagramSolution:
+    return SchematicDiagramSolution(
+        diagram_parser=SchematicDiagramParser(schematic),
+        solution=EmptyDiagramSolution()
+    )
 
 def single_frequency_time_domain_steady_state_solution(schematic: elm.Schematic, w: float = 0, sin: bool = False, deg: bool = False, hertz: bool = False) -> SchematicDiagramSolution:
     digagram_parser = SchematicDiagramParser(schematic)

@@ -45,8 +45,8 @@ circuit:
       name: GND
     - type: line
       direction: up
-analysis:
-  dc_solution:
+  solution:
+    type: dc
     voltages:
       - name: R1
       - name: R2
@@ -57,9 +57,8 @@ analysis:
       - name: R4
       - name: R5
       - name: U2
-        reverse: true
-    potentials:
-      - name: a
+        reverse: false
     powers:
       - name: U1
+      - name: U2
       - name: R1 
