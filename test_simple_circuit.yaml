@@ -1,14 +1,16 @@
 circuit:
-  unit: 8
+  unit: 6
   elements:
     - type: voltage_source
       V: 1
       name: U1
       reverse: true
       direction: up
-    - type: resistor
-      name: R1
-      R: 10
+    - type: impedance
+      name: Z1
+      Z:
+        real: 10
+        imag: 20
       direction: right
     - type: node
       name: a
@@ -62,3 +64,4 @@ circuit:
       - name: U1
       - name: U2
       - name: R1 
+  
