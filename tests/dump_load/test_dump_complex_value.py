@@ -1,9 +1,9 @@
 from hypothesis import given, strategies as st
-from CircuitCalculator.dump_load import dump_complex
+from CircuitCalculator.dump_load import dump_complex_value
 
 @given(st.complex_numbers(allow_nan=False))
 def test_remove_complex(z: complex) -> None:
     data = {'z': z}
-    real_data = dump_complex(data)
+    real_data = dump_complex_value(data)
     assert real_data['z']['real'] == z.real
     assert real_data['z']['imag'] == z.imag

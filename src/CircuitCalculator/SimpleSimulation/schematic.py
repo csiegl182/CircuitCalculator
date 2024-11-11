@@ -8,6 +8,7 @@ from inspect import signature
 
 solutions = {
     'dc': ds.real_solution,
+    'real': ds.real_solution,
     'complex': ds.complex_solution,
     'single_frequency_time_domain': ds.single_frequency_complex_solution
 }

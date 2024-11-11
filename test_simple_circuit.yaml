@@ -32,7 +32,7 @@ circuit:
       name: R2
       R: 20
       direction: down
-      place_after: R1
+      place_after: Z1
     - type: line
       place_after: R4
       direction: down
@@ -50,11 +50,11 @@ circuit:
   solution:
     type: dc
     voltages:
-      - name: R1
+      - name: Z1
       - name: R2
       - name: R5
     currents:
-      - name: R1
+      - name: Z1
       - name: R2
       - name: R4
       - name: R5
@@ -63,5 +63,5 @@ circuit:
     powers:
       - name: U1
       - name: U2
-      - name: R1 
+      - name: Z1 
   

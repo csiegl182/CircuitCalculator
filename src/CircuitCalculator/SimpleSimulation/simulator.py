@@ -3,9 +3,11 @@ from .file_loaders import load_simulation_data
 from .schematic import create_schematic
 import CircuitCalculator.SimpleCircuit.Elements as elm
 from matplotlib.axes import Axes
+from CircuitCalculator.dump_load import load
 
 element_handlers = {
     'resistor': lambda kwargs: element_factory(elm.Resistor, **kwargs),
+    'impedance': lambda kwargs: element_factory(elm.Impedance, **kwargs),
     'line': lambda kwargs: element_factory(elm.LabeledLine, **kwargs) if 'name' in kwargs.keys() else element_factory(elm.Line, **kwargs),
     'node': lambda kwargs: element_factory(elm.Node, **kwargs),
     'ground': lambda kwargs: element_factory(elm.Ground, **kwargs),
@@ -50,5 +52,6 @@ def simulate(data: dict, circuit_ax: Optional[Axes] = None) -> None:
     create_schematic(circuit_definiton, circuit_ax)
 
 def simulate_file(name: str) -> None:
-    data = load_simulation_data(name)
+    # data = load_simulation_data(name)
+    data = load(name)
     simulate(data)

@@ -3,27 +3,19 @@ import json
 import yaml
 import numpy as np
 
-def json_loader(file: str) -> dict:
-    with open(file) as f:
-        return json.load(f)
-
-def yaml_loader(file: str) -> dict:
-    with open(file) as f:
-        return yaml.safe_load(f)
-
-file_loaders = {
-    '.json': json_loader,
-    '.yaml': yaml_loader,
-    '.yml': yaml_loader,
+serializers = {
+    'json': json.loads,
+    'yaml': yaml.safe_load,
+    'yml': yaml.safe_load
 }
 
-def dump_complex(data: dict) -> dict:
+def dump_complex_value(data: dict) -> dict:
     for key, value in data.items():
         if isinstance(value, complex):
             data[key] = {'real': value.real, 'imag': value.imag}
     return data
 
-def restore_complex(data: dict) -> dict:
+def restore_complex_value(data: dict) -> dict:
     for key, value in data.items():
         if isinstance(value, dict) and sorted(list(value.keys())) == sorted(['real', 'imag']):
             data[key] = complex(value['real'], value['imag'])
@@ -37,12 +29,28 @@ def restore_complex(data: dict) -> dict:
             data[key] = value['abs'] * complex(np.cos(value['phase_deg']/180*np.pi), np.sin(value['phase_deg']/180*np.pi))
     return data
 
+def dump_complex_values(data: dict) -> dict:
+    for key, value in data.items():
+        if isinstance(value, dict):
+            data[key] = dump_complex_values(value)
+    return data
+
+def restore_complex_values(data: dict) -> dict:
+    for key, value in data.items():
+        if isinstance(value, dict):
+            data[key] = restore_complex_values(value)
+        if isinstance(value, list):
+            data[key] = [restore_complex_values(v) for v in value]
+    return restore_complex_value(data)
+
+def restore(data: str, format: str) -> dict:
+    restorer = serializers.get(format, None)
+    if restorer is None:
+        raise ValueError('Unknown data format {format}.')
+    return restore_complex_values(restorer(data))
+
 def load(file: str) -> dict:
-    suffix = Path(file).suffix
-    loader = file_loaders.get(suffix, None)
-    if loader is None:
-        raise ValueError('File has unknown data format')
-    try:
-        return loader(file)
-    except json.JSONDecodeError or yaml.YAMLError as e:
-        raise ValueError(f'Error loading file: {e}')
+    file_name = Path(file)
+    suffix = file_name.suffix[1:]
+    with open(file_name) as f:
+        return restore(f.read(), suffix)
