@@ -2,6 +2,7 @@ from pathlib import Path
 import json
 import yaml
 import numpy as np
+from typing import Callable
 
 serializers = {
     'json': json.loads,
@@ -43,14 +44,14 @@ def restore_complex_values(data: dict) -> dict:
             data[key] = [restore_complex_values(v) for v in value]
     return restore_complex_value(data)
 
-def restore(data: str, format: str) -> dict:
+def restore(data: str, format: str, dict_processor: Callable[[dict], dict] = restore_complex_values) -> dict:
     restorer = serializers.get(format, None)
     if restorer is None:
         raise ValueError('Unknown data format {format}.')
-    return restore_complex_values(restorer(data))
+    return dict_processor(restorer(data))
 
-def load(file: str) -> dict:
+def load(file: str, restore_fcn: Callable[[str, str], dict] = restore) -> dict:
     file_name = Path(file)
     suffix = file_name.suffix[1:]
     with open(file_name) as f:
-        return restore(f.read(), suffix)
+        return restore_fcn(f.read(), suffix)
