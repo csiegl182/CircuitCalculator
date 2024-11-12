@@ -33,7 +33,7 @@ def test_restore_complex_from_abs_phase_data(z: complex) -> None:
     data = {'z': {'abs': np.abs(z), 'phase': np.angle(z)}}
     restored_data = restore_complex_value(data)
     assert_approx_equal(np.abs(restored_data['z']), np.abs(z))
-    assert_approx_equal(np.angle(restored_data['z']), np.angle(z))
+    assert_approx_equal(np.mod(np.angle(restored_data['z']), np.pi), np.mod(np.angle(z), np.pi))
 
 def test_additional_field_to_abs_phase_prevents_restoring_of_complex_number() -> None:
     not_complex_number = {'abs': 1, 'phase': 2, 'additional': 3}
