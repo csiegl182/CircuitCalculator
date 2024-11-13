@@ -1,5 +1,5 @@
 import pytest
-from CircuitCalculator.Circuit.serializers import load_circuit, UnknownCircuitComponent, IncorrectComponentInformation, UnidentifiedComponent
+from CircuitCalculator.Circuit.serializers import circuit_from_dict, UnknownCircuitComponent, IncorrectComponentInformation, UnidentifiedComponent
 
 def test_circuit_can_be_loaded_from_dict() -> None:
     test_circuit = [
@@ -16,7 +16,7 @@ def test_circuit_can_be_loaded_from_dict() -> None:
             'value': {'R': 10}
         }
     ]
-    circuit = load_circuit(test_circuit)
+    circuit = circuit_from_dict(test_circuit)
     assert circuit.components[0].type == test_circuit[0]['type']
     assert circuit.components[1].type == test_circuit[1]['type']
 
@@ -36,7 +36,7 @@ def test_undefined_component_type_leads_to_error() -> None:
         }
     ]
     with pytest.raises(UnknownCircuitComponent):
-        load_circuit(test_circuit)
+        circuit_from_dict(test_circuit)
 
 def test_missing_component_type_leads_to_error() -> None:
     test_circuit = [
@@ -53,7 +53,7 @@ def test_missing_component_type_leads_to_error() -> None:
         }
     ]
     with pytest.raises(IncorrectComponentInformation):
-        load_circuit(test_circuit)
+        circuit_from_dict(test_circuit)
 
 def test_missing_component_id_leads_to_error() -> None:
     test_circuit = [
@@ -70,7 +70,7 @@ def test_missing_component_id_leads_to_error() -> None:
         }
     ]
     with pytest.raises(UnidentifiedComponent):
-        load_circuit(test_circuit)
+        circuit_from_dict(test_circuit)
 
 def test_odd_value_information_leads_to_error() -> None:
     test_circuit = [
@@ -88,4 +88,4 @@ def test_odd_value_information_leads_to_error() -> None:
         }
     ]
     with pytest.raises(IncorrectComponentInformation):
-        load_circuit(test_circuit)
+        circuit_from_dict(test_circuit)

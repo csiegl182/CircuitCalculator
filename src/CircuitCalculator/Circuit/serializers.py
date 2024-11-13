@@ -3,6 +3,8 @@ from .circuit import Circuit, Component
 from . import components as ccp
 from dataclasses import asdict
 import json
+from .. import dump_load
+import functools
 
 class UnidentifiedComponent(Exception):
     ...
@@ -53,16 +55,20 @@ def generate_component(component: dict[str, Any]) -> Component:
     except TypeError:
         raise IncorrectComponentInformation(f"Given value information for component '{component_id}' of type '{component_type}' is incorrect: '{component_value}'")
 
-def load_circuit(circuit_dict: list[dict[str, Any]]) -> Circuit:
-    return Circuit([generate_component(entry) for entry in circuit_dict])
+def circuit_from_dict(circuit: dict) -> Circuit:
+    return Circuit([generate_component(entry) for entry in circuit])
 
-def dump_circuit(circuit: Circuit) -> list[dict[str, Any]]:
-    return [asdict(c) for c in circuit.components]
+restore2 = functools.partial(dump_load.restore, dict_processor=circuit_from_dict)
 
+def dump_circuit(circuit: Circuit) -> dict:
+    return {'components' : [asdict(c) for c in circuit.components]}
+
+
+load2 = functools.partial(dump_load.load, restore_fcn=restore2)
 def load_circuit_from_json(filename: str) -> Circuit:
     with open(filename, 'r') as json_file:
         circuit_dict = json.load(json_file)
-    return load_circuit(circuit_dict)
+    return circuit_from_dict(circuit_dict)
 
 def dump_circuit_to_json(circuit: Circuit, filename: str) -> None:
     with open(filename, 'w') as json_file:
