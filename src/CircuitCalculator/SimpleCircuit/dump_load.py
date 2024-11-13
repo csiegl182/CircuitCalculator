@@ -1,5 +1,5 @@
 from .Elements import Schematic
-from ..Circuit.serializers import dictify_circuit
+from ..Circuit.dump_load import dictify_circuit
 from .DiagramTranslator import circuit_translator
 from . import Elements as simple_circuit_elements
 import schemdraw.elements

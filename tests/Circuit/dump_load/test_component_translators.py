@@ -1,4 +1,4 @@
-from CircuitCalculator.Circuit.serializers import generate_component
+from CircuitCalculator.Circuit.dump_load import generate_component
 
 def test_resistor_translator() -> None:
     resistor_dict = {

@@ -1,5 +1,5 @@
 import pytest
-from CircuitCalculator.Circuit.serializers import undictify_circuit, UnknownCircuitComponent, IncorrectComponentInformation, UnidentifiedComponent
+from CircuitCalculator.Circuit.dump_load import undictify_circuit, UnknownCircuitComponent, IncorrectComponentInformation, UnidentifiedComponent
 
 def test_circuit_can_be_loaded_from_dict() -> None:
     test_circuit = { 'components':
