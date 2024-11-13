@@ -1,13 +1,14 @@
 from .Elements import Schematic
-from ..Circuit.serializers import dump_circuit
+from ..Circuit.serializers import dictify_circuit
 from .DiagramTranslator import circuit_translator
 from . import Elements as simple_circuit_elements
 import schemdraw.elements
 import schemdraw.util
 import schemdraw.transform
-import json
 from typing import Any, TypedDict, Callable, TypeVar
 from collections import ChainMap
+from .. import dump_load
+import functools
 
 class SchemdrawObjectProperties(TypedDict):
     type: str
@@ -121,21 +122,21 @@ def schematic_to_dict(d: schemdraw.Drawing) -> list[SimpleCircuitObjectPropertie
     return [dictify_element(e) for e in d.elements]
 
 schemdraw_deserializers = {
-    str(schemdraw.segments.Segment.__name__) : lambda x: schemdraw.segments.Segment(**deserialize(x)), # type: ignore
-    str(schemdraw.segments.SegmentText.__name__) : lambda x: schemdraw.segments.SegmentText(**deserialize(x)),
-    str(schemdraw.segments.SegmentCircle.__name__) : lambda x: schemdraw.segments.SegmentCircle(**deserialize(x)),
+    str(schemdraw.segments.Segment.__name__) : lambda x: schemdraw.segments.Segment(**deserialize_schemdraw_elements(x)), # type: ignore
+    str(schemdraw.segments.SegmentText.__name__) : lambda x: schemdraw.segments.SegmentText(**deserialize_schemdraw_elements(x)),
+    str(schemdraw.segments.SegmentCircle.__name__) : lambda x: schemdraw.segments.SegmentCircle(**deserialize_schemdraw_elements(x)),
     str(schemdraw.util.Point.__name__) : lambda *x: schemdraw.util.Point(*x),
-    str(schemdraw.transform.Transform.__name__) : lambda x: schemdraw.transform.Transform(**deserialize(x)),
+    str(schemdraw.transform.Transform.__name__) : lambda x: schemdraw.transform.Transform(**deserialize_schemdraw_elements(x)),
 }
 
-def deserialize(element: dict[str, Any] | list) -> Any:
+def deserialize_schemdraw_elements(element: dict[str, Any] | list) -> Any:
     if type(element) == list:
-        return [deserialize(e) for e in element]
+        return [deserialize_schemdraw_elements(e) for e in element]
     if type(element) == dict:
         try:
             return schemdraw_deserializers[element['type']](element['values'])
         except KeyError:
-            return {k: deserialize(v) for k, v in element.items()}
+            return {k: deserialize_schemdraw_elements(v) for k, v in element.items()}
     return element
 
 def combine_to_complex(real_imag: tuple[str, str], z: str, kv: dict[str, Any]) -> dict[str, Any]:
@@ -162,7 +163,7 @@ simple_circuit_element_types = {
 }
 
 def undictify_element(element_dict: dict[str, Any], circuit_dict: dict[str, Any]) -> schemdraw.elements.Element:
-    kwargs = deserialize(element_dict['values']['_userparams'])
+    kwargs = deserialize_schemdraw_elements(element_dict['values']['_userparams'])
     kwargs.update({'name': element_dict.get('name', '')})
     kwargs.update({'reverse': element_dict.get('reverse', False)})
     if element_dict['name'] in circuit_dict.keys():
@@ -171,24 +172,28 @@ def undictify_element(element_dict: dict[str, Any], circuit_dict: dict[str, Any]
         element = simple_circuit_element_types[element_dict['type']](**kwargs)
     except KeyError:
         element = simple_circuit_elements.Element(**kwargs)
-    element.segments=deserialize(element_dict['values']['segments'])
-    element.params=deserialize(element_dict['values']['params'])
-    element.anchors=deserialize(element_dict['values']['anchors'])
-    element.absanchors=deserialize(element_dict['values']['absanchors'])
-    element.transform=deserialize(element_dict['values']['transform'])
-    element.absdrop=deserialize(element_dict['values']['absdrop'])
+    element.segments=deserialize_schemdraw_elements(element_dict['values']['segments'])
+    element.params=deserialize_schemdraw_elements(element_dict['values']['params'])
+    element.anchors=deserialize_schemdraw_elements(element_dict['values']['anchors'])
+    element.absanchors=deserialize_schemdraw_elements(element_dict['values']['absanchors'])
+    element.transform=deserialize_schemdraw_elements(element_dict['values']['transform'])
+    element.absdrop=deserialize_schemdraw_elements(element_dict['values']['absdrop'])
     return element
 
-def schematic(schematic_dict: dict[str, Any]) -> Schematic:
+def undictify_schematic(schematic_dict: dict) -> Schematic:
     schematic = Schematic()
-    circuit_dict = {c['id']: c['value'] for c in schematic_dict['circuit']}
+    circuit_dict = {c['id']: c['value'] for c in schematic_dict['circuit']['components']}
     schematic.elements.extend([undictify_element(e, circuit_dict) for e in schematic_dict['simple_circuit']])
     return schematic
 
-def dump_json(json_file: str, schematic: Schematic, indent: int|None=None) -> None:
-    with open(json_file, 'w') as file:
-        json.dump({'circuit': dump_circuit(circuit_translator(schematic)), 'simple_circuit': schematic_to_dict(schematic)}, file, indent=indent)
+def dictify_all(schematic: Schematic) -> dict:
+    return {
+        'circuit': dictify_circuit(circuit_translator(schematic)),
+        'simple_circuit': schematic_to_dict(schematic)
+    }
 
-def load_json(json_file: str) -> Schematic:
-    with open(json_file, 'r') as file:
-        return schematic(json.load(file))
+serialize = functools.partial(dump_load.serialize, dict_processor=dictify_all)
+dump = functools.partial(dump_load.dump, dump_fcn=serialize)
+
+deserialize = functools.partial(dump_load.deserialize, dict_preprocessor=undictify_schematic)
+load = functools.partial(dump_load.load, deserialize_fcn=deserialize)

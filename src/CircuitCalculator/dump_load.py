@@ -12,13 +12,19 @@ serializers = {
     'yml': yaml.safe_load
 }
 
-def dump_complex_value(data: dict) -> dict:
+deserializers = {
+    'json': json.dumps,
+    'yaml': yaml.dump,
+    'yml': yaml.dump
+}
+
+def dictify_complex_values(data: dict) -> dict:
     for key, value in data.items():
         if isinstance(value, complex):
             data[key] = {'real': value.real, 'imag': value.imag}
     return data
 
-def restore_complex_value(data: dict) -> dict:
+def undictify_complex_values(data: dict) -> dict:
     for key, value in data.items():
         if isinstance(value, dict) and sorted(list(value.keys())) == sorted(['real', 'imag']):
             data[key] = complex(value['real'], value['imag'])
@@ -32,28 +38,40 @@ def restore_complex_value(data: dict) -> dict:
             data[key] = value['abs'] * complex(np.cos(value['phase_deg']/180*np.pi), np.sin(value['phase_deg']/180*np.pi))
     return data
 
-def dump_complex_values(data: dict) -> dict:
+def dictify_all_complex_values(data: dict) -> dict:
     for key, value in data.items():
         if isinstance(value, dict):
-            data[key] = dump_complex_values(value)
+            data[key] = dictify_all_complex_values(value)
     return data
 
-def restore_complex_values(data: dict) -> dict:
+def undictify_all_complex_values(data: dict) -> dict:
     for key, value in data.items():
         if isinstance(value, dict):
-            data[key] = restore_complex_values(value)
+            data[key] = undictify_all_complex_values(value)
         if isinstance(value, list):
-            data[key] = [restore_complex_values(v) for v in value]
-    return restore_complex_value(data)
+            data[key] = [undictify_all_complex_values(v) for v in value]
+    return undictify_complex_values(data)
 
-def restore(data: str, format: str, dict_processor: Callable[[dict], T] = restore_complex_values) -> T:
-    restorer = serializers.get(format, None)
-    if restorer is None:
+def serialize(data: T, format: str, dict_processor: Callable[[T], dict] = dictify_all_complex_values) -> str:
+    deserializer = deserializers.get(format, None)
+    if deserializer is None:
         raise ValueError('Unknown data format {format}.')
-    return dict_processor(restorer(data))
+    return deserializer(dict_processor(data))
 
-def load(file: str, restore_fcn: Callable[[str, str], T] = restore) -> T:
+def dump(file: str, data: T, dump_fcn: Callable[[T, str], str] = serialize) -> None:
+    file_name = Path(file)
+    suffix = file_name.suffix[1:]
+    with open(file_name, 'w') as f:
+        f.write(dump_fcn(data, suffix))
+
+def deserialize(data: str, format: str, dict_preprocessor: Callable[[dict], T] = undictify_all_complex_values) -> T:
+    serializer = serializers.get(format, None)
+    if serializer is None:
+        raise ValueError('Unknown data format {format}.')
+    return dict_preprocessor(serializer(data))
+
+def load(file: str, deserialize_fcn: Callable[[str, str], T] = deserialize) -> T:
     file_name = Path(file)
     suffix = file_name.suffix[1:]
     with open(file_name) as f:
-        return restore_fcn(f.read(), suffix)
+        return deserialize_fcn(f.read(), suffix)
