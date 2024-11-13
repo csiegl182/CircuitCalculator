@@ -1,5 +1,4 @@
 from typing import Optional
-from .file_loaders import load_simulation_data
 from .schematic import create_schematic
 import CircuitCalculator.SimpleCircuit.Elements as elm
 from matplotlib.axes import Axes
@@ -52,6 +51,5 @@ def simulate(data: dict, circuit_ax: Optional[Axes] = None) -> None:
     create_schematic(circuit_definiton, circuit_ax)
 
 def simulate_file(name: str) -> None:
-    # data = load_simulation_data(name)
     data = load(name)
     simulate(data)
