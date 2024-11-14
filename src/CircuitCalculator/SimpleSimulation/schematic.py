@@ -3,6 +3,7 @@ import CircuitCalculator.SimpleCircuit.Elements as elm
 from matplotlib.axes import Axes
 from typing import Callable
 import CircuitCalculator.SimpleCircuit.DiagramSolution as ds
+import CircuitCalculator.SimpleCircuit.LampLighter as ll
 from dataclasses import dataclass
 from inspect import signature
 from . import errors
@@ -92,12 +93,15 @@ def get_placed_element(schematic: elm.Schematic, label: Optional[str] = None) ->
         return None
     return schematic.elements[[se.name for se in schematic.elements].index(label)]
 
-def fill(schematic: elm.Schematic, elements: list[elm.Element], unit: float, solution_definition: SolutionDefinition) -> None:
+def fill(schematic: elm.Schematic, elements: list[elm.Element], unit: float, light_lamps: bool, solution_definition: SolutionDefinition) -> None:
     for e in elements:
         se = transform_to_schematic_element(e)
         se = apply_direction_and_length(se, e.get('direction', ''), e.get('length', 1), unit)
         se = apply_position(se, get_placed_element(schematic, e.get('place_after', None)))
         schematic += se
+
+    if light_lamps:
+        ll.light_lamps(schematic)
 
     solution = solution_definition.diagram_solution_creator(schematic)
     for v in solution_definition.voltages:
@@ -112,12 +116,13 @@ def fill(schematic: elm.Schematic, elements: list[elm.Element], unit: float, sol
 def create_schematic(circuit_data: dict, circuit_ax: Optional[Axes] = None) -> elm.Schematic:
     unit = circuit_data.get('unit', 7)
     elements = circuit_data.get('elements', [])
+    light_lamps = circuit_data.get('light_lamps', False)
     solution_definition = SolutionDefinition(circuit_data.get('solution', {}))
     if circuit_ax is None:
         with elm.Schematic(unit=unit) as schematic:
-            fill(schematic, elements, unit, solution_definition)
+            fill(schematic, elements, unit, light_lamps, solution_definition)
         return schematic
     schematic = elm.Schematic(unit=circuit_data['unit'], canvas=circuit_ax)
-    fill(schematic, elements, unit, solution_definition)
+    fill(schematic, elements, unit, light_lamps, solution_definition)
     schematic.draw(show=False)
     return schematic

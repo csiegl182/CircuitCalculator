@@ -6,12 +6,6 @@ circuit:
       name: U1
       reverse: true
       direction: up
-    - type: impedance
-      name: Z1
-      Z:
-        real: 10
-        imag: 20
-      direction: right
     - type: node
       name: a
     - type: resistor
@@ -32,7 +26,7 @@ circuit:
       name: R2
       R: 20
       direction: down
-      place_after: Z1
+      place_after: R3
     - type: line
       place_after: R4
       direction: down
@@ -50,11 +44,9 @@ circuit:
   solution:
     type: dc
     voltages:
-      - name: Z1
       - name: R2
       - name: R5
     currents:
-      - name: Z1
       - name: R2
       - name: R4
       - name: R5
@@ -63,5 +55,4 @@ circuit:
     powers:
       - name: U1
       - name: U2
-      - name: Z1 
   
