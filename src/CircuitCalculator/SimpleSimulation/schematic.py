@@ -5,6 +5,7 @@ from typing import Callable
 import CircuitCalculator.SimpleCircuit.DiagramSolution as ds
 from dataclasses import dataclass
 from inspect import signature
+from . import errors
 
 solutions = {
     'dc': ds.real_solution,
@@ -42,12 +43,21 @@ class SolutionDefinition:
 
 element_handlers = {
     'resistor': lambda kwargs: element_factory(elm.Resistor, **kwargs),
+    'conductance': lambda kwargs: element_factory(elm.Conductance, **kwargs),
     'impedance': lambda kwargs: element_factory(elm.Impedance, **kwargs),
+    'admittance': lambda kwargs: element_factory(elm.Admittance, **kwargs),
+    'capacitor': lambda kwargs: element_factory(elm.Capacitor, **kwargs),
+    'inductance': lambda kwargs: element_factory(elm.Inductance, **kwargs),
     'line': lambda kwargs: element_factory(elm.LabeledLine, **kwargs) if 'name' in kwargs.keys() else element_factory(elm.Line, **kwargs),
     'node': lambda kwargs: element_factory(elm.Node, **kwargs),
+    'lamp': lambda kwargs: element_factory(elm.Lamp, **kwargs),
     'ground': lambda kwargs: element_factory(elm.Ground, **kwargs),
     'voltage_source': lambda kwargs: element_factory(elm.VoltageSource, **kwargs),
+    'ac_voltage_source': lambda kwargs: element_factory(elm.ACVoltageSource, **kwargs),
+    'complex_voltage_source': lambda kwargs: element_factory(elm.ComplexVoltageSource, **kwargs),
     'current_source': lambda kwargs: element_factory(elm.CurrentSource, **kwargs),
+    'ac_current_source': lambda kwargs: element_factory(elm.ACCurrentSource, **kwargs),
+    'complex_current_source': lambda kwargs: element_factory(elm.ComplexCurrentSource, **kwargs),
 }
 
 def element_factory(element: type[elm.Element], name: str = '', reverse: bool = False, **kwargs) -> elm.Element:
@@ -56,8 +66,10 @@ def element_factory(element: type[elm.Element], name: str = '', reverse: bool = 
 def transform_to_schematic_element(element: dict) -> elm.Element:
     try:
         return element_handlers[element['type']](element)
-    except KeyError:
-        raise ValueError(f'No handler for element type {element["type"]}')
+    except KeyError as e:
+        raise errors.UnknownCircuitElement(f'Unknown element "{element["type"]}".') from e
+    except TypeError as e:
+        raise errors.MissingArguments(f'Missing arguments for element "{element["type"]}": {str(e).split(":")[-1].strip()}.') from e
 
 def apply_direction_and_length(element: elm.Element, direction: str = '', length: float = 1, unit: float = 1) -> elm.Element:
     if direction == 'right':
