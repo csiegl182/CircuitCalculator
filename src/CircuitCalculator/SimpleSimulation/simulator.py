@@ -6,12 +6,21 @@ from CircuitCalculator.dump_load import load
 
 element_handlers = {
     'resistor': lambda kwargs: element_factory(elm.Resistor, **kwargs),
+    'conductance': lambda kwargs: element_factory(elm.Conductance, **kwargs),
     'impedance': lambda kwargs: element_factory(elm.Impedance, **kwargs),
+    'admittance': lambda kwargs: element_factory(elm.Admittance, **kwargs),
+    'capacitor': lambda kwargs: element_factory(elm.Capacitor, **kwargs),
+    'inductance': lambda kwargs: element_factory(elm.Inductance, **kwargs),
     'line': lambda kwargs: element_factory(elm.LabeledLine, **kwargs) if 'name' in kwargs.keys() else element_factory(elm.Line, **kwargs),
     'node': lambda kwargs: element_factory(elm.Node, **kwargs),
+    'lamp': lambda kwargs: element_factory(elm.Lamp, **kwargs),
     'ground': lambda kwargs: element_factory(elm.Ground, **kwargs),
     'voltage_source': lambda kwargs: element_factory(elm.VoltageSource, **kwargs),
+    'ac_voltage_source': lambda kwargs: element_factory(elm.ACVoltageSource, **kwargs),
+    'complex_voltage_source': lambda kwargs: element_factory(elm.ComplexVoltageSource, **kwargs),
     'current_source': lambda kwargs: element_factory(elm.CurrentSource, **kwargs),
+    'ac_current_source': lambda kwargs: element_factory(elm.ACCurrentSource, **kwargs),
+    'complex_current_source': lambda kwargs: element_factory(elm.ComplexCurrentSource, **kwargs),
 }
 
 def element_factory(element: type[elm.Element], name: str = '', reverse: bool = False, **kwargs) -> elm.Element:
