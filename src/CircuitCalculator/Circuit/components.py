@@ -8,6 +8,8 @@ class Component:
     value: dict[str, float | str] = field(default_factory=dict)
 
 def resistor(id: str, nodes: tuple[str, str], R: float) -> Component:
+    if R < 0:
+        raise ValueError('R must be greater than zero.')
     return Component(
         type='resistor',
         id=id,
@@ -16,6 +18,8 @@ def resistor(id: str, nodes: tuple[str, str], R: float) -> Component:
         )
 
 def conductance(id: str, nodes: tuple[str, str], G: float) -> Component:
+    if G < 0:
+        raise ValueError('G must be greater than zero.')
     return Component(
         type='conductance',
         id=id,
@@ -24,6 +28,8 @@ def conductance(id: str, nodes: tuple[str, str], G: float) -> Component:
         )
 
 def capacitor(id: str, nodes: tuple[str, str], C: float) -> Component:
+    if C < 0:
+        raise ValueError('C must be greater than zero.')
     return Component(
         type='capacitor',
         id=id,
@@ -32,6 +38,8 @@ def capacitor(id: str, nodes: tuple[str, str], C: float) -> Component:
     )
 
 def inductance(id: str, nodes: tuple[str, str], L: float) -> Component:
+    if L < 0:
+        raise ValueError('L must be greater than zero.')
     return Component(
         type='inductance',
         id=id,
@@ -56,6 +64,8 @@ def admittance(id: str, nodes: tuple[str, str], Y: complex) -> Component:
         )
 
 def dc_voltage_source(id: str, nodes: tuple[str, str], V: float, R: float = 0) -> Component:
+    if R < 0:
+        raise ValueError('R must be greater than zero.')
     return Component(
         type='dc_voltage_source',
         id=id,
@@ -64,6 +74,10 @@ def dc_voltage_source(id: str, nodes: tuple[str, str], V: float, R: float = 0) -
         )
 
 def ac_voltage_source(id: str, nodes: tuple[str, str], V: float, R: float = 0, w: float = 0, phi: float = 0) -> Component:
+    if R < 0:
+        raise ValueError('R must be greater than zero.')
+    if w < 0:
+        raise ValueError('w must be greater than zero.')
     return Component(
         type='ac_voltage_source',
         id=id,
@@ -80,6 +94,10 @@ def complex_voltage_source(id: str, nodes: tuple[str, str], V: complex, Z: compl
         )
 
 def periodic_voltage_source(id: str, nodes: tuple[str, str], wavetype: str, V: float, w: float, phi: float = 0, R: float = 0) ->Component:
+    if R < 0:
+        raise ValueError('R must be greater than zero.')
+    if w < 0:
+        raise ValueError('w must be greater than zero.')
     return Component(
         type='periodic_voltage_source',
         id=id,
@@ -92,6 +110,8 @@ def periodic_voltage_source(id: str, nodes: tuple[str, str], wavetype: str, V: f
         )
 
 def dc_current_source(id: str, nodes: tuple[str, str], I: float, G: float = 0) -> Component:
+    if G < 0:
+        raise ValueError('G must be greater than zero.')
     return Component(
         type='dc_current_source',
         id=id,
@@ -100,6 +120,10 @@ def dc_current_source(id: str, nodes: tuple[str, str], I: float, G: float = 0) -
         )
 
 def ac_current_source(id: str, nodes: tuple[str, str], I: float, G: float = 0, w: float = 0, phi: float = 0) -> Component:
+    if G < 0:
+        raise ValueError('G must be greater than zero.')
+    if w < 0:
+        raise ValueError('w must be greater than zero.')
     return Component(
         type='ac_current_source',
         id=id,
@@ -128,6 +152,10 @@ def periodic_current_source(id: str, nodes: tuple[str, str], wavetype: str, I: f
         )
 
 def lamp(id: str, nodes: tuple[str, str], P: float, V_ref: float) -> Component:
+    if P < 0:
+        raise ValueError('P must be greater than zero.')
+    if V_ref < 0:
+        raise ValueError('V_ref must be greater than zero.')
     return Component(
         type='lamp',
         id=id,
@@ -136,6 +164,10 @@ def lamp(id: str, nodes: tuple[str, str], P: float, V_ref: float) -> Component:
         )
 
 def resistive_load(id: str, nodes: tuple[str, str], P: float, V_ref: float) -> Component:
+    if P < 0:
+        raise ValueError('P must be greater than zero.')
+    if V_ref < 0:
+        raise ValueError('V_ref must be greater than zero.')
     return Component(
         type='resistive_load',
         id=id,

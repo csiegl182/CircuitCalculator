@@ -1,12 +1,14 @@
 from typing import Optional
-import CircuitCalculator.SimpleCircuit.Elements as elm
 from matplotlib.axes import Axes
 from typing import Callable
+import CircuitCalculator.SimpleCircuit.Elements as elm
+import CircuitCalculator.SimpleCircuit.DiagramParser as dp
 import CircuitCalculator.SimpleCircuit.DiagramSolution as ds
 import CircuitCalculator.SimpleCircuit.LampLighter as ll
 from dataclasses import dataclass
 from inspect import signature
 from . import errors
+
 
 solutions = {
     'dc': ds.real_solution,
@@ -93,7 +95,7 @@ def get_placed_element(schematic: elm.Schematic, label: Optional[str] = None) ->
         return None
     return schematic.elements[[se.name for se in schematic.elements].index(label)]
 
-def fill(schematic: elm.Schematic, elements: list[elm.Element], unit: float, light_lamps: bool, solution_definition: SolutionDefinition) -> None:
+def fill(schematic: elm.Schematic, elements: list[elm.Element], unit: int, light_lamps: bool, solution_definition: SolutionDefinition) -> None:
     for e in elements:
         se = transform_to_schematic_element(e)
         se = apply_direction_and_length(se, e.get('direction', ''), e.get('length', 1), unit)
@@ -103,15 +105,31 @@ def fill(schematic: elm.Schematic, elements: list[elm.Element], unit: float, lig
     if light_lamps:
         ll.light_lamps(schematic)
 
-    solution = solution_definition.diagram_solution_creator(schematic)
+    try:
+        solution = solution_definition.diagram_solution_creator(schematic)
+    except ValueError as e:
+        schematic = elm.Schematic(unit=unit)
+        raise errors.IllegalElementValue(str(e)) from e
     for v in solution_definition.voltages:
-        schematic += solution.draw_voltage(**v)
+        try:
+            schematic += solution.draw_voltage(**v)
+        except dp.UnknownElement as e:
+            print(f'Cannot draw voltage of undefined element "{str(e)}".')
     for c in solution_definition.currents:
-        schematic += solution.draw_current(**c)
+        try:
+            schematic += solution.draw_current(**c)
+        except dp.UnknownElement as e:
+           print(f'Cannot draw current of undefined element "{str(e)}".')
     for p in solution_definition.potentials:
-        schematic += solution.draw_potential(**p)
+        try:
+            schematic += solution.draw_potential(**p)
+        except dp.UnknownElement as e:
+           print(f'Cannot draw potential of undefined node "{str(e)}".')
     for p in solution_definition.powers:
-        schematic += solution.draw_power(**p)
+        try:
+            schematic += solution.draw_power(**p)
+        except dp.UnknownElement as e:
+           print(f'Cannot draw power of undefined element "{str(e)}".')
 
 def create_schematic(circuit_data: dict, circuit_ax: Optional[Axes] = None) -> elm.Schematic:
     unit = circuit_data.get('unit', 7)

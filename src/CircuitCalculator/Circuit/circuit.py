@@ -1,4 +1,4 @@
-from .components import Component, is_active
+from .components import Component
 from .transformers import transformers
 from ..Network.network import Network
 import numpy as np

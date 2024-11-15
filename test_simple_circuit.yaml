@@ -46,6 +46,7 @@ circuit:
     voltages:
       - name: R2
       - name: R5
+      - name: new
     currents:
       - name: R2
       - name: R4

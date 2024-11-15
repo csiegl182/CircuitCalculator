@@ -2,10 +2,12 @@ from functools import wraps
 
 class UnknownCircuitElement(Exception): ...
 class MissingArguments(Exception): ...
+class IllegalElementValue(Exception): ...
 
 simulation_exceptions : tuple[type[Exception], ...] = (
     UnknownCircuitElement,
-    MissingArguments
+    MissingArguments,
+    IllegalElementValue
 )
 
 def handle_simulation_exceptions(func):
