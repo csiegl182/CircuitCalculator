@@ -10,7 +10,7 @@ circuit:
       name: a
     - type: resistor
       name: R3
-      R: 30
+      R2: 30
       direction: right
     - type: resistor
       name: R4

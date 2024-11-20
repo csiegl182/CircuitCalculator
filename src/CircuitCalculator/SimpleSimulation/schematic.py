@@ -23,7 +23,8 @@ class SolutionDefinition:
 
     @property
     def diagram_solution_creator(self) -> Callable[[elm.Schematic], ds.SchematicDiagramSolution]:
-        solution_fcn = solutions.get(self.data['type'], ds.empty_solution)
+        solution_type = self.data.get('type', 'unknown')
+        solution_fcn = solutions.get(solution_type, ds.empty_solution)
         feasible_solution_params = signature(solution_fcn).parameters.keys()
         solution_parameters = {k: v for k, v in self.data.items() if k in feasible_solution_params}
         return lambda schematic: solution_fcn(schematic=schematic, **solution_parameters)
@@ -64,15 +65,25 @@ element_handlers = {
 }
 
 def element_factory(element: type[elm.Element], name: str = '', reverse: bool = False, **kwargs) -> elm.Element:
-    return element(name=name, reverse=reverse, **kwargs)
+    try:
+        return element(name=name, reverse=reverse, **kwargs)
+    except TypeError as e:
+        missing_argument = str(e).split(":")[-1].strip()
+        provided_arguments = {}
+        if name != '':
+            provided_arguments = {'name': name}
+        provided_arguments.update(kwargs)
+        raise errors.MissingArgument(missing_argument, str(provided_arguments)) from e
 
 def transform_to_schematic_element(element: dict) -> elm.Element:
     try:
-        return element_handlers[element['type']](element)
+        element_type = element['type']
     except KeyError as e:
-        raise errors.UnknownCircuitElement(f'Unknown element "{element["type"]}".') from e
-    except TypeError as e:
-        raise errors.MissingArguments(f'Missing arguments for element "{element["type"]}": {str(e).split(":")[-1].strip()}.') from e
+        raise errors.MissingArgument('type', str(element)) from e
+    try:
+        return element_handlers[element_type](element)
+    except KeyError as e:
+        raise errors.UnknownCircuitElement(element_type) from e
 
 def apply_direction_and_length(element: elm.Element, direction: str = '', length: float = 1, unit: float = 1) -> elm.Element:
     if direction == 'right':
