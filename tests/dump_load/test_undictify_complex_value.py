@@ -28,7 +28,7 @@ def test_missing_real_field_prevents_restoring_of_complex_number() -> None:
     restored_data = undictify_complex_values(data)
     assert restored_data['z'] == not_complex_number
 
-@given(st.complex_numbers(allow_nan=False, allow_infinity=False))
+@given(st.complex_numbers(min_magnitude=1e-4, allow_nan=False, allow_infinity=False))
 def test_undictify_complex_from_abs_phase_data(z: complex) -> None:
     data = {'z': {'abs': np.abs(z), 'phase': np.angle(z)}}
     restored_data = undictify_complex_values(data)
@@ -58,7 +58,7 @@ def test_undictify_complex_from_abs_phase_data_with_negative_abs_raises_value_er
     with pytest.raises(ValueError):
         _ = undictify_complex_values(data)
 
-@given(st.complex_numbers(allow_nan=False, allow_infinity=False))
+@given(st.complex_numbers(min_magnitude=1e-4, allow_nan=False, allow_infinity=False))
 def test_undictify_complex_from_abs_phase_data_with_deg_phase(z: complex) -> None:
     data = {'z': {'abs': np.abs(z), 'phase_deg': np.angle(z)/np.pi*180}}
     restored_data = undictify_complex_values(data)

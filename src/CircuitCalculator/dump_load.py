@@ -35,7 +35,8 @@ def undictify_complex_values(data: dict) -> dict:
         if isinstance(value, dict) and sorted(list(value.keys())) == sorted(['abs', 'phase_deg']):
             if value['abs'] < 0:
                 raise ValueError("abs value of '{key}' may not be negative")
-            data[key] = value['abs'] * complex(np.cos(value['phase_deg']/180*np.pi), np.sin(value['phase_deg']/180*np.pi))
+            phase_rad = np.deg2rad(value['phase_deg'])
+            data[key] = value['abs'] * complex(np.cos(phase_rad), np.sin(phase_rad))
     return data
 
 def dictify_all_complex_values(data: dict) -> dict:
