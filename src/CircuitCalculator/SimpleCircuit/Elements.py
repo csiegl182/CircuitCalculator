@@ -386,8 +386,8 @@ class RectVoltageSource(schemdraw.elements.SourceSquare):
     def type(self) -> str:
         return 'rect_voltage_source'
 
-@extension.source
 @simple_circuit_element
+@extension.source
 class TriangleVoltageSource(schemdraw.elements.SourceTriangle):
     def __init__(self, V: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, **kwargs):
         super().__init__(*args, reverse=not reverse, **kwargs)
@@ -423,8 +423,8 @@ class TriangleVoltageSource(schemdraw.elements.SourceTriangle):
     def type(self) -> str:
         return 'tri_voltage_source'
 
-@extension.source
 @simple_circuit_element
+@extension.source
 class SawtoothVoltageSource(schemdraw.elements.Source):
     def __init__(self, V: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, **kwargs):
         super().__init__(*args, reverse=not reverse, **kwargs)
@@ -461,8 +461,8 @@ class SawtoothVoltageSource(schemdraw.elements.Source):
     def type(self) -> str:
         return 'saw_voltage_source'
 
-@extension.source
 @simple_circuit_element
+@extension.source
 class RectCurrentSource(schemdraw.elements.SourceSquare):
     def __init__(self, I: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
@@ -498,8 +498,8 @@ class RectCurrentSource(schemdraw.elements.SourceSquare):
     def type(self) -> str:
         return 'rect_current_source'
 
-@extension.source
 @simple_circuit_element
+@extension.source
 class TriangleCurrentSource(schemdraw.elements.SourceTriangle):
     def __init__(self, I: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
@@ -535,8 +535,8 @@ class TriangleCurrentSource(schemdraw.elements.SourceTriangle):
     def type(self) -> str:
         return 'tri_current_source'
 
-@extension.source
 @simple_circuit_element
+@extension.source
 class SawtoothCurrentSource(schemdraw.elements.Source):
     def __init__(self, I: float, w: float, phi: float, name: str, *args, sin=False, deg=False, reverse=False, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
@@ -573,7 +573,6 @@ class SawtoothCurrentSource(schemdraw.elements.Source):
     def type(self) -> str:
         return 'saw_current_source'
 
-@extension.capacitor
 @simple_circuit_element
 @extension.capacitor
 class Capacitor(schemdraw.elements.Capacitor):
@@ -702,8 +701,8 @@ class Line(schemdraw.elements.lines.Line):
     def type(self) -> str:
         return 'line'
 
-@extension.lamp
 @simple_circuit_element
+@extension.lamp
 class Lamp(schemdraw.elements.Lamp2):
     def __init__(self, V_ref: float, P_ref: float, name: str, *args, show_name: bool = True, show_value: bool = True, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)

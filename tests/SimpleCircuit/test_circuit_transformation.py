@@ -1,4 +1,4 @@
-import matplotlib # type: ignore
+import matplotlib
 matplotlib.use('Agg')
 from CircuitCalculator.SimpleCircuit.Elements import Resistor, Schematic, LabelNode
 from CircuitCalculator.SimpleCircuit.DiagramTranslator import circuit_translator

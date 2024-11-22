@@ -170,7 +170,7 @@ class ScientificComplex:
                 if self.deg:
                     if np.log10(np.abs(self.angle)) <= -2:
                         return f'{str(self.abs)}'
-                    return f'{str(self.abs)}∠{self.angle:.2f}'
+                    return f'{str(self.abs)}∠{self.angle:.2f}°'
                 if np.log10(np.abs(self.angle)) <= -5:
                     return f'{str(self.abs)}'
                 return f'{str(self.abs)}∠{self.angle:.4f}'

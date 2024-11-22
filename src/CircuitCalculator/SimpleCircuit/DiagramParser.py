@@ -2,8 +2,8 @@ import schemdraw.elements, schemdraw.util
 from dataclasses import dataclass
 from . import Elements as elm
 
-class UnknownElement(Exception): pass
-class MultipleGroundNodes(Exception): pass
+class UnknownElement(Exception): ...
+class MultipleGroundNodes(Exception): ...
 
 @dataclass(frozen=True)
 class SchematicDiagramParser:
@@ -106,6 +106,6 @@ class SchematicDiagramParser:
     def get_element(self, name: str) -> schemdraw.elements.Element:
         elements = [e for e in self.circuit_elements if e.name == name]
         if len(elements) == 0:
-            raise UnknownElement(f'Element {name} not known')
+            raise UnknownElement(name)
         else:
             return elements[0]

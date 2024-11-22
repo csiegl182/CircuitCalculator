@@ -2,7 +2,8 @@ from typing import Any, Callable
 from .circuit import Circuit, Component
 from . import components as ccp
 from dataclasses import asdict
-import json
+from .. import dump_load
+import functools
 
 class UnidentifiedComponent(Exception):
     ...
@@ -53,17 +54,14 @@ def generate_component(component: dict[str, Any]) -> Component:
     except TypeError:
         raise IncorrectComponentInformation(f"Given value information for component '{component_id}' of type '{component_type}' is incorrect: '{component_value}'")
 
-def load_circuit(circuit_dict: list[dict[str, Any]]) -> Circuit:
-    return Circuit([generate_component(entry) for entry in circuit_dict])
+def undictify_circuit(circuit: dict) -> Circuit:
+    return Circuit([generate_component(entry) for entry in circuit['components']])
 
-def dump_circuit(circuit: Circuit) -> list[dict[str, Any]]:
-    return [asdict(c) for c in circuit.components]
+deserialize = functools.partial(dump_load.deserialize, dict_preprocessor=undictify_circuit)
+load = functools.partial(dump_load.load, deserialize_fcn=deserialize)
 
-def load_circuit_from_json(filename: str) -> Circuit:
-    with open(filename, 'r') as json_file:
-        circuit_dict = json.load(json_file)
-    return load_circuit(circuit_dict)
+def dictify_circuit(circuit: Circuit) -> dict:
+    return {'components' : [asdict(c) for c in circuit.components]}
 
-def dump_circuit_to_json(circuit: Circuit, filename: str) -> None:
-    with open(filename, 'w') as json_file:
-        json.dump(dump_circuit(circuit), json_file)
+serialize = functools.partial(dump_load.serialize, dict_processor=dictify_circuit)
+save = functools.partial(dump_load.dump, dump_fcn=serialize)
