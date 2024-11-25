@@ -11,10 +11,17 @@ class MissingArgument(Exception):
         self.missing = missing_argument
         self.provided_arguments = provided_arguments
 
+class UnknownArgument(Exception):
+    def __init__(self, unknown_argument: str, method: str = '') -> None:
+        super().__init__(f"Unknown argument {unknown_argument}" + f" for method '{method}'." if len(method) > 0 else '.')
+        self.unknown_argument = unknown_argument
+        self.method = method
+
 class IllegalElementValue(Exception): ...
 
 simulation_exceptions : tuple[type[Exception], ...] = (
     UnknownCircuitElement,
     MissingArgument,
-    IllegalElementValue
+    IllegalElementValue,
+    UnknownArgument
 )

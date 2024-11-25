@@ -11,7 +11,11 @@ def simulate(data: dict, circuit_ax: Optional[Axes] = None) -> None:
     create_schematic(circuit_definiton, circuit_ax)
 
 def simulate_file(name: str) -> None:
-    data = load(name)
+    try:
+        data = load(name)
+    except FileNotFoundError:
+        print(f'Simulation file "{name}" does not exist.')
+        return
     try:
         simulate(data)
     except simulation_exceptions as e:

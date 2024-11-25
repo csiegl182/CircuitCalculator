@@ -131,6 +131,9 @@ def fill(schematic: elm.Schematic, elements: list[elm.Element], unit: int, light
             schematic += solution.draw_current(**c)
         except dp.UnknownElement as e:
            print(f'Cannot draw current of undefined element "{str(e)}".')
+        except TypeError as e:
+            unknown_argument = str(e).split()[-1].strip()
+            raise errors.UnknownArgument(unknown_argument, 'currents') from e
     for p in solution_definition.potentials:
         try:
             schematic += solution.draw_potential(**p)
