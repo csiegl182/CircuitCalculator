@@ -160,7 +160,7 @@ class SchematicDiagramSolution:
 
     def draw_current(self, name: str, reverse: bool = False, end: bool = False) -> elm.CurrentLabel:
         element = self.diagram_parser.get_element(name)
-        ilabel = self.solution.get_current(name=name, reverse=reverse)
+        ilabel = self.solution.get_current(name=name, reverse=reverse if not end else not reverse)
         return elm.CurrentLabel(element, ilabel=ilabel, reverse=reverse if not element.is_reverse else not reverse, start=not end, color=dsp.red)
 
     def draw_power(self, name: str, reverse: bool = False) -> elm.PowerLabel:

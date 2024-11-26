@@ -1,5 +1,5 @@
 circuit:
-  unit: 6
+  unit: 7
   elements:
     - type: voltage_source
       V: 1
@@ -37,8 +37,5 @@ circuit:
       - name: R4
     currents:
       - name: R3
-        end: False
-        reverse: False
-      - name: R2
-      - name: R4
-      - name: R1
+        end: True
+        reverse: True
