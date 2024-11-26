@@ -1,4 +1,5 @@
 from functools import wraps
+from CircuitCalculator.Circuit.circuit import AmbiguousComponentID
 
 class UnknownCircuitElement(Exception):
     def __init__(self, element_type: str) -> None:
@@ -23,5 +24,6 @@ simulation_exceptions : tuple[type[Exception], ...] = (
     UnknownCircuitElement,
     MissingArgument,
     IllegalElementValue,
-    UnknownArgument
+    UnknownArgument,
+    AmbiguousComponentID
 )
