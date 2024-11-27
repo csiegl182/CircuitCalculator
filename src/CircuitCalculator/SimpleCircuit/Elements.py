@@ -850,16 +850,16 @@ class Ground(Node):
     def type(self) -> str:
         return 'ground'
 
-    def up(self) -> schemdraw.elements.Element:
+    def up(self, _: float) -> schemdraw.elements.Element:
         return super().left()
 
-    def down(self) -> schemdraw.elements.Element:
+    def down(self, _: float) -> schemdraw.elements.Element:
         return super().right()
 
-    def left(self) -> schemdraw.elements.Element:
+    def left(self, _: float) -> schemdraw.elements.Element:
         return super().down()
 
-    def right(self) -> schemdraw.elements.Element:
+    def right(self, _: float) -> schemdraw.elements.Element:
         return super().up()
 
 class VoltageLabel(schemdraw.elements.CurrentLabel):
