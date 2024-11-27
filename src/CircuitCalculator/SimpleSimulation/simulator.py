@@ -2,7 +2,7 @@ from typing import Optional
 from .schematic import create_schematic
 from .errors import simulation_exceptions
 from matplotlib.axes import Axes
-from CircuitCalculator.dump_load import load
+from CircuitCalculator.dump_load import load, FormatError
 
 def simulate(data: dict, circuit_ax: Optional[Axes] = None) -> None:
     circuit_definiton = data.get('circuit', {'unit': 7, 'elements': [], 'solution': {'type': None}})
@@ -15,6 +15,9 @@ def simulate_file(name: str) -> None:
         data = load(name)
     except FileNotFoundError:
         print(f'Simulation file "{name}" does not exist.')
+        return
+    except FormatError:
+        print(f'Cannot parse "{name}" as simulation file due to format issues.')
         return
     try:
         simulate(data)

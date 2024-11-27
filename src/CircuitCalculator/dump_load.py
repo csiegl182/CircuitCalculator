@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 import yaml
+import yaml.parser
 import numpy as np
 from typing import Callable, TypeVar
 
@@ -17,6 +18,16 @@ serializers = {
     'yaml': yaml.dump,
     'yml': yaml.dump
 }
+
+class FormatError(Exception):
+    def __init__(self, format: str) -> None:
+        super().__init__(f'Cannot parse data as {format}.')
+        self.format = format
+
+format_errors : tuple[type[Exception], ...] = (
+    json.JSONDecodeError,
+    yaml.parser.ParserError
+)
 
 def dictify_complex_values(data: dict) -> dict:
     for key, value in data.items():
@@ -69,7 +80,10 @@ def deserialize(data: str, format: str, dict_preprocessor: Callable[[dict], T] =
     deserializer = deserializers.get(format, None)
     if deserializer is None:
         raise ValueError('Unknown data format {format}.')
-    return dict_preprocessor(deserializer(data))
+    try:
+        return dict_preprocessor(deserializer(data))
+    except format_errors as e:
+        raise FormatError(format) from e
 
 def load(file: str, deserialize_fcn: Callable[[str, str], T] = deserialize) -> T:
     file_name = Path(file)
