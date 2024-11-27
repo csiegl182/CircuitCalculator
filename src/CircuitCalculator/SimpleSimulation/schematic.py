@@ -126,6 +126,9 @@ def fill(schematic: elm.Schematic, elements: list[elm.Element], unit: int, light
             schematic += solution.draw_voltage(**v)
         except dp.UnknownElement as e:
             print(f'Cannot draw voltage of undefined element "{str(e)}".')
+        except TypeError as e:
+            unknown_argument = str(e).split()[-1].strip()
+            raise errors.UnknownArgument(unknown_argument, 'voltages') from e
     for c in solution_definition.currents:
         try:
             schematic += solution.draw_current(**c)
@@ -139,11 +142,17 @@ def fill(schematic: elm.Schematic, elements: list[elm.Element], unit: int, light
             schematic += solution.draw_potential(**p)
         except dp.UnknownElement as e:
            print(f'Cannot draw potential of undefined node "{str(e)}".')
+        except TypeError as e:
+            unknown_argument = str(e).split()[-1].strip()
+            raise errors.UnknownArgument(unknown_argument, 'potential') from e
     for p in solution_definition.powers:
         try:
             schematic += solution.draw_power(**p)
         except dp.UnknownElement as e:
            print(f'Cannot draw power of undefined element "{str(e)}".')
+        except TypeError as e:
+            unknown_argument = str(e).split()[-1].strip()
+            raise errors.UnknownArgument(unknown_argument, 'powers') from e
 
 def create_schematic(circuit_data: dict, circuit_ax: Optional[Axes] = None) -> elm.Schematic:
     unit = circuit_data.get('unit', 7)
