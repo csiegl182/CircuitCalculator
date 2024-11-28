@@ -1,0 +1,142 @@
+circuit:
+  unit: 10
+  elements:
+    - type: voltage_source
+      V: 0.5
+      name: U1_reverse
+      reverse: true
+      direction: up
+      show_value: false
+    - type: voltage_source
+      V: -0.5
+      name: U2
+      direction: up
+      show_value: false
+    - type: resistor
+      name: R1_reverse
+      R: 0.5
+      direction: right
+      reverse: true
+      show_value: false
+    - type: resistor
+      name: R2
+      R: 0.5
+      direction: down
+      show_value: false
+      length: 2
+    - type: line
+      direction: left
+    - type: voltage_source
+      V: 0.5
+      name: U3
+      direction: down
+      show_value: false
+    - type: voltage_source
+      V: -0.5
+      name: U4_reverse
+      reverse: true
+      direction: down
+      show_value: false
+    - type: resistor
+      name: R3
+      R: 0.5
+      direction: right
+      show_value: false
+    - type: resistor
+      name: R4_reverse
+      R: 0.5
+      direction: up
+      show_value: false
+      length: 2
+      reverse: true
+    - type: line
+      direction: left
+    - type: ground
+      name: GND
+      direction: left
+  solution:
+    type: dc
+    currents:
+      - name: U1_reverse
+      - name: U1_reverse
+        end: True
+      - name: U2
+      - name: U2
+        end: True
+      - name: U1_reverse
+        end: True
+      - name: R1_reverse
+      - name: R1_reverse
+        end: True
+      - name: R2
+      - name: R2
+        end: True
+      - name: U3
+        reverse: True
+      - name: U3
+        end: True
+        reverse: True
+      - name: U4_reverse
+        reverse: True
+      - name: U4_reverse
+        end: True
+        reverse: True
+      - name: R3
+        reverse: True
+      - name: R3
+        reverse: True
+        end: True
+      - name: R4_reverse
+        reverse: True
+      - name: R4_reverse
+        reverse: True
+        end: True
+    voltages:
+      - name: U1_reverse
+      - name: U1_reverse
+        reverse: True
+        offset: -2
+      - name: U2
+      - name: U2
+        reverse: True
+        offset: -2
+      - name: R1_reverse
+      - name: R1_reverse
+        reverse: True
+        offset: -2
+      - name: R2
+      - name: R2
+        reverse: True
+        offset: -2
+      - name: U3
+      - name: U3
+        reverse: True
+        offset: -2
+      - name: U4_reverse
+      - name: U4_reverse
+        reverse: True
+        offset: -2
+      - name: R3
+      - name: R3
+        reverse: True
+        offset: -2
+      - name: R4_reverse
+      - name: R4_reverse
+        reverse: True
+        offset: -2
+    powers:
+      - name: U1_reverse
+      - name: U2
+      - name: R1_reverse
+      - name: R2
+        offset: 4
+      - name: U3
+        offset: 4
+      - name: U4_reverse
+        offset: 4
+      - name: R3
+        offset: 4
+      - name: R4_reverse
+        offset: -4
+  
+  
