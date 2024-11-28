@@ -896,7 +896,7 @@ class CurrentLabel(schemdraw.elements.CurrentLabelInline):
         self.label(ilabel)
 
 class PowerLabel(schemdraw.elements.Label):
-    def __init__(self, at: schemdraw.elements.Element, plabel: str = '', **kwargs):
+    def __init__(self, at: schemdraw.elements.Element, plabel: str = '', offset: float = 0, **kwargs):
         kwargs.update({'color': kwargs.get('color', dsp.green)})
         super().__init__(**kwargs)
         try:
@@ -907,7 +907,7 @@ class PowerLabel(schemdraw.elements.Label):
         rotate = kwargs.get('rotate', True)
         if rotate == True and at.transform.theta == 270:
             rotate = 90
-        self.label(plabel, rotate=rotate, halign='center')
+        self.label(plabel, rotate=rotate, halign='center', ofst=(0, offset))
 
 i_label_args : dict[Any, dict[str, float]] = {
     Resistor : {'ofst' : 0},
