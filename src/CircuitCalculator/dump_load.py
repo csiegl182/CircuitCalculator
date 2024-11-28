@@ -1,7 +1,7 @@
 from pathlib import Path
 import json
 import yaml
-import yaml.parser
+import yaml.parser, yaml.scanner
 import numpy as np
 from typing import Callable, TypeVar
 
@@ -26,7 +26,8 @@ class FormatError(Exception):
 
 format_errors : tuple[type[Exception], ...] = (
     json.JSONDecodeError,
-    yaml.parser.ParserError
+    yaml.parser.ParserError,
+    yaml.scanner.ScannerError
 )
 
 def dictify_complex_values(data: dict) -> dict:
