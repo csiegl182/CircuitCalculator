@@ -1,10 +1,11 @@
-from ..Circuit.solution import ComplexSolution, DCSolution
+from ..Circuit.solution import CircuitSolution, DCSolution, ComplexSolution
+from ..Circuit.circuit import Circuit
 
 from . import Elements as elm
 from . import Display as dsp
 from .DiagramTranslator import SchematicDiagramParser, circuit_translator
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Protocol
 
 class DiagramSolution(Protocol):
@@ -16,8 +17,13 @@ class DiagramSolution(Protocol):
         ...
     def get_potential(self, name: str) -> str:
         ...
+    @property
+    def solution(self) -> CircuitSolution:
+        ...
 
+@dataclass
 class EmptyDiagramSolution:
+    solution: CircuitSolution = field(default_factory=lambda: DCSolution(circuit=Circuit([])))
     def get_voltage(self, name: str, reverse: bool) -> str:
         return ''
     def get_current(self, name: str, reverse: bool) -> str:
