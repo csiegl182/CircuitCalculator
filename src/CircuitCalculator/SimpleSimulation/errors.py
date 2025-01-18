@@ -1,5 +1,5 @@
-from functools import wraps
 from CircuitCalculator.Circuit.circuit import AmbiguousComponentID
+from CircuitCalculator.dump_load import FormatError
 
 class UnknownCircuitElement(Exception):
     def __init__(self, element_type: str) -> None:
@@ -18,6 +18,23 @@ class UnknownArgument(Exception):
         self.unknown_argument = unknown_argument
         self.method = method
 
+class UnknownSolutionType(Exception):
+    def __init__(self, solution_type: str, available_solutions: list[str]) -> None:
+        super().__init__(f'Unknown solution type "{solution_type}". Available solutions: {", ".join(available_solutions)}.')
+        self.solution_type = solution_type
+        self.available_solutions = available_solutions
+
+class SolutionUsageError(Exception):
+    def __init__(self, solution_type: str, unknown_arguments: list[str]) -> None:
+        error_message = f'Cannot use solution "{solution_type}" with arguments: {", ".join(unknown_arguments)}.'
+        if len(unknown_arguments) == 0:
+            error_message = f'Cannot use solution "{solution_type}".'
+        if len(unknown_arguments) == 1:
+            error_message = f'Cannot use solution "{solution_type}" with argument: {unknown_arguments[0]}.'
+        super().__init__(error_message)
+        self.solution_type = solution_type
+        self.unknown_arguments = unknown_arguments
+
 class IllegalElementValue(Exception): ...
 
 simulation_exceptions : tuple[type[Exception], ...] = (
@@ -25,5 +42,9 @@ simulation_exceptions : tuple[type[Exception], ...] = (
     MissingArgument,
     IllegalElementValue,
     UnknownArgument,
-    AmbiguousComponentID
+    AmbiguousComponentID,
+    FileNotFoundError,
+    FormatError,
+    UnknownSolutionType,
+    SolutionUsageError
 )

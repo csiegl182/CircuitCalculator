@@ -30,6 +30,22 @@ class CircuitSolution(ABC):
         ...
 
 @dataclass
+class EmptySolution(CircuitSolution):
+    circuit: Circuit = field(default_factory=lambda: Circuit([]))
+
+    def get_voltage(self, _: str) -> Any:
+        return None
+
+    def get_current(self, _: str) -> Any:
+        return None
+
+    def get_potential(self, _: str) -> Any:
+        return None
+
+    def get_power(self, _: str) -> Any:
+        return None
+
+@dataclass
 class DCSolution(CircuitSolution):
     solver: NetworkSolver = field(default=nodal_analysis_bias_point_solver)
 
