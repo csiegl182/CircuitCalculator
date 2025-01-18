@@ -1,9 +1,9 @@
 from typing import Optional
-from .schematic import create_schematic
+from .schematic import draw_schematic, create_schematic
 from .errors import simulation_exceptions
 from matplotlib.axes import Axes
 from CircuitCalculator.dump_load import load, FormatError
-from CircuitCalculator.Circuit.solution import CircuitSolution
+import CircuitCalculator.Circuit.solution as solution
 from CircuitCalculator.SimpleCircuit.DiagramTranslator import circuit_translator
 
 def load_simulation_file(name: str) -> dict:
@@ -24,7 +24,7 @@ def parse_circuit_data(data: dict) -> dict:
     
 def show_schematic(data: dict, ax: Optional[Axes] = None) -> None:
     try:
-        create_schematic(parse_circuit_data(data), ax)
+        draw_schematic(parse_circuit_data(data), ax)
     except simulation_exceptions as e:
         print(e)
         return
@@ -33,9 +33,20 @@ def show_schematic_from_file(name: str, ax: Optional[Axes] = None) -> None:
     data = load_simulation_file(name)
     show_schematic(data, ax)
 
-def simulate_schematic(data: dict) -> CircuitSolution:
-    ...
+solutions = {
+    'dc': solution.DCSolution,
+    'complex': solution.ComplexSolution,
+    'time_domain': solution.TimeDomainSolution,
+    'frequency_domain': solution.FrequencyDomainSolution,
+    'transient': solution.TransientSolution
+}
 
-def simulate_schematic_from_file(name: str) -> CircuitSolution:
+def simulate_schematic(data: dict, solution_type: str, **kwargs) -> solution.CircuitSolution:
+    schematic = create_schematic(parse_circuit_data(data))
+    circuit = circuit_translator(schematic)
+    selected_solution = solutions.get(solution_type, solution.DCSolution)
+    return selected_solution(circuit, **kwargs)
+
+def simulate_schematic_from_file(name: str, solution_type: str, **kwargs) -> solution.CircuitSolution:
     data = load_simulation_file(name)
-    return simulate_schematic(data)
+    return simulate_schematic(data, solution_type, **kwargs)
