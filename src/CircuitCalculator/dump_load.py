@@ -2,10 +2,27 @@ from pathlib import Path
 import json
 import yaml
 import yaml.parser, yaml.scanner
+import re
 import numpy as np
 from typing import Callable, TypeVar
 
 T = TypeVar('T')
+
+# Define a custom constructor for scientific notation
+def scientific_notation_constructor(loader, node):
+    value = loader.construct_scalar(node)
+    try:
+        return float(value)
+    except ValueError:
+        return value
+
+# Add the custom constructor to the SafeLoader
+yaml.SafeLoader.add_implicit_resolver(
+    'tag:yaml.org,2002:float',
+    re.compile(r'''^(?:[-+]?(?:[0-9][0-9_]*(?:\.[0-9_]*)?|\.[0-9_]+)(?:[eE][-+]?[0-9]+)?)$'''),
+    list('-+0123456789.')
+)
+yaml.SafeLoader.add_constructor('tag:yaml.org,2002:float', scientific_notation_constructor)
 
 deserializers = {
     'json': json.loads,

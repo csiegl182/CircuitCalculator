@@ -31,19 +31,31 @@ class SolutionDefinition:
 
     @property
     def voltages(self) -> list[dict]:
-        return self.data.get('voltages', [])
+        voltages = self.data.get('voltages', [])
+        if voltages is None:
+            return []
+        return voltages
 
     @property
     def currents(self) -> list[dict]:
-        return self.data.get('currents', [])
+        currents = self.data.get('currents', [])
+        if currents is None:
+            return []
+        return currents
 
     @property
     def potentials(self) -> list[dict]:
-        return self.data.get('potentials', [])
+        potentials = self.data.get('potentials', [])
+        if potentials is None:
+            return []
+        return potentials
 
     @property
     def powers(self) -> list[dict]:
-        return self.data.get('powers', [])
+        powers = self.data.get('powers', [])
+        if powers is None:
+            return []
+        return powers
 
 element_handlers = {
     'resistor': lambda kwargs: element_factory(elm.Resistor, **kwargs),
