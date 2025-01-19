@@ -2,7 +2,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot
 import pytest
-from CircuitCalculator.SimpleSimulation.simulator import simulate
+from CircuitCalculator.SimpleSimulation.schematic import draw_schematic
 from CircuitCalculator.SimpleSimulation import errors
 
 def test_simulate_raises_missing_argument_error_when_no_element_type_is_defined_in_circuit_elements_definition() -> None:
@@ -18,7 +18,7 @@ def test_simulate_raises_missing_argument_error_when_no_element_type_is_defined_
         }
     }
     with pytest.raises(errors.MissingArgument):
-        simulate(simulation_data, ax)
+        draw_schematic(simulation_data, ax)
 
 def test_simulate_raises_unknown_circuit_element_error_when_element_type_is_unknown() -> None:
     _, ax = matplotlib.pyplot.subplots()
@@ -33,7 +33,7 @@ def test_simulate_raises_unknown_circuit_element_error_when_element_type_is_unkn
         }
     }
     with pytest.raises(errors.UnknownCircuitElement):
-        simulate(simulation_data, ax)
+        draw_schematic(simulation_data, ax)
 
 def test_when_providing_no_analysis_section_no_error_occurs() -> None:
     simulation_data = {
@@ -58,7 +58,7 @@ def test_when_providing_no_analysis_section_no_error_occurs() -> None:
             ]
         }
     }
-    simulate(simulation_data)
+    draw_schematic(simulation_data)
 
 def test_when_providing_element_with_insufficient_arguemnts_a_missing_argument_error_is_raised() -> None:
     _, ax = matplotlib.pyplot.subplots()
@@ -75,4 +75,4 @@ def test_when_providing_element_with_insufficient_arguemnts_a_missing_argument_e
         }
     }
     with pytest.raises(errors.MissingArgument):
-        simulate(simulation_data, ax)
+        draw_schematic(simulation_data, ax)

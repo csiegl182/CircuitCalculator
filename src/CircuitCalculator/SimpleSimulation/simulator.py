@@ -14,16 +14,10 @@ def load_simulation_file(name: str) -> dict:
         raise FileNotFoundError(f'Simulation file "{name}" does not exist.') from e
     except FormatError as e:
         raise FormatError(f'Cannot parse "{name}" as simulation file due to format issues.') from e
-
-def parse_circuit_data(data: dict) -> dict:
-    circuit_definiton = data.get('circuit', {'unit': 7, 'elements': [], 'solution': {'type': None}})
-    if len(circuit_definiton['elements']) == 0:
-        raise ValueError('No elements in circuit definition')
-    return circuit_definiton
     
 def show_schematic(data: dict, ax: Optional[Axes] = None) -> None:
     try:
-        draw_schematic(parse_circuit_data(data), ax)
+        draw_schematic(data, ax)
     except errors.simulation_exceptions as e:
         print(e)
         return
@@ -56,7 +50,7 @@ def get_solution(solution_type: str, circuit: Circuit, **kwargs) -> solution.Cir
 
 def simulate_schematic(data: dict, solution_type: str, **kwargs) -> solution.CircuitSolution:
     try:
-        schematic = create_schematic(parse_circuit_data(data))
+        schematic = create_schematic(data)
         circuit = circuit_translator(schematic)
         return get_solution(solution_type, circuit, **kwargs)
     except errors.simulation_exceptions as e:

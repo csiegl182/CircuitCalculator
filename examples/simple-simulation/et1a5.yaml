@@ -1,0 +1,65 @@
+circuit:
+  unit: 5 
+  elements:
+    - type: current_source
+      I: 40e-3
+      name: Iq
+      direction: up
+      length: 2
+    - type: line
+      direction: right
+      length: 0.5
+    - type: resistor
+      name: R1
+      R: 80
+      direction: down
+    - type: node
+      name: '1'
+    - type: resistor
+      name: R2
+      R: 20
+      direction: down
+    - type: ground
+      name: GND
+    - type: line
+      direction: left
+      length: 0.5
+    - type: resistor
+      name: RV
+      R: 200
+      direction: right
+      length: 1.5
+      place_after: R1
+    - type: resistor
+      name: R4
+      R: 70
+      direction: down
+    - type: line
+      direction: right
+      length: 0.5
+    - type: voltage_source
+      V: 6
+      name: Vq
+      direction: up
+      length: 2
+      reverse: true
+    - type: line
+      direction: left
+      length: 0.5
+    - type: resistor
+      name: R3
+      R: 30
+      direction: down
+  solution:
+    type: dc
+    voltages:
+      - name: Iq
+        reverse: true
+      - name: R1
+      - name: R2
+      - name: RV
+      - name: R3
+      - name: R4
+    currents:
+      - name: RV
+    powers:

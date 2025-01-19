@@ -166,7 +166,14 @@ def fill_solution(schematic: elm.Schematic, light_lamps: bool, solution_definiti
             unknown_argument = str(e).split()[-1].strip()
             raise errors.UnknownArgument(unknown_argument, 'powers') from e
 
+def parse_circuit_data(data: dict) -> dict:
+    circuit_definiton = data.get('circuit', {'unit': 7, 'elements': [], 'solution': {'type': None}})
+    if len(circuit_definiton['elements']) == 0:
+        raise ValueError('No elements in circuit definition')
+    return circuit_definiton
+
 def create_schematic(circuit_data: dict) -> elm.Schematic:
+    circuit_data = parse_circuit_data(circuit_data)
     unit = circuit_data.get('unit', 7)
     elements = circuit_data.get('elements', [])
     schematic = elm.Schematic(unit=unit)
@@ -174,6 +181,7 @@ def create_schematic(circuit_data: dict) -> elm.Schematic:
     return schematic
 
 def draw_schematic(circuit_data: dict, circuit_ax: Optional[Axes] = None) -> elm.Schematic:
+    circuit_data = parse_circuit_data(circuit_data)
     unit = circuit_data.get('unit', 7)
     elements = circuit_data.get('elements', [])
     light_lamps = circuit_data.get('light_lamps', False)
