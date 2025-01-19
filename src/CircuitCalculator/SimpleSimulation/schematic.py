@@ -169,7 +169,7 @@ def fill_solution(schematic: elm.Schematic, light_lamps: bool, solution_definiti
 def parse_circuit_data(data: dict) -> dict:
     circuit_definiton = data.get('circuit', {'unit': 7, 'elements': [], 'solution': {'type': None}})
     if len(circuit_definiton['elements']) == 0:
-        raise ValueError('No elements in circuit definition')
+        raise errors.EmptyCircuit('No elements in circuit definition')
     return circuit_definiton
 
 def create_schematic(circuit_data: dict) -> elm.Schematic:

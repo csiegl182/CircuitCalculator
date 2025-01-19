@@ -37,6 +37,8 @@ class SolutionUsageError(Exception):
 
 class IllegalElementValue(Exception): ...
 
+class EmptyCircuit(Exception): ...
+
 simulation_exceptions : tuple[type[Exception], ...] = (
     UnknownCircuitElement,
     MissingArgument,
@@ -46,5 +48,6 @@ simulation_exceptions : tuple[type[Exception], ...] = (
     FileNotFoundError,
     FormatError,
     UnknownSolutionType,
-    SolutionUsageError
+    SolutionUsageError,
+    EmptyCircuit
 )
