@@ -33,14 +33,14 @@ class Circuit:
 def w(f: float) -> float:
     return 2*np.pi*f
 
-def transform_circuit(circuit: Circuit, w: float, w_resolution: float = 1e-3) -> Network:
+def transform_circuit(circuit: Circuit, w: float, w_resolution: float = 1e-3, rms: bool = True) -> Network:
     return Network(
-        branches=[transformers[component.type](component, w, w_resolution) for component in circuit.components if component.type in transformers.keys()],
+        branches=[transformers[component.type](component, w, w_resolution, rms) for component in circuit.components if component.type in transformers.keys()],
         node_zero_label=circuit.ground_node
     )
 
-def transform(circuit: Circuit, w: list[float] = [0], w_resolution: float = 1e-3) -> list[Network]:
-    return [transform_circuit(circuit, w_, w_resolution) for w_ in w]
+def transform(circuit: Circuit, w: list[float] = [0], w_resolution: float = 1e-3, rms: bool = True) -> list[Network]:
+    return [transform_circuit(circuit, w_, w_resolution, rms) for w_ in w]
 
 def frequency_components(circuit: Circuit, w_max: float) -> list[float]:
     def frequencies(component: Component) -> list[float]:

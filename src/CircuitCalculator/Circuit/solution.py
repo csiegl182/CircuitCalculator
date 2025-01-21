@@ -72,23 +72,19 @@ class ComplexSolution(CircuitSolution):
     peak_values: bool = False
 
     def __post_init__(self):
-        network = transform(self.circuit, w=[self.w])[0]
+        network = transform(self.circuit, w=[self.w], rms=not self.peak_values)[0]
+        if self.w == 0:
+            self.peak_values = True
         self._solution = self.solver(network)
 
     def get_voltage(self, component_id: str) -> complex:
-        if self.peak_values:
-            return self._solution.get_voltage(component_id)
-        return self._solution.get_voltage(component_id)/np.sqrt(2)
+        return self._solution.get_voltage(component_id)
 
     def get_current(self, component_id: str) -> complex:
-        if self.peak_values:
-            return self._solution.get_current(component_id)
-        return self._solution.get_current(component_id)/np.sqrt(2)
+        return self._solution.get_current(component_id)
 
     def get_potential(self, node_id: str) -> complex:
-        if self.peak_values:
-            return self._solution.get_potential(node_id)
-        return self._solution.get_potential(node_id)/np.sqrt(2)
+        return self._solution.get_potential(node_id)
 
     def get_power(self, component_id: str) -> complex:
         if self.peak_values:

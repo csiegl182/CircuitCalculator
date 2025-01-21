@@ -121,7 +121,7 @@ def admittance_value(G : float = 0.0, B : float = 0.0, absY : float = -1.0, phi 
         return complex(absY*np.cos(phi), absY*np.sin(phi))
     return complex(G, B)
 
-def complex_value(X : float, phi : float = 0.0, rms: bool = False, deg: bool = False):
+def complex_value(X : float, phi : float = 0.0, rms: bool = False, deg: bool = False) -> complex:
     if rms:
         X *= np.sqrt(2)
     if deg:

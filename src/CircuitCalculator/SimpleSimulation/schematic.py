@@ -13,7 +13,7 @@ from . import errors
 solutions = {
     'dc': ds.real_solution,
     'real': ds.real_solution,
-    'complex': ds.complex_solution,
+    'complex': ds.single_frequency_complex_solution,
     'single_frequency_time_domain': ds.single_frequency_complex_solution
 }
 

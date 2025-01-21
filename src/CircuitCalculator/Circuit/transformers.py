@@ -6,7 +6,7 @@ from . import components as ccp
 from ..SignalProcessing.periodic_functions import periodic_function, fourier_series
 
 CircuitComponent = TypeVar("CircuitComponent", bound=ccp.Component)
-CircuitComponentTranslator = Callable[[ccp.Component, float, float], ntw.Branch]
+CircuitComponentTranslator = Callable[[ccp.Component, float, float, bool], ntw.Branch]
 
 def resistor(resistor: ccp.Component, *_) -> ntw.Branch:
     R = float(resistor.value['R'])
@@ -34,7 +34,7 @@ def inductance(inductance: ccp.Component, w: float = 0, *_) -> ntw.Branch:
         elm.impedance(inductance.id, elm.impedance_value(X=w*L))
     )
 
-def dc_voltage_source(voltage_source: ccp.Component, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
+def dc_voltage_source(voltage_source: ccp.Component, w: float = 0, w_resolution: float = 1e-3, *_) -> ntw.Branch:
     V = elm.complex_value(float(voltage_source.value['V']), 0)
     Z = elm.complex_value(float(voltage_source.value['R']), 0)
     element = elm.voltage_source(voltage_source.id, V, Z)
@@ -45,7 +45,9 @@ def dc_voltage_source(voltage_source: ccp.Component, w: float = 0, w_resolution:
         voltage_source.nodes[1],
         element)
 
-def ac_voltage_source(voltage_source: ccp.Component, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
+def ac_voltage_source(voltage_source: ccp.Component, w: float = 0, w_resolution: float = 1e-3, rms:bool = True) -> ntw.Branch:
+    if rms:
+        vs_V = float(voltage_source.value['V'])/np.sqrt(2)
     vs_V = float(voltage_source.value['V'])
     vs_phi = float(voltage_source.value['phi'])
     vs_R = float(voltage_source.value['R'])
@@ -72,7 +74,7 @@ def complex_voltage_source(voltage_source: ccp.Component, *_) -> ntw.Branch:
         voltage_source.nodes[1],
         element)
 
-def periodic_voltage_source(source: ccp.Component, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
+def periodic_voltage_source(source: ccp.Component, w: float = 0, w_resolution: float = 1e-3, *_) -> ntw.Branch:
     wavetype = str(source.value['wavetype'])
     w0 = float(source.value['w'])
     V = float(source.value['V'])
@@ -94,7 +96,7 @@ def periodic_voltage_source(source: ccp.Component, w: float = 0, w_resolution: f
     )
     return ac_voltage_source(single_frequency_source, w, w_resolution)
 
-def dc_current_source(current_source: ccp.Component, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
+def dc_current_source(current_source: ccp.Component, w: float = 0, w_resolution: float = 1e-3, *_) -> ntw.Branch:
     cs_I = float(current_source.value['I'])
     cs_G = float(current_source.value['G'])
     cs_w = float(current_source.value['w'])
@@ -107,7 +109,9 @@ def dc_current_source(current_source: ccp.Component, w: float = 0, w_resolution:
         element
     )
 
-def ac_current_source(current_source: ccp.Component, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
+def ac_current_source(current_source: ccp.Component, w: float = 0, w_resolution: float = 1e-3, rms: bool = True) -> ntw.Branch:
+    if rms:
+        cs_I = float(current_source.value['I'])/np.sqrt(2)
     cs_I = float(current_source.value['I'])
     cs_G = float(current_source.value['G'])
     cs_w = float(current_source.value['w'])
@@ -121,7 +125,7 @@ def ac_current_source(current_source: ccp.Component, w: float = 0, w_resolution:
         element
     )
 
-def complex_current_source(current_source: ccp.Component, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
+def complex_current_source(current_source: ccp.Component, w: float = 0, w_resolution: float = 1e-3, *_) -> ntw.Branch:
     cs_I = complex(
         float(current_source.value['I_real']),
         float(current_source.value['I_imag'])
@@ -139,7 +143,7 @@ def complex_current_source(current_source: ccp.Component, w: float = 0, w_resolu
         current_source.nodes[1],
         element)
 
-def periodic_current_source(source: ccp.Component, w: float = 0, w_resolution: float = 1e-3) -> ntw.Branch:
+def periodic_current_source(source: ccp.Component, w: float = 0, w_resolution: float = 1e-3, *_) -> ntw.Branch:
     wavetype = str(source.value['wavetype'])
     w0 = float(source.value['w'])
     I = float(source.value['I'])

@@ -30,56 +30,56 @@ class NetworkSolutionMock:
         return other_power
 
 def test_complex_solution_returns_voltage_when_asking_for_correct_id(monkeypatch: MonkeyPatch) -> None:
-    monkeypatch.setattr('CircuitCalculator.Circuit.solution.transform', lambda _, w: [None])
+    monkeypatch.setattr('CircuitCalculator.Circuit.solution.transform', lambda _, w, rms: [None])
 
     complex_solution = ComplexSolution(Circuit([]), lambda _: NetworkSolutionMock(), peak_values=True)
 
     assert complex_solution.get_voltage('correct_id') == correct_voltage
 
 def test_complex_solution_returns_voltage_when_asking_for_another_id(monkeypatch: MonkeyPatch) -> None:
-    monkeypatch.setattr('CircuitCalculator.Circuit.solution.transform', lambda _, w: [None])
+    monkeypatch.setattr('CircuitCalculator.Circuit.solution.transform', lambda _, w, rms: [None])
 
     complex_solution = ComplexSolution(Circuit([]), lambda _: NetworkSolutionMock(), peak_values=True)
 
     assert complex_solution.get_voltage('another_id') == other_voltage
 
 def test_complex_solution_returns_current_when_asking_for_correct_id(monkeypatch: MonkeyPatch) -> None:
-    monkeypatch.setattr('CircuitCalculator.Circuit.solution.transform', lambda _, w: [None])
+    monkeypatch.setattr('CircuitCalculator.Circuit.solution.transform', lambda _, w, rms: [None])
 
     complex_solution = ComplexSolution(Circuit([]), lambda _: NetworkSolutionMock(), peak_values=True)
 
     assert complex_solution.get_current('correct_id') == correct_current
 
 def test_complex_solution_returns_current_when_asking_for_another_id(monkeypatch: MonkeyPatch) -> None:
-    monkeypatch.setattr('CircuitCalculator.Circuit.solution.transform', lambda _, w: [None])
+    monkeypatch.setattr('CircuitCalculator.Circuit.solution.transform', lambda _, w, rms: [None])
 
     complex_solution = ComplexSolution(Circuit([]), lambda _: NetworkSolutionMock(), peak_values=True)
 
     assert complex_solution.get_current('another_id') == other_current
 
 def test_complex_solution_returns_potential_when_asking_for_correct_id(monkeypatch: MonkeyPatch) -> None:
-    monkeypatch.setattr('CircuitCalculator.Circuit.solution.transform', lambda _, w: [None])
+    monkeypatch.setattr('CircuitCalculator.Circuit.solution.transform', lambda _, w, rms: [None])
 
     complex_solution = ComplexSolution(Circuit([]), lambda _: NetworkSolutionMock(), peak_values=True)
 
     assert complex_solution.get_potential('correct_id') == correct_potential
 
 def test_complex_solution_returns_potential_when_asking_for_another_id(monkeypatch: MonkeyPatch) -> None:
-    monkeypatch.setattr('CircuitCalculator.Circuit.solution.transform', lambda _, w: [None])
+    monkeypatch.setattr('CircuitCalculator.Circuit.solution.transform', lambda _, w, rms: [None])
 
     complex_solution = ComplexSolution(Circuit([]), lambda _: NetworkSolutionMock(), peak_values=True)
 
     assert complex_solution.get_potential('another_id') == other_potential
 
 def test_complex_solution_returns_power_when_asking_for_correct_id(monkeypatch: MonkeyPatch) -> None:
-    monkeypatch.setattr('CircuitCalculator.Circuit.solution.transform', lambda _, w: [None])
+    monkeypatch.setattr('CircuitCalculator.Circuit.solution.transform', lambda _, w, rms: [None])
 
     complex_solution = ComplexSolution(Circuit([]), lambda _: NetworkSolutionMock(), peak_values=True)
 
     assert complex_solution.get_power('correct_id') == correct_power
 
 def test_complex_solution_returns_power_when_asking_for_another_id(monkeypatch: MonkeyPatch) -> None:
-    monkeypatch.setattr('CircuitCalculator.Circuit.solution.transform', lambda _, w: [None])
+    monkeypatch.setattr('CircuitCalculator.Circuit.solution.transform', lambda _, w, rms: [None])
 
     complex_solution = ComplexSolution(Circuit([]), lambda _: NetworkSolutionMock(), peak_values=True)
 
