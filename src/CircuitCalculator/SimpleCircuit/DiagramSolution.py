@@ -159,20 +159,12 @@ class SchematicDiagramSolution:
     def draw_voltage(self, name: str, reverse: bool = False, offset: float = 0) -> elm.VoltageLabel:
         element = self.diagram_parser.get_element(name)
         vlabel = self.solution.get_voltage(name=name, reverse=reverse)
-        if element.type == 'voltage_source':
-            return elm.VoltageLabel(element, vlabel=vlabel, reverse=reverse if not element.is_reverse else not reverse, color=dsp.blue, ofst=offset)
-        if element.type == 'current_source':
-            return elm.VoltageLabel(element, vlabel=vlabel, reverse=reverse if not element.is_reverse else not reverse, color=dsp.blue, ofst=offset)
-        return elm.VoltageLabel(element, vlabel=vlabel, reverse=reverse, color=dsp.blue, ofst=offset)
+        return elm.VoltageLabel(element, vlabel=vlabel, reverse=reverse if not element.is_reverse else not reverse, color=dsp.blue, ofst=offset)
 
     def draw_current(self, name: str, reverse: bool = False, end: bool = False) -> elm.CurrentLabel:
         element = self.diagram_parser.get_element(name)
         ilabel = self.solution.get_current(name=name, reverse=reverse if not end else not reverse)
-        if element.type == 'voltage_source':
-            return elm.CurrentLabel(element, ilabel=ilabel, reverse=reverse if not element.is_reverse else not reverse, start=not end, color=dsp.red)
-        if element.type == 'current_source':
-            return elm.CurrentLabel(element, ilabel=ilabel, reverse=reverse if not element.is_reverse else not reverse, start=not end, color=dsp.red)
-        return elm.CurrentLabel(element, ilabel=ilabel, reverse=reverse, start=not end, color=dsp.red)
+        return elm.CurrentLabel(element, ilabel=ilabel, reverse=reverse if not element.is_reverse else not reverse, start=not end, color=dsp.red)
 
     def draw_power(self, name: str, offset: float = 0) -> elm.PowerLabel:
         element = self.diagram_parser.get_element(name)

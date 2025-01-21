@@ -188,6 +188,10 @@ class Resistor(schemdraw.elements.Resistor):
         return 1/self._R
 
     @property
+    def is_reverse(self) -> bool:
+        return False
+
+    @property
     def type(self) -> str:
         return 'resistor'
 
@@ -210,6 +214,10 @@ class Conductance(schemdraw.elements.Resistor):
     @property
     def G(self) -> float:
         return self._G
+
+    @property
+    def is_reverse(self) -> bool:
+        return False
 
     @property
     def type(self) -> str:
@@ -236,6 +244,10 @@ class Impedance(schemdraw.elements.Resistor):
         return 1/self._Z
 
     @property
+    def is_reverse(self) -> bool:
+        return False
+
+    @property
     def type(self) -> str:
         return 'impedance'
 
@@ -258,6 +270,10 @@ class Admittance(schemdraw.elements.Resistor):
     @property
     def Y(self) -> complex:
         return 1/self._Y
+
+    @property
+    def is_reverse(self) -> bool:
+        return False
 
     @property
     def type(self) -> str:
@@ -590,6 +606,10 @@ class Capacitor(schemdraw.elements.Capacitor):
         return self._C
 
     @property
+    def is_reverse(self) -> bool:
+        return False
+
+    @property
     def type(self) -> str:
         return 'capacitor'
 
@@ -608,6 +628,10 @@ class Inductance(schemdraw.elements.Inductor):
     @property
     def L(self) -> float:
         return self._L
+
+    @property
+    def is_reverse(self) -> bool:
+        return False
 
     @property
     def type(self) -> str:
@@ -726,6 +750,10 @@ class Lamp(schemdraw.elements.Lamp2):
     def R(self) -> float:
         return self._V_ref**2/self._P_ref
 
+    @property
+    def is_reverse(self) -> bool:
+        return False
+
 class LabeledLine(Line):
     def __init__(self, *args, name: str, **kwargs):
         super().__init__(*args, name=name, **kwargs)
@@ -738,6 +766,10 @@ class LabeledLine(Line):
     @property
     def type(self) -> str:
         return 'labeled_line'
+
+    @property
+    def is_reverse(self) -> bool:
+        return False
 
 @simple_circuit_element
 class Node(schemdraw.elements.Element):
@@ -811,6 +843,10 @@ class Switch(schemdraw.elements.elements.Element2Term):
     @property
     def name(self) -> str:
         return self._name
+
+    @property
+    def is_reverse(self) -> bool:
+        return False
 
     @property
     def type(self) -> str:
