@@ -49,5 +49,6 @@ simulation_exceptions : tuple[type[Exception], ...] = (
     FormatError,
     UnknownSolutionType,
     SolutionUsageError,
-    EmptyCircuit
+    EmptyCircuit,
+    KeyError
 )

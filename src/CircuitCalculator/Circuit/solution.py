@@ -154,6 +154,12 @@ class TransientSolution(CircuitSolution):
     input: dict[str, TimeDomainFunction] = field(default_factory=dict)
     solver: StateSpaceSolver = field(default=continuous_state_space_solver)
 
+    def _input_fcn(self, input_id: str) -> TimeDomainFunction:
+        try:
+            return self.input[input_id]
+        except KeyError as e:
+            raise KeyError(f'Input element with id "{input_id}" not defined.') from e
+
     def __post_init__(self):
         network = transform(self.circuit, w=[0])[0]
 
@@ -161,7 +167,7 @@ class TransientSolution(CircuitSolution):
         L_values = {c.id: float(c.value['L']) for c in self.circuit.components if c.type == 'inductance'}
 
         self._ssm = nodal_state_space_model(network, c_values=C_values, l_values=L_values)
-        self._u = np.array([self.input[input_id](self.tin) for input_id in self._ssm.sources])
+        self._u = np.array([self._input_fcn(input_id)(self.tin) for input_id in self._ssm.sources])
         self._tout, self._x, _ = self.solver(
             StateSpaceModel(A=self._ssm.A, B=self._ssm.B, C=np.eye(self._ssm.A.shape[0]), D=np.zeros((self._ssm.A.shape[0], self._ssm.B.shape[1]))),
             self._u.T,

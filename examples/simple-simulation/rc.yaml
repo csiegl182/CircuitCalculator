@@ -1,12 +1,12 @@
 circuit:
   elements:
-    - type: voltage_source
+    - type: complex_voltage_source
       V: 1
-      name: U1
+      name: Uq
       reverse: true
     - type: resistor
       name: R1
-      R: 10
+      R: 1
       direction: right
     - type: capacitor
       name: C1
@@ -18,8 +18,12 @@ circuit:
       name: GND
   solution:
     type: complex
+    w: 500000
     voltages:
-      - name: U1
-        reverse: true
+      - name: Uq
+        reverse: false
       - name: R1
       - name: C1
+    currents:
+      - name: Uq
+      - name: R1
