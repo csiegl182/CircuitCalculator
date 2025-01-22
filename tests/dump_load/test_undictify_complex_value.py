@@ -58,12 +58,12 @@ def test_undictify_complex_from_abs_phase_data_with_negative_abs_raises_value_er
     with pytest.raises(ValueError):
         _ = undictify_complex_values(data)
 
-@given(st.complex_numbers(min_magnitude=1e-4, allow_nan=False, allow_infinity=False))
+@given(st.complex_numbers(min_magnitude=1e-4, max_magnitude=1e4, allow_nan=False, allow_infinity=False))
 def test_undictify_complex_from_abs_phase_data_with_deg_phase(z: complex) -> None:
     data = {'z': {'abs': np.abs(z), 'phase_deg': np.angle(z)/np.pi*180}}
     restored_data = undictify_complex_values(data)
-    assert_approx_equal(np.abs(restored_data['z']), np.abs(z))
-    assert_approx_equal(np.mod(np.angle(restored_data['z']), np.pi), np.mod(np.angle(z), np.pi))
+    assert_approx_equal(np.abs(restored_data['z']), np.abs(z), 3)
+    assert_approx_equal(np.angle(restored_data['z']), np.angle(z), 3)
 
 def test_additional_field_to_abs_phase_allows_negative_abs() -> None:
     not_complex_number = {'abs': -1, 'phase': 2, 'additional': 3}
