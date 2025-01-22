@@ -12,19 +12,11 @@ class NodalAnalysisBiasPointSolution(NodalAnalysisSolution):
         A = nodal_analysis_coefficient_matrix(self.network, node_mapper=self.node_mapper)
         b = nodal_analysis_constants_vector(self.network, node_mapper=self.node_mapper)
         try:
-            self._solution_vector = np.linalg.solve(A, b)
+            self._solution_vector = tuple(np.linalg.solve(A, b))
         except np.linalg.LinAlgError:
-            self._solution_vector = np.zeros(np.size(b))
+            self._solution_vector = tuple(np.zeros(np.size(b)))
         if np.any(np.isnan(self._solution_vector)):
-            self._solution_vector = np.zeros(np.size(b))
-
-    @property
-    def _potentials(self) -> np.ndarray:
-        return self._solution_vector[:self._node_mapping.N]
-
-    @property
-    def _voltage_source_currents(self) -> np.ndarray:
-        return self._solution_vector[-self._voltage_source_mapping.N:]
+            self._solution_vector = tuple(np.zeros(np.size(b)))
 
     def get_potential(self, node_id: str) -> complex:
         if node_id == self.network.node_zero_label:
