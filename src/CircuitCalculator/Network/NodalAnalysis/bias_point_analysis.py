@@ -1,10 +1,10 @@
-from .node_analysis import nodal_analysis_coefficient_matrix, nodal_analysis_constants_vector, open_circuit_impedance
+import numpy as np
+from dataclasses import dataclass
 from ..elements import is_ideal_current_source, is_current_source
 from ..network import Network
 from ..solution import NetworkSolution
+from .node_analysis import nodal_analysis_coefficient_matrix, nodal_analysis_constants_vector, open_circuit_impedance
 from .solution import NodalAnalysisSolution
-import numpy as np
-from dataclasses import dataclass
 
 @dataclass
 class NodalAnalysisBiasPointSolution(NodalAnalysisSolution):

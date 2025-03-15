@@ -1,7 +1,7 @@
-from ..network import Network
-from ..elements import is_current_source, is_ideal_voltage_source
 from typing import Callable
 from dataclasses import dataclass
+from ..network import Network
+from ..elements import is_current_source, is_ideal_voltage_source
 
 class DistinctValues(Exception):
     ...

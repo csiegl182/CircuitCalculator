@@ -1,5 +1,6 @@
 from typing import Protocol
 from dataclasses import dataclass
+from abc import ABC, abstractmethod
 import numpy as np
 
 class NortenTheveninElement(Protocol):
@@ -12,28 +13,79 @@ class NortenTheveninElement(Protocol):
         """Specific element type"""
         ...
     @property
-    def Z(self) -> complex:
+    def Z(self) -> complex | str:
         """Impedance value of element"""
         ...
     @property
-    def Y(self) -> complex:
+    def Y(self) -> complex | str:
         """Admittance value of element"""
         ...
     @property
-    def V(self) -> complex:
+    def V(self) -> complex | str:
         """Voltage value of element"""
         ...
     @property
-    def I(self) -> complex:
+    def I(self) -> complex | str:
         """Current value of element"""
+        ...
+    @property
+    def is_voltage_source(self) -> bool:
+        """Check if element behaves as a linear voltage source"""
+        ...
+    @property
+    def is_current_source(self) -> bool:
+        """Check if element behaves as a linear current source"""
+        ...
+    @property
+    def is_ideal_voltage_source(self) -> bool:
+        """Check if element behaves as an ideal voltage source"""
+        ...
+    @property
+    def is_ideal_current_source(self) -> bool:
+        """Check if element behaves as an ideal current source"""
         ...
 
 @dataclass(frozen=True)
-class NortenElement:
-    name : str
-    type : str
-    Z : complex
-    V : complex
+class NummericNortenTheveninElement(ABC):
+    name: str
+    type: str
+
+    @property
+    @abstractmethod
+    def Z(self) -> complex: ...
+
+    @property
+    @abstractmethod
+    def Y(self) -> complex: ...
+
+    @property
+    @abstractmethod
+    def V(self) -> complex: ...
+
+    @property
+    @abstractmethod
+    def I(self) -> complex: ...
+
+    @property
+    def is_voltage_source(self) -> bool:
+        return np.abs(self.V) > 0
+
+    @property
+    def is_current_source(self) -> bool:
+        return np.abs(self.I) > 0
+
+    @property
+    def is_ideal_voltage_source(self) -> bool:
+        return np.abs(self.V) >= 0 and self.Z==0
+
+    @property
+    def is_ideal_current_source(self) -> bool:
+        return np.abs(self.I) >= 0 and self.Y==0
+
+@dataclass(frozen=True)
+class NortenElement(NummericNortenTheveninElement):
+    V : complex = 0
+    Z : complex = 0
 
     @property
     def Y(self) -> complex:
@@ -50,11 +102,9 @@ class NortenElement:
             return np.nan
 
 @dataclass(frozen=True)
-class TheveninElement:
-    name : str
-    type : str
-    Y : complex
-    I : complex
+class TheveninElement(NummericNortenTheveninElement):
+    I : complex = 0
+    Y : complex = 0
 
     @property
     def Z(self) -> complex:
@@ -69,6 +119,77 @@ class TheveninElement:
             return complex(self.I)/self.Y
         except ZeroDivisionError:
             return np.nan
+
+dataclass(frozen=True)
+class SymbolicNortenTheveninElement(ABC):
+    name : str
+    type : str
+
+    @property
+    @abstractmethod
+    def Z(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def Y(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def V(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def I(self) -> str: ...
+
+    @property
+    def is_voltage_source(self) -> bool:
+        return self.V != '0'
+
+    @property
+    def is_current_source(self) -> bool:
+        return self.I != '0'
+
+    @property
+    def is_ideal_voltage_source(self) -> bool:
+        return self.V != 'nan' and self.Z == '0'
+
+    @property
+    def is_ideal_current_source(self) -> bool:
+        return self.I != 'nan' and self.Y == '0'
+
+@dataclass(frozen=True)
+class SymbolicNortenElement(SymbolicNortenTheveninElement):
+    V : str = '0'
+    Z : str = '0'
+
+    @property
+    def Y(self) -> str:
+        if self.Z == '0':
+            return 'oo'
+        return f'1/{self.Z}'
+    
+    @property
+    def I(self) -> str:
+        if self.Z == '0':
+            return 'nan'
+        return f'{self.V}/{self.Z}'
+
+@dataclass(frozen=True)
+class SymbolicTheveninElement(SymbolicNortenTheveninElement):
+    I : str = '0'
+    Y : str = '0'
+
+    @property
+    def Z(self) -> str:
+        if self.Y == '0':
+            return 'oo'
+        return f'1/{self.Y}'
+    
+    @property
+    def V(self) -> str:
+        if self.Y == '0':
+            return 'nan'
+        return f'{self.I}/{self.Y}'
 
 def impedance(name : str, Z : complex) -> NortenTheveninElement:
     return NortenElement(Z=Z, V=0, name=name, type='impedance')
@@ -107,6 +228,31 @@ def open_circuit(name : str) -> NortenTheveninElement:
 def short_circuit(name : str) -> NortenTheveninElement:
     return NortenElement(V=0, Z=0, name=name, type='short_circuit')
 
+## TODO: Remove these functions
+
+def is_voltage_source(element: NortenTheveninElement) -> bool:
+    return np.abs(element.V) > 0
+
+def is_current_source(element: NortenTheveninElement) -> bool:
+    return np.abs(element.I) > 0
+
+def is_ideal_voltage_source(element: NortenTheveninElement) -> bool:
+    return np.abs(element.V) >= 0 and element.Z==0
+
+def is_ideal_current_source(element: NortenTheveninElement) -> bool:
+    return np.abs(element.I) >= 0 and element.Y==0
+
+## TODO: IS THIS NEEDED?
+
+def is_active(element: NortenTheveninElement) -> bool:
+    return is_voltage_source(element) or is_current_source(element)
+
+def is_short_circuit(element: NortenTheveninElement) -> bool:
+    return element.V == 0 and element.Z == 0
+
+def is_open_circuit(element: NortenTheveninElement) -> bool:
+    return element.I == 0 and element.Y == 0
+
 def impedance_value(R : float = 0.0, X : float = 0.0, absZ : float = -1.0, phi : float = 0.0, degree : bool = False) -> complex:
     if degree:
         phi *= np.pi/180
@@ -129,25 +275,3 @@ def complex_value(X : float, phi : float = 0.0, rms: bool = False, deg: bool = F
     if not np.isfinite(X):
         return complex(np.inf, 0)
     return X*complex(np.cos(phi), np.sin(phi))
-
-def is_voltage_source(element: NortenTheveninElement) -> bool:
-    return np.abs(element.V) > 0
-
-def is_current_source(element: NortenTheveninElement) -> bool:
-    return np.abs(element.I) > 0
-
-def is_ideal_voltage_source(element: NortenTheveninElement) -> bool:
-    return np.abs(element.V) >= 0 and element.Z==0
-
-def is_ideal_current_source(element: NortenTheveninElement) -> bool:
-    return np.abs(element.I) >= 0 and element.Y==0
-
-def is_active(element: NortenTheveninElement) -> bool:
-    return is_voltage_source(element) or is_current_source(element)
-
-def is_short_circuit(element: NortenTheveninElement) -> bool:
-    return element.V == 0 and element.Z == 0
-
-def is_open_circuit(element: NortenTheveninElement) -> bool:
-    return element.I == 0 and element.Y == 0
-

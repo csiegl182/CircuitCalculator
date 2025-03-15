@@ -1,13 +1,83 @@
 import numpy as np
-
+import sympy as sp
 from ..network import Network
-from ..elements import is_ideal_voltage_source, is_current_source
+from ..elements import NortenTheveninElement, is_ideal_voltage_source, is_current_source
 from . import label_mapping as map
 from .. import transformers as trf
 import itertools
+from typing import Protocol, TypeVar
+
+T = TypeVar('T')
+
+Matrix = np.ndarray | sp.Matrix
+symFloat = sp.core.numbers.Float
+symComplex = sp.core.add.Add
+symNumber  = symFloat | symComplex
+MatrixElement = complex | symNumber
 
 class DimensionError(Exception):
     ...
+
+class MatrixOperations(Protocol):
+    @staticmethod
+    def zeros(shape: tuple[int, int]) -> Matrix: ...
+
+    @staticmethod
+    def vstack(matrices: tuple[T, ...]) -> T: ...
+
+    @staticmethod
+    def hstack(matrices: tuple[T, ...]) -> T: ...
+
+    @staticmethod
+    def solve(A: T, b: T) -> T: ...
+
+    @staticmethod
+    def element_value(element: NortenTheveninElement) -> MatrixElement: ...
+
+class NumPyMatrixOperations:
+    @staticmethod
+    def zeros(shape: tuple[int, int]) -> np.ndarray:
+        return np.zeros(shape, dtype=complex)
+
+    @staticmethod
+    def vstack(matrices: tuple[np.ndarray, ...]) -> np.ndarray:
+        return np.vstack(matrices)
+
+    @staticmethod
+    def hstack(matrices: tuple[np.ndarray, ...]) -> np.ndarray:
+        return np.hstack(matrices)
+
+    @staticmethod
+    def solve(A: np.ndarray, b: np.ndarray) -> np.ndarray:
+        return np.linalg.solve(A, b)
+
+    @staticmethod
+    def element_value(element: NortenTheveninElement) -> complex:
+        try:
+            return complex(element.V)
+        except ValueError:
+            return np.nan
+
+class SymPyMatrixOperations:
+    @staticmethod
+    def zeros(shape: tuple[int, int]) -> sp.Matrix:
+        return sp.zeros(*shape)
+
+    @staticmethod
+    def vstack(matrices: tuple[sp.Matrix, ...]) -> sp.Matrix:
+        return sp.Matrix.vstack(*matrices)
+
+    @staticmethod
+    def hstack(matrices: tuple[sp.Matrix, ...]) -> sp.Matrix:
+        return sp.Matrix.hstack(*matrices)
+
+    @staticmethod
+    def solve(A: sp.Matrix, b: sp.Matrix) -> sp.Matrix:
+        return A.LUsolve(b)
+
+    @staticmethod
+    def element_value(element: NortenTheveninElement) -> symNumber:
+        return sp.sympify(element.V)
 
 def admittance_connected_to(network: Network, node: str) -> complex:
     return sum(b.element.Y for b in network.branches_connected_to(node) if np.isfinite(b.element.Y))
@@ -18,19 +88,19 @@ def admittance_between(network: Network, node1: str, node2: str) -> complex:
 def connected_nodes(network: Network, node: str) -> list[str]:
     return [b.node1 if b.node1 != node else b.node2 for b in network.branches_connected_to(node)]
 
-def node_admittance_matrix(network: Network, node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> np.ndarray:
+def node_admittance_matrix(network: Network, matrix_ops: MatrixOperations = NumPyMatrixOperations(), node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> Matrix:
     def node_matrix_element(i_label:str, j_label:str) -> complex:
         if i_label == j_label:
             return admittance_connected_to(no_voltage_sources_network, i_label)
         return -admittance_between(no_voltage_sources_network, i_label, j_label)
     node_mapping = node_index_mapper(network)
     no_voltage_sources_network = Network(branches=[b for b in network.branches if not is_ideal_voltage_source(b.element)], node_zero_label=network.node_zero_label)
-    Y = np.zeros((node_mapping.N, node_mapping.N), dtype=complex)
+    Y = matrix_ops.zeros((node_mapping.N, node_mapping.N))
     for i_label, j_label in itertools.product(node_mapping, repeat=2):
         Y[node_mapping(i_label, j_label)] = node_matrix_element(i_label, j_label)
     return Y
 
-def voltage_source_incidence_matrix(network: Network, node_mapper: map.NetworkMapper = map.default_node_mapper, source_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper) -> np.ndarray:
+def voltage_source_incidence_matrix(network: Network, matrix_ops: MatrixOperations = NumPyMatrixOperations(), node_mapper: map.NetworkMapper = map.default_node_mapper, source_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper) -> Matrix:
     def voltage_source_direction(voltage_source: str, node: str) -> int:
         if network[voltage_source].node1 == node:
             return 1
@@ -39,16 +109,16 @@ def voltage_source_incidence_matrix(network: Network, node_mapper: map.NetworkMa
         return 0
     node_index = node_mapper(network)
     vs_index = source_mapper(network)
-    A = np.zeros((node_index.N, vs_index.N))
+    A = matrix_ops.zeros((node_index.N, vs_index.N))
     for node, vs in itertools.product(node_index.keys, vs_index.keys):
         A[node_index[node], vs_index[vs]] = voltage_source_direction(vs, node)
     return A
 
-def nodal_analysis_coefficient_matrix(network: Network, node_mapper: map.NetworkMapper = map.default_node_mapper, source_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper) -> np.ndarray:
-    Y = node_admittance_matrix(network, node_mapper)
-    B = voltage_source_incidence_matrix(network, node_mapper, source_mapper)
-    Z = np.zeros((B.shape[1], B.shape[1]))
-    return np.vstack((np.hstack((Y, B)), np.hstack((B.T, Z))))
+def nodal_analysis_coefficient_matrix(network: Network, matrix_ops: MatrixOperations = NumPyMatrixOperations(), node_mapper: map.NetworkMapper = map.default_node_mapper, source_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper) -> Matrix:
+    Y = node_admittance_matrix(network, matrix_ops, node_mapper)
+    B = voltage_source_incidence_matrix(network, matrix_ops, node_mapper, source_mapper)
+    Z = matrix_ops.zeros((B.shape[1], B.shape[1]))
+    return matrix_ops.vstack((matrix_ops.hstack((Y, B)), matrix_ops.hstack((B.T, Z))))
 
 def source_incidence_matrix(network: Network, node_mapper: map.NetworkMapper = map.default_node_mapper, source_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper) -> np.ndarray:
     node_index = node_mapper(network)
