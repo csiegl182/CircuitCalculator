@@ -24,19 +24,19 @@ def capacitor(capacitor: ccp.Component, w: float = 0, *_) -> ntw.Branch:
     return ntw.Branch(
         capacitor.nodes[0],
         capacitor.nodes[1],
-        elm.admittance(capacitor.id, elm.admittance_value(B=w*C)))
+        elm.admittance(capacitor.id, complex(0, w*C)))
 
 def inductance(inductance: ccp.Component, w: float = 0, *_) -> ntw.Branch:
     L = float(inductance.value['L'])
     return ntw.Branch(
         inductance.nodes[0],
         inductance.nodes[1],
-        elm.impedance(inductance.id, elm.impedance_value(X=w*L))
+        elm.impedance(inductance.id, complex(0, w*L))
     )
 
 def dc_voltage_source(voltage_source: ccp.Component, w: float = 0, w_resolution: float = 1e-3, *_) -> ntw.Branch:
-    V = elm.complex_value(float(voltage_source.value['V']), 0)
-    Z = elm.complex_value(float(voltage_source.value['R']), 0)
+    V = complex(float(voltage_source.value['V']), 0)
+    Z = complex(float(voltage_source.value['R']), 0)
     element = elm.voltage_source(voltage_source.id, V, Z)
     if np.abs(w-float(voltage_source.value['w'])) > w_resolution:
         element = elm.short_circuit(voltage_source.id)

@@ -44,6 +44,18 @@ class NortenTheveninElement(Protocol):
     def is_ideal_current_source(self) -> bool:
         """Check if element behaves as an ideal current source"""
         ...
+    @property
+    def is_active(self) -> bool:
+        """Check if element is active"""
+        ...
+    @property
+    def is_short_circuit(self) -> bool:
+        """Check if element behaves as a short circuit"""
+        ... 
+    @property
+    def is_open_circuit(self) -> bool:
+        """Check if element behaves as an open circuit"""
+        ...
 
 @dataclass(frozen=True)
 class NummericNortenTheveninElement(ABC):
@@ -81,6 +93,18 @@ class NummericNortenTheveninElement(ABC):
     @property
     def is_ideal_current_source(self) -> bool:
         return np.abs(self.I) >= 0 and self.Y==0
+
+    @property
+    def is_active(self) -> bool:
+        return self.is_voltage_source or self.is_current_source
+
+    @property
+    def is_short_circuit(self) -> bool:
+        return self.V == 0 and self.Z == 0
+
+    @property
+    def is_open_circuit(self) -> bool:
+        return self.I == 0 and self.Y == 0
 
 @dataclass(frozen=True)
 class NortenElement(NummericNortenTheveninElement):
@@ -157,6 +181,18 @@ class SymbolicNortenTheveninElement(ABC):
     def is_ideal_current_source(self) -> bool:
         return self.I != 'nan' and self.Y == '0'
 
+    @property
+    def is_active(self) -> bool:
+        return self.is_voltage_source or self.is_current_source
+
+    @property
+    def is_short_circuit(self) -> bool:
+        return self.V == '0' and self.Z == '0'
+
+    @property
+    def is_open_circuit(self) -> bool:
+        return self.I == '0' and self.Y == '0'
+
 @dataclass(frozen=True)
 class SymbolicNortenElement(SymbolicNortenTheveninElement):
     V : str = '0'
@@ -229,29 +265,6 @@ def short_circuit(name : str) -> NortenTheveninElement:
     return NortenElement(V=0, Z=0, name=name, type='short_circuit')
 
 ## TODO: IS THIS NEEDED?
-
-def is_active(element: NortenTheveninElement) -> bool:
-    return element.is_voltage_source or element.is_current_source
-
-def is_short_circuit(element: NortenTheveninElement) -> bool:
-    return element.V == 0 and element.Z == 0
-
-def is_open_circuit(element: NortenTheveninElement) -> bool:
-    return element.I == 0 and element.Y == 0
-
-def impedance_value(R : float = 0.0, X : float = 0.0, absZ : float = -1.0, phi : float = 0.0, degree : bool = False) -> complex:
-    if degree:
-        phi *= np.pi/180
-    if absZ > 0:
-        return complex(absZ*np.cos(phi), absZ*np.sin(phi))
-    return complex(R, X)
-
-def admittance_value(G : float = 0.0, B : float = 0.0, absY : float = -1.0, phi : float = 0.0, degree : bool = False) -> complex:
-    if degree:
-        phi *= np.pi/180
-    if absY > 0:
-        return complex(absY*np.cos(phi), absY*np.sin(phi))
-    return complex(G, B)
 
 def complex_value(X : float, phi : float = 0.0, rms: bool = False, deg: bool = False) -> complex:
     if rms:

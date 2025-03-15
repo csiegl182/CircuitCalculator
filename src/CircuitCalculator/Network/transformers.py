@@ -1,5 +1,5 @@
 from .network import Network, Branch
-from .elements import NortenTheveninElement, is_short_circuit, is_open_circuit, impedance, admittance, is_open_circuit, is_short_circuit
+from .elements import NortenTheveninElement, impedance, admittance
 
 def switch_ground_node(network: Network, new_ground: str) -> Network:
     return Network(network.branches, new_ground)
@@ -10,11 +10,11 @@ def remove_element(network: Network, element: str) -> Network:
     return Network(branches, node_zero_label=network.node_zero_label)
 
 def remove_open_circuit_elements(network: Network) -> Network:
-    return Network([b for b in network.branches if not is_open_circuit(b.element)], node_zero_label=network.node_zero_label)
+    return Network([b for b in network.branches if not b.element.is_open_circuit], node_zero_label=network.node_zero_label)
 
 def remove_short_circuit_elements(network: Network, keep: list[NortenTheveninElement] = []) -> Network:
     branches = network.branches
-    short_circuits = [b for b in network.branches if is_short_circuit(b.element) and b.element not in keep]
+    short_circuits = [b for b in network.branches if b.element.is_short_circuit and b.element not in keep]
     short_circuit_nodes = [(vs.node1, vs.node2) if not network.is_zero_node(vs.node1) else (vs.node2, vs.node1) for vs in short_circuits]
     for an, rn in short_circuit_nodes:
         branches = [Branch(rn, b.node2, b.element) if b.node1 == an else b for b in branches]
