@@ -263,14 +263,3 @@ def open_circuit(name : str) -> NortenTheveninElement:
 
 def short_circuit(name : str) -> NortenTheveninElement:
     return NortenElement(V=0, Z=0, name=name, type='short_circuit')
-
-## TODO: IS THIS NEEDED?
-
-def complex_value(X : float, phi : float = 0.0, rms: bool = False, deg: bool = False) -> complex:
-    if rms:
-        X *= np.sqrt(2)
-    if deg:
-        phi = np.radians(phi)
-    if not np.isfinite(X):
-        return complex(np.inf, 0)
-    return X*complex(np.cos(phi), np.sin(phi))

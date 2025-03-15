@@ -51,7 +51,7 @@ def ac_voltage_source(voltage_source: ccp.Component, w: float = 0, w_resolution:
     vs_V = float(voltage_source.value['V'])
     vs_phi = float(voltage_source.value['phi'])
     vs_R = float(voltage_source.value['R'])
-    element = elm.voltage_source(voltage_source.id, elm.complex_value(vs_V, vs_phi), elm.complex_value(vs_R, 0))
+    element = elm.voltage_source(voltage_source.id, complex(vs_V*np.cos(vs_phi), vs_V*np.sin(vs_phi)), complex(vs_R, 0))
     if np.abs(w-float(voltage_source.value['w'])) > w_resolution:
         element = elm.short_circuit(voltage_source.id)
     return ntw.Branch(
@@ -100,7 +100,7 @@ def dc_current_source(current_source: ccp.Component, w: float = 0, w_resolution:
     cs_I = float(current_source.value['I'])
     cs_G = float(current_source.value['G'])
     cs_w = float(current_source.value['w'])
-    element = elm.current_source(current_source.id, elm.complex_value(cs_I, 0), elm.complex_value(cs_G, 0))
+    element = elm.current_source(current_source.id, complex(cs_I, 0), complex(cs_G, 0))
     if np.abs(w-cs_w) > w_resolution:
         element = elm.open_circuit(current_source.id)
     return ntw.Branch(
@@ -116,7 +116,7 @@ def ac_current_source(current_source: ccp.Component, w: float = 0, w_resolution:
     cs_G = float(current_source.value['G'])
     cs_w = float(current_source.value['w'])
     cs_phi = float(current_source.value['phi'])
-    element = elm.current_source(current_source.id, elm.complex_value(cs_I, cs_phi), elm.complex_value(cs_G))
+    element = elm.current_source(current_source.id, complex(cs_I*np.cos(cs_phi), cs_I*np.sin(cs_phi)), complex(cs_G, 0))
     if np.abs(w-cs_w) > w_resolution:
         element = elm.open_circuit(current_source.id)
     return ntw.Branch(
