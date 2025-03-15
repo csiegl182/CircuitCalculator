@@ -1,6 +1,5 @@
 import numpy as np
 from dataclasses import dataclass
-from ..elements import is_ideal_current_source, is_current_source
 from ..network import Network
 from ..solution import NetworkSolution
 from .node_analysis import nodal_analysis_coefficient_matrix, nodal_analysis_constants_vector, open_circuit_impedance
@@ -26,9 +25,9 @@ class NodalAnalysisBiasPointSolution(NodalAnalysisSolution):
     def get_current(self, branch_id: str) -> complex:
         if branch_id in self._voltage_source_mapping.keys:
             return self._voltage_source_currents[self._voltage_source_mapping[branch_id]]
-        if is_ideal_current_source(self.network[branch_id].element):
+        if self.network[branch_id].element.is_ideal_current_source:
             return self.network[branch_id].element.I
-        if is_current_source(self.network[branch_id].element):
+        if self.network[branch_id].element.is_current_source:
             return - (self.network[branch_id].element.I + self.get_voltage(branch_id)/self.network[branch_id].element.Z)
         branch = self.network[branch_id]
         return self.get_voltage(branch_id)/branch.element.Z

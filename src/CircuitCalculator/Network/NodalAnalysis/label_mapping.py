@@ -1,7 +1,6 @@
 from typing import Callable
 from dataclasses import dataclass
 from ..network import Network
-from ..elements import is_current_source, is_ideal_voltage_source
 
 class DistinctValues(Exception):
     ...
@@ -49,17 +48,17 @@ def alphabetic_node_mapper(network: Network) -> LabelMapping:
 default_node_mapper = alphabetic_node_mapper
 
 def alphabetic_source_mapper(network: Network) -> LabelMapping:
-    current_source_labels = [b.id for b in network.branches if is_current_source(b.element)]
-    voltage_source_labels = [b.id for b in network.branches if is_ideal_voltage_source(b.element)]
+    current_source_labels = [b.id for b in network.branches if b.element.is_current_source]
+    voltage_source_labels = [b.id for b in network.branches if b.element.is_ideal_voltage_source]
     sorted_soruce_labels = sorted(current_source_labels+voltage_source_labels)
     return LabelMapping({k: v for v, k in enumerate(sorted_soruce_labels)})
 
 def alphabetic_current_source_mapper(network: Network) -> LabelMapping:
-    current_source_labels = sorted([b.id for b in network.branches if is_current_source(b.element)])
+    current_source_labels = sorted([b.id for b in network.branches if b.element.is_current_source])
     return LabelMapping({k: v for v, k in enumerate(current_source_labels)})
 
 def alphabetic_voltage_source_mapper(network: Network) -> LabelMapping:
-    voltage_source_labels = sorted([b.id for b in network.branches if is_ideal_voltage_source(b.element)])
+    voltage_source_labels = sorted([b.id for b in network.branches if b.element.is_ideal_voltage_source])
     return LabelMapping({k: v for v, k in enumerate(voltage_source_labels)})
 
 default_source_mapper = alphabetic_source_mapper

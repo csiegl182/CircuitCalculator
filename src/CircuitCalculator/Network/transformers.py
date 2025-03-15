@@ -1,5 +1,5 @@
 from .network import Network, Branch
-from .elements import NortenTheveninElement, is_current_source, is_voltage_source, is_short_circuit, is_open_circuit, impedance, admittance, is_open_circuit, is_short_circuit
+from .elements import NortenTheveninElement, is_short_circuit, is_open_circuit, impedance, admittance, is_open_circuit, is_short_circuit
 
 def switch_ground_node(network: Network, new_ground: str) -> Network:
     return Network(network.branches, new_ground)
@@ -28,7 +28,7 @@ def short_circuitify_voltage_sources(network: Network, keep: list[NortenThevenin
     def is_intended_voltage_source(branch: Branch) -> bool:
         if branch.element in keep:
             return False
-        if is_voltage_source(branch.element):
+        if branch.element.is_voltage_source:
             return True
         return False
     return Network(
@@ -42,7 +42,7 @@ def open_circuitify_current_sources(network: Network, keep: list[NortenTheveninE
     def is_intended_current_source(branch: Branch) -> bool:
         if branch.element in keep:
             return False
-        if is_current_source(branch.element):
+        if branch.element.is_current_source:
             return True
         return False
     return Network(

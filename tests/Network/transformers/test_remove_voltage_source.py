@@ -1,5 +1,5 @@
 from CircuitCalculator.Network.network import Network, Branch
-from CircuitCalculator.Network.elements import voltage_source, current_source, resistor, is_ideal_voltage_source
+from CircuitCalculator.Network.elements import voltage_source, current_source, resistor
 from CircuitCalculator.Network.transformers import remove_ideal_voltage_sources
 
 def test_remove_ideal_voltage_sources_removes_all_voltage_sources() -> None:
@@ -14,7 +14,7 @@ def test_remove_ideal_voltage_sources_removes_all_voltage_sources() -> None:
         ]
     )
     network = remove_ideal_voltage_sources(network)
-    assert any([is_ideal_voltage_source(b.element) for b in network.branches]) == False
+    assert any([b.element.is_ideal_voltage_source for b in network.branches]) == False
 
 def test_remove_ideal_voltage_sources_keeps_desired_voltage_sources() -> None:
     vs1 = voltage_source('Us1', V=1)

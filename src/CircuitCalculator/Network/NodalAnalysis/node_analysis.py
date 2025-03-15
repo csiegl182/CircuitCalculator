@@ -1,7 +1,7 @@
 import numpy as np
 import sympy as sp
 from ..network import Network
-from ..elements import NortenTheveninElement, is_ideal_voltage_source, is_current_source
+from ..elements import NortenTheveninElement
 from . import label_mapping as map
 from .. import transformers as trf
 import itertools
@@ -94,7 +94,7 @@ def node_admittance_matrix(network: Network, matrix_ops: MatrixOperations = NumP
             return admittance_connected_to(no_voltage_sources_network, i_label)
         return -admittance_between(no_voltage_sources_network, i_label, j_label)
     node_mapping = node_index_mapper(network)
-    no_voltage_sources_network = Network(branches=[b for b in network.branches if not is_ideal_voltage_source(b.element)], node_zero_label=network.node_zero_label)
+    no_voltage_sources_network = Network(branches=[b for b in network.branches if not b.element.is_ideal_voltage_source], node_zero_label=network.node_zero_label)
     Y = matrix_ops.zeros((node_mapping.N, node_mapping.N))
     for i_label, j_label in itertools.product(node_mapping, repeat=2):
         Y[node_mapping(i_label, j_label)] = node_matrix_element(i_label, j_label)
@@ -133,7 +133,7 @@ def source_incidence_matrix(network: Network, node_mapper: map.NetworkMapper = m
     return Q
 
 def current_source_vector(network: Network, source_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper) -> np.ndarray:
-    cs_index = map.filter(source_mapper(network), lambda x: is_current_source(network[x].element))
+    cs_index = map.filter(source_mapper(network), lambda x: network[x].element.is_current_source)
     return np.array([network[x].element.I for x in cs_index.keys])
 
 def current_source_incidence_vector(network: Network, node_mapper: map.NetworkMapper = map.default_node_mapper, source_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper) -> np.ndarray:
@@ -151,7 +151,7 @@ def nodal_analysis_constants_vector(network: Network, node_mapper: map.NetworkMa
 def open_circuit_impedance(network: Network, node1: str, node2: str, node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> complex:
     if node1 == node2:
         return 0
-    if any([is_ideal_voltage_source(b.element) for b in network.branches_between(node1, node2)]):
+    if any([b.element.is_ideal_voltage_source for b in network.branches_between(node1, node2)]):
         return 0
     if network.is_zero_node(node1):
         node1, node2 = node2, node1

@@ -60,10 +60,10 @@ class Network:
         return {b.id: b for b in self.branches}[id]
 
 def ideal_voltage_sources(network: Network) -> list[Branch]:
-    return [b for b in network.branches if elm.is_ideal_voltage_source(b.element)]
+    return [b for b in network.branches if b.element.is_ideal_voltage_source]
 
 def ideal_current_sources(network: Network) -> list[Branch]:
-    return [b for b in network.branches if elm.is_ideal_current_source(b.element)]
+    return [b for b in network.branches if b.element.is_ideal_current_source]
 
 def passive_elements(network: Network) -> list[Branch]:
     return [b for b in network.branches if not elm.is_active(b.element)]

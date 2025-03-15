@@ -3,7 +3,6 @@ import itertools
 from dataclasses import dataclass
 from .node_analysis import source_incidence_matrix, nodal_analysis_coefficient_matrix
 from . import label_mapping as map
-from ..elements import is_ideal_voltage_source
 from ..network import Network
 from ...SignalProcessing import state_space_model as sp
 
@@ -82,7 +81,7 @@ class NodalStateSpaceModel(sp.StateSpaceModel):
         return c_pos - c_neg
 
     def c_row_current(self, branch_id: str) -> np.ndarray:
-        voltage_source_mapping = map.filter(self.voltage_source_index_mapping, lambda x: is_ideal_voltage_source(self.network[x].element))
+        voltage_source_mapping = map.filter(self.voltage_source_index_mapping, lambda x: self.network[x].element.is_ideal_voltage_source)
         if branch_id in self.c_values:
             idx = list(self.c_values.keys()).index(branch_id)
             return self.c_values[branch_id]*self.A[idx][:]

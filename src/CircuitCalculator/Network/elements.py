@@ -228,24 +228,10 @@ def open_circuit(name : str) -> NortenTheveninElement:
 def short_circuit(name : str) -> NortenTheveninElement:
     return NortenElement(V=0, Z=0, name=name, type='short_circuit')
 
-## TODO: Remove these functions
-
-def is_voltage_source(element: NortenTheveninElement) -> bool:
-    return np.abs(element.V) > 0
-
-def is_current_source(element: NortenTheveninElement) -> bool:
-    return np.abs(element.I) > 0
-
-def is_ideal_voltage_source(element: NortenTheveninElement) -> bool:
-    return np.abs(element.V) >= 0 and element.Z==0
-
-def is_ideal_current_source(element: NortenTheveninElement) -> bool:
-    return np.abs(element.I) >= 0 and element.Y==0
-
 ## TODO: IS THIS NEEDED?
 
 def is_active(element: NortenTheveninElement) -> bool:
-    return is_voltage_source(element) or is_current_source(element)
+    return element.is_voltage_source or element.is_current_source
 
 def is_short_circuit(element: NortenTheveninElement) -> bool:
     return element.V == 0 and element.Z == 0
