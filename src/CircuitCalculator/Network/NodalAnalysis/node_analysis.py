@@ -5,34 +5,65 @@ from ..elements import NortenTheveninElement
 from . import label_mapping as map
 from .. import transformers as trf
 import itertools
-from typing import Protocol, TypeVar
+from typing import Protocol, Union, Any, Type
 
-T = TypeVar('T')
-
-Matrix = np.ndarray | sp.Matrix
+Matrix = Union[np.ndarray,  sp.Matrix]
 symFloat = sp.core.numbers.Float
 symComplex = sp.core.add.Add
 symNumber  = symFloat | symComplex
-MatrixElement = complex | symNumber
 
 class DimensionError(Exception):
     ...
 
+class MatrixElement(Protocol):
+    def __init__(self, value: str | complex) -> None: ...
+    @property
+    def value(self) -> Any: ...
+
+    @property
+    def isfinite(self) -> bool: ...
+
+class NumericMatrixElement:
+    def __init__(self, value: complex) -> None:
+        self._value = value
+
+    @property
+    def value(self) -> complex:
+        return self._value
+
+    @property
+    def isfinite(self) -> bool:
+        return np.isfinite(self.value)
+
+class SymbolicMatrixElement:
+    def __init__(self, value: str) -> None:
+        self._value = sp.sympify(value)
+
+    @property
+    def value(self) -> Any:
+        return self._value
+
+    @property
+    def isfinite(self) -> bool:
+        if self.value.is_finite is None:
+            return True
+        return self.value.is_finite
+
 class MatrixOperations(Protocol):
     @staticmethod
-    def zeros(shape: tuple[int, int]) -> Matrix: ...
+    def zeros(shape: tuple[int, int]) -> Any: ...
 
     @staticmethod
-    def vstack(matrices: tuple[T, ...]) -> T: ...
+    def vstack(matrices: tuple[Any, ...]) -> Any: ...
 
     @staticmethod
-    def hstack(matrices: tuple[T, ...]) -> T: ...
+    def hstack(matrices: tuple[Any, ...]) -> Any: ...
 
     @staticmethod
-    def solve(A: T, b: T) -> T: ...
+    def solve(A: Any, b: Any) -> Any: ...
 
-    @staticmethod
-    def element_value(element: NortenTheveninElement) -> MatrixElement: ...
+    @property
+    def matrix_element(_) -> Type[MatrixElement]: ...
 
 class NumPyMatrixOperations:
     @staticmethod
@@ -51,12 +82,9 @@ class NumPyMatrixOperations:
     def solve(A: np.ndarray, b: np.ndarray) -> np.ndarray:
         return np.linalg.solve(A, b)
 
-    @staticmethod
-    def element_value(element: NortenTheveninElement) -> complex:
-        try:
-            return complex(element.V)
-        except ValueError:
-            return np.nan
+    @property
+    def matrix_element(_) -> Type[NumericMatrixElement]:
+        return NumericMatrixElement
 
 class SymPyMatrixOperations:
     @staticmethod
@@ -75,15 +103,15 @@ class SymPyMatrixOperations:
     def solve(A: sp.Matrix, b: sp.Matrix) -> sp.Matrix:
         return A.LUsolve(b)
 
-    @staticmethod
-    def element_value(element: NortenTheveninElement) -> symNumber:
-        return sp.sympify(element.V)
+    @property
+    def matrix_element(_) -> Type[SymbolicMatrixElement]:
+        return SymbolicMatrixElement
 
-def admittance_connected_to(network: Network, node: str) -> complex:
-    return sum(b.element.Y for b in network.branches_connected_to(node) if np.isfinite(b.element.Y))
+def admittance_connected_to(network: Network, node: str, me: Type[MatrixElement]) -> complex:
+    return sum([e.value for e in [me(b.element.Y) for b in network.branches_connected_to(node)] if e.isfinite])
 
-def admittance_between(network: Network, node1: str, node2: str) -> complex:
-    return sum([b.element.Y for b in network.branches_between(node1, node2) if np.isfinite(b.element.Y)])
+def admittance_between(network: Network, node1: str, node2: str, me: Type[MatrixElement]) -> complex:
+    return sum([e.value for e in [me(b.element.Y) for b in network.branches_between(node1, node2)] if e.isfinite])
 
 def connected_nodes(network: Network, node: str) -> list[str]:
     return [b.node1 if b.node1 != node else b.node2 for b in network.branches_connected_to(node)]
@@ -91,8 +119,8 @@ def connected_nodes(network: Network, node: str) -> list[str]:
 def node_admittance_matrix(network: Network, matrix_ops: MatrixOperations = NumPyMatrixOperations(), node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> Matrix:
     def node_matrix_element(i_label:str, j_label:str) -> complex:
         if i_label == j_label:
-            return admittance_connected_to(no_voltage_sources_network, i_label)
-        return -admittance_between(no_voltage_sources_network, i_label, j_label)
+            return admittance_connected_to(no_voltage_sources_network, i_label, matrix_ops.matrix_element)
+        return -admittance_between(no_voltage_sources_network, i_label, j_label, matrix_ops.matrix_element)
     node_mapping = node_index_mapper(network)
     no_voltage_sources_network = Network(branches=[b for b in network.branches if not b.element.is_ideal_voltage_source], node_zero_label=network.node_zero_label)
     Y = matrix_ops.zeros((node_mapping.N, node_mapping.N))
