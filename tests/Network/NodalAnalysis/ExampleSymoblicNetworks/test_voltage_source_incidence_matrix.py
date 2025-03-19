@@ -1,7 +1,7 @@
 from CircuitCalculator.Network.NodalAnalysis.node_analysis import voltage_source_incidence_matrix, SymPyMatrixOperations
 from CircuitCalculator.Network.network import Network, Branch
 from CircuitCalculator.Network.symbolic_elements import resistor, voltage_source, current_source
-import sympy as sp
+import numpy as np
 
 def test_voltage_source_incidence_matrix_from_reference_network_1() -> None:
     network = Network(
@@ -10,11 +10,11 @@ def test_voltage_source_incidence_matrix_from_reference_network_1() -> None:
             Branch('1', '0', resistor('R', R='R'))
         ]
     )
-    A = voltage_source_incidence_matrix(network, matrix_ops=SymPyMatrixOperations())
-    A_ref = sp.Matrix([
+    A = voltage_source_incidence_matrix(network)
+    A_ref = np.array([
         [1]
         ])
-    assert A == A_ref
+    np.testing.assert_equal(A, A_ref)
 
 def test_voltage_source_incidence_matrix_from_reference_network_2() -> None:
     network = Network(
@@ -23,9 +23,9 @@ def test_voltage_source_incidence_matrix_from_reference_network_2() -> None:
             Branch('1', '0', resistor('R1', R='R'))
         ]
     )
-    A = voltage_source_incidence_matrix(network, matrix_ops=SymPyMatrixOperations())
-    A_ref = sp.Matrix([]).reshape(1, 0)
-    assert A == A_ref
+    A = voltage_source_incidence_matrix(network)
+    A_ref = np.array([]).reshape(1, 0)
+    np.testing.assert_equal(A, A_ref)
 
 def test_voltage_source_incidence_matrix_from_reference_network_3() -> None:
     network = Network(
@@ -35,12 +35,12 @@ def test_voltage_source_incidence_matrix_from_reference_network_3() -> None:
             Branch('2', '0', resistor('R2', R='R2'))
         ]
     )
-    A = voltage_source_incidence_matrix(network, matrix_ops=SymPyMatrixOperations())
-    A_ref = sp.Matrix([
+    A = voltage_source_incidence_matrix(network)
+    A_ref = np.array([
         [],
         []
         ]).reshape(2,0)
-    assert A == A_ref
+    np.testing.assert_equal(A, A_ref)
 
 def test_voltage_source_incidence_matrix_from_reference_network_4() -> None:
     network = Network(
@@ -51,12 +51,12 @@ def test_voltage_source_incidence_matrix_from_reference_network_4() -> None:
             Branch('2', '0', resistor('R3', R='R3'))
         ]
     )
-    A = voltage_source_incidence_matrix(network, matrix_ops=SymPyMatrixOperations())
-    A_ref = sp.Matrix([
+    A = voltage_source_incidence_matrix(network)
+    A_ref = np.array([
         [1],
         [0]
         ])
-    assert A == A_ref
+    np.testing.assert_equal(A, A_ref)
 
 def test_voltage_source_incidence_matrix_from_reference_network_5() -> None:
     network = Network(
@@ -70,14 +70,14 @@ def test_voltage_source_incidence_matrix_from_reference_network_5() -> None:
             Branch('0', '4', voltage_source('Vs2', V='Vs2'))
         ]
     )
-    A = voltage_source_incidence_matrix(network, matrix_ops=SymPyMatrixOperations())
-    A_ref = sp.Matrix([
+    A = voltage_source_incidence_matrix(network)
+    A_ref = np.array([
         [1,  0],
         [0,  0],
         [0,  0],
         [0, -1]
         ])
-    assert A == A_ref
+    np.testing.assert_equal(A, A_ref)
 
 def test_voltage_source_incidence_matrix_from_reference_network_6() -> None:
     network = Network(
@@ -91,14 +91,14 @@ def test_voltage_source_incidence_matrix_from_reference_network_6() -> None:
             Branch('3', '2', voltage_source('Uq2', V='V2'))
         ]
     )
-    A = voltage_source_incidence_matrix(network, matrix_ops=SymPyMatrixOperations())
-    A_ref = sp.Matrix([
+    A = voltage_source_incidence_matrix(network)
+    A_ref = np.array([
         [1,  0],
         [0, -1],
         [0,  1],
         [0,  0]
         ])
-    assert A == A_ref
+    np.testing.assert_equal(A, A_ref)
 
 def test_voltage_source_incidence_matrix_from_reference_network_7() -> None:
     network = Network(
@@ -113,15 +113,15 @@ def test_voltage_source_incidence_matrix_from_reference_network_7() -> None:
             Branch('3', '5', current_source('Is4', I='I4'))
         ]
     )
-    A = voltage_source_incidence_matrix(network, matrix_ops=SymPyMatrixOperations())
-    A_ref = sp.Matrix([
+    A = voltage_source_incidence_matrix(network)
+    A_ref = np.array([
         [ 0, -1,  0],
         [ 0,  1,  0],
         [ 0,  0, -1],
         [ 0,  0,  1],
         [-1,  0,  0]
         ])
-    assert A == A_ref
+    np.testing.assert_equal(A, A_ref)
 
 def test_voltage_source_incidence_matrix_from_reference_network_10() -> None:
     network = Network(
@@ -136,14 +136,14 @@ def test_voltage_source_incidence_matrix_from_reference_network_10() -> None:
             Branch('2', '4', resistor('R5', R='R5')),
         ]
     )
-    A = voltage_source_incidence_matrix(network, matrix_ops=SymPyMatrixOperations())
-    A_ref = sp.Matrix([
+    A = voltage_source_incidence_matrix(network)
+    A_ref = np.array([
         [1, -1],
         [0,  1],
         [0,  0],
         [0,  0]
         ])
-    assert A == A_ref
+    np.testing.assert_equal(A, A_ref)
 
 def test_voltage_source_incidence_matrix_from_reference_network_11() -> None:
     network = Network(
@@ -157,13 +157,13 @@ def test_voltage_source_incidence_matrix_from_reference_network_11() -> None:
         ],
         node_zero_label='0'
     )
-    A = voltage_source_incidence_matrix(network, matrix_ops=SymPyMatrixOperations())
-    A_ref = sp.Matrix([
+    A = voltage_source_incidence_matrix(network)
+    A_ref = np.array([
         [ 0],
         [-1],
         [ 1]
         ])
-    assert A == A_ref
+    np.testing.assert_equal(A, A_ref)
 
 def test_voltage_source_incidence_matrix_from_reference_network_13() -> None:
     network = Network(
@@ -175,9 +175,9 @@ def test_voltage_source_incidence_matrix_from_reference_network_13() -> None:
         ],
         node_zero_label='0'
     )
-    A = voltage_source_incidence_matrix(network, matrix_ops=SymPyMatrixOperations())
-    A_ref = sp.Matrix([
+    A = voltage_source_incidence_matrix(network)
+    A_ref = np.array([
         [1],
         [0]
         ])
-    assert A == A_ref
+    np.testing.assert_equal(A, A_ref)
