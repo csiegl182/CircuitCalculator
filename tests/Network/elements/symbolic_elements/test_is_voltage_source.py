@@ -1,5 +1,5 @@
 from CircuitCalculator.Network.network import Branch
-from CircuitCalculator.Network.symbolic_elements import voltage_source, resistor, conductor
+from CircuitCalculator.Network.symbolic_elements import voltage_source, resistor, conductor, current_source
 
 def test_ideal_voltage_source_is_detected() -> None:
     b = Branch('1', '0', voltage_source('Us1', V='1'))
@@ -28,4 +28,8 @@ def test_conductor_is_not_ideal_voltage_source() -> None:
 
 def test_conductor_is_not_voltage_source() -> None:
     b = Branch('1', '0', conductor('G1', G='1'))
+    assert b.element.is_voltage_source == False
+
+def test_current_source_is_not_voltage_source() -> None:
+    b = Branch('1', '0', current_source('Is1', I='1'))
     assert b.element.is_voltage_source == False

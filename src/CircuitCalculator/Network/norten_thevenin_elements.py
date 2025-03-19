@@ -167,11 +167,11 @@ class SymbolicNortenTheveninElement(ABC):
 
     @property
     def is_voltage_source(self) -> bool:
-        return self.V != '0'
+        return self.V != '0' and self.V != 'nan'
 
     @property
     def is_current_source(self) -> bool:
-        return self.I != '0'
+        return self.I != '0' and self.I != 'nan'
 
     @property
     def is_ideal_voltage_source(self) -> bool:
