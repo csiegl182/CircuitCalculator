@@ -139,6 +139,7 @@ def node_admittance_matrix(network: Network, matrix_ops: MatrixOperations = NumP
         Y[node_mapping(i_label, j_label)] = node_matrix_element(i_label, j_label)
     return Y
 
+# TODO: Check if matrix_ops is needed
 def voltage_source_incidence_matrix(network: Network, matrix_ops: MatrixOperations = NumPyMatrixOperations(), node_mapper: map.NetworkMapper = map.default_node_mapper, source_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper) -> Matrix:
     def voltage_source_direction(voltage_source: str, node: str) -> int:
         if network[voltage_source].node1 == node:
