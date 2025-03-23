@@ -1,7 +1,10 @@
 from typing import Protocol
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import numpy as np
+import sympy as sp
+
+symbolic = sp.core.symbol.Symbol
 
 class NortenTheveninElement(Protocol):
     @property
@@ -13,19 +16,19 @@ class NortenTheveninElement(Protocol):
         """Specific element type"""
         ...
     @property
-    def Z(self) -> complex | str:
+    def Z(self) -> complex | symbolic:
         """Impedance value of element"""
         ...
     @property
-    def Y(self) -> complex | str:
+    def Y(self) -> complex | symbolic:
         """Admittance value of element"""
         ...
     @property
-    def V(self) -> complex | str:
+    def V(self) -> complex | symbolic:
         """Voltage value of element"""
         ...
     @property
-    def I(self) -> complex | str:
+    def I(self) -> complex | symbolic:
         """Current value of element"""
         ...
     @property
@@ -151,35 +154,35 @@ class SymbolicNortenTheveninElement(ABC):
 
     @property
     @abstractmethod
-    def Z(self) -> str: ...
+    def Z(self) -> symbolic: ...
 
     @property
     @abstractmethod
-    def Y(self) -> str: ...
+    def Y(self) -> symbolic: ...
 
     @property
     @abstractmethod
-    def V(self) -> str: ...
+    def V(self) -> symbolic: ...
 
     @property
     @abstractmethod
-    def I(self) -> str: ...
+    def I(self) -> symbolic: ...
 
     @property
     def is_voltage_source(self) -> bool:
-        return self.V != '0' and self.V != 'nan'
+        return self.V != 0 and self.V != sp.nan
 
     @property
     def is_current_source(self) -> bool:
-        return self.I != '0' and self.I != 'nan'
+        return self.I != 0 and self.I != sp.nan
 
     @property
     def is_ideal_voltage_source(self) -> bool:
-        return self.V != 'nan' and self.Z == '0'
+        return self.V != sp.nan and self.Z == 0
 
     @property
     def is_ideal_current_source(self) -> bool:
-        return self.I != 'nan' and self.Y == '0'
+        return self.I != sp.nan and self.Y == 0
 
     @property
     def is_active(self) -> bool:
@@ -187,58 +190,54 @@ class SymbolicNortenTheveninElement(ABC):
 
     @property
     def is_short_circuit(self) -> bool:
-        return self.V == '0' and self.Z == '0'
+        return self.V == 0 and self.Z == 0
 
     @property
     def is_open_circuit(self) -> bool:
-        return self.I == '0' and self.Y == '0'
+        return self.I == 0 and self.Y == 0
 
 @dataclass(frozen=True)
 class SymbolicNortenElement(SymbolicNortenTheveninElement):
-    V : str = '0'
-    Z : str = '0'
+    V : symbolic = sp.sympify(0)
+    Z : symbolic = sp.sympify(0)
 
     @property
-    def Y(self) -> str:
-        if self.Z == '0':
-            return 'oo'
-        if self.Z == 'oo':
-            return '0'
-        return f'1/{self.Z}'
+    def Y(self) -> symbolic:
+        if self.Z == 0:
+            return sp.sympify('oo')
+        if abs(self.Z) == sp.oo:
+            return sp.sympify(0)
+        return sp.sympify(f'1/{self.Z}')
     
     @property
-    def I(self) -> str:
-        if self.Z == '0':
-            return 'nan'
-        if self.V == 'oo' and self.Z == 'oo':
-            return 'nan'
-        if self.Z == 'oo':
-            return '0'
-        if self.V == '0':
-            return '0'
-        return f'{self.V}/{self.Z}'
+    def I(self) -> symbolic:
+        if self.Z == 0:
+            return sp.nan
+        if abs(self.V) == sp.oo and abs(self.Z) == sp.oo:
+            return sp.nan
+        if abs(self.Z) == sp.oo:
+            return sp.sympify(0)
+        return sp.sympify(f'{self.V}/{self.Z}')
 
 @dataclass(frozen=True)
 class SymbolicTheveninElement(SymbolicNortenTheveninElement):
-    I : str = '0'
-    Y : str = '0'
+    I : symbolic = sp.sympify(0)
+    Y : symbolic = sp.sympify(0)
 
     @property
-    def Z(self) -> str:
-        if self.Y == '0':
-            return 'oo'
-        if self.Y == 'oo':
-            return '0'
-        return f'1/{self.Y}'
+    def Z(self) -> symbolic:
+        if self.Y == 0:
+            return sp.sympify('oo')
+        if abs(self.Y) == sp.oo:
+            return sp.sympify(0)
+        return sp.sympify(f'1/{self.Y}')
     
     @property
-    def V(self) -> str:
-        if self.Y == '0':
-            return 'nan'
-        if self.I == 'oo' and self.Y == 'oo':
-            return 'nan'
-        if self.Y == 'oo':
-            return '0'
-        if self.I == '0':
-            return '0'
-        return f'{self.I}/{self.Y}'
+    def V(self) -> symbolic:
+        if self.Y == 0:
+            return sp.nan
+        if abs(self.I) == sp.oo and abs(self.Y) == sp.oo:
+            return sp.nan
+        if abs(self.Y) == sp.oo:
+            return sp.sympify(0)
+        return sp.sympify(f'{self.I}/{self.Y}')

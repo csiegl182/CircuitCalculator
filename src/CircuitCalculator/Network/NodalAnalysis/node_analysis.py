@@ -7,12 +7,13 @@ import itertools
 from typing import Protocol, Any, Callable
 
 Matrix = np.ndarray | sp.Matrix
+symbolic = sp.core.symbol.Symbol
 
 class DimensionError(Exception):
     ...
 
 class MatrixElement(Protocol):
-    def __init__(self, value: complex | str) -> None: ...
+    def __init__(self, value: complex | symbolic) -> None: ...
     @property
     def value(self) -> Any: ...
 
@@ -20,7 +21,7 @@ class MatrixElement(Protocol):
     def isfinite(self) -> bool: ...
 
 class NumericMatrixElement:
-    def __init__(self, value: complex | str) -> None:
+    def __init__(self, value: complex | symbolic) -> None:
         try:
             self._value = complex(value)
         except ValueError:
@@ -35,7 +36,7 @@ class NumericMatrixElement:
         return np.isfinite(self.value)
 
 class SymbolicMatrixElement:
-    def __init__(self, value: complex | str) -> None:
+    def __init__(self, value: complex | symbolic) -> None:
         self._value = sp.sympify(value)
 
     @property
@@ -53,7 +54,7 @@ class MatrixOperations(Protocol):
     def zeros(shape: tuple[int, int]) -> Any: ...
 
     @staticmethod
-    def column_vector(values: list[complex | str]) -> Any: ...
+    def column_vector(values: list[complex | symbolic]) -> Any: ...
 
     @staticmethod
     def vstack(matrices: tuple[Any, ...]) -> Any: ...
@@ -65,7 +66,7 @@ class MatrixOperations(Protocol):
     def solve(A: Any, b: Any) -> Any: ...
 
     @staticmethod
-    def elm(value: complex | str) -> MatrixElement: ...
+    def elm(value: complex | symbolic) -> MatrixElement: ...
 
 class NumPyMatrixOperations:
     @staticmethod
@@ -73,7 +74,7 @@ class NumPyMatrixOperations:
         return np.zeros(shape, dtype=complex)
 
     @staticmethod
-    def column_vector(values: list[complex | str]) -> Any:
+    def column_vector(values: list[complex | symbolic]) -> Any:
         return np.array([NumericMatrixElement(v).value for v in values]).reshape(len(values), 1)
 
     @staticmethod
@@ -89,7 +90,7 @@ class NumPyMatrixOperations:
         return np.linalg.solve(A, b)
 
     @staticmethod
-    def elm(value: complex | str) -> NumericMatrixElement:
+    def elm(value: complex | symbolic) -> NumericMatrixElement:
         return NumericMatrixElement(value)
 
 class SymPyMatrixOperations:
@@ -98,7 +99,7 @@ class SymPyMatrixOperations:
         return sp.zeros(*shape)
 
     @staticmethod
-    def column_vector(values: list[complex | str]) -> sp.Matrix:
+    def column_vector(values: list[complex | symbolic]) -> sp.Matrix:
         return sp.Matrix([[v] for v in values]).reshape(len(values), 1)
 
     @staticmethod
@@ -107,21 +108,21 @@ class SymPyMatrixOperations:
 
     @staticmethod
     def hstack(matrices: tuple[sp.Matrix, ...]) -> sp.Matrix:
-        return sp.Matrix.hstack(*matrices)
+        return sp.Matrix.hstack(*[sp.Matrix(m) for m in matrices])
 
     @staticmethod
     def solve(A: sp.Matrix, b: sp.Matrix) -> sp.Matrix:
         return A.LUsolve(b)
 
     @staticmethod
-    def elm(value: complex | str) -> SymbolicMatrixElement:
+    def elm(value: complex | symbolic) -> SymbolicMatrixElement:
         return SymbolicMatrixElement(value)
 
 
-def admittance_connected_to(network: Network, node: str, me: Callable[[complex | str], MatrixElement]) -> complex:
+def admittance_connected_to(network: Network, node: str, me: Callable[[Any], MatrixElement]) -> complex:
     return sum([e.value for e in [me(b.element.Y) for b in network.branches_connected_to(node)] if e.isfinite])
 
-def admittance_between(network: Network, node1: str, node2: str, me: Callable[[complex | str], MatrixElement]) -> complex:
+def admittance_between(network: Network, node1: str, node2: str, me: Callable[[Any], MatrixElement]) -> complex:
     return sum([e.value for e in [me(b.element.Y) for b in network.branches_between(node1, node2)] if e.isfinite])
 
 def connected_nodes(network: Network, node: str) -> list[str]:
@@ -171,7 +172,7 @@ def source_incidence_matrix(network: Network, node_mapper: map.NetworkMapper = m
             Q[node_index[source_element.node2]][cs_index[cs]] = 1
     return Q
 
-def current_source_vector(network: Network, matrix_ops: MatrixOperations = NumPyMatrixOperations(), source_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper) -> np.ndarray:
+def current_source_vector(network: Network, matrix_ops: MatrixOperations = NumPyMatrixOperations(), source_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper) -> Matrix:
     cs_index = map.filter(source_mapper(network), lambda x: network[x].element.is_current_source)
     return matrix_ops.column_vector([network[x].element.I for x in cs_index.keys])
 
