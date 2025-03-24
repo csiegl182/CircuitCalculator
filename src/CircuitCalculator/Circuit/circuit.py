@@ -1,5 +1,6 @@
 from .components import Component
 from .transformers import transformers
+from .symbolic_transformers import transformers as symbolic_transformers
 from ..Network.network import Network
 import numpy as np
 from dataclasses import dataclass, field
@@ -53,3 +54,9 @@ def frequency_components(circuit: Circuit, w_max: float) -> list[float]:
             return [w*n for n in np.arange(n_max+1)]
         return [w]
     return sorted(list(set([w for c in circuit.components for w in frequencies(c)])))
+
+def transform_symbolic_circuit(circuit: Circuit) -> Network:
+    return Network(
+        branches=[symbolic_transformers[component.type](component) for component in circuit.components if component.type in symbolic_transformers.keys()],
+        node_zero_label=circuit.ground_node
+    )   
