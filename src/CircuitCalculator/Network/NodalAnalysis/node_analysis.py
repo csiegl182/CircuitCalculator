@@ -50,6 +50,8 @@ class SymbolicMatrixElement:
         return self.value.is_finite
 
 class MatrixOperations(Protocol):
+    matrix_inversion_exception: Any
+
     @staticmethod
     def zeros(shape: tuple[int, int]) -> Any: ...
 
@@ -68,7 +70,15 @@ class MatrixOperations(Protocol):
     @staticmethod
     def elm(value: complex | symbolic) -> MatrixElement: ...
 
+    @staticmethod
+    def shape(matrix: Any) -> tuple[int, int]: ...
+
+    @staticmethod
+    def contains_nan(matrix: Any) -> bool: ...
+
 class NumPyMatrixOperations:
+    matrix_inversion_exception = np.linalg.LinAlgError
+
     @staticmethod
     def zeros(shape: tuple[int, int]) -> np.ndarray:
         return np.zeros(shape, dtype=complex)
@@ -93,7 +103,17 @@ class NumPyMatrixOperations:
     def elm(value: complex | symbolic) -> NumericMatrixElement:
         return NumericMatrixElement(value)
 
+    @staticmethod
+    def shape(matrix: np.ndarray) -> tuple[int, int]:
+        return (matrix.shape[0], matrix.shape[1])
+
+    @staticmethod
+    def contains_nan(matrix: np.ndarray) -> bool:
+        return np.any(np.isnan(matrix)) == True
+
 class SymPyMatrixOperations:
+    matrix_inversion_exception = sp.matrices.common.NonInvertibleMatrixError
+
     @staticmethod
     def zeros(shape: tuple[int, int]) -> sp.Matrix:
         return sp.zeros(*shape)
@@ -118,6 +138,13 @@ class SymPyMatrixOperations:
     def elm(value: complex | symbolic) -> SymbolicMatrixElement:
         return SymbolicMatrixElement(value)
 
+    @staticmethod
+    def shape(matrix: sp.Matrix) -> tuple[int, int]:
+        return (matrix.shape[0], matrix.shape[1])
+
+    @staticmethod
+    def contains_nan(matrix: sp.Matrix) -> bool:
+        return False
 
 def admittance_connected_to(network: Network, node: str, me: Callable[[Any], MatrixElement]) -> complex:
     return sum([e.value for e in [me(b.element.Y) for b in network.branches_connected_to(node)] if e.isfinite])
@@ -181,7 +208,7 @@ def current_source_incidence_vector(network: Network, matrix_ops: MatrixOperatio
     Is = current_source_vector(network, matrix_ops=matrix_ops, source_mapper=source_mapper)
     return Q@Is
 
-def nodal_analysis_constants_vector(network: Network, matrix_ops: MatrixOperations = NumPyMatrixOperations(), node_mapper: map.NetworkMapper = map.default_node_mapper, current_source_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper, voltage_source_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper) -> np.ndarray:
+def nodal_analysis_constants_vector(network: Network, matrix_ops: MatrixOperations = NumPyMatrixOperations(), node_mapper: map.NetworkMapper = map.default_node_mapper, current_source_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper, voltage_source_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper) -> Matrix:
     I = current_source_incidence_vector(network, matrix_ops, node_mapper, current_source_mapper)
 
     vs_mapping = voltage_source_mapper(network)

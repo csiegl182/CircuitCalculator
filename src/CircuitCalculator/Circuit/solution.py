@@ -1,7 +1,7 @@
-from .circuit import Circuit, transform, frequency_components
+from .circuit import Circuit, transform, frequency_components, transform_symbolic_circuit
 from ..SignalProcessing.types import TimeDomainFunction, FrequencyDomainSeries, TimeDomainSeries, StateSpaceSolver
 from ..SignalProcessing.state_space_model import StateSpaceModel, continuous_state_space_solver
-from ..Network.NodalAnalysis.bias_point_analysis import nodal_analysis_bias_point_solver
+from ..Network.NodalAnalysis.bias_point_analysis import nodal_analysis_bias_point_solver, symbolic_nodal_analysis_bias_point_solver
 from ..Network.NodalAnalysis.state_space_model import nodal_state_space_model
 from ..Network.solution import NetworkSolver
 from typing import Any
@@ -191,5 +191,25 @@ class TransientSolution(CircuitSolution):
 
     def get_power(self, component_id: str) -> TimeDomainSeries:
         return self._tout, self.get_voltage(component_id)[1]*self.get_current(component_id)[1]
+
+@dataclass
+class SymoblicSolution(CircuitSolution):
+    solver: NetworkSolver = field(default=symbolic_nodal_analysis_bias_point_solver)
+
+    def __post_init__(self):
+        network = transform_symbolic_circuit(self.circuit)
+        self._solution = self.solver(network)
+
+    def get_voltage(self, component_id: str) -> Any:
+        return self._solution.get_voltage(component_id)
+
+    def get_current(self, component_id: str) -> Any:
+        return self._solution.get_current(component_id)
+
+    def get_potential(self, node_id: str) -> Any:
+        return self._solution.get_potential(node_id)
+
+    def get_power(self, component_id: str) -> Any:
+        return self.get_voltage(component_id)*self.get_current(component_id)
         
         
