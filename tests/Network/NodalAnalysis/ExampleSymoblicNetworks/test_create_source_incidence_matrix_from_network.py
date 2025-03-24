@@ -2,12 +2,13 @@ from CircuitCalculator.Network.NodalAnalysis.node_analysis import source_inciden
 from CircuitCalculator.Network.network import Network, Branch
 from CircuitCalculator.Network.symbolic_elements import resistor, voltage_source, current_source
 import numpy as np
+import sympy as sp
 
 def test_source_incidence_matrix_from_reference_network_1() -> None:
     network = Network(
         [
-            Branch('1', '0', voltage_source('Uq', V='Vq')),
-            Branch('1', '0', resistor('R1', R='R'))
+            Branch('1', '0', voltage_source('Vq', V=sp.Symbol('Vq'))),
+            Branch('1', '0', resistor('R1', R=sp.Symbol('R')))
         ]
     )
     Q = source_incidence_matrix(network)
@@ -17,8 +18,8 @@ def test_source_incidence_matrix_from_reference_network_1() -> None:
 def test_source_incidence_matrix_from_reference_network_2() -> None:
     network = Network(
         [
-            Branch('0', '1', current_source('Iq', I='Iq')),
-            Branch('1', '0', resistor('R1', R='R'))
+            Branch('0', '1', current_source('Iq', I=sp.Symbol('Iq'))),
+            Branch('1', '0', resistor('R1', R=sp.Symbol('R')))
         ]
     )
     Q = source_incidence_matrix(network)
@@ -28,9 +29,9 @@ def test_source_incidence_matrix_from_reference_network_2() -> None:
 def test_source_incidence_matrix_from_reference_network_3() -> None:
     network = Network(
         [
-            Branch('0', '1', current_source('Iq1', I='Iq', Y='1/Ri')),
-            Branch('1', '2', resistor('R1', R='R1')),
-            Branch('2', '0', resistor('R2', R='R2'))
+            Branch('0', '1', current_source('Iq1', I=sp.Symbol('Iq'), Y=sp.Symbol('1/Ri'))),
+            Branch('1', '2', resistor('R1', R=sp.Symbol('R1'))),
+            Branch('2', '0', resistor('R2', R=sp.Symbol('R2')))
         ]
     )
     Q = source_incidence_matrix(network)
@@ -41,10 +42,10 @@ def test_source_incidence_matrix_from_reference_network_3() -> None:
 def test_source_incidence_matrix_from_reference_network_4() -> None:
     network = Network(
         [
-            Branch('1', '0', voltage_source('Uq', V='Uq')),
-            Branch('1', '0', resistor('R1', R='R1')),
-            Branch('1', '2', resistor('R2', R='R2')),
-            Branch('2', '0', resistor('R3', R='R3'))
+            Branch('1', '0', voltage_source('Vq', V=sp.Symbol('Vq'))),
+            Branch('1', '0', resistor('R1', R=sp.Symbol('R1'))),
+            Branch('1', '2', resistor('R2', R=sp.Symbol('R2'))),
+            Branch('2', '0', resistor('R3', R=sp.Symbol('R3')))
         ]
     )
     Q = source_incidence_matrix(network)
@@ -54,11 +55,11 @@ def test_source_incidence_matrix_from_reference_network_4() -> None:
 def test_source_incidence_matrix_from_reference_network_5() -> None:
     network = Network(
         [
-            Branch('1', '0', voltage_source('Uq1', V='U1')),
-            Branch('1', '2', resistor('R1', R='R1')),
-            Branch('3', '4', resistor('R4', R='R4')),
-            Branch('4', '0', resistor('R5', R='R5')),
-            Branch('0', '4', voltage_source('Uq2', V='U2'))
+            Branch('1', '0', voltage_source('Vs1', V=sp.Symbol('V1'))),
+            Branch('1', '2', resistor('R1', R=sp.Symbol('R1'))),
+            Branch('3', '4', resistor('R4', R=sp.Symbol('R4'))),
+            Branch('4', '0', resistor('R5', R=sp.Symbol('R5'))),
+            Branch('0', '4', voltage_source('Vs2', V=sp.Symbol('V2')))
         ]
     )
     Q = source_incidence_matrix(network)
@@ -68,13 +69,13 @@ def test_source_incidence_matrix_from_reference_network_5() -> None:
 def test_source_incidence_matrix_from_reference_network_6() -> None:
     network = Network(
         [
-            Branch('1', '0', voltage_source('Us1', V='V1')),
-            Branch('1', '2', resistor('R1', R='R1')),
-            Branch('2', '0', resistor('R2', R='R2')),
-            Branch('2', '3', resistor('R3', R='R3')),
-            Branch('3', '4', resistor('R4', R='R4')),
-            Branch('4', '0', resistor('R5', R='R5')),
-            Branch('3', '2', voltage_source('Us2', V='V2'))
+            Branch('1', '0', voltage_source('Vs1', V=sp.Symbol('V1'))),
+            Branch('1', '2', resistor('R1', R=sp.Symbol('R1'))),
+            Branch('2', '0', resistor('R2', R=sp.Symbol('R2'))),
+            Branch('2', '3', resistor('R3', R=sp.Symbol('R3'))),
+            Branch('3', '4', resistor('R4', R=sp.Symbol('R4'))),
+            Branch('4', '0', resistor('R5', R=sp.Symbol('R5'))),
+            Branch('3', '2', voltage_source('Vs2', V=sp.Symbol('V2')))
         ]
     )
     Q = source_incidence_matrix(network)
@@ -84,14 +85,14 @@ def test_source_incidence_matrix_from_reference_network_6() -> None:
 def test_source_incidence_matrix_from_reference_network_7() -> None:
     network = Network(
         [
-            Branch('0', '1', resistor('R1', R='R1')),
-            Branch('2', '1', voltage_source('Us2', V='V2')),
-            Branch('1', '3', resistor('R2', R='R2')),
-            Branch('4', '3', voltage_source('Us3', V='V3')),
-            Branch('2', '5', resistor('R3', R='R3')),
-            Branch('4', '5', resistor('R4', R='R4')),
-            Branch('3', '5', current_source('Is4', I='I4')),
-            Branch('0', '5', voltage_source('Us1', V='V1'))
+            Branch('0', '1', resistor('R1', R=sp.Symbol('R1'))),
+            Branch('2', '1', voltage_source('Us2', V=sp.Symbol('V2'))),
+            Branch('1', '3', resistor('R2', R=sp.Symbol('R2'))),
+            Branch('4', '3', voltage_source('Us3', V=sp.Symbol('V3'))),
+            Branch('2', '5', resistor('R3', R=sp.Symbol('R3'))),
+            Branch('4', '5', resistor('R4', R=sp.Symbol('R4'))),
+            Branch('3', '5', current_source('Is4', I=sp.Symbol('I4'))),
+            Branch('0', '5', voltage_source('Us1', V=sp.Symbol('V1')))
         ]
     )
     Q = source_incidence_matrix(network)
@@ -105,18 +106,16 @@ def test_source_incidence_matrix_from_reference_network_7() -> None:
     np.testing.assert_almost_equal(Q, Q_ref)
 
 def test_source_incidence_matrix_from_reference_network_10() -> None:
-    R1, R2, R3, R4, R5 = 10, 20, 30, 40, 50
-    V1, V2, I4 = 1, 2, 0.1
     network = Network(
         [
-            Branch('1', '0', voltage_source('Us1', V='V1')),
-            Branch('1', '0', resistor('R1', R='R1')),
-            Branch('2', '1', voltage_source('Us2', V='V2')),
-            Branch('2', '1', resistor('R2', R='R2')),
-            Branch('0', '4', resistor('R3', R='R3')),
-            Branch('4', '3', current_source('Is4', I='I4')),
-            Branch('3', '2', resistor('R4', R='R4')),
-            Branch('2', '4', resistor('R5', R='R5')),
+            Branch('1', '0', voltage_source('Vs1', V=sp.Symbol('V1'))),
+            Branch('1', '0', resistor('R1', R=sp.Symbol('R1'))),
+            Branch('2', '1', voltage_source('Vs2', V=sp.Symbol('V2'))),
+            Branch('2', '1', resistor('R2', R=sp.Symbol('R2'))),
+            Branch('0', '4', resistor('R3', R=sp.Symbol('R3'))),
+            Branch('4', '3', current_source('Is4', I=sp.Symbol('I4'))),
+            Branch('3', '2', resistor('R4', R=sp.Symbol('R4'))),
+            Branch('2', '4', resistor('R5', R=sp.Symbol('R5'))),
         ]
     )
     Q = source_incidence_matrix(network)
@@ -131,10 +130,10 @@ def test_source_incidence_matrix_from_reference_network_10() -> None:
 def test_source_incidence_matrix_from_reference_network_13() -> None:
     network = Network(
         branches=[
-            Branch('1', '0', voltage_source('V', V='V')),
-            Branch('1', '2', resistor('R1', R='R1')),
-            Branch('1', '2', resistor('R2', R='R2')),
-            Branch('2', '0', resistor('R3', R='R3'))
+            Branch('1', '0', voltage_source('V', V=sp.Symbol('V'))),
+            Branch('1', '2', resistor('R1', R=sp.Symbol('R1'))),
+            Branch('1', '2', resistor('R2', R=sp.Symbol('R2'))),
+            Branch('2', '0', resistor('R3', R=sp.Symbol('R3')))
         ],
         node_zero_label='0'
     )

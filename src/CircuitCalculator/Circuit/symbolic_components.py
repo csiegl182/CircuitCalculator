@@ -1,6 +1,18 @@
 from .components import Component
+import sympy as sp
+
+def value_less_than_zero(value: str) -> bool:
+    if len(value) == 0:
+        return False
+    x = sp.sympify(value)
+    try:
+        return (x < 0) == True
+    except TypeError:
+        return False
 
 def resistor(id: str, nodes: tuple[str, str], R: str = '') -> Component:
+    if value_less_than_zero(R):
+        raise ValueError('R must be greater than zero.')
     return Component(
         type='resistor',
         id=id,
@@ -9,6 +21,8 @@ def resistor(id: str, nodes: tuple[str, str], R: str = '') -> Component:
         )
 
 def conductance(id: str, nodes: tuple[str, str], G: str = '') -> Component:
+    if value_less_than_zero(G):
+        raise ValueError('G must be greater than zero.')
     return Component(
         type='conductance',
         id=id,
@@ -17,6 +31,8 @@ def conductance(id: str, nodes: tuple[str, str], G: str = '') -> Component:
         )
 
 def capacitor(id: str, nodes: tuple[str, str], C: str = '') -> Component:
+    if value_less_than_zero(C):
+        raise ValueError('C must be greater than zero.')
     return Component(
         type='capacitor',
         id=id,
@@ -25,6 +41,8 @@ def capacitor(id: str, nodes: tuple[str, str], C: str = '') -> Component:
     )
 
 def inductance(id: str, nodes: tuple[str, str], L: str = '') -> Component:
+    if value_less_than_zero(L):
+        raise ValueError('L must be greater than zero.')
     return Component(
         type='inductance',
         id=id,
@@ -48,17 +66,17 @@ def admittance(id: str, nodes: tuple[str, str], Y: str = '') -> Component:
         nodes=nodes
         )
 
-def dc_voltage_source(id: str, nodes: tuple[str, str], V: str = '', R: str = '0') -> Component:
+def voltage_source(id: str, nodes: tuple[str, str], V: str = '', R: str = '0') -> Component:
     return Component(
-        type='dc_voltage_source',
+        type='voltage_source',
         id=id,
         value={'V': V if len(V) > 0 else id, 'R': R, 'w': 0, 'phi': 0},
         nodes=nodes
         )
 
-def dc_current_source(id: str, nodes: tuple[str, str], I: str = '', G: str = '0') -> Component:
+def current_source(id: str, nodes: tuple[str, str], I: str = '', G: str = '0') -> Component:
     return Component(
-        type='dc_current_source',
+        type='current_source',
         id=id,
         value={'I': I if len(I) > 0 else id, 'G': G, 'w': 0, 'phi': 0},
         nodes=nodes
