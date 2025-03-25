@@ -188,8 +188,3 @@ def ground(id: str='gnd', nodes: tuple[str]=('0',)) -> Component:
         id=id,
         nodes=nodes
     )
-
-def is_active(component: Component) -> bool:
-    if 'w' in component.value.keys():
-        return True
-    return False
