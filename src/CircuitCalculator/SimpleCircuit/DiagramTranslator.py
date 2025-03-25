@@ -5,7 +5,6 @@ from ..Circuit.circuit import Circuit, Component
 
 from . import Elements as elm
 from .CircuitComponentTranslators import circuit_translator_map
-from .NetworkBranchTranslators import network_translator_map
 from .SchemdrawTranslatorTypes import ElementTranslatorMap
 
 from .DiagramParser import SchematicDiagramParser
@@ -30,8 +29,3 @@ def circuit_translator(schematic: elm.Schematic) -> Circuit:
     parser = SchematicDiagramParser(schematic)
     translator = DiagramTranslator(parser, circuit_translator_map)
     return Circuit(_remove_none([translator(e) for e in parser.all_elements]))
-
-def network_translator(schematic: elm.Schematic) -> Network:
-    parser = SchematicDiagramParser(schematic)
-    translator = DiagramTranslator(parser, network_translator_map)
-    return Network(_remove_none([translator(e) for e in parser.all_elements]), parser.ground_label)
