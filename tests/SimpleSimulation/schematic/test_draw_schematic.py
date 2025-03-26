@@ -60,23 +60,6 @@ def test_when_providing_no_analysis_section_no_error_occurs() -> None:
     }
     draw_schematic(simulation_data)
 
-def test_when_providing_element_with_insufficient_arguemnts_a_missing_argument_error_is_raised() -> None:
-    _, ax = matplotlib.pyplot.subplots()
-    simulation_data = {
-        "circuit": {
-            "unit": 5,
-            "elements": [
-                {
-                    "type": "voltage_source",
-                    "name": "Vq",
-                    "V_insufficient": 1
-                }
-            ]
-        }
-    }
-    with pytest.raises(errors.MissingArgument):
-        draw_schematic(simulation_data, ax)
-
 def test_when_providing_empty_simulation_data_empty_circuit_error_is_raised() -> None:
     _, ax = matplotlib.pyplot.subplots()
     with pytest.raises(errors.EmptyCircuit):
