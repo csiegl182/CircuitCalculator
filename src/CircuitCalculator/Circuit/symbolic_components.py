@@ -68,7 +68,7 @@ def admittance(id: str, nodes: tuple[str, str], Y: str = '') -> Component:
 
 def voltage_source(id: str, nodes: tuple[str, str], V: str = '', R: str = '0') -> Component:
     return Component(
-        type='voltage_source',
+        type='dc_voltage_source',
         id=id,
         value={'V': V if len(V) > 0 else id, 'R': R, 'w': 0, 'phi': 0},
         nodes=nodes
@@ -76,7 +76,7 @@ def voltage_source(id: str, nodes: tuple[str, str], V: str = '', R: str = '0') -
 
 def current_source(id: str, nodes: tuple[str, str], I: str = '', G: str = '0') -> Component:
     return Component(
-        type='current_source',
+        type='dc_current_source',
         id=id,
         value={'I': I if len(I) > 0 else id, 'G': G, 'w': 0, 'phi': 0},
         nodes=nodes

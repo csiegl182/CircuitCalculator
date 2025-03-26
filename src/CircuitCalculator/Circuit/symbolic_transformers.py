@@ -9,20 +9,20 @@ CircuitComponentTranslator = Callable[[ccp.Component], ntw.Branch]
 
 def resistor(resistor: ccp.Component) -> ntw.Branch:
     R = sp.sympify(resistor.value['R'])
-    if id == resistor.value['R']:
-        R = sp.Symbol(id, real=True, positive=True)
+    if R == sp.nan or resistor.id == resistor.value['R']:
+        R = sp.Symbol(resistor.id, real=True, positive=True)
     return ntw.Branch(resistor.nodes[0], resistor.nodes[1], elm.resistor(resistor.id, R))
 
 def impedance(impedance: ccp.Component) -> ntw.Branch:
     Z = sp.sympify(impedance.value['Z'])
-    if id == impedance.value['Z']:
-        Z = sp.Symbol(id, complex=True)
+    if Z == sp.nan or impedance.id == impedance.value['Z']:
+        Z = sp.Symbol(impedance.id, complex=True)
     return ntw.Branch(impedance.nodes[0], impedance.nodes[1], elm.impedance(impedance.id, Z))
 
 def capacitor(capacitor: ccp.Component) -> ntw.Branch:
     C = capacitor.value['C']
-    if id == capacitor.value['C']:
-        C = sp.Symbol(id, real=True, positive=True)
+    if C == sp.nan or capacitor.id == capacitor.value['C']:
+        C = sp.Symbol(capacitor.id, real=True, positive=True)
     return ntw.Branch(
         capacitor.nodes[0],
         capacitor.nodes[1],
@@ -31,8 +31,8 @@ def capacitor(capacitor: ccp.Component) -> ntw.Branch:
 
 def inductance(inductance: ccp.Component) -> ntw.Branch:
     L = inductance.value['L']
-    if id == inductance.value['L']:
-        L = sp.Symbol(id, real=True, positive=True)
+    if L == sp.nan or inductance.id == inductance.value['L']:
+        L = sp.Symbol(inductance.id, real=True, positive=True)
     return ntw.Branch(
         inductance.nodes[0],
         inductance.nodes[1],
@@ -42,6 +42,8 @@ def inductance(inductance: ccp.Component) -> ntw.Branch:
 def voltage_source(voltage_source: ccp.Component) -> ntw.Branch:
     V = sp.sympify(voltage_source.value['V'])
     Z = sp.sympify(voltage_source.value['R'])
+    if V == sp.nan:
+        V = sp.Symbol(voltage_source.id)
     element = elm.voltage_source(voltage_source.id, V, Z)
     return ntw.Branch(
         voltage_source.nodes[0],
@@ -51,6 +53,8 @@ def voltage_source(voltage_source: ccp.Component) -> ntw.Branch:
 def current_source(current_source: ccp.Component) -> ntw.Branch:
     cs_I = sp.sympify(current_source.value['I'])
     cs_G = sp.sympify(current_source.value['G'])
+    if cs_I == sp.nan:
+        cs_I = sp.Symbol(current_source.id)
     element = elm.current_source(current_source.id, cs_I, cs_G)
     return ntw.Branch(
         current_source.nodes[0],

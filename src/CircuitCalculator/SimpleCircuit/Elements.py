@@ -98,10 +98,15 @@ class Element(schemdraw.elements.Element):
 @simple_circuit_element
 @extension.source
 class VoltageSource(schemdraw.elements.SourceV):
-    def __init__(self, *args, name: str, V: float, reverse: bool = False, precision: int = 3, **kwargs):
+    def __init__(self, *args, name: str, V: float = float('nan'), show_name: bool = True, show_value: bool = True, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=not reverse, **kwargs)
+        if np.isnan(V):
+            show_value = False
         self._V = V if not reverse else -V
-        label = dsp.print_real(V, unit='V', precision=precision)
+        label = ''
+        label += f'{name}' if show_name else ''
+        label += '=' if  show_name and show_value else ''
+        label += dsp.print_real(V, unit='V', precision=precision) if show_value else ''
         self.label(f'{name}={label}', rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
         self.segments.append(extension.voltage_arrow())
 
@@ -116,10 +121,15 @@ class VoltageSource(schemdraw.elements.SourceV):
 @simple_circuit_element
 @extension.source
 class ComplexVoltageSource(schemdraw.elements.SourceV):
-    def __init__(self, *args, name: str, V: complex, reverse: bool = False, precision: int = 3, **kwargs):
+    def __init__(self, *args, name: str, V: complex = complex('nan'), show_name: bool = True, show_value: bool = True, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=not reverse, **kwargs)
+        if np.isnan(V):
+            show_value = False
         self._V = V if not reverse else -V
-        label = dsp.print_complex(V, unit='V', precision=precision)
+        label = ''
+        label += f'{name}' if show_name else ''
+        label += '=' if  show_name and show_value else ''
+        label += dsp.print_complex(V, unit='V', precision=precision) if show_value else ''
         self.label(f'{name}={label}', rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
         self.segments.append(extension.voltage_arrow())
 
@@ -134,10 +144,15 @@ class ComplexVoltageSource(schemdraw.elements.SourceV):
 @simple_circuit_element
 @extension.source
 class CurrentSource(schemdraw.elements.SourceI):
-    def __init__(self, *args, I: float, name: str, reverse=False, precision=3, **kwargs):
+    def __init__(self, *args, name: str, I: float = float('nan'), show_name: bool = True, show_value: bool = True, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
+        if np.isnan(I):
+            show_value = False
         self._I = I if not reverse else -I
-        label = dsp.print_complex(I, unit='A', precision=precision)
+        label = ''
+        label += f'{name}' if show_name else ''
+        label += '=' if  show_name and show_value else ''
+        label += dsp.print_real(I, unit='A', precision=precision) if show_value else ''
         self.label(f'{name}={label}', loc='i_label', ofst=(0, 0.4), rotate=True, color=dsp.red)
         self.segments.append(extension.current_arrow())
 
@@ -152,10 +167,15 @@ class CurrentSource(schemdraw.elements.SourceI):
 @simple_circuit_element
 @extension.source
 class ComplexCurrentSource(schemdraw.elements.SourceI):
-    def __init__(self, *args, I: complex, name: str, reverse=False, precision=3, **kwargs):
+    def __init__(self, *args, name: str, I: complex = complex('nan'), show_name: bool = True, show_value: bool = True, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
+        if np.isnan(I):
+            show_value = False
         self._I = I if not reverse else -I
-        label = dsp.print_complex(I, unit='A', precision=precision)
+        label = ''
+        label += f'{name}' if show_name else ''
+        label += '=' if  show_name and show_value else ''
+        label += dsp.print_complex(I, unit='A', precision=precision) if show_value else ''
         self.label(f'{name}={label}', loc='i_label', ofst=(0, 0.4), rotate=True, color=dsp.red)
         self.segments.append(extension.current_arrow())
 
@@ -170,13 +190,15 @@ class ComplexCurrentSource(schemdraw.elements.SourceI):
 @simple_circuit_element
 @extension.resistor
 class Resistor(schemdraw.elements.Resistor):
-    def __init__(self, *args, R: float, name: str, show_name: bool = True, show_value: bool = True, reverse: bool = False, **kwargs):
+    def __init__(self, *args, name: str, R: float = float('nan'), show_name: bool = True, show_value: bool = True, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
+        if np.isnan(R):
+            show_value = False
         self._R = R
         label = ''
         label += f'{name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
-        label += dsp.print_resistance(self.R) if show_value else ''
+        label += dsp.print_resistance(self.R, precision=precision) if show_value else ''
         self.label(label, rotate=True, loc='value_label', halign='center')
 
     @property
@@ -198,13 +220,15 @@ class Resistor(schemdraw.elements.Resistor):
 @simple_circuit_element
 @extension.resistor
 class Conductance(schemdraw.elements.Resistor):
-    def __init__(self, *args, G: float, name: str, show_name: bool = True, show_value: bool = True, reverse: bool = False, **kwargs):
+    def __init__(self, *args, name: str, G: float = float('nan'), show_name: bool = True, show_value: bool = True, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
+        if np.isnan(G):
+            show_value = False
         self._G = G
         label = ''
         label += f'{name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
-        label += dsp.print_conductance(self.G) if show_value else ''
+        label += dsp.print_conductance(self.G, precision=precision) if show_value else ''
         self.label(label, rotate=True, loc='value_label', halign='center')
 
     @property
@@ -226,8 +250,10 @@ class Conductance(schemdraw.elements.Resistor):
 @simple_circuit_element
 @extension.resistor
 class Impedance(schemdraw.elements.Resistor):
-    def __init__(self, *args, Z: complex, name: str, show_name: bool = True, show_value: bool = True, precision: int = 3, reverse: bool = False, **kwargs):
+    def __init__(self, *args, name: str, Z: complex = complex('nan'), show_name: bool = True, show_value: bool = True, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
+        if np.isnan(Z):
+            show_value = False
         self._Z = Z
         label = ''
         label += f'{name}' if show_name else ''
@@ -254,8 +280,10 @@ class Impedance(schemdraw.elements.Resistor):
 @simple_circuit_element
 @extension.resistor
 class Admittance(schemdraw.elements.Resistor):
-    def __init__(self, *args, Y: complex, name: str, show_name: bool = True, show_value: bool = True, precision: int = 3, reverse: bool = False, **kwargs):
+    def __init__(self, *args, name: str, Y: complex = complex('nan'), show_name: bool = True, show_value: bool = True, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
+        if np.isnan(Y):
+            show_value = False
         self._Y = Y
         label = ''
         label += f'{name}' if show_name else ''
