@@ -111,7 +111,7 @@ class VoltageSource(schemdraw.elements.SourceV):
         label += f'{name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
         label += dsp.print_real(V, unit='V', precision=precision) if show_value else ''
-        self.label(f'{name}={label}', rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
+        self.label(f'{label}', rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
         self.segments.append(extension.voltage_arrow())
 
     @property
@@ -138,7 +138,7 @@ class ComplexVoltageSource(schemdraw.elements.SourceV):
         label += f'{name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
         label += dsp.print_complex(V, unit='V', precision=precision) if show_value else ''
-        self.label(f'{name}={label}', rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
+        self.label(f'{label}', rotate=True, color=dsp.blue, loc='value_label', halign='center', valign='center')
         self.segments.append(extension.voltage_arrow())
 
     @property
@@ -165,7 +165,7 @@ class CurrentSource(schemdraw.elements.SourceI):
         label += f'{name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
         label += dsp.print_real(I, unit='A', precision=precision) if show_value else ''
-        self.label(f'{name}={label}', loc='i_label', ofst=(0, 0.4), rotate=True, color=dsp.red)
+        self.label(f'{label}', loc='i_label', ofst=(0, 0.4), rotate=True, color=dsp.red)
         self.segments.append(extension.current_arrow())
 
     @property
@@ -192,7 +192,7 @@ class ComplexCurrentSource(schemdraw.elements.SourceI):
         label += f'{name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
         label += dsp.print_complex(I, unit='A', precision=precision) if show_value else ''
-        self.label(f'{name}={label}', loc='i_label', ofst=(0, 0.4), rotate=True, color=dsp.red)
+        self.label(f'{label}', loc='i_label', ofst=(0, 0.4), rotate=True, color=dsp.red)
         self.segments.append(extension.current_arrow())
 
     @property
