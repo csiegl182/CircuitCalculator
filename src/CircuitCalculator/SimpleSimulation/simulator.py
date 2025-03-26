@@ -35,7 +35,8 @@ solutions : dict[str, type[solution.CircuitSolution]]= {
     'complex': solution.ComplexSolution,
     'time_domain': solution.TimeDomainSolution,
     'frequency_domain': solution.FrequencyDomainSolution,
-    'transient': solution.TransientSolution
+    'transient': solution.TransientSolution,
+    'symbolic': solution.SymbolicSolution
 }
 
 def get_solution(solution_type: str, circuit: Circuit, **kwargs) -> solution.CircuitSolution:

@@ -193,7 +193,7 @@ class TransientSolution(CircuitSolution):
         return self._tout, self.get_voltage(component_id)[1]*self.get_current(component_id)[1]
 
 @dataclass
-class SymoblicSolution(CircuitSolution):
+class SymbolicSolution(CircuitSolution):
     solver: NetworkSolver = field(default=symbolic_nodal_analysis_bias_point_solver)
 
     def __post_init__(self):

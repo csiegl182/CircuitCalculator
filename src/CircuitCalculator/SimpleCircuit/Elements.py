@@ -100,6 +100,10 @@ class Element(schemdraw.elements.Element):
 class VoltageSource(schemdraw.elements.SourceV):
     def __init__(self, *args, name: str, V: float = float('nan'), show_name: bool = True, show_value: bool = True, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=not reverse, **kwargs)
+        try:
+            V = float(V)
+        except ValueError:
+            V = float('nan')
         if np.isnan(V):
             show_value = False
         self._V = V if not reverse else -V
@@ -123,6 +127,10 @@ class VoltageSource(schemdraw.elements.SourceV):
 class ComplexVoltageSource(schemdraw.elements.SourceV):
     def __init__(self, *args, name: str, V: complex = complex('nan'), show_name: bool = True, show_value: bool = True, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=not reverse, **kwargs)
+        try:
+            V = complex(V)
+        except ValueError:
+            V = complex('nan')
         if np.isnan(V):
             show_value = False
         self._V = V if not reverse else -V
@@ -146,6 +154,10 @@ class ComplexVoltageSource(schemdraw.elements.SourceV):
 class CurrentSource(schemdraw.elements.SourceI):
     def __init__(self, *args, name: str, I: float = float('nan'), show_name: bool = True, show_value: bool = True, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
+        try:
+            I = float(I)
+        except ValueError:
+            I = float('nan')
         if np.isnan(I):
             show_value = False
         self._I = I if not reverse else -I
@@ -169,6 +181,10 @@ class CurrentSource(schemdraw.elements.SourceI):
 class ComplexCurrentSource(schemdraw.elements.SourceI):
     def __init__(self, *args, name: str, I: complex = complex('nan'), show_name: bool = True, show_value: bool = True, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
+        try:
+            I = complex(I)
+        except ValueError:
+            I = complex('nan')
         if np.isnan(I):
             show_value = False
         self._I = I if not reverse else -I
@@ -192,6 +208,10 @@ class ComplexCurrentSource(schemdraw.elements.SourceI):
 class Resistor(schemdraw.elements.Resistor):
     def __init__(self, *args, name: str, R: float = float('nan'), show_name: bool = True, show_value: bool = True, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
+        try:
+            R = float(R)
+        except ValueError:
+            R = float('nan')
         if np.isnan(R):
             show_value = False
         self._R = R
@@ -222,6 +242,10 @@ class Resistor(schemdraw.elements.Resistor):
 class Conductance(schemdraw.elements.Resistor):
     def __init__(self, *args, name: str, G: float = float('nan'), show_name: bool = True, show_value: bool = True, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
+        try:
+            G = float(G)
+        except ValueError:
+            G = float('nan')
         if np.isnan(G):
             show_value = False
         self._G = G
@@ -252,6 +276,10 @@ class Conductance(schemdraw.elements.Resistor):
 class Impedance(schemdraw.elements.Resistor):
     def __init__(self, *args, name: str, Z: complex = complex('nan'), show_name: bool = True, show_value: bool = True, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
+        try:
+            Z = complex(Z)
+        except ValueError:
+            Z = complex('nan')
         if np.isnan(Z):
             show_value = False
         self._Z = Z
@@ -282,6 +310,10 @@ class Impedance(schemdraw.elements.Resistor):
 class Admittance(schemdraw.elements.Resistor):
     def __init__(self, *args, name: str, Y: complex = complex('nan'), show_name: bool = True, show_value: bool = True, reverse: bool = False, precision: int = 3, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
+        try:
+            Y = complex(Y)
+        except ValueError:
+            Y = complex('nan')
         if np.isnan(Y):
             show_value = False
         self._Y = Y
