@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 
 class MultipleGroundNodes(Exception): pass
 class AmbiguousComponentID(Exception): pass
+class CircuitTransformationError(Exception): pass
 
 @dataclass
 class Circuit:
@@ -28,17 +29,25 @@ class Circuit:
             raise AmbiguousComponentID(f'Component list contains multiple components with the same ID.')
 
     def __getitem__(self, key: str) -> Component:
+        if key == self.ground_node:
+            raise KeyError('Ground node is not a component.')
         index = [component.id for component in self.components].index(key)
         return self.components[index]
+
+    def __iter__(self):
+        return (component for component in self.components if component.type != 'ground')
 
 def w(f: float) -> float:
     return 2*np.pi*f
 
 def transform_circuit(circuit: Circuit, w: float, w_resolution: float = 1e-3, rms: bool = True) -> Network:
-    return Network(
-        branches=[transformers[component.type](component, w, w_resolution, rms) for component in circuit.components if component.type in transformers.keys()],
-        node_zero_label=circuit.ground_node
-    )
+    try:
+        return Network(
+            branches=[transformers[component.type](component, w, w_resolution, rms) for component in circuit],
+            node_zero_label=circuit.ground_node
+        )
+    except (ValueError, KeyError) as e:
+        raise CircuitTransformationError from e
 
 def transform(circuit: Circuit, w: list[float] = [0], w_resolution: float = 1e-3, rms: bool = True) -> list[Network]:
     return [transform_circuit(circuit, w_, w_resolution, rms) for w_ in w]
@@ -56,7 +65,10 @@ def frequency_components(circuit: Circuit, w_max: float) -> list[float]:
     return sorted(list(set([w for c in circuit.components for w in frequencies(c)])))
 
 def transform_symbolic_circuit(circuit: Circuit) -> Network:
-    return Network(
-        branches=[symbolic_transformers[component.type](component) for component in circuit.components if component.type in symbolic_transformers.keys()],
-        node_zero_label=circuit.ground_node
-    )   
+    try:
+        return Network(
+            branches=[symbolic_transformers[component.type](component) for component in circuit],
+            node_zero_label=circuit.ground_node
+        )   
+    except (ValueError, KeyError) as e:
+        raise CircuitTransformationError from e

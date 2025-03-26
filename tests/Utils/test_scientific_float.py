@@ -132,3 +132,8 @@ def test_large_negative_values_are_minus_infinity() -> None:
     value = -1e6
     str_repr = str(ScientificFloat(value, precision=3, use_exp_prefix=True, exp_prefixes={3: 'k'}))
     assert str_repr == '-∞'
+
+def test_nan_value() -> None:
+    value = float('nan')
+    str_repr = str(ScientificFloat(value))
+    assert str_repr == 'NaN'

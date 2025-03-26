@@ -33,6 +33,8 @@ class NumericMatrixElement:
 
     @property
     def isfinite(self) -> bool:
+        if np.isnan(self.value):
+            return True
         return np.isfinite(self.value)
 
 class SymbolicMatrixElement:
@@ -45,6 +47,8 @@ class SymbolicMatrixElement:
 
     @property
     def isfinite(self) -> bool:
+        if self.value == sp.nan:
+            return True
         if self.value.is_finite is None:
             return True
         return self.value.is_finite
@@ -54,6 +58,9 @@ class MatrixOperations(Protocol):
 
     @staticmethod
     def zeros(shape: tuple[int, int]) -> Any: ...
+
+    @staticmethod
+    def nan(shape: tuple[int, int]) -> Any: ...
 
     @staticmethod
     def column_vector(values: list[complex | symbolic]) -> Any: ...
@@ -82,6 +89,10 @@ class NumPyMatrixOperations:
     @staticmethod
     def zeros(shape: tuple[int, int]) -> np.ndarray:
         return np.zeros(shape, dtype=complex)
+
+    @staticmethod
+    def nan(shape: tuple[int, int]) -> np.ndarray:
+        return np.full(shape, np.nan, dtype=complex)
 
     @staticmethod
     def column_vector(values: list[complex | symbolic]) -> Any:
@@ -117,6 +128,10 @@ class SymPyMatrixOperations:
     @staticmethod
     def zeros(shape: tuple[int, int]) -> sp.Matrix:
         return sp.zeros(*shape)
+
+    @staticmethod
+    def nan(shape: tuple[int, int]) -> sp.Matrix:
+        return sp.Matrix([[sp.nan] * shape[1]] * shape[0])
 
     @staticmethod
     def column_vector(values: list[complex | symbolic]) -> sp.Matrix:

@@ -1,6 +1,5 @@
 from . import Elements as elm
 from ..Circuit import components as ccp
-from ..SignalProcessing import periodic_functions
 from .SchemdrawTranslatorTypes import ElementTranslatorMap
 from math import pi, inf
 

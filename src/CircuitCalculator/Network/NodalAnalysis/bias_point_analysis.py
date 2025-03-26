@@ -15,9 +15,7 @@ class NodalAnalysisBiasPointSolution(NodalAnalysisSolution):
         try:
             self._solution_vector = tuple(self.matrix_ops.solve(A, b))
         except self.matrix_ops.matrix_inversion_exception:
-            self._solution_vector = tuple(self.matrix_ops.zeros(self.matrix_ops.shape(b)))
-        if self.matrix_ops.contains_nan(self._solution_vector):
-            self._solution_vector = tuple(self.matrix_ops.zeros(self.matrix_ops.shape(b)))
+            self._solution_vector = (float('nan'),) * len(b)
 
     def get_potential(self, node_id: str) -> complex:
         if node_id == self.network.node_zero_label:

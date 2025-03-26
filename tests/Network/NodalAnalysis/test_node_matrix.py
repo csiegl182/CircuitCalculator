@@ -46,3 +46,14 @@ def test_node_admittance_matrix_sorts_node_indices() -> None:
     Y = node_admittance_matrix(network)
 
     np.testing.assert_almost_equal(Y, Y_ref)
+
+def test_node_admittance_matrix_contains_nan_values_when_conductance_is_nan() -> None:
+    Y_10, Y_20, Y_12 = 1, 2, np.nan
+    network = Network([
+        Branch('1', '0', conductor('Y_10', Y_10)),
+        Branch('2', '0', conductor('Y_20', Y_20)),
+        Branch('2', '1', conductor('Y_12', Y_12))
+    ])
+    Y = node_admittance_matrix(network)
+
+    assert np.any(np.isnan(Y))

@@ -72,10 +72,10 @@ def print_active_reactive_power(value: complex, precision: int = 3) -> str:
     return label
 
 def print_resistance(R: float, precision: int = 3):
-    return str(ScientificComplex(value=R, unit='Ω', use_exp_prefix=True, exp_prefixes={-3: 'm', 3: 'k', 6: 'M', 9: 'G'}, precision=precision))
+    return str(ScientificFloat(value=R, unit='Ω', use_exp_prefix=True, exp_prefixes={-3: 'm', 3: 'k', 6: 'M', 9: 'G'}, precision=precision))
 
 def print_conductance(G: float, precision: int = 3):
-    return str(ScientificComplex(value=G, unit='S', use_exp_prefix=True, exp_prefixes={-3: 'm', 3: 'k', 6: 'M', 9: 'G'}, precision=precision))
+    return str(ScientificFloat(value=G, unit='S', use_exp_prefix=True, exp_prefixes={-3: 'm', 3: 'k', 6: 'M', 9: 'G'}, precision=precision))
 
 def print_impedance(Z: complex, precision: int = 3):
     return str(ScientificComplex(value=Z, unit='Ω', use_exp_prefix=True, exp_prefixes={-3: 'm', 3: 'k', 6: 'M', 9: 'G'}, precision=precision))
