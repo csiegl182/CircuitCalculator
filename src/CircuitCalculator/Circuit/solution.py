@@ -172,7 +172,7 @@ class TransientSolution(CircuitSolution):
             StateSpaceModel(A=self._ssm.A, B=self._ssm.B, C=np.eye(self._ssm.A.shape[0]), D=np.zeros((self._ssm.A.shape[0], self._ssm.B.shape[1]))),
             self._u.T,
             self.tin,
-            np.zeros((self._ssm.A.shape[0], 1))
+            np.zeros((self._ssm.A.shape[0], ))
         )
         self._x = np.reshape(self._x, (self._x.shape[0], self._ssm.A.shape[0])).T
 

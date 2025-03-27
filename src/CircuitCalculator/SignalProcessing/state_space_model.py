@@ -35,4 +35,4 @@ class StateSpaceModel:
 
 def continuous_state_space_solver(ssm: StateSpaceModel, y: np.ndarray, t: np.ndarray, x0: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     sys = scipy.signal.StateSpace(ssm.A, ssm.B, ssm.C, ssm.D)
-    return scipy.signal.lsim(sys, y, t)
+    return scipy.signal.lsim(sys, y, t, x0)
