@@ -1,5 +1,5 @@
 from typing import Protocol
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from abc import ABC, abstractmethod
 import numpy as np
 import sympy as sp
@@ -207,7 +207,7 @@ class SymbolicNortenElement(SymbolicNortenTheveninElement):
             return sp.sympify('oo')
         if abs(self.Z) == sp.oo:
             return sp.sympify(0)
-        return sp.sympify(f'1/{self.Z}')
+        return 1/self.Z # type: ignore
     
     @property
     def I(self) -> symbolic:
@@ -217,7 +217,7 @@ class SymbolicNortenElement(SymbolicNortenTheveninElement):
             return sp.nan
         if abs(self.Z) == sp.oo:
             return sp.sympify(0)
-        return sp.sympify(f'{self.V}/{self.Z}')
+        return self.V/self.Z # type: ignore
 
 @dataclass(frozen=True)
 class SymbolicTheveninElement(SymbolicNortenTheveninElement):
@@ -230,7 +230,7 @@ class SymbolicTheveninElement(SymbolicNortenTheveninElement):
             return sp.sympify('oo')
         if abs(self.Y) == sp.oo:
             return sp.sympify(0)
-        return sp.sympify(f'1/{self.Y}')
+        return 1/self.Y # type: ignore
     
     @property
     def V(self) -> symbolic:
@@ -240,4 +240,4 @@ class SymbolicTheveninElement(SymbolicNortenTheveninElement):
             return sp.nan
         if abs(self.Y) == sp.oo:
             return sp.sympify(0)
-        return sp.sympify(f'{self.I}/{self.Y}')
+        return self.I/self.Y # type: ignore

@@ -20,23 +20,25 @@ def impedance(impedance: ccp.Component) -> ntw.Branch:
     return ntw.Branch(impedance.nodes[0], impedance.nodes[1], elm.impedance(impedance.id, Z))
 
 def capacitor(capacitor: ccp.Component) -> ntw.Branch:
-    C = capacitor.value['C']
+    C = sp.sympify(capacitor.value['C'])
     if C == sp.nan or capacitor.id == capacitor.value['C']:
         C = sp.Symbol(capacitor.id, real=True, positive=True)
+    s = sp.Symbol('s')
     return ntw.Branch(
         capacitor.nodes[0],
         capacitor.nodes[1],
-        elm.admittance(capacitor.id, sp.sympify(f's*{C}'))
+        elm.admittance(capacitor.id, s*C)  # type: ignore
     )
 
 def inductance(inductance: ccp.Component) -> ntw.Branch:
-    L = inductance.value['L']
+    L = sp.sympify(inductance.value['L'])
     if L == sp.nan or inductance.id == inductance.value['L']:
         L = sp.Symbol(inductance.id, real=True, positive=True)
+    s = sp.Symbol('s')
     return ntw.Branch(
         inductance.nodes[0],
         inductance.nodes[1],
-        elm.impedance(inductance.id, sp.sympify(f's*{L}'))
+        elm.impedance(inductance.id, s*L) # type: ignore
     )
 
 def voltage_source(voltage_source: ccp.Component) -> ntw.Branch:

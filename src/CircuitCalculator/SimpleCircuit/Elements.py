@@ -652,9 +652,15 @@ class SawtoothCurrentSource(schemdraw.elements.Source):
 @simple_circuit_element
 @extension.capacitor
 class Capacitor(schemdraw.elements.Capacitor):
-    def __init__(self, C: float, name: str, *args, show_name: bool = True, show_value: bool = True, reverse: bool = False, **kwargs):
-        self._C = C
+    def __init__(self, *args, name: str, C: float = float('nan'), show_name: bool = True, show_value: bool = True, reverse: bool = False, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
+        try:
+            C = float(C)
+        except ValueError:
+            C = float('nan')
+        if np.isnan(C):
+            show_value = False
+        self._C = C
         label = ''
         label += f'{name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
@@ -676,9 +682,15 @@ class Capacitor(schemdraw.elements.Capacitor):
 @simple_circuit_element
 @extension.inductor
 class Inductance(schemdraw.elements.Inductor):
-    def __init__(self, L: float, name: str, *args, show_name: bool = True, show_value: bool = True, label_offset: float = 0.2, reverse: bool = False, **kwargs):
-        self._L = L
+    def __init__(self, *args, name: str, L: float = float('nan'), show_name: bool = True, show_value: bool = True, label_offset: float = 0.2, reverse: bool = False, **kwargs):
         super().__init__(*args, reverse=reverse, **kwargs)
+        try:
+            L = float(L)
+        except ValueError:
+            L = float('nan')
+        if np.isnan(L):
+            show_value = False
+        self._L = L
         label = ''
         label += f'{name}' if show_name else ''
         label += '=' if  show_name and show_value else ''
