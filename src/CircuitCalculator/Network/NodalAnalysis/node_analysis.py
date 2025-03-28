@@ -70,6 +70,15 @@ class MatrixOperations(Protocol):
 
     @staticmethod
     def hstack(matrices: tuple[Any, ...]) -> Any: ...
+    
+    @staticmethod
+    def diag(values: list[complex | symbolic]) -> Any: ...
+
+    @staticmethod
+    def diag_vec(values: Any) -> list[complex | symbolic]: ...
+
+    @staticmethod
+    def inv(matrix: Any) -> Any: ...
 
     @staticmethod
     def solve(A: Any, b: Any) -> Any: ...
@@ -105,6 +114,18 @@ class NumPyMatrixOperations:
     @staticmethod
     def hstack(matrices: tuple[np.ndarray, ...]) -> np.ndarray:
         return np.hstack(matrices)
+
+    @staticmethod
+    def diag(values: list[complex | symbolic]) -> np.ndarray:
+        return np.diag([NumericMatrixElement(v).value for v in values])
+
+    @staticmethod
+    def diag_vec(values: np.ndarray) -> list[complex | symbolic]:
+        return [NumericMatrixElement(v).value for v in np.diag(values)]
+
+    @staticmethod
+    def inv(matrix: np.ndarray) -> np.ndarray:
+        return np.linalg.inv(matrix)
 
     @staticmethod
     def solve(A: np.ndarray, b: np.ndarray) -> np.ndarray:
@@ -144,6 +165,18 @@ class SymPyMatrixOperations:
     @staticmethod
     def hstack(matrices: tuple[sp.Matrix, ...]) -> sp.Matrix:
         return sp.Matrix.hstack(*[sp.Matrix(m) for m in matrices])
+
+    @staticmethod
+    def diag(values: list[complex | symbolic]) -> sp.Matrix:
+        return sp.diag(*values)
+
+    @staticmethod
+    def diag_vec(values: sp.Matrix) -> list[complex | symbolic]:
+        return list(values.diagonal())
+
+    @staticmethod
+    def inv(matrix: sp.Matrix) -> sp.Matrix:
+        return sp.Matrix(matrix.inv())
 
     @staticmethod
     def solve(A: sp.Matrix, b: sp.Matrix) -> sp.Matrix:
@@ -253,6 +286,53 @@ def element_impedance(network: Network, element: str, node_index_mapper: map.Net
         node_index_mapper=node_index_mapper
     )
 
+def state_space_matrices(network: Network, c_values: dict[str, float] = {}, l_values: dict[str, float] = {}, matrix_ops: MatrixOperations = NumPyMatrixOperations(), node_mapper: map.NetworkMapper = map.default_node_mapper, current_source_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper, voltage_source_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper) -> tuple[Matrix, Matrix, Matrix, Matrix]:
+    def element_incidence_matrix(values: dict[str, float]) -> np.ndarray:
+        node_mapping = node_mapper(network)
+        Delta = np.zeros((len(values), node_mapping.N))
+        for (k, value), (i_label) in itertools.product(enumerate(values), node_mapping):
+            if i_label == network[value].node1:
+                Delta[k][node_mapping(i_label)] = +1
+            if i_label == network[value].node2:
+                Delta[k][node_mapping(i_label)] = -1
+        return np.hstack((Delta, np.zeros((Delta.shape[0], voltage_source_mapper(network).N))))
+    def source_and_inductance_incidence_matrix(values: dict[str, float]) -> tuple[np.ndarray, np.ndarray]:
+        voltage_source_mapping_all = voltage_source_mapper(network)
+        source_mapping_all = map.default_source_mapper(network)
+        Qi = source_incidence_matrix(network=network, node_mapper=node_mapper, source_mapper=current_source_mapper)
+        Q = np.zeros((voltage_source_mapping_all.N, voltage_source_mapping_all.N), dtype=int)
+        for i in voltage_source_mapping_all.values:
+            Q[i][i] = 1
+        Q = np.vstack((np.hstack( (Qi, np.zeros((Qi.shape[0], Q.shape[1]) ))),
+                    np.hstack( (np.zeros((Q.shape[0], Qi.shape[1])), Q) )))
+        QS = Q[:,[source_mapping_all[l] for l in source_mapping_all if l not in values]]
+        QL = Q[:,[source_mapping_all[l] for l in source_mapping_all if l in values]]
+        return QS, QL
+    def value_matrix(c_values: dict[str, float], l_values: dict[str, float]) -> np.ndarray:
+        return matrix_ops.vstack((
+            matrix_ops.hstack(( matrix_ops.diag([-C for C in c_values.values()]), matrix_ops.zeros((len(c_values), len(l_values))) )),
+            matrix_ops.hstack(( matrix_ops.zeros((len(l_values), len(c_values))), matrix_ops.diag([L for L in l_values.values()]) ))
+        ))
+
+    Delta = element_incidence_matrix(c_values)
+    A_tilde = nodal_analysis_coefficient_matrix(network, matrix_ops=matrix_ops, node_mapper=node_mapper, source_mapper=voltage_source_mapper)
+    QS, QL = source_and_inductance_incidence_matrix(l_values)
+    DQ = np.hstack((Delta.T, QL))
+    Lambda = value_matrix(c_values, l_values)
+    invLambda = matrix_ops.diag([1/L for L in matrix_ops.diag_vec(Lambda)]) # type: ignore
+
+    inv_A_tilde = matrix_ops.inv(A_tilde)
+    transformed_inv_A_tilde = DQ.T @ inv_A_tilde
+    sorted_A_tilde = matrix_ops.inv(transformed_inv_A_tilde @ DQ)
+
+    A = invLambda @ sorted_A_tilde
+    C = transformed_inv_A_tilde.T @ sorted_A_tilde
+    B = (-invLambda @ C.T) @ QS
+    D = (inv_A_tilde - transformed_inv_A_tilde.T @ C.T) @ QS
+
+    return A, B, C, D
+
+# TODO: this function is not used in the codebase: check and remove!
 def calculate_node_voltages0(Y : np.ndarray, I : np.ndarray) -> np.ndarray:
     if np.any(np.logical_not(np.isfinite(Y))):
         raise ValueError

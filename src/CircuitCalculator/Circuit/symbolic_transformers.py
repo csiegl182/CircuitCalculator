@@ -5,43 +5,41 @@ from typing import Callable, TypeVar
 from . import components as ccp
 
 CircuitComponent = TypeVar("CircuitComponent", bound=ccp.Component)
-CircuitComponentTranslator = Callable[[ccp.Component], ntw.Branch]
+CircuitComponentTranslator = Callable[[ccp.Component, sp.Symbol], ntw.Branch]
 
-def resistor(resistor: ccp.Component) -> ntw.Branch:
+def resistor(resistor: ccp.Component, _: sp.Symbol) -> ntw.Branch:
     R = sp.sympify(resistor.value['R'])
     if R == sp.nan or resistor.id == resistor.value['R']:
         R = sp.Symbol(resistor.id, real=True, positive=True)
     return ntw.Branch(resistor.nodes[0], resistor.nodes[1], elm.resistor(resistor.id, R))
 
-def impedance(impedance: ccp.Component) -> ntw.Branch:
+def impedance(impedance: ccp.Component, _: sp.Symbol) -> ntw.Branch:
     Z = sp.sympify(impedance.value['Z'])
     if Z == sp.nan or impedance.id == impedance.value['Z']:
         Z = sp.Symbol(impedance.id, complex=True)
     return ntw.Branch(impedance.nodes[0], impedance.nodes[1], elm.impedance(impedance.id, Z))
 
-def capacitor(capacitor: ccp.Component) -> ntw.Branch:
+def capacitor(capacitor: ccp.Component, s: sp.Symbol) -> ntw.Branch:
     C = sp.sympify(capacitor.value['C'])
     if C == sp.nan or capacitor.id == capacitor.value['C']:
         C = sp.Symbol(capacitor.id, real=True, positive=True)
-    s = sp.Symbol('s')
     return ntw.Branch(
         capacitor.nodes[0],
         capacitor.nodes[1],
         elm.admittance(capacitor.id, s*C)  # type: ignore
     )
 
-def inductance(inductance: ccp.Component) -> ntw.Branch:
+def inductance(inductance: ccp.Component, s: sp.Symbol) -> ntw.Branch:
     L = sp.sympify(inductance.value['L'])
     if L == sp.nan or inductance.id == inductance.value['L']:
         L = sp.Symbol(inductance.id, real=True, positive=True)
-    s = sp.Symbol('s')
     return ntw.Branch(
         inductance.nodes[0],
         inductance.nodes[1],
         elm.impedance(inductance.id, s*L) # type: ignore
     )
 
-def voltage_source(voltage_source: ccp.Component) -> ntw.Branch:
+def voltage_source(voltage_source: ccp.Component, _: sp.Symbol) -> ntw.Branch:
     V = sp.sympify(voltage_source.value['V'])
     Z = sp.sympify(voltage_source.value['R'])
     if V == sp.nan:
@@ -52,7 +50,7 @@ def voltage_source(voltage_source: ccp.Component) -> ntw.Branch:
         voltage_source.nodes[1],
         element)
 
-def current_source(current_source: ccp.Component) -> ntw.Branch:
+def current_source(current_source: ccp.Component, _: sp.Symbol) -> ntw.Branch:
     cs_I = sp.sympify(current_source.value['I'])
     cs_G = sp.sympify(current_source.value['G'])
     if cs_I == sp.nan:
@@ -64,7 +62,7 @@ def current_source(current_source: ccp.Component) -> ntw.Branch:
         element
     )
 
-def short_circuit(short_circuit: ccp.Component) -> ntw.Branch:
+def short_circuit(short_circuit: ccp.Component, _: sp.Symbol) -> ntw.Branch:
     return ntw.Branch(
         short_circuit.nodes[0],
         short_circuit.nodes[1],

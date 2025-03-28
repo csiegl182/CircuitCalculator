@@ -3,6 +3,7 @@ from .transformers import transformers
 from .symbolic_transformers import transformers as symbolic_transformers
 from ..Network.network import Network
 import numpy as np
+import sympy as sp
 from dataclasses import dataclass, field
 
 class MultipleGroundNodes(Exception): pass
@@ -64,10 +65,10 @@ def frequency_components(circuit: Circuit, w_max: float) -> list[float]:
         return [w]
     return sorted(list(set([w for c in circuit.components for w in frequencies(c)])))
 
-def transform_symbolic_circuit(circuit: Circuit) -> Network:
+def transform_symbolic_circuit(circuit: Circuit, s: sp.Symbol = sp.Symbol('s', complex=True)) -> Network:
     try:
         return Network(
-            branches=[symbolic_transformers[component.type](component) for component in circuit],
+            branches=[symbolic_transformers[component.type](component, s) for component in circuit],
             node_zero_label=circuit.ground_node
         )   
     except (ValueError, KeyError) as e:

@@ -1,56 +1,10 @@
 import numpy as np
 import itertools
 from dataclasses import dataclass
-from .node_analysis import source_incidence_matrix, nodal_analysis_coefficient_matrix
+from .node_analysis import state_space_matrices
 from . import label_mapping as map
 from ..network import Network
 from ...SignalProcessing import state_space_model as sp
-
-def state_space_matrices(network: Network, c_values: dict[str, float] = {}, l_values: dict[str, float] = {}, node_mapper: map.NetworkMapper = map.default_node_mapper, current_source_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper, voltage_source_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    def element_incidence_matrix(values: dict[str, float]) -> np.ndarray:
-        node_mapping = node_mapper(network)
-        Delta = np.zeros((len(values), node_mapping.N))
-        for (k, value), (i_label) in itertools.product(enumerate(values), node_mapping):
-            if i_label == network[value].node1:
-                Delta[k][node_mapping(i_label)] = +1
-            if i_label == network[value].node2:
-                Delta[k][node_mapping(i_label)] = -1
-        return np.hstack((Delta, np.zeros((Delta.shape[0], voltage_source_mapper(network).N))))
-    def source_and_inductance_incidence_matrix(values: dict[str, float]) -> tuple[np.ndarray, np.ndarray]:
-        voltage_source_mapping_all = voltage_source_mapper(network)
-        source_mapping_all = map.default_source_mapper(network)
-        Qi = source_incidence_matrix(network=network)
-        Q = np.zeros((voltage_source_mapping_all.N, voltage_source_mapping_all.N), dtype=int)
-        for i in voltage_source_mapping_all.values:
-            Q[i][i] = 1
-        Q = np.vstack((np.hstack( (Qi, np.zeros((Qi.shape[0], Q.shape[1]) ))),
-                    np.hstack( (np.zeros((Q.shape[0], Qi.shape[1])), Q) )))
-        QS = Q[:,[source_mapping_all[l] for l in source_mapping_all if l not in l_values]]
-        QL = Q[:,[source_mapping_all[l] for l in source_mapping_all if l in l_values]]
-        return QS, QL
-    def value_matrix(c_values: dict[str, float], l_values: dict[str, float]) -> np.ndarray:
-        return np.vstack((
-            np.hstack(( np.diag([-C for C in c_values.values()]), np.zeros((len(c_values), len(l_values))) )),
-            np.hstack(( np.zeros((len(l_values), len(c_values))), np.diag([L for L in l_values.values()]) ))
-        ))
-
-    Delta = element_incidence_matrix(c_values)
-    A_tilde = nodal_analysis_coefficient_matrix(network).real
-    QS, QL = source_and_inductance_incidence_matrix(l_values)
-    DQ = np.hstack((Delta.T, QL))
-    Lambda = value_matrix(c_values, l_values)
-    invLambda = np.diag([1/L for L in np.diag(Lambda)])
-
-    inv_A_tilde = np.linalg.inv(A_tilde)
-    transformed_inv_A_tilde = DQ.T @ inv_A_tilde
-    sorted_A_tilde = np.linalg.inv(transformed_inv_A_tilde @ DQ)
-
-    A = invLambda @ sorted_A_tilde
-    C = transformed_inv_A_tilde.T @ sorted_A_tilde
-    B = (-invLambda @ C.T) @ QS
-    D = (inv_A_tilde - transformed_inv_A_tilde.T @ C.T) @ QS
-
-    return A, B, C, D
 
 @dataclass(frozen=True)
 class NodalStateSpaceModel(sp.StateSpaceModel):
