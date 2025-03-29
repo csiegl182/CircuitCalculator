@@ -1,8 +1,9 @@
-from .circuit import Circuit, transform, frequency_components, transform_symbolic_circuit
+from .circuit import Circuit, transform, frequency_components, transform_symbolic_circuit, transform_circuit
 from ..SignalProcessing.types import TimeDomainFunction, FrequencyDomainSeries, TimeDomainSeries, StateSpaceSolver
-from ..SignalProcessing.state_space_model import StateSpaceModel, continuous_state_space_solver
+from ..SignalProcessing.state_space_model import NumericStateSpaceModel, continuous_state_space_solver
 from ..Network.NodalAnalysis.bias_point_analysis import nodal_analysis_bias_point_solver, symbolic_nodal_analysis_bias_point_solver
-from ..Network.NodalAnalysis.state_space_model import nodal_state_space_model
+from ..Network.NodalAnalysis.state_space_model import numeric_state_space_model
+from .state_space_model import NumericCircuitStateSpaceModel
 from ..Network.solution import NetworkSolver
 from typing import Any
 from dataclasses import dataclass, field
@@ -161,15 +162,10 @@ class TransientSolution(CircuitSolution):
             raise KeyError(f'Input element with id "{input_id}" not defined.') from e
 
     def __post_init__(self):
-        network = transform(self.circuit, w=[0])[0]
-
-        C_values = {c.id: float(c.value['C']) for c in self.circuit.components if c.type == 'capacitor'}
-        L_values = {c.id: float(c.value['L']) for c in self.circuit.components if c.type == 'inductance'}
-
-        self._ssm = nodal_state_space_model(network, c_values=C_values, l_values=L_values)
+        self._ssm = NumericCircuitStateSpaceModel(self.circuit)
         self._u = np.array([self._input_fcn(input_id)(self.tin) for input_id in self._ssm.sources])
         self._tout, self._x, _ = self.solver(
-            StateSpaceModel(A=self._ssm.A, B=self._ssm.B, C=np.eye(self._ssm.A.shape[0]), D=np.zeros((self._ssm.A.shape[0], self._ssm.B.shape[1]))),
+            NumericStateSpaceModel(A=self._ssm.A, B=self._ssm.B, C=np.eye(self._ssm.A.shape[0]), D=np.zeros((self._ssm.A.shape[0], self._ssm.B.shape[1]))),
             self._u.T,
             self.tin,
             np.zeros((self._ssm.A.shape[0], ))
@@ -181,13 +177,16 @@ class TransientSolution(CircuitSolution):
         return self._tout
 
     def get_potential(self, node_id: str) -> TimeDomainSeries:
-        return self._tout, np.reshape(self._ssm.c_row_for_potential(node_id)@self._x + self._ssm.d_row_for_potential(node_id)@self._u, (-1,))
+        c, d = self._ssm.c_d_row_for_potential(node_id)
+        return self._tout, np.reshape(c@self._x + d@self._u, (-1,))
 
     def get_voltage(self, component_id: str) -> TimeDomainSeries:
-        return self._tout, np.reshape(self._ssm.c_row_voltage(component_id)@self._x + self._ssm.d_row_voltage(component_id)@self._u, (-1,))
+        c, d = self._ssm.c_d_row_for_voltage(component_id)
+        return self._tout, np.reshape(c@self._x + d@self._u, (-1,))
 
     def get_current(self, component_id: str) -> TimeDomainSeries:
-        return self._tout, np.reshape(self._ssm.c_row_current(component_id)@self._x + self._ssm.d_row_current(component_id)@self._u, (-1,))
+        c, d = self._ssm.c_d_row_for_current(component_id)
+        return self._tout, np.reshape(c@self._x + d@self._u, (-1,))
 
     def get_power(self, component_id: str) -> TimeDomainSeries:
         return self._tout, self.get_voltage(component_id)[1]*self.get_current(component_id)[1]
