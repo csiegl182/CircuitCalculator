@@ -4,7 +4,7 @@ from ..network import Network
 from . import label_mapping as map
 from .. import transformers as trf
 import itertools
-from typing import Protocol, Any, Callable
+from typing import Protocol, Any, Callable, Mapping
 
 Matrix = np.ndarray | sp.Matrix
 symbolic = sp.core.symbol.Symbol
@@ -72,7 +72,7 @@ class MatrixOperations(Protocol):
     def hstack(matrices: tuple[Any, ...]) -> Any: ...
     
     @staticmethod
-    def diag(values: list[complex | symbolic]) -> Any: ...
+    def diag(values: list[complex | float | symbolic]) -> Any: ...
 
     @staticmethod
     def diag_vec(values: Any) -> list[complex | symbolic]: ...
@@ -286,8 +286,8 @@ def element_impedance(network: Network, element: str, node_index_mapper: map.Net
         node_index_mapper=node_index_mapper
     )
 
-def state_space_matrices(network: Network, c_values: dict[str, float] = {}, l_values: dict[str, float] = {}, matrix_ops: MatrixOperations = NumPyMatrixOperations(), node_mapper: map.NetworkMapper = map.default_node_mapper, current_source_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper, voltage_source_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper) -> tuple[Matrix, Matrix, Matrix, Matrix]:
-    def element_incidence_matrix(values: dict[str, float]) -> np.ndarray:
+def state_space_matrices(network: Network, c_values: Mapping[str, float | symbolic] = {}, l_values: Mapping[str, float | symbolic] = {}, matrix_ops: MatrixOperations = NumPyMatrixOperations(), node_mapper: map.NetworkMapper = map.default_node_mapper, current_source_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper, voltage_source_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper) -> tuple[Matrix, Matrix, Matrix, Matrix]:
+    def element_incidence_matrix(values: dict[str, float | symbolic]) -> np.ndarray:
         node_mapping = node_mapper(network)
         Delta = np.zeros((len(values), node_mapping.N))
         for (k, value), (i_label) in itertools.product(enumerate(values), node_mapping):
@@ -296,7 +296,7 @@ def state_space_matrices(network: Network, c_values: dict[str, float] = {}, l_va
             if i_label == network[value].node2:
                 Delta[k][node_mapping(i_label)] = -1
         return np.hstack((Delta, np.zeros((Delta.shape[0], voltage_source_mapper(network).N))))
-    def source_and_inductance_incidence_matrix(values: dict[str, float]) -> tuple[np.ndarray, np.ndarray]:
+    def source_and_inductance_incidence_matrix(values: dict[str, float | symbolic]) -> tuple[np.ndarray, np.ndarray]:
         voltage_source_mapping_all = voltage_source_mapper(network)
         source_mapping_all = map.default_source_mapper(network)
         Qi = source_incidence_matrix(network=network, node_mapper=node_mapper, source_mapper=current_source_mapper)
@@ -308,9 +308,9 @@ def state_space_matrices(network: Network, c_values: dict[str, float] = {}, l_va
         QS = Q[:,[source_mapping_all[l] for l in source_mapping_all if l not in values]]
         QL = Q[:,[source_mapping_all[l] for l in source_mapping_all if l in values]]
         return QS, QL
-    def value_matrix(c_values: dict[str, float], l_values: dict[str, float]) -> np.ndarray:
+    def value_matrix(c_values: dict[str, float | symbolic], l_values: dict[str, float | symbolic]) -> np.ndarray:
         return matrix_ops.vstack((
-            matrix_ops.hstack(( matrix_ops.diag([-C for C in c_values.values()]), matrix_ops.zeros((len(c_values), len(l_values))) )),
+            matrix_ops.hstack(( matrix_ops.diag([-C for C in c_values.values()]), matrix_ops.zeros((len(c_values), len(l_values))) )), # type: ignore
             matrix_ops.hstack(( matrix_ops.zeros((len(l_values), len(c_values))), matrix_ops.diag([L for L in l_values.values()]) ))
         ))
 
