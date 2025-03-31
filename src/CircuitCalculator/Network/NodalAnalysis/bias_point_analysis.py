@@ -13,7 +13,7 @@ class NodalAnalysisBiasPointSolution(NodalAnalysisSolution):
         A = na.nodal_analysis_coefficient_matrix(self.network, matrix_ops=self.matrix_ops, node_mapper=self.node_mapper, source_mapper=self.voltage_source_mapper)
         b = na.nodal_analysis_constants_vector(self.network, matrix_ops=self.matrix_ops, node_mapper=self.node_mapper, current_source_mapper=self.current_source_mapper, voltage_source_mapper=self.voltage_source_mapper)
         try:
-            self._solution_vector = tuple(self.matrix_ops.solve(A, b))
+            self._solution_vector = tuple(self.matrix_ops.solve(A, b).flatten())
         except self.matrix_ops.matrix_inversion_exception:
             self._solution_vector = (float('nan'),) * len(b)
 
