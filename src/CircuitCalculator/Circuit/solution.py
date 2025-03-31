@@ -3,7 +3,7 @@ from ..SignalProcessing.types import TimeDomainFunction, FrequencyDomainSeries, 
 from ..SignalProcessing.state_space_model import NumericStateSpaceModel, continuous_state_space_solver
 from ..Network.NodalAnalysis.bias_point_analysis import nodal_analysis_bias_point_solver, symbolic_nodal_analysis_bias_point_solver
 from ..Network.NodalAnalysis.state_space_model import numeric_state_space_model
-from .state_space_model import NumericCircuitStateSpaceModel
+from .state_space_model import numeric_state_space_model_constructor
 from ..Network.solution import NetworkSolver
 from typing import Any
 from dataclasses import dataclass, field
@@ -162,7 +162,7 @@ class TransientSolution(CircuitSolution):
             raise KeyError(f'Input element with id "{input_id}" not defined.') from e
 
     def __post_init__(self):
-        self._ssm = NumericCircuitStateSpaceModel(self.circuit)
+        self._ssm = numeric_state_space_model_constructor(self.circuit)
         self._u = np.array([self._input_fcn(input_id)(self.tin) for input_id in self._ssm.sources])
         self._tout, self._x, _ = self.solver(
             NumericStateSpaceModel(A=self._ssm.A, B=self._ssm.B, C=np.eye(self._ssm.A.shape[0]), D=np.zeros((self._ssm.A.shape[0], self._ssm.B.shape[1]))),

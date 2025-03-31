@@ -85,3 +85,6 @@ class SymbolicStateSpaceModel:
 def continuous_state_space_solver(ssm: NumericStateSpaceModel, y: np.ndarray, t: np.ndarray, x0: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     sys = scipy.signal.StateSpace(ssm.A, ssm.B, ssm.C, ssm.D)
     return scipy.signal.lsim(sys, y, t, x0)
+
+def symbolic_state_space_solver(ssm: SymbolicStateSpaceModel, y: sp.Matrix, t: sp.Matrix, x0: sp.Matrix) -> sp.Symbol:
+    ...
