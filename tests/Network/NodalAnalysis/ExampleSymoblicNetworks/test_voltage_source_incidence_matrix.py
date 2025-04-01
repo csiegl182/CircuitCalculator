@@ -1,4 +1,4 @@
-from CircuitCalculator.Network.NodalAnalysis.node_analysis import voltage_source_incidence_matrix, SymPyMatrixOperations
+from CircuitCalculator.Network.NodalAnalysis.node_analysis import voltage_source_incidence_matrix
 from CircuitCalculator.Network.network import Network, Branch
 from CircuitCalculator.Network.symbolic_elements import resistor, voltage_source, current_source
 import numpy as np

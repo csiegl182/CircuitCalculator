@@ -1,13 +1,13 @@
-import numpy as np
 from dataclasses import dataclass
 from . import node_analysis as na
 from .solution import NodalAnalysisSolution
 from ..network import Network
 from ..solution import NetworkSolution
+from .. import matrix_operations as mo
 
 @dataclass
 class NodalAnalysisBiasPointSolution(NodalAnalysisSolution):
-    matrix_ops: na.MatrixOperations = na.NumPyMatrixOperations()
+    matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations()
 
     def __post_init__(self) -> None:
         A = na.nodal_analysis_coefficient_matrix(self.network, matrix_ops=self.matrix_ops, node_mapper=self.node_mapper, source_mapper=self.voltage_source_mapper)
@@ -49,4 +49,4 @@ def nodal_analysis_bias_point_solver(network: Network) -> NetworkSolution:
     return NodalAnalysisBiasPointSolution(network)
 
 def symbolic_nodal_analysis_bias_point_solver(network: Network) -> NetworkSolution:
-    return NodalAnalysisBiasPointSolution(network, matrix_ops=na.SymPyMatrixOperations())
+    return NodalAnalysisBiasPointSolution(network, matrix_ops=mo.SymPyMatrixOperations())

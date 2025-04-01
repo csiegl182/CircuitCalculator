@@ -1,4 +1,5 @@
-from CircuitCalculator.Network.NodalAnalysis.node_analysis import node_admittance_matrix, SymPyMatrixOperations
+from CircuitCalculator.Network.NodalAnalysis.node_analysis import node_admittance_matrix
+from CircuitCalculator.Network.matrix_operations import SymPyMatrixOperations
 from CircuitCalculator.Network.network import Network, Branch
 from CircuitCalculator.Network.symbolic_elements import resistor, voltage_source, current_source
 import sympy as sp
