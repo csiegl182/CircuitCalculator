@@ -147,18 +147,3 @@ def state_space_matrices(network: Network, c_values: Mapping[str, float | symbol
     D = (inv_A_tilde - transformed_inv_A_tilde.T @ C.T) @ QS
 
     return A, B, C, D
-
-# TODO: this function is not used in the codebase: check and remove!
-def calculate_node_voltages0(Y : np.ndarray, I : np.ndarray) -> np.ndarray:
-    if np.any(np.logical_not(np.isfinite(Y))):
-        raise ValueError
-    if np.any(np.logical_not(np.isfinite(I))):
-        raise ValueError
-    if Y.ndim != 2:
-        raise DimensionError('dim error')
-    if I.ndim != 1:
-        raise DimensionError('dim error')
-    m, n = Y.shape
-    if n != m:
-        raise DimensionError('dim error')
-    return np.linalg.solve(Y, I)
