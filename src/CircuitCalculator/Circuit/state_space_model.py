@@ -1,6 +1,5 @@
 from . import circuit as cc
 from ..Network.NodalAnalysis import state_space_model as ssm
-from ..Network.NodalAnalysis.node_analysis import symbolic
 from ..SignalProcessing.state_space_model import NumericStateSpaceModel, SymbolicStateSpaceModel
 from typing import Any
 
@@ -12,7 +11,7 @@ from dataclasses import dataclass
 @dataclass
 class StateSpaceMatrixConstructor:
 
-    _state_space_model: ssm.StateSpaceOutput
+    _state_space_model: ssm.StateSpaceGenericOutput
 
     @property
     def A(self) -> Any:
@@ -60,7 +59,7 @@ def numeric_state_space_model(circuit: cc.Circuit, potential_nodes: list[str] = 
     )
 
 def symbolic_state_space_model_constructor(circuit) -> StateSpaceMatrixConstructor:
-    def to_symbolic(id: str, value: str) -> symbolic:
+    def to_symbolic(id: str, value: str) -> sp.Symbol:
         sym_value = sp.sympify(value)
         if sym_value == sp.nan or id == value:
             return sp.Symbol(id, real=True, positive=True)

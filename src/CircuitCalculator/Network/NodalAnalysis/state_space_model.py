@@ -3,7 +3,7 @@ from . import label_mapping as map
 from ..network import Network
 from typing import Mapping
 
-class StateSpaceOutput:
+class StateSpaceGenericOutput:
     def __init__(self, network: Network, c_values: Mapping[str, float | symbolic], l_values: Mapping[str, float | symbolic], matrix_ops: MatrixOperations, node_index_mapper: map.NetworkMapper, voltage_source_index_mapper: map.SourceIndexMapper, current_source_index_mapper: map.SourceIndexMapper):
         self.network = network
         self.c_values = c_values
@@ -99,8 +99,8 @@ class StateSpaceOutput:
         voltage_sources = [vs for vs in self._voltage_source_label_mapping.keys if vs not in self.l_values]
         return current_sources + voltage_sources
 
-def numeric_state_space_model(network: Network, c_values: Mapping[str, float], l_values: Mapping[str, float], node_index_mapper: map.NetworkMapper = map.default_node_mapper, voltage_source_index_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper, current_source_index_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper) -> StateSpaceOutput:
-    return StateSpaceOutput(
+def numeric_state_space_model(network: Network, c_values: Mapping[str, float], l_values: Mapping[str, float], node_index_mapper: map.NetworkMapper = map.default_node_mapper, voltage_source_index_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper, current_source_index_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper) -> StateSpaceGenericOutput:
+    return StateSpaceGenericOutput(
         network=network,
         c_values=c_values,
         l_values=l_values,
@@ -110,8 +110,8 @@ def numeric_state_space_model(network: Network, c_values: Mapping[str, float], l
         current_source_index_mapper=current_source_index_mapper
     )
 
-def symbolic_state_space_model(network: Network, c_values: Mapping[str, symbolic], l_values: Mapping[str, symbolic], node_index_mapper: map.NetworkMapper = map.default_node_mapper, voltage_source_index_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper, current_source_index_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper) -> StateSpaceOutput:
-    return StateSpaceOutput(
+def symbolic_state_space_model(network: Network, c_values: Mapping[str, symbolic], l_values: Mapping[str, symbolic], node_index_mapper: map.NetworkMapper = map.default_node_mapper, voltage_source_index_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper, current_source_index_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper) -> StateSpaceGenericOutput:
+    return StateSpaceGenericOutput(
         network=network,
         c_values=c_values,
         l_values=l_values,
