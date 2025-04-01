@@ -1,5 +1,5 @@
 from CircuitCalculator.Circuit.circuit import Circuit
-import CircuitCalculator.Circuit.components as cmp
+import CircuitCalculator.Circuit.Components.components as cmp
 from CircuitCalculator.Circuit.state_space_model import numeric_state_space_model
 import numpy as np
 from scipy import signal

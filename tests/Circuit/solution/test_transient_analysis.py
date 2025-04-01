@@ -1,7 +1,7 @@
 from CircuitCalculator.Circuit.solution import TransientSolution
 from CircuitCalculator.SignalProcessing.one_sided_functions import step
 from CircuitCalculator.Circuit.circuit import Circuit
-from CircuitCalculator.Circuit import components as cmp
+from CircuitCalculator.Circuit.Components import components as cmp
 import numpy as np
 
 def quad_equation(a, b, c):

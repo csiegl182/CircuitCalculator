@@ -1,4 +1,4 @@
-from .components import Component
+from .Components.components import Component
 from .transformers import transformers
 from .symbolic_transformers import transformers as symbolic_transformers
 from ..Network.network import Network

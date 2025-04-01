@@ -1,6 +1,6 @@
 from CircuitCalculator.Circuit.impedance import open_circuit_impedance
 from CircuitCalculator.Circuit.circuit import Circuit
-from CircuitCalculator.Circuit.components import resistor, inductance, ground, short_circuit
+from CircuitCalculator.Circuit.Components.components import resistor, inductance, ground, short_circuit
 
 def test_impedance_of_simple_network_can_be_calculated() -> None:
     R = 1

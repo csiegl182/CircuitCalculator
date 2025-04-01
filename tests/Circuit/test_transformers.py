@@ -1,4 +1,4 @@
-import CircuitCalculator.Circuit.components as ccp
+import CircuitCalculator.Circuit.Components.components as ccp
 import CircuitCalculator.Circuit.transformers as transform
 import numpy as np
 

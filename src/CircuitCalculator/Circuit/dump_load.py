@@ -1,6 +1,6 @@
 from typing import Any, Callable
 from .circuit import Circuit, Component
-from . import components as ccp
+from .Components import components as cp
 from dataclasses import asdict
 from .. import dump_load
 import functools
@@ -14,17 +14,17 @@ class UnknownCircuitComponent(Exception):
 class IncorrectComponentInformation(Exception):
     ...
 
-circuit_component_translators : dict[str, Callable[..., ccp.Component]] = {
-    "resistor" : ccp.resistor,
-    "conductance" : ccp.conductance,
-    "impedance" : ccp.impedance,
-    "admittance" : ccp.admittance,
-    "dc_voltage_source" : ccp.dc_voltage_source,
-    "ac_voltage_source" : ccp.ac_voltage_source,
-    "complex_voltage_source" : ccp.complex_voltage_source,
-    "dc_current_source" : ccp.dc_current_source,
-    "ac_current_source" : ccp.ac_current_source,
-    "complex_current_source" : ccp.complex_current_source
+circuit_component_translators : dict[str, Callable[..., cp.Component]] = {
+    "resistor" : cp.resistor,
+    "conductance" : cp.conductance,
+    "impedance" : cp.impedance,
+    "admittance" : cp.admittance,
+    "dc_voltage_source" : cp.dc_voltage_source,
+    "ac_voltage_source" : cp.ac_voltage_source,
+    "complex_voltage_source" : cp.complex_voltage_source,
+    "dc_current_source" : cp.dc_current_source,
+    "ac_current_source" : cp.ac_current_source,
+    "complex_current_source" : cp.complex_current_source
 }
 
 def generate_component(component: dict[str, Any]) -> Component:

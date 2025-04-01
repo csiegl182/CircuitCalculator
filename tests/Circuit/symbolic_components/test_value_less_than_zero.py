@@ -1,4 +1,4 @@
-from CircuitCalculator.Circuit.symbolic_components import value_less_than_zero
+from CircuitCalculator.Circuit.Components.symbolic_components import value_less_than_zero
 
 def test_value_less_than_zero_returns_true_for_negative_value() -> None:
     value = '-1'

@@ -1,6 +1,6 @@
 from CircuitCalculator.Circuit.impedance import element_impedance
 from CircuitCalculator.Circuit.circuit import Circuit
-import CircuitCalculator.Circuit.components as ccp
+import CircuitCalculator.Circuit.Components.components as ccp
 
 def test_element_impedance_of_simple_network_can_be_calculated() -> None:
     R = 1
