@@ -3,7 +3,6 @@ from ..Network.NodalAnalysis import state_space_model as ssm
 from ..SignalProcessing.state_space_model import NumericStateSpaceModel, SymbolicStateSpaceModel
 from typing import Any
 
-
 import numpy as np
 import sympy as sp
 from dataclasses import dataclass
