@@ -87,7 +87,7 @@ def open_circuit_impedance(network: Network, node1: str, node2: str, node_index_
     if network.is_zero_node(node1):
         node1, node2 = node2, node1
     network = trf.switch_ground_node(network=network, new_ground=node2)
-    Y = node_admittance_matrix(network, node_index_mapper=node_index_mapper)
+    Y = nodal_analysis_coefficient_matrix(network, node_mapper=node_index_mapper)
     Y = np.delete(Y, np.where(~Y.any(axis=0))[0], axis=1)
     Y = np.delete(Y, np.where(~Y.any(axis=1))[0], axis=0)
     Z = np.linalg.inv(Y)
