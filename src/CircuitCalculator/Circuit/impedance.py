@@ -1,6 +1,8 @@
 import numpy as np
-from .circuit import Circuit, transform_circuit
+import sympy as sp
+from .circuit import Circuit, transform_circuit, transform_symbolic_circuit
 from ..Network.NodalAnalysis import node_analysis as ntw_imp
+from ..Network import matrix_operations as mo
 
 def open_circuit_impedance(circuit: Circuit, node1: str, node2: str, w: np.ndarray = np.array([0])) -> np.ndarray:
     return np.array([ntw_imp.open_circuit_impedance(transform_circuit(circuit, w0), node1, node2) for w0 in w])
@@ -13,3 +15,6 @@ def open_circuit_dc_resistance(circuit: Circuit, node1: str, node2: str) -> floa
 
 def element_dc_resistance(circuit: Circuit, element_id: str) -> float:
     return element_impedance(circuit, element_id, w=np.array([0]))[0].real
+
+def symbolic_open_circuit_impedance(circuit: Circuit, node1: str, node2: str) -> ntw_imp.symbolic:
+    return ntw_imp.open_circuit_impedance(transform_symbolic_circuit(circuit), node1, node2, matrix_ops = mo.SymPyMatrixOperations())

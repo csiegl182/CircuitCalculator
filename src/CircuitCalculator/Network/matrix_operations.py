@@ -85,6 +85,12 @@ class MatrixOperations(Protocol):
     @staticmethod
     def contains_nan(matrix: Any) -> bool: ...
 
+    @staticmethod
+    def any_element(matrix: Any, axis: int) -> np.ndarray: ...
+
+    @staticmethod
+    def delete(matrix: Any, idx: list[int], axis: int) -> Any: ...
+
 class NumPyMatrixOperations:
     matrix_inversion_exception = np.linalg.LinAlgError
 
@@ -136,6 +142,14 @@ class NumPyMatrixOperations:
     def contains_nan(matrix: np.ndarray) -> bool:
         return np.any(np.isnan(matrix)) == True
 
+    @staticmethod
+    def any_element(matrix: np.ndarray, axis: int) -> np.ndarray:
+        return np.any(matrix, axis=axis)
+
+    @staticmethod
+    def delete(matrix: np.ndarray, idx: list[int], axis: int) -> np.ndarray:
+        return np.delete(matrix, idx, axis)
+
 class SymPyMatrixOperations:
     matrix_inversion_exception = sp.matrices.common.NonInvertibleMatrixError
 
@@ -186,3 +200,18 @@ class SymPyMatrixOperations:
     @staticmethod
     def contains_nan(matrix: sp.Matrix) -> bool:
         return False
+
+    @staticmethod
+    def any_element(matrix: sp.Matrix, axis: int) -> np.ndarray:
+        is_zero = np.array(matrix.applyfunc(lambda x: int(x != 0)), dtype=int)
+        return np.any(is_zero, axis)
+
+    @staticmethod
+    def delete(matrix: sp.Matrix, idx: list[int], axis: int) -> sp.Matrix:
+        if len(idx) == 0:
+            return matrix
+        if axis == 0:
+            return matrix.row_del(*idx)
+        if axis == 1:
+            return matrix.col_del(*idx)
+        return matrix

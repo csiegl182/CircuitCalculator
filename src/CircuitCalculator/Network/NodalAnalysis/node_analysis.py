@@ -79,26 +79,27 @@ def nodal_analysis_constants_vector(network: Network, matrix_ops: mo.MatrixOpera
     V = matrix_ops.column_vector([network[vs].element.V for vs in vs_mapping.keys])
     return matrix_ops.vstack((I, V))
 
-def open_circuit_impedance(network: Network, node1: str, node2: str, node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> complex:
+def open_circuit_impedance(network: Network, node1: str, node2: str, matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations(), node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> symbolic:
     if node1 == node2:
-        return 0
+        return matrix_ops.elm(0).value
     if any([b.element.is_ideal_voltage_source for b in network.branches_between(node1, node2)]):
-        return 0
+        return matrix_ops.elm(0).value
     if network.is_zero_node(node1):
         node1, node2 = node2, node1
     network = trf.switch_ground_node(network=network, new_ground=node2)
-    Y = nodal_analysis_coefficient_matrix(network, node_mapper=node_index_mapper)
-    Y = np.delete(Y, np.where(~Y.any(axis=0))[0], axis=1)
-    Y = np.delete(Y, np.where(~Y.any(axis=1))[0], axis=0)
-    Z = np.linalg.inv(Y)
+    Y = nodal_analysis_coefficient_matrix(network, matrix_ops=matrix_ops, node_mapper=node_index_mapper)
+    Y = matrix_ops.delete(Y, np.where(~matrix_ops.any_element(Y, axis=0))[0].tolist(), axis=1)
+    Y = matrix_ops.delete(Y, np.where(~matrix_ops.any_element(Y, axis=1))[0].tolist(), axis=0)
+    Z = matrix_ops.inv(Y)
     i1 = node_index_mapper(network)[node1]
-    return Z[i1][i1]
+    return Z.diagonal()[i1]
 
-def element_impedance(network: Network, element: str, node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> complex:
+def element_impedance(network: Network, element: str, matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations(), node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> symbolic:
     return open_circuit_impedance(
         network=trf.remove_element(network, element),
         node1=network[element].node1,
         node2=network[element].node2,
+        matrix_ops=matrix_ops,
         node_index_mapper=node_index_mapper
     )
 

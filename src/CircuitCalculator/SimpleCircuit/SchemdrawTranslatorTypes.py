@@ -1,4 +1,4 @@
-from typing import TypeVar, Callable, Any, Type, Union
+from typing import TypeVar, Callable, Type
 import schemdraw.elements
 from ..Circuit.Components.components import Component
 
