@@ -8,13 +8,13 @@ CircuitComponent = TypeVar("CircuitComponent", bound=cp.Component)
 CircuitComponentTranslator = Callable[[cp.Component, sp.Symbol], ntw.Branch]
 
 def resistor(resistor: cp.Component, _: sp.Symbol) -> ntw.Branch:
-    R = sp.sympify(resistor.value['R'])
+    R = sp.sympify(resistor.value.get('R', 'nan'))
     if R == sp.nan or resistor.id == resistor.value['R']:
         R = sp.Symbol(resistor.id, real=True, positive=True)
     return ntw.Branch(resistor.nodes[0], resistor.nodes[1], elm.resistor(resistor.id, R))
 
 def impedance(impedance: cp.Component, _: sp.Symbol) -> ntw.Branch:
-    Z = sp.sympify(impedance.value['Z'])
+    Z = sp.sympify(impedance.value.get('Z', 'nan'))
     if Z == sp.nan or impedance.id == impedance.value['Z']:
         Z = sp.Symbol(impedance.id, complex=True)
     return ntw.Branch(impedance.nodes[0], impedance.nodes[1], elm.impedance(impedance.id, Z))
@@ -40,8 +40,8 @@ def inductance(inductance: cp.Component, s: sp.Symbol) -> ntw.Branch:
     )
 
 def voltage_source(voltage_source: cp.Component, _: sp.Symbol) -> ntw.Branch:
-    V = sp.sympify(voltage_source.value['V'])
-    Z = sp.sympify(voltage_source.value['R'])
+    V = sp.sympify(voltage_source.value.get('V', 'nan'))
+    Z = sp.sympify(voltage_source.value.get('R', 0))
     if V == sp.nan:
         V = sp.Symbol(voltage_source.id)
     element = elm.voltage_source(voltage_source.id, V, Z)
@@ -51,8 +51,8 @@ def voltage_source(voltage_source: cp.Component, _: sp.Symbol) -> ntw.Branch:
         element)
 
 def current_source(current_source: cp.Component, _: sp.Symbol) -> ntw.Branch:
-    cs_I = sp.sympify(current_source.value['I'])
-    cs_G = sp.sympify(current_source.value['G'])
+    cs_I = sp.sympify(current_source.value.get('I', 'nan'))
+    cs_G = sp.sympify(current_source.value.get('G', 0))
     if cs_I == sp.nan:
         cs_I = sp.Symbol(current_source.id)
     element = elm.current_source(current_source.id, cs_I, cs_G)

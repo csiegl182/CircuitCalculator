@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 import schemdraw.elements
-from ..Network.network import Network
 from ..Circuit.circuit import Circuit, Component
 
 from . import Elements as elm
@@ -29,3 +28,7 @@ def circuit_translator(schematic: elm.Schematic) -> Circuit:
     parser = SchematicDiagramParser(schematic)
     translator = DiagramTranslator(parser, circuit_translator_map)
     return Circuit(_remove_none([translator(e) for e in parser.all_elements]))
+
+def symbolic_circuit_translator(schematic: elm.Schematic) -> Circuit:
+    circuit = circuit_translator(schematic)
+    return Circuit(components=[Component(type=c.type, id=c.id, nodes=c.nodes) for c in circuit.components])
