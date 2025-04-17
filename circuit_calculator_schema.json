@@ -19,7 +19,7 @@
                 "type": {
                   "type": "string",
                   "description": "The type of the element.",
-                  "enum": ["voltage_source", "resistor", "capacitor", "inductor", "line", "node", "ground"]
+                  "enum": ["complex_voltage_source", "voltage_source", "resistor", "capacitor", "inductor", "line", "node", "ground"]
                 },
                 "name": {
                   "type": "string",

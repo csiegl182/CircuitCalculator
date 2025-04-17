@@ -1,0 +1,25 @@
+circuit:
+  elements:
+    - type: voltage_source
+      name: Uq
+      reverse: true
+    - type: resistor
+      name: R1
+      direction: right
+    - type: capacitor
+      name: C1
+      direction: down
+    - type: line
+      direction: left
+    - type: ground
+      name: GND
+  solution:
+    type: symbolic
+    voltages:
+      - name: Uq
+        reverse: false
+      - name: R1
+      - name: C1
+    currents:
+      - name: Uq
+      - name: R1

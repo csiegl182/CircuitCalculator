@@ -9,6 +9,7 @@ from typing import Any
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import numpy as np
+import sympy as sp
 
 @dataclass
 class CircuitSolution(ABC):
@@ -194,21 +195,22 @@ class TransientSolution(CircuitSolution):
 @dataclass
 class SymbolicSolution(CircuitSolution):
     solver: NetworkSolver = field(default=symbolic_nodal_analysis_bias_point_solver)
+    s: sp.Symbol = sp.Symbol('s', complex=True)
 
     def __post_init__(self):
-        network = transform_symbolic_circuit(self.circuit)
+        network = transform_symbolic_circuit(self.circuit, s=self.s)
         self._solution = self.solver(network)
 
     def get_voltage(self, component_id: str) -> Any:
-        return self._solution.get_voltage(component_id)
+        return self._solution.get_voltage(component_id).simplify().nsimplify()
 
     def get_current(self, component_id: str) -> Any:
-        return self._solution.get_current(component_id)
+        return self._solution.get_current(component_id).simplify().nsimplify()
 
     def get_potential(self, node_id: str) -> Any:
-        return self._solution.get_potential(node_id)
+        return self._solution.get_potential(node_id).simplify().nsimplify()
 
     def get_power(self, component_id: str) -> Any:
-        return self.get_voltage(component_id)*self.get_current(component_id)
+        return (self.get_voltage(component_id)*self.get_current(component_id)).simplify().nsimplify()
         
         

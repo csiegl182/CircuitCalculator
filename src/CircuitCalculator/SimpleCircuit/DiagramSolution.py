@@ -26,13 +26,13 @@ class DiagramSolution(Protocol):
 class EmptyDiagramSolution:
     solution: CircuitSolution = field(default_factory=lambda: DCSolution(circuit=Circuit([])))
     def get_voltage(self, name: str, reverse: bool) -> str:
-        return ''
+        return f'V[{name}]'
     def get_current(self, name: str, reverse: bool) -> str:
-        return ''
+        return f'I[{name}]'
     def get_power(self, name: str) -> str:
-        return ''
+        return f'P[{name}]'
     def get_potential(self, name: str) -> str:
-        return ''
+        return f'φ[{name}]'
 
 @dataclass
 class TimeDomainSteadyStateDiagramSolution:
