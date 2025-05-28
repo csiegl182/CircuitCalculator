@@ -31,7 +31,7 @@ def node_admittance_matrix(network: Network, matrix_ops: mo.MatrixOperations = m
         Y[node_mapping(i_label, j_label)] = node_matrix_element(i_label, j_label)
     return Y
 
-def voltage_source_incidence_matrix(network: Network, node_mapper: map.NetworkMapper = map.default_node_mapper, source_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper) -> mo.Matrix:
+def voltage_source_incidence_matrix(network: Network, matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations(), node_mapper: map.NetworkMapper = map.default_node_mapper, source_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper) -> mo.Matrix:
     def voltage_source_direction(voltage_source: str, node: str) -> int:
         if network[voltage_source].node1 == node:
             return 1
@@ -40,14 +40,14 @@ def voltage_source_incidence_matrix(network: Network, node_mapper: map.NetworkMa
         return 0
     node_index = node_mapper(network)
     vs_index = source_mapper(network)
-    A = np.zeros((node_index.N, vs_index.N))
+    A = matrix_ops.zeros((node_index.N, vs_index.N))
     for node, vs in itertools.product(node_index.keys, vs_index.keys):
         A[node_index[node], vs_index[vs]] = voltage_source_direction(vs, node)
     return A
 
 def nodal_analysis_coefficient_matrix(network: Network, matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations(), node_mapper: map.NetworkMapper = map.default_node_mapper, source_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper) -> mo.Matrix:
     Y = node_admittance_matrix(network, matrix_ops, node_mapper)
-    B = voltage_source_incidence_matrix(network, node_mapper, source_mapper)
+    B = voltage_source_incidence_matrix(network, matrix_ops, node_mapper, source_mapper)
     Z = matrix_ops.zeros((B.shape[1], B.shape[1]))
     return matrix_ops.vstack((matrix_ops.hstack((Y, B)), matrix_ops.hstack((B.T, Z))))
 
