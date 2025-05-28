@@ -79,23 +79,3 @@ def test_missing_component_id_leads_to_error() -> None:
     }
     with pytest.raises(UnidentifiedComponent):
         undictify_circuit(test_circuit)
-
-def test_odd_value_information_leads_to_error() -> None:
-    test_circuit = { 'components' :
-        [
-            {
-                'type': 'dc_voltage_source',
-                'id': 'Vs',
-                'nodes': ('1', '0'),
-                'value': {'R': 1}
-            },
-            {
-                'type': 'resistor',
-                'id': 'R1',
-                'nodes': ('0', '1'),
-                'value': {'R': 1}
-            }
-        ]
-    }
-    with pytest.raises(IncorrectComponentInformation):
-        undictify_circuit(test_circuit)

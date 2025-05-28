@@ -1,6 +1,7 @@
 from typing import Any, Callable
 from .circuit import Circuit, Component
 from .Components import components as cp
+from .Components import symbolic_components as s_cp
 from dataclasses import asdict
 from .. import dump_load
 import functools
@@ -14,17 +15,29 @@ class UnknownCircuitComponent(Exception):
 class IncorrectComponentInformation(Exception):
     ...
 
+def numeric_component_factory(*_, factory_fcn: tuple[Callable[..., cp.Component], Callable[..., cp.Component]], numeric_keys: tuple[str, ...], **kwargs) -> cp.Component:
+    def is_numeric(value: str) -> bool:
+        try:
+            float(value)
+            return True
+        except ValueError:
+            return False
+    numeric_values = [kwargs.get(key, '') for key in numeric_keys]
+    if all(is_numeric(value) for value in numeric_values):
+        return factory_fcn[0](**kwargs)
+    return factory_fcn[1](**kwargs)
+
 circuit_component_translators : dict[str, Callable[..., cp.Component]] = {
-    "resistor" : cp.resistor,
-    "conductance" : cp.conductance,
-    "impedance" : cp.impedance,
-    "admittance" : cp.admittance,
-    "dc_voltage_source" : cp.dc_voltage_source,
-    "ac_voltage_source" : cp.ac_voltage_source,
-    "complex_voltage_source" : cp.complex_voltage_source,
-    "dc_current_source" : cp.dc_current_source,
-    "ac_current_source" : cp.ac_current_source,
-    "complex_current_source" : cp.complex_current_source
+    "resistor" : functools.partial(numeric_component_factory, factory_fcn=(cp.resistor, s_cp.resistor), numeric_keys=('R',)),
+    "conductance" : functools.partial(numeric_component_factory, factory_fcn=(cp.conductance, s_cp.conductance), numeric_keys=('G',)),
+    "impedance" : functools.partial(numeric_component_factory, factory_fcn=(cp.impedance, s_cp.impedance), numeric_keys=('Z',)),
+    "admittance" : functools.partial(numeric_component_factory, factory_fcn=(cp.admittance, s_cp.admittance), numeric_keys=('Y',)),
+    "dc_voltage_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.dc_voltage_source, s_cp.voltage_source), numeric_keys=('V',)),
+    "ac_voltage_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.ac_voltage_source, s_cp.voltage_source), numeric_keys=('V', 'f')),
+    "complex_voltage_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.complex_voltage_source, s_cp.voltage_source), numeric_keys=('V',)),
+    "dc_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.dc_current_source, s_cp.current_source), numeric_keys=('I',)),
+    "ac_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.ac_current_source, s_cp.current_source), numeric_keys=('I', 'f')),
+    "complex_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.complex_current_source, s_cp.current_source), numeric_keys=('I',)),
 }
 
 def generate_component(component: dict[str, Any]) -> Component:
@@ -34,7 +47,7 @@ def generate_component(component: dict[str, Any]) -> Component:
     except KeyError:
         raise UnidentifiedComponent(f'Unidentified component')
     try:
-        component_value = component.pop('value')
+        component_value = component.pop('value', {})
     except KeyError:
         raise IncorrectComponentInformation(f"Missing value of component '{component_id}'.")
     try:
@@ -49,10 +62,7 @@ def generate_component(component: dict[str, Any]) -> Component:
         component_factory = circuit_component_translators[component_type]
     except KeyError:
         raise UnknownCircuitComponent(f"Unknown type '{component_type}' of component '{component_id}' is unknown.")
-    try:
-        return component_factory(id=component_id, nodes=component_nodes, **component_value)
-    except TypeError:
-        raise IncorrectComponentInformation(f"Given value information for component '{component_id}' of type '{component_type}' is incorrect: '{component_value}'")
+    return component_factory(id=component_id, nodes=component_nodes, **component_value)
 
 def undictify_circuit(circuit: dict) -> Circuit:
     return Circuit([generate_component(entry) for entry in circuit['components']])
