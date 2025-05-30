@@ -1,0 +1,51 @@
+{
+    "circuit": {
+      "unit": 5,
+      "elements": [
+        {
+          "type": "current_source",
+          "name": "I_q",
+          "direction": "up",
+          "length": 1
+        },
+        {
+          "type": "node",
+          "name": "b",
+          "id_loc": "SE"
+        },
+        {
+          "type": "line",
+          "name": "L1",
+          "direction": "right",
+          "length": 0.5
+        },
+        {
+          "type": "resistor",
+          "name": "R_1",
+          "direction": "down"
+        },
+        {
+          "type": "line",
+          "direction": "left",
+          "length": 0.5
+        },
+        {
+          "type": "line",
+          "direction": "right",
+          "place_after": "L1"
+        },
+        {
+          "type": "resistor",
+          "name": "R_2",
+          "direction": "down"
+        },
+        {
+          "type": "line",
+          "direction": "left"
+        },
+        {
+          "type": "ground"
+        }
+      ]
+  }
+}

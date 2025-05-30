@@ -1,0 +1,37 @@
+circuit:
+  unit: 7
+  elements:
+    - type: voltage_source
+      V: 9*V
+      name: U1
+      reverse: true
+      direction: up
+    - type: resistor
+      name: R1
+      direction: right
+    - type: resistor
+      name: R2
+      direction: down
+    - type: line
+      direction: left
+    - type: ground
+      name: GND
+    - type: resistor
+      name: R3
+      direction: right
+      place_after: R1
+      show_value: False
+    - type: resistor
+      name: R4
+      direction: down
+    - type: line
+      direction: left
+  solution:
+    type: dc
+    voltages:
+      - name: R2
+      - name: R4
+    currents:
+      - name: R3
+        end: True
+        reverse: True

@@ -13,7 +13,7 @@ def test_create_current_vector_from_reference_network_1() -> None:
         ]
     )
     I = current_source_incidence_vector(network)
-    I_ref = np.array([0], dtype=complex)
+    I_ref = np.array([[0],], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
 def test_create_current_vector_from_reference_network_2() -> None:
@@ -26,7 +26,7 @@ def test_create_current_vector_from_reference_network_2() -> None:
         ]
     )
     I = current_source_incidence_vector(network)
-    I_ref = np.array([Iq], dtype=complex)
+    I_ref = np.array([[Iq],], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
 def test_create_current_vector_from_reference_network_3() -> None:
@@ -40,8 +40,8 @@ def test_create_current_vector_from_reference_network_3() -> None:
         ]
     )
     I = current_source_incidence_vector(network)
-    I_ref = np.array([Iq,
-                      0], dtype=complex)
+    I_ref = np.array([[Iq],
+                      [0]], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
 def test_create_current_vector_from_reference_network_4() -> None:
@@ -56,7 +56,7 @@ def test_create_current_vector_from_reference_network_4() -> None:
         ]
     )
     I = current_source_incidence_vector(network)
-    I_ref = np.array([0, 0], dtype=complex)
+    I_ref = np.array([[0], [0]], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
 def test_create_current_vector_from_reference_network_5() -> None:
@@ -72,7 +72,7 @@ def test_create_current_vector_from_reference_network_5() -> None:
         ]
     )
     I = current_source_incidence_vector(network)
-    I_ref = np.array([0, 0, 0, 0], dtype=complex)
+    I_ref = np.array([[0], [0], [0], [0]], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
 def test_create_current_vector_from_reference_network_6() -> None:
@@ -91,7 +91,7 @@ def test_create_current_vector_from_reference_network_6() -> None:
         ]
     )
     I = current_source_incidence_vector(network)
-    I_ref = np.array([0, 0, 0, 0], dtype=complex)
+    I_ref = np.array([[0], [0], [0], [0]], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
 def test_create_current_vector_from_reference_network_7() -> None:
@@ -111,7 +111,7 @@ def test_create_current_vector_from_reference_network_7() -> None:
         ]
     )
     I = current_source_incidence_vector(network)
-    I_ref = np.array([0, 0, -I4, 0, I4], dtype=complex)
+    I_ref = np.array([[0], [0], [-I4], [0], [I4]], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
 def test_create_current_vector_from_reference_network_10() -> None:
@@ -130,7 +130,7 @@ def test_create_current_vector_from_reference_network_10() -> None:
         ]
     )
     I = current_source_incidence_vector(network)
-    I_ref = np.array([0, 0, I4, -I4], dtype=complex)
+    I_ref = np.array([[0], [0], [I4], [-I4]], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
 def test_create_current_vector_from_reference_network_13() -> None:
@@ -147,5 +147,5 @@ def test_create_current_vector_from_reference_network_13() -> None:
         node_zero_label='0'
     )
     I = current_source_incidence_vector(network)
-    I_ref = np.array([0, 0], dtype=complex)
+    I_ref = np.array([[0], [0]], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)

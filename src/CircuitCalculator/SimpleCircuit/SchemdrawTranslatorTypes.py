@@ -1,6 +1,6 @@
-from typing import TypeVar, Callable, Any, Type, Union
+from typing import TypeVar, Callable, Type
 import schemdraw.elements
-from ..Circuit.components import Component
+from ..Circuit.Components.components import Component
 
 SchemdrawElement = TypeVar('SchemdrawElement', bound=schemdraw.elements.Element)
 SchemdrawElementTranslator = Callable[[SchemdrawElement, tuple[str, ...]], Component | None] | Callable[[SchemdrawElement, tuple[str, ...]], Component | None]

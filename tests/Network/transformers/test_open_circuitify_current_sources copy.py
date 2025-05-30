@@ -1,5 +1,5 @@
 from CircuitCalculator.Network.network import Network, Branch
-from CircuitCalculator.Network.elements import current_source, voltage_source, is_open_circuit, is_active
+from CircuitCalculator.Network.elements import current_source, voltage_source
 from CircuitCalculator.Network.transformers import open_circuitify_current_sources
 
 def test_ideal_current_source_is_replaced_by_open_circuit() -> None:
@@ -9,7 +9,7 @@ def test_ideal_current_source_is_replaced_by_open_circuit() -> None:
         ]
     )
     network = open_circuitify_current_sources(network)
-    assert any([is_open_circuit(b.element) for b in network.branches]) == True
+    assert any([b.element.is_open_circuit for b in network.branches]) == True
 
 def test_linear_current_source_is_replaced_by_conductor() -> None:
     network = Network(
@@ -18,7 +18,7 @@ def test_linear_current_source_is_replaced_by_conductor() -> None:
         ]
     )
     network = open_circuitify_current_sources(network)
-    assert any([is_active(b.element) for b in network.branches]) == False
+    assert any([b.element.is_active for b in network.branches]) == False
 
 def test_open_circuitify_keeps_desired_current_sources() -> None:
     cs1 = current_source('Is1', I=1)
@@ -44,7 +44,7 @@ def test_linear_voltage_source_is_replaced_by_conductor() -> None:
         ]
     )
     network = open_circuitify_current_sources(network)
-    assert any([is_active(b.element) for b in network.branches]) == False
+    assert any([b.element.is_active for b in network.branches]) == False
 
 def test_ideal_voltage_source_is_not_touched() -> None:
     network = Network(
@@ -53,7 +53,7 @@ def test_ideal_voltage_source_is_not_touched() -> None:
         ]
     )
     network = open_circuitify_current_sources(network)
-    assert any([is_active(b.element) for b in network.branches]) == True
+    assert any([b.element.is_active for b in network.branches]) == True
 
 def test_zero_node_label_is_kept() -> None:
     network = Network(

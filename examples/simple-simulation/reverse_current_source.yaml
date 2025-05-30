@@ -1,0 +1,81 @@
+circuit:
+  unit: 10
+  elements:
+    - type: ground
+      name: GND
+      direction: left
+    - type: current_source
+      I: 2
+      name: I1
+      direction: up
+      show_value: false
+    - type: line
+      direction: right
+      length: 0.5
+      place_after: GND
+    - type: resistor
+      name: R1
+      R: 1
+      direction: up
+    - type: line
+      direction: left
+      length: 0.5
+    - type: current_source
+      I: 2
+      name: I2_reverse
+      direction: down
+      reverse: true
+      show_value: false
+      place_after: GND
+    - type: line
+      direction: right
+      length: 0.5
+    - type: resistor
+      name: R2
+      R: 1
+      direction: up
+    - type: line
+      direction: right
+      length: 0.5
+      name: line
+    - type: current_source
+      I: 2
+      name: I3
+      direction: up
+      show_value: false
+    - type: line
+      direction: left
+      length: 0.5
+  solution:
+    type: dc
+    voltages:
+      - name: I1
+      - name: I1
+        reverse: true
+        offset: -2
+      - name: I2_reverse
+      - name: I2_reverse
+        reverse: true
+        offset: -2
+      - name: R2
+        reverse: true
+    currents:
+      - name: I1
+      - name: I1
+        end: true
+      - name: I2_reverse
+      - name: I2_reverse
+        end: true
+      - name: R1
+        end: true
+      - name: R2
+        end: true
+      - name: I3
+        reverse: true
+      - name: I3
+        end: true
+        reverse: true
+    powers:
+      - name: I1
+      - name: I2_reverse
+        offset: 3

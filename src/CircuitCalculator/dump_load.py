@@ -1,10 +1,28 @@
 from pathlib import Path
 import json
 import yaml
+import yaml.parser, yaml.scanner
+import re
 import numpy as np
 from typing import Callable, TypeVar
 
 T = TypeVar('T')
+
+# Define a custom constructor for scientific notation
+def scientific_notation_constructor(loader, node):
+    value = loader.construct_scalar(node)
+    try:
+        return float(value)
+    except ValueError:
+        return value
+
+# Add the custom constructor to the SafeLoader
+yaml.SafeLoader.add_implicit_resolver(
+    'tag:yaml.org,2002:float',
+    re.compile(r'''^(?:[-+]?(?:[0-9][0-9_]*(?:\.[0-9_]*)?|\.[0-9_]+)(?:[eE][-+]?[0-9]+)?)$'''),
+    list('-+0123456789.')
+)
+yaml.SafeLoader.add_constructor('tag:yaml.org,2002:float', scientific_notation_constructor)
 
 deserializers = {
     'json': json.loads,
@@ -17,6 +35,17 @@ serializers = {
     'yaml': yaml.dump,
     'yml': yaml.dump
 }
+
+class FormatError(Exception):
+    def __init__(self, format: str) -> None:
+        super().__init__(f'Cannot parse data as {format}.')
+        self.format = format
+
+format_errors : tuple[type[Exception], ...] = (
+    json.JSONDecodeError,
+    yaml.parser.ParserError,
+    yaml.scanner.ScannerError
+)
 
 def dictify_complex_values(data: dict) -> dict:
     for key, value in data.items():
@@ -69,7 +98,10 @@ def deserialize(data: str, format: str, dict_preprocessor: Callable[[dict], T] =
     deserializer = deserializers.get(format, None)
     if deserializer is None:
         raise ValueError('Unknown data format {format}.')
-    return dict_preprocessor(deserializer(data))
+    try:
+        return dict_preprocessor(deserializer(data))
+    except format_errors as e:
+        raise FormatError(format) from e
 
 def load(file: str, deserialize_fcn: Callable[[str, str], T] = deserialize) -> T:
     file_name = Path(file)

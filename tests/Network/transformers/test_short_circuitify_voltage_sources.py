@@ -1,5 +1,5 @@
 from CircuitCalculator.Network.network import Network, Branch
-from CircuitCalculator.Network.elements import voltage_source, current_source, is_short_circuit, is_active
+from CircuitCalculator.Network.elements import voltage_source, current_source
 from CircuitCalculator.Network.transformers import short_circuitify_voltage_sources
 
 def test_ideal_voltage_source_is_replaced_by_short_circuit() -> None:
@@ -9,7 +9,7 @@ def test_ideal_voltage_source_is_replaced_by_short_circuit() -> None:
         ]
     )
     network = short_circuitify_voltage_sources(network)
-    assert any([is_short_circuit(b.element) for b in network.branches]) == True
+    assert any([b.element.is_short_circuit for b in network.branches]) == True
 
 def test_linear_voltage_source_is_replaced_by_resistor() -> None:
     network = Network(
@@ -18,7 +18,7 @@ def test_linear_voltage_source_is_replaced_by_resistor() -> None:
         ]
     )
     network = short_circuitify_voltage_sources(network)
-    assert any([is_active(b.element) for b in network.branches]) == False
+    assert any([b.element.is_active for b in network.branches]) == False
 
 def test_short_circuitify_keeps_desired_voltage_sources() -> None:
     vs1 = voltage_source('Vs1', V=1)
@@ -44,7 +44,7 @@ def test_linear_current_source_is_replaced_by_resistor() -> None:
         ]
     )
     network = short_circuitify_voltage_sources(network)
-    assert any([is_active(b.element) for b in network.branches]) == False
+    assert any([b.element.is_active for b in network.branches]) == False
 
 def test_ideal_current_source_is_not_touched() -> None:
     network = Network(
@@ -53,7 +53,7 @@ def test_ideal_current_source_is_not_touched() -> None:
         ]
     )
     network = short_circuitify_voltage_sources(network)
-    assert any([is_active(b.element) for b in network.branches]) == True
+    assert any([b.element.is_active for b in network.branches]) == True
 
 def test_zero_node_label_is_kept() -> None:
     network = Network(

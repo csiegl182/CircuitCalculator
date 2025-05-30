@@ -1,0 +1,53 @@
+circuit:
+  unit: 6
+  light_lamps: true
+  elements:
+    - type: voltage_source
+      V: 1
+      name: U1
+      reverse: true
+      direction: up
+    - type: line
+      name: line1
+      direction: right
+    - type: lamp
+      name: L1
+      V_ref: 1
+      P_ref: 1
+      direction: down
+    - type: line
+      name: line2
+      direction: right
+      length: 0.5
+      place_after: line1
+    - type: lamp
+      name: L2
+      V_ref: 1
+      P_ref: 1
+      direction: down
+    - type: line
+      name: line3
+      direction: right
+      length: 0.5
+      place_after: line2
+    - type: lamp
+      name: L3
+      V_ref: 1
+      P_ref: 1
+      direction: down
+    - type: line
+      direction: left
+      length: 0.5
+    - type: line
+      direction: left
+      length: 0.5
+    - type: line
+      direction: left
+    - type: ground
+      name: GND
+  solution:
+    type: dc
+    currents:
+      - name: line1
+      - name: L1
+  

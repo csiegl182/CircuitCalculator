@@ -1,4 +1,4 @@
-import CircuitCalculator.Circuit.components as ccp
+import CircuitCalculator.Circuit.Components.components as ccp
 from CircuitCalculator.Circuit.circuit import Circuit, transform
 
 def test_list_of_circuit_elements_can_be_transformed_into_network_with_same_node_labels() -> None:

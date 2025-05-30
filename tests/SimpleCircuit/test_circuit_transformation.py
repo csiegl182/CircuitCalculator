@@ -13,3 +13,4 @@ def test_network_transformation_keeps_node_names() -> None:
         d += Resistor(R=20, name='R4').up()
     circuit = circuit_translator(d)
     assert circuit['R1'].nodes == ('4', '5')
+    assert circuit['R2'].nodes[0] == '5'

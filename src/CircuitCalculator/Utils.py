@@ -19,6 +19,10 @@ class FloatPrecision:
         return self.exponent > self.max_exp
 
     @property
+    def is_nan(self) -> bool:
+        return np.isnan(self.value)
+
+    @property
     def mantissa(self) -> int:
         return int(np.round(self.value/(10**self.exponent)))
 
@@ -47,10 +51,14 @@ class FloatPrecision:
 class Float3(FloatPrecision):
     @property
     def mantissa3(self) -> float:
+        if self.is_nan:
+            return np.nan
         return self.mantissa * 10**(self.exponent-self.exponent3)
 
     @property
     def exponent3(self) -> int:
+        if self.is_nan:
+            return 0
         return int(3*np.floor((self.precision + self.exponent - 1)/3))
 
 @dataclass
@@ -105,6 +113,8 @@ class ScientificFloat:
     def __str__(self) -> str:
         if self.value3.is_inf:
             return '∞' if self.value3.mantissa >= 0 else '-∞'
+        if self.value3.is_nan:
+            return 'NaN'
         pre_decimal_positions = 0 if np.abs(self.value3.mantissa3) < 1 else len(str(abs(self.value3.mantissa3)).split('.')[0])
         post_decimal_positions = max(self.precision - pre_decimal_positions, 0)
         pre_decimal = int(self.value3.mantissa3)

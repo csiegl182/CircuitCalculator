@@ -13,7 +13,7 @@ from . import errors
 solutions = {
     'dc': ds.real_solution,
     'real': ds.real_solution,
-    'complex': ds.complex_solution,
+    'complex': ds.single_frequency_complex_solution,
     'single_frequency_time_domain': ds.single_frequency_complex_solution
 }
 
@@ -31,19 +31,31 @@ class SolutionDefinition:
 
     @property
     def voltages(self) -> list[dict]:
-        return self.data.get('voltages', [])
+        voltages = self.data.get('voltages', [])
+        if voltages is None:
+            return []
+        return voltages
 
     @property
     def currents(self) -> list[dict]:
-        return self.data.get('currents', [])
+        currents = self.data.get('currents', [])
+        if currents is None:
+            return []
+        return currents
 
     @property
     def potentials(self) -> list[dict]:
-        return self.data.get('potentials', [])
+        potentials = self.data.get('potentials', [])
+        if potentials is None:
+            return []
+        return potentials
 
     @property
     def powers(self) -> list[dict]:
-        return self.data.get('powers', [])
+        powers = self.data.get('powers', [])
+        if powers is None:
+            return []
+        return powers
 
 element_handlers = {
     'resistor': lambda kwargs: element_factory(elm.Resistor, **kwargs),
@@ -106,52 +118,81 @@ def get_placed_element(schematic: elm.Schematic, label: Optional[str] = None) ->
         return None
     return schematic.elements[[se.name for se in schematic.elements].index(label)]
 
-def fill(schematic: elm.Schematic, elements: list[elm.Element], unit: int, light_lamps: bool, solution_definition: SolutionDefinition) -> None:
+def fill_schematic(schematic: elm.Schematic, elements: list[elm.Element], unit: int) -> None:
     for e in elements:
         se = transform_to_schematic_element(e)
         se = apply_direction_and_length(se, e.get('direction', ''), e.get('length', 1), unit)
         se = apply_position(se, get_placed_element(schematic, e.get('place_after', None)))
         schematic += se
 
+def fill_solution(schematic: elm.Schematic, light_lamps: bool, solution_definition: SolutionDefinition) -> None:
     if light_lamps:
         ll.light_lamps(schematic)
 
     try:
         solution = solution_definition.diagram_solution_creator(schematic)
     except ValueError as e:
-        schematic = elm.Schematic(unit=unit)
         raise errors.IllegalElementValue(str(e)) from e
     for v in solution_definition.voltages:
         try:
             schematic += solution.draw_voltage(**v)
         except dp.UnknownElement as e:
             print(f'Cannot draw voltage of undefined element "{str(e)}".')
+        except TypeError as e:
+            unknown_argument = str(e).split()[-1].strip()
+            raise errors.UnknownArgument(unknown_argument, 'voltages') from e
     for c in solution_definition.currents:
         try:
             schematic += solution.draw_current(**c)
         except dp.UnknownElement as e:
            print(f'Cannot draw current of undefined element "{str(e)}".')
+        except TypeError as e:
+            unknown_argument = str(e).split()[-1].strip()
+            raise errors.UnknownArgument(unknown_argument, 'currents') from e
     for p in solution_definition.potentials:
         try:
             schematic += solution.draw_potential(**p)
         except dp.UnknownElement as e:
            print(f'Cannot draw potential of undefined node "{str(e)}".')
+        except TypeError as e:
+            unknown_argument = str(e).split()[-1].strip()
+            raise errors.UnknownArgument(unknown_argument, 'potential') from e
     for p in solution_definition.powers:
         try:
             schematic += solution.draw_power(**p)
         except dp.UnknownElement as e:
            print(f'Cannot draw power of undefined element "{str(e)}".')
+        except TypeError as e:
+            unknown_argument = str(e).split()[-1].strip()
+            raise errors.UnknownArgument(unknown_argument, 'powers') from e
 
-def create_schematic(circuit_data: dict, circuit_ax: Optional[Axes] = None) -> elm.Schematic:
+def parse_circuit_data(data: dict) -> dict:
+    circuit_definiton = data.get('circuit', {'unit': 7, 'elements': [], 'solution': {'type': None}})
+    if len(circuit_definiton['elements']) == 0:
+        raise errors.EmptyCircuit('No elements in circuit definition')
+    return circuit_definiton
+
+def create_schematic(circuit_data: dict) -> elm.Schematic:
+    circuit_data = parse_circuit_data(circuit_data)
+    unit = circuit_data.get('unit', 7)
+    elements = circuit_data.get('elements', [])
+    schematic = elm.Schematic(unit=unit)
+    fill_schematic(schematic, elements, unit)
+    return schematic
+
+def draw_schematic(circuit_data: dict, circuit_ax: Optional[Axes] = None) -> elm.Schematic:
+    circuit_data = parse_circuit_data(circuit_data)
     unit = circuit_data.get('unit', 7)
     elements = circuit_data.get('elements', [])
     light_lamps = circuit_data.get('light_lamps', False)
     solution_definition = SolutionDefinition(circuit_data.get('solution', {}))
     if circuit_ax is None:
         with elm.Schematic(unit=unit) as schematic:
-            fill(schematic, elements, unit, light_lamps, solution_definition)
+            fill_schematic(schematic, elements, unit)
+            fill_solution(schematic, light_lamps, solution_definition)
         return schematic
     schematic = elm.Schematic(unit=circuit_data['unit'], canvas=circuit_ax)
-    fill(schematic, elements, unit, light_lamps, solution_definition)
+    fill_schematic(schematic, elements, unit)
+    fill_solution(schematic, light_lamps, solution_definition)
     schematic.draw(show=False)
     return schematic

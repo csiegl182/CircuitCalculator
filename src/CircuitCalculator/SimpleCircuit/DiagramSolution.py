@@ -1,31 +1,38 @@
-from ..Circuit.solution import ComplexSolution, DCSolution
+from ..Circuit.solution import CircuitSolution, DCSolution, ComplexSolution
+from ..Circuit.circuit import Circuit
 
 from . import Elements as elm
 from . import Display as dsp
 from .DiagramTranslator import SchematicDiagramParser, circuit_translator
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Protocol
+import numpy as np
 
 class DiagramSolution(Protocol):
     def get_voltage(self, name: str, reverse: bool) -> str:
         ...
     def get_current(self, name: str, reverse: bool) -> str:
         ...
-    def get_power(self, name: str, reverse: bool) -> str:
+    def get_power(self, name: str) -> str:
         ...
     def get_potential(self, name: str) -> str:
+        ...
+    @property
+    def solution(self) -> CircuitSolution:
         ...
 
+@dataclass
 class EmptyDiagramSolution:
+    solution: CircuitSolution = field(default_factory=lambda: DCSolution(circuit=Circuit([])))
     def get_voltage(self, name: str, reverse: bool) -> str:
-        return ''
+        return f'V[{name}]'
     def get_current(self, name: str, reverse: bool) -> str:
-        return ''
-    def get_power(self, name: str, reverse: bool) -> str:
-        return ''
+        return f'I[{name}]'
+    def get_power(self, name: str) -> str:
+        return f'P[{name}]'
     def get_potential(self, name: str) -> str:
-        return ''
+        return f'φ[{name}]'
 
 @dataclass
 class TimeDomainSteadyStateDiagramSolution:
@@ -37,8 +44,11 @@ class TimeDomainSteadyStateDiagramSolution:
 
     def get_voltage(self, name: str, reverse: bool) -> str:
         sign = -1 if reverse else 1
+        v = self.solution.get_voltage(name)
+        if np.isnan(v):
+            return f'v[{name}](t)'
         return dsp.print_sinosoidal(
-            value=sign*self.solution.get_voltage(name),
+            value=sign*v,
             unit='V',
             precision=self.precision,
             w=self.solution.w,
@@ -49,8 +59,11 @@ class TimeDomainSteadyStateDiagramSolution:
 
     def get_current(self, name: str, reverse: bool) -> str:
         sign = -1 if reverse else 1
+        i = self.solution.get_voltage(name)
+        if np.isnan(i):
+            return f'i[{name}](t)'
         return dsp.print_sinosoidal(
-            value=sign*self.solution.get_current(name),
+            value=sign*i,
             unit='A',
             precision=self.precision,
             w=self.solution.w,
@@ -59,10 +72,12 @@ class TimeDomainSteadyStateDiagramSolution:
             hertz=self.hertz
         )
 
-    def get_power(self, name: str, reverse: bool) -> str:
-        sign = -1 if reverse else 1
+    def get_power(self, name: str) -> str:
+        p = self.solution.get_voltage(name)
+        if np.isnan(p):
+            return f'p[{name}](t)'
         return dsp.print_sinosoidal(
-            value=sign*self.solution.get_power(name),
+            value=self.solution.get_power(name),
             unit='W',
             precision=self.precision,
             w=self.solution.w,
@@ -72,6 +87,9 @@ class TimeDomainSteadyStateDiagramSolution:
         )
 
     def get_potential(self, name: str) -> str:
+        phi = self.solution.get_voltage(name)
+        if np.isnan(phi):
+            return f'φ[{name}](t)'
         return dsp.print_sinosoidal(
             value=self.solution.get_potential(name),
             unit='V',
@@ -91,8 +109,11 @@ class ComplexNetworkDiagramSolution:
 
     def get_voltage(self, name: str, reverse: bool) -> str:
         sign = -1 if reverse else 1
+        v = self.solution.get_voltage(name)
+        if np.isnan(v):
+            return f'V({name})'
         return dsp.print_complex(
-            value=sign*self.solution.get_voltage(name),
+            value=sign*v,
             unit='V',
             precision=self.precision,
             polar=self.polar,
@@ -101,27 +122,35 @@ class ComplexNetworkDiagramSolution:
 
     def get_current(self, name: str, reverse: bool) -> str:
         sign = -1 if reverse else 1
+        i = self.solution.get_current(name)
+        if np.isnan(i):
+            return f'I({name})'
         return dsp.print_complex(
-            value=sign*self.solution.get_current(name),
+            value=sign*i,
             unit='A',
             precision=self.precision,
             polar=self.polar,
             deg=self.deg
         )
 
-    def get_power(self, name: str, reverse: bool) -> str:
-        sign = -1 if reverse else 1
+    def get_power(self, name: str) -> str:
+        s = self.solution.get_power(name)
+        if np.isnan(s):
+            return f'S({name})'
         return dsp.print_complex(
-            value=sign*self.solution.get_power(name),
-            unit='W',
+            value=s,
+            unit='VA',
             precision=self.precision,
             polar=self.polar,
             deg=self.deg
         )
 
     def get_potential(self, name: str) -> str:
+        phi = self.solution.get_potential(name)
+        if np.isnan(phi):
+            return f'φ({name})'
         return dsp.print_complex(
-            value=self.solution.get_potential(name),
+            value=phi,
             unit='V',
             precision=self.precision,
             polar=self.polar,
@@ -135,38 +164,49 @@ class RealNetworkDiagramSolution:
 
     def get_voltage(self, name: str, reverse: bool) -> str:
         sign = -1 if reverse else 1
-        return dsp.print_real(sign*self.solution.get_voltage(name), unit='V', precision=self.precision)
+        v = self.solution.get_voltage(name)
+        if np.isnan(v):
+            return f'V({name})'
+        return dsp.print_real(sign*v, unit='V', precision=self.precision)
 
     def get_current(self, name: str, reverse: bool) -> str:
         sign = -1 if reverse else 1
-        return dsp.print_real(sign*self.solution.get_current(name), unit='A', precision=self.precision)
+        i = self.solution.get_current(name)
+        if np.isnan(i):
+            return f'I({name})'
+        return dsp.print_real(sign*i, unit='A', precision=self.precision)
 
-    def get_power(self, name: str, reverse: bool) -> str:
-        sign = -1 if reverse else 1
-        return dsp.print_active_power(sign*self.solution.get_power(name), precision=self.precision)
+    def get_power(self, name: str) -> str:
+        p = self.solution.get_power(name)
+        if np.isnan(p):
+            return f'P({name})'
+        return dsp.print_active_power(p, precision=self.precision)
 
     def get_potential(self, name: str) -> str:
-        return dsp.print_real(self.solution.get_potential(name), unit='V', precision=self.precision)
+        phi = self.solution.get_potential(name)
+        if np.isnan(phi):
+            return f'φ({name})'
+        return dsp.print_real(phi, unit='V', precision=self.precision)
 
 @dataclass
 class SchematicDiagramSolution:
     diagram_parser: SchematicDiagramParser
     solution: DiagramSolution
 
-    def draw_voltage(self, name: str, reverse: bool = False) -> elm.VoltageLabel:
+    def draw_voltage(self, name: str, reverse: bool = False, offset: float = 0) -> elm.VoltageLabel:
         element = self.diagram_parser.get_element(name)
         vlabel = self.solution.get_voltage(name=name, reverse=reverse)
-        return elm.VoltageLabel(element, vlabel=vlabel, reverse=reverse if not element.is_reverse else not reverse, color=dsp.blue)
+        return elm.VoltageLabel(element, vlabel=vlabel, reverse=reverse if not element.is_reverse else not reverse, color=dsp.blue, ofst=offset)
 
     def draw_current(self, name: str, reverse: bool = False, end: bool = False) -> elm.CurrentLabel:
         element = self.diagram_parser.get_element(name)
-        ilabel = self.solution.get_current(name=name, reverse=reverse)
+        ilabel = self.solution.get_current(name=name, reverse=reverse if not end else not reverse)
         return elm.CurrentLabel(element, ilabel=ilabel, reverse=reverse if not element.is_reverse else not reverse, start=not end, color=dsp.red)
 
-    def draw_power(self, name: str, reverse: bool = False) -> elm.PowerLabel:
+    def draw_power(self, name: str, offset: float = 0) -> elm.PowerLabel:
         element = self.diagram_parser.get_element(name)
-        plabel = self.solution.get_power(name=name, reverse=reverse)
-        return elm.PowerLabel(element, plabel=plabel, color=dsp.green)
+        plabel = self.solution.get_power(name=name)
+        return elm.PowerLabel(element, plabel=plabel, color=dsp.green, offset=offset)
 
     def draw_potential(self, name: str, loc:str = '') -> elm.LabelNode:
         element = self.diagram_parser.get_element(name)

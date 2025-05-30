@@ -1,13 +1,15 @@
-from .circuit import Circuit, transform, frequency_components
+from .circuit import Circuit, transform, frequency_components, transform_symbolic_circuit, transform_circuit
 from ..SignalProcessing.types import TimeDomainFunction, FrequencyDomainSeries, TimeDomainSeries, StateSpaceSolver
-from ..SignalProcessing.state_space_model import StateSpaceModel, continuous_state_space_solver
-from ..Network.NodalAnalysis.bias_point_analysis import nodal_analysis_bias_point_solver
-from ..Network.NodalAnalysis.state_space_model import nodal_state_space_model
+from ..SignalProcessing.state_space_model import NumericStateSpaceModel, continuous_state_space_solver
+from ..Network.NodalAnalysis.bias_point_analysis import nodal_analysis_bias_point_solver, symbolic_nodal_analysis_bias_point_solver
+from ..Network.NodalAnalysis.state_space_model import numeric_state_space_model
+from .state_space_model import numeric_state_space_model_constructor
 from ..Network.solution import NetworkSolver
 from typing import Any
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import numpy as np
+import sympy as sp
 
 @dataclass
 class CircuitSolution(ABC):
@@ -28,6 +30,22 @@ class CircuitSolution(ABC):
     @abstractmethod
     def get_power(self, id: str) -> Any:
         ...
+
+@dataclass
+class EmptySolution(CircuitSolution):
+    circuit: Circuit = field(default_factory=lambda: Circuit([]))
+
+    def get_voltage(self, _: str) -> Any:
+        return None
+
+    def get_current(self, _: str) -> Any:
+        return None
+
+    def get_potential(self, _: str) -> Any:
+        return None
+
+    def get_power(self, _: str) -> Any:
+        return None
 
 @dataclass
 class DCSolution(CircuitSolution):
@@ -56,23 +74,19 @@ class ComplexSolution(CircuitSolution):
     peak_values: bool = False
 
     def __post_init__(self):
-        network = transform(self.circuit, w=[self.w])[0]
+        network = transform(self.circuit, w=[self.w], rms=not self.peak_values)[0]
+        if self.w == 0:
+            self.peak_values = True
         self._solution = self.solver(network)
 
     def get_voltage(self, component_id: str) -> complex:
-        if self.peak_values:
-            return self._solution.get_voltage(component_id)
-        return self._solution.get_voltage(component_id)/np.sqrt(2)
+        return self._solution.get_voltage(component_id)
 
     def get_current(self, component_id: str) -> complex:
-        if self.peak_values:
-            return self._solution.get_current(component_id)
-        return self._solution.get_current(component_id)/np.sqrt(2)
+        return self._solution.get_current(component_id)
 
     def get_potential(self, node_id: str) -> complex:
-        if self.peak_values:
-            return self._solution.get_potential(node_id)
-        return self._solution.get_potential(node_id)/np.sqrt(2)
+        return self._solution.get_potential(node_id)
 
     def get_power(self, component_id: str) -> complex:
         if self.peak_values:
@@ -142,19 +156,20 @@ class TransientSolution(CircuitSolution):
     input: dict[str, TimeDomainFunction] = field(default_factory=dict)
     solver: StateSpaceSolver = field(default=continuous_state_space_solver)
 
+    def _input_fcn(self, input_id: str) -> TimeDomainFunction:
+        try:
+            return self.input[input_id]
+        except KeyError as e:
+            raise KeyError(f'Input element with id "{input_id}" not defined.') from e
+
     def __post_init__(self):
-        network = transform(self.circuit, w=[0])[0]
-
-        C_values = {c.id: float(c.value['C']) for c in self.circuit.components if c.type == 'capacitor'}
-        L_values = {c.id: float(c.value['L']) for c in self.circuit.components if c.type == 'inductance'}
-
-        self._ssm = nodal_state_space_model(network, c_values=C_values, l_values=L_values)
-        self._u = np.array([self.input[input_id](self.tin) for input_id in self._ssm.sources])
+        self._ssm = numeric_state_space_model_constructor(self.circuit)
+        self._u = np.array([self._input_fcn(input_id)(self.tin) for input_id in self._ssm.sources])
         self._tout, self._x, _ = self.solver(
-            StateSpaceModel(A=self._ssm.A, B=self._ssm.B, C=np.eye(self._ssm.A.shape[0]), D=np.zeros((self._ssm.A.shape[0], self._ssm.B.shape[1]))),
+            NumericStateSpaceModel(A=self._ssm.A, B=self._ssm.B, C=np.eye(self._ssm.A.shape[0]), D=np.zeros((self._ssm.A.shape[0], self._ssm.B.shape[1]))),
             self._u.T,
             self.tin,
-            np.zeros((self._ssm.A.shape[0], 1))
+            np.zeros((self._ssm.A.shape[0], ))
         )
         self._x = np.reshape(self._x, (self._x.shape[0], self._ssm.A.shape[0])).T
 
@@ -163,15 +178,39 @@ class TransientSolution(CircuitSolution):
         return self._tout
 
     def get_potential(self, node_id: str) -> TimeDomainSeries:
-        return self._tout, np.reshape(self._ssm.c_row_for_potential(node_id)@self._x + self._ssm.d_row_for_potential(node_id)@self._u, (-1,))
+        c, d = self._ssm.c_d_row_for_potential(node_id)
+        return self._tout, np.reshape(c@self._x + d@self._u, (-1,))
 
     def get_voltage(self, component_id: str) -> TimeDomainSeries:
-        return self._tout, np.reshape(self._ssm.c_row_voltage(component_id)@self._x + self._ssm.d_row_voltage(component_id)@self._u, (-1,))
+        c, d = self._ssm.c_d_row_for_voltage(component_id)
+        return self._tout, np.reshape(c@self._x + d@self._u, (-1,))
 
     def get_current(self, component_id: str) -> TimeDomainSeries:
-        return self._tout, np.reshape(self._ssm.c_row_current(component_id)@self._x + self._ssm.d_row_current(component_id)@self._u, (-1,))
+        c, d = self._ssm.c_d_row_for_current(component_id)
+        return self._tout, np.reshape(c@self._x + d@self._u, (-1,))
 
     def get_power(self, component_id: str) -> TimeDomainSeries:
         return self._tout, self.get_voltage(component_id)[1]*self.get_current(component_id)[1]
+
+@dataclass
+class SymbolicSolution(CircuitSolution):
+    solver: NetworkSolver = field(default=symbolic_nodal_analysis_bias_point_solver)
+    s: sp.Symbol = sp.Symbol('s', complex=True)
+
+    def __post_init__(self):
+        network = transform_symbolic_circuit(self.circuit, s=self.s)
+        self._solution = self.solver(network)
+
+    def get_voltage(self, component_id: str) -> Any:
+        return self._solution.get_voltage(component_id).simplify().nsimplify()
+
+    def get_current(self, component_id: str) -> Any:
+        return self._solution.get_current(component_id).simplify().nsimplify()
+
+    def get_potential(self, node_id: str) -> Any:
+        return self._solution.get_potential(node_id).simplify().nsimplify()
+
+    def get_power(self, component_id: str) -> Any:
+        return (self.get_voltage(component_id)*self.get_current(component_id)).simplify().nsimplify()
         
         

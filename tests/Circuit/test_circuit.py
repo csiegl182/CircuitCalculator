@@ -1,6 +1,6 @@
 import pytest
 from CircuitCalculator.Circuit import circuit
-import CircuitCalculator.Circuit.components as ccp
+import CircuitCalculator.Circuit.Components.components as ccp
 
 def test_circuit_can_be_instantiated() -> None:
     c = circuit.Circuit([])
