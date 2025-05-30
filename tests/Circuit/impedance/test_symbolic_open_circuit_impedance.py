@@ -10,7 +10,6 @@ def test_impedance_of_simple_network_can_be_calculated() -> None:
         cp.resistor(id='R1', nodes=('1', '0')),
         cp.resistor(id='R2', nodes=('1', '0'))
     ])
-    print(sp.simplify(symbolic_open_circuit_dc_resistance(circuit, '1', '0')))
     assert sp.simplify(symbolic_open_circuit_dc_resistance(circuit, '1', '0')) == R1*R2/(R1+R2)
 
 def test_impedance_of_inductance_is_zero() -> None:

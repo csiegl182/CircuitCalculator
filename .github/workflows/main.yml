@@ -22,13 +22,12 @@ jobs:
         pip install pytest hypothesis
     - name: Test with pytest
       run: |
-        pytest -s
+        pytest
 
   build-and-publish:
     name: Build and publish
     runs-on: ubuntu-latest
     needs: test
-    if: false  # Step disabled
     steps:
     - uses: actions/checkout@master
     - name: Set up Python 3.10
@@ -58,7 +57,6 @@ jobs:
     name: Tag version
     runs-on: ubuntu-latest
     needs: build-and-publish
-    if: false  # Step disabled
     steps:
     - uses: actions/checkout@master
     - name: Set up Python 3.10
