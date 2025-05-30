@@ -47,8 +47,6 @@ class SymbolicMatrixElement:
         return self.value.is_finite
 
 class MatrixOperations(Protocol):
-    matrix_inversion_exception: Any
-
     @staticmethod
     def zeros(shape: tuple[int, int]) -> Any: ...
 
@@ -92,8 +90,6 @@ class MatrixOperations(Protocol):
     def delete(matrix: Any, idx: list[int], axis: int) -> Any: ...
 
 class NumPyMatrixOperations:
-    matrix_inversion_exception = np.linalg.LinAlgError
-
     @staticmethod
     def zeros(shape: tuple[int, int]) -> np.ndarray:
         return np.zeros(shape, dtype=complex)
@@ -151,8 +147,6 @@ class NumPyMatrixOperations:
         return np.delete(matrix, idx, axis)
 
 class SymPyMatrixOperations:
-    matrix_inversion_exception = sp.matrices.common.NonInvertibleMatrixError
-
     @staticmethod
     def zeros(shape: tuple[int, int]) -> sp.Matrix:
         return sp.zeros(*shape)
