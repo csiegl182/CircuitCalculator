@@ -51,3 +51,16 @@ def test_current_source_translator() -> None:
     assert current_source.id == current_source_dict['id']
     assert current_source.nodes == current_source_dict['nodes']
     assert current_source.value['I'] == current_source_dict['value']['I']
+
+def test_ground() -> None:
+    ground_dict = {
+        'type': 'ground',
+        'id': 'gnd',
+        'nodes': ('0', ),
+        'value': {}
+    }
+    ground = generate_component(ground_dict)
+    assert ground.type == ground_dict['type']
+    assert ground.id == ground_dict['id']
+    assert ground.nodes == ground_dict['nodes']
+    assert ground.value == {}

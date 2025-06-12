@@ -38,6 +38,7 @@ circuit_component_translators : dict[str, Callable[..., cp.Component]] = {
     "dc_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.dc_current_source, s_cp.current_source), numeric_keys=('I',)),
     "ac_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.ac_current_source, s_cp.current_source), numeric_keys=('I', 'f')),
     "complex_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.complex_current_source, s_cp.current_source), numeric_keys=('I',)),
+    "ground" : functools.partial(numeric_component_factory, factory_fcn=(cp.ground, s_cp.ground), numeric_keys=()),
 }
 
 def generate_component(component: dict[str, Any]) -> Component:
