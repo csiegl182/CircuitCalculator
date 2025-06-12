@@ -50,7 +50,7 @@ def complex_current_source_translator(element: elm.ComplexCurrentSource, nodes: 
     return cp.complex_current_source(
         nodes=(nodes[0], nodes[1]) if not element.is_reverse else (nodes[1], nodes[0]),
         id=element.name,
-        I=element.V if not element.is_reverse else -element.I
+        I=element.I if not element.is_reverse else -element.I
     )
 
 def ac_voltage_source_translator(element: elm.ACVoltageSource, nodes: tuple[str, ...]) -> cp.Component:
