@@ -10,7 +10,7 @@ def value_less_than_zero(value: str) -> bool:
     except TypeError:
         return False
 
-def resistor(id: str, nodes: tuple[str, str], R: str = '') -> Component:
+def resistor(id: str, nodes: tuple[str, str], R: str = '', **_) -> Component:
     if value_less_than_zero(R):
         raise ValueError('R must be greater than zero.')
     return Component(
@@ -20,7 +20,7 @@ def resistor(id: str, nodes: tuple[str, str], R: str = '') -> Component:
         nodes=nodes
         )
 
-def conductance(id: str, nodes: tuple[str, str], G: str = '') -> Component:
+def conductance(id: str, nodes: tuple[str, str], G: str = '', **_) -> Component:
     if value_less_than_zero(G):
         raise ValueError('G must be greater than zero.')
     return Component(
@@ -30,7 +30,7 @@ def conductance(id: str, nodes: tuple[str, str], G: str = '') -> Component:
         nodes=nodes
         )
 
-def capacitor(id: str, nodes: tuple[str, str], C: str = '') -> Component:
+def capacitor(id: str, nodes: tuple[str, str], C: str = '', **_) -> Component:
     if value_less_than_zero(C):
         raise ValueError('C must be greater than zero.')
     return Component(
@@ -40,7 +40,7 @@ def capacitor(id: str, nodes: tuple[str, str], C: str = '') -> Component:
         nodes=nodes
     )
 
-def inductance(id: str, nodes: tuple[str, str], L: str = '') -> Component:
+def inductance(id: str, nodes: tuple[str, str], L: str = '', **_) -> Component:
     if value_less_than_zero(L):
         raise ValueError('L must be greater than zero.')
     return Component(
@@ -50,7 +50,7 @@ def inductance(id: str, nodes: tuple[str, str], L: str = '') -> Component:
         nodes=nodes
     )
 
-def impedance(id: str, nodes: tuple[str, str], Z: str = '') -> Component:
+def impedance(id: str, nodes: tuple[str, str], Z: str = '', **_) -> Component:
     return Component(
         type='impedance',
         id=id,
@@ -58,7 +58,7 @@ def impedance(id: str, nodes: tuple[str, str], Z: str = '') -> Component:
         nodes=nodes
         )
 
-def admittance(id: str, nodes: tuple[str, str], Y: str = '') -> Component:
+def admittance(id: str, nodes: tuple[str, str], Y: str = '', **_) -> Component:
     return Component(
         type='admittance',
         id=id,
@@ -66,7 +66,7 @@ def admittance(id: str, nodes: tuple[str, str], Y: str = '') -> Component:
         nodes=nodes
         )
 
-def voltage_source(id: str, nodes: tuple[str, str], V: str = '', R: str = '0') -> Component:
+def voltage_source(id: str, nodes: tuple[str, str], V: str = '', R: str = '0', **_) -> Component:
     return Component(
         type='dc_voltage_source',
         id=id,
@@ -74,7 +74,7 @@ def voltage_source(id: str, nodes: tuple[str, str], V: str = '', R: str = '0') -
         nodes=nodes
         )
 
-def current_source(id: str, nodes: tuple[str, str], I: str = '', G: str = '0') -> Component:
+def current_source(id: str, nodes: tuple[str, str], I: str = '', G: str = '0', **_) -> Component:
     return Component(
         type='dc_current_source',
         id=id,
@@ -82,14 +82,14 @@ def current_source(id: str, nodes: tuple[str, str], I: str = '', G: str = '0') -
         nodes=nodes
         )
 
-def short_circuit(id: str, nodes: tuple[str, str]) -> Component:
+def short_circuit(id: str, nodes: tuple[str, str], **_) -> Component:
     return Component(
         type='short_circuit',
         id=id,
         nodes=nodes
     )        
 
-def ground(id: str='gnd', nodes: tuple[str]=('0',)) -> Component:
+def ground(id: str='gnd', nodes: tuple[str]=('0',), **_) -> Component:
     return Component(
         type='ground',
         id=id,

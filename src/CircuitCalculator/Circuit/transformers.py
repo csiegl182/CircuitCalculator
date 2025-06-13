@@ -127,14 +127,14 @@ def ac_current_source(current_source: cp.Component, w: float = 0, w_resolution: 
 
 def complex_current_source(current_source: cp.Component, w: float = 0, w_resolution: float = 1e-3, *_) -> ntw.Branch:
     cs_I = complex(
-        float(current_source.value['I_real']),
-        float(current_source.value['I_imag'])
+        float(current_source.value.get('I_real', 0)),
+        float(current_source.value.get('I_imag', 0))
     )
     cs_Y = complex(
-        float(current_source.value['G']),
-        float(current_source.value['B'])
+        float(current_source.value.get('G', 0)),
+        float(current_source.value.get('B', 0))
     )
-    cs_w = float(current_source.value['w'])
+    cs_w = float(current_source.value.get('w', 0))
     element = elm.current_source(current_source.id, cs_I, cs_Y)
     if np.abs(w-cs_w) > w_resolution:
         element = elm.short_circuit(current_source.id)

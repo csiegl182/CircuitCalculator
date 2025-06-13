@@ -79,3 +79,40 @@ def test_missing_component_id_leads_to_error() -> None:
     }
     with pytest.raises(UnidentifiedComponent):
         undictify_circuit(test_circuit)
+
+
+
+def test_passing_additional_arguments_to_circuit_components_does_not_lead_to_error() -> None:
+    test_circuit = {
+        "components": [
+            {
+                "type": "dc_voltage_source",
+                "id": "Vs",
+                "nodes": [ "a", "b" ],
+                "value": {
+                    "V": 1,
+                    "I": -0.01,
+                    "P": -0.01,
+                    "phi1": 0,
+                    "phi2": -1
+                }
+            },
+            {
+                "type": "resistor",
+                "id": "R",
+                "nodes": [ "a", "b"
+                ],
+                "value": {
+                    "R": 100,
+                    "V": 1,
+                    "I": 0.01,
+                    "P": 0.01,
+                    "phi1": 0,
+                    "phi2": -1
+                }
+            }
+        ]
+    }
+    circuit = undictify_circuit(test_circuit)
+    assert circuit.components[0].type == test_circuit['components'][0]['type']
+    assert circuit.components[1].type == test_circuit['components'][1]['type']
