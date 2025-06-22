@@ -5,6 +5,10 @@ from typing import Protocol, Any
 Matrix = np.ndarray | sp.Matrix
 symbolic = sp.core.symbol.Symbol
 
+class MatrixInversionException(Exception):
+    """Exception raised when matrix inversion fails."""
+    pass
+
 class MatrixElement(Protocol):
     def __init__(self, value: complex | symbolic) -> None: ...
     @property
@@ -120,7 +124,10 @@ class NumPyMatrixOperations:
 
     @staticmethod
     def inv(matrix: np.ndarray) -> np.ndarray:
-        return np.linalg.inv(matrix)
+        try:
+            return np.linalg.inv(matrix)
+        except np.linalg.LinAlgError:
+            raise MatrixInversionException("Matrix inversion failed, possibly due to singular matrix.")
 
     @staticmethod
     def solve(A: np.ndarray, b: np.ndarray) -> tuple[complex, ...]:
@@ -177,7 +184,10 @@ class SymPyMatrixOperations:
 
     @staticmethod
     def inv(matrix: sp.Matrix) -> sp.Matrix:
-        return sp.Matrix(matrix.inv())
+        try:
+            return sp.Matrix(matrix.inv())
+        except ValueError:
+            raise MatrixInversionException("Matrix inversion failed, possibly due to singular matrix.")
 
     @staticmethod
     def solve(A: sp.Matrix, b: sp.Matrix) -> tuple[symbolic, ...]:
