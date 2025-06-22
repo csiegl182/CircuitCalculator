@@ -79,7 +79,7 @@ def nodal_analysis_constants_vector(network: Network, matrix_ops: mo.MatrixOpera
     V = matrix_ops.column_vector([network[vs].element.V for vs in vs_mapping.keys])
     return matrix_ops.vstack((I, V))
 
-def open_circuit_impedance(network: Network, node1: str, node2: str, matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations(), node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> symbolic:
+def open_circuit_impedance(network: Network, node1: str, node2: str, matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations(), node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> complex | symbolic:
     if node1 == node2:
         return matrix_ops.elm(0).value
     if any([b.element.is_ideal_voltage_source for b in network.branches_between(node1, node2)]):
@@ -94,7 +94,7 @@ def open_circuit_impedance(network: Network, node1: str, node2: str, matrix_ops:
     i1 = node_index_mapper(network)[node1]
     return Z.diagonal()[i1]
 
-def element_impedance(network: Network, element: str, matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations(), node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> symbolic:
+def element_impedance(network: Network, element: str, matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations(), node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> complex | symbolic:
     return open_circuit_impedance(
         network=trf.remove_element(network, element),
         node1=network[element].node1,

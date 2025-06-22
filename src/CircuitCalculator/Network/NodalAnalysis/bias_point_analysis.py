@@ -41,7 +41,7 @@ def open_circuit_voltage(network: Network, node1: str, node2: str) -> complex:
     return phi1-phi2
 
 def short_circuit_current(network: Network, node1: str, node2: str) -> complex:
-    Z = na.open_circuit_impedance(network, node1, node2)
+    Z = complex(na.open_circuit_impedance(network, node1, node2))
     V = open_circuit_voltage(network, node1, node2)
     return V/Z
 
