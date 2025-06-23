@@ -25,7 +25,9 @@ def node_admittance_matrix(network: Network, matrix_ops: mo.MatrixOperations = m
             return admittance_connected_to(no_voltage_sources_network, i_label, matrix_ops.elm)
         return -admittance_between(no_voltage_sources_network, i_label, j_label, matrix_ops.elm)
     node_mapping = node_index_mapper(network)
-    no_voltage_sources_network = trf.remove_elements(network, [b.id for b in network.branches if b.element.is_ideal_voltage_source])
+    # no_voltage_sources_network = trf.remove_elements(network, [b.id for b in network.branches if b.element.is_ideal_voltage_source])
+    b_list = [b for b in network.branches if not b.element.is_ideal_voltage_source]
+    no_voltage_sources_network = Network(branches=b_list, node_zero_label=b_list[0].node1)
     Y = matrix_ops.zeros((node_mapping.N, node_mapping.N))
     for i_label, j_label in itertools.product(node_mapping, repeat=2):
         Y[node_mapping(i_label, j_label)] = node_matrix_element(i_label, j_label)

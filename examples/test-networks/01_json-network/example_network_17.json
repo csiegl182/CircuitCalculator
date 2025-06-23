@@ -1,0 +1,9 @@
+[
+    {
+        "type": "current_source",
+        "id": "Is",
+        "N1": "1",
+        "N2": "0",
+        "I": {"real": 1, "imag": 0}
+    }
+]

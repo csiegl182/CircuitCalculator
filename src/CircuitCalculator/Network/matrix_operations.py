@@ -1,5 +1,6 @@
 import numpy as np
 import sympy as sp
+from sympy.matrices.common import NonInvertibleMatrixError
 from typing import Protocol, Any
 
 Matrix = np.ndarray | sp.Matrix
@@ -131,7 +132,10 @@ class NumPyMatrixOperations:
 
     @staticmethod
     def solve(A: np.ndarray, b: np.ndarray) -> tuple[complex, ...]:
-        return tuple(np.linalg.solve(A, b).flatten())
+        try:
+            return tuple(np.linalg.solve(A, b).flatten())
+        except np.linalg.LinAlgError:
+            raise MatrixInversionException("Matrix inversion failed, possibly due to singular matrix.")
 
     @staticmethod
     def elm(value: complex | symbolic) -> NumericMatrixElement:
@@ -191,7 +195,10 @@ class SymPyMatrixOperations:
 
     @staticmethod
     def solve(A: sp.Matrix, b: sp.Matrix) -> tuple[symbolic, ...]:
-        return tuple(A.LUsolve(b))
+        try:
+            return tuple(A.LUsolve(b))
+        except NonInvertibleMatrixError:
+            raise MatrixInversionException("Matrix inversion failed, possibly due to singular matrix.")
 
     @staticmethod
     def elm(value: complex | symbolic) -> SymbolicMatrixElement:

@@ -1,0 +1,9 @@
+[
+    {
+        "type": "voltage_source",
+        "id": "Vs",
+        "N1": "1",
+        "N2": "0",
+        "V": {"real": 1, "imag": 0}
+    }
+]
