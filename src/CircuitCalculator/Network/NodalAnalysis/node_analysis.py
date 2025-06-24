@@ -22,12 +22,10 @@ def connected_nodes(network: Network, node: str) -> list[str]:
 def node_admittance_matrix(network: Network, matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations(), node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> mo.Matrix:
     def node_matrix_element(i_label:str, j_label:str) -> complex:
         if i_label == j_label:
-            return admittance_connected_to(no_voltage_sources_network, i_label, matrix_ops.elm)
-        return -admittance_between(no_voltage_sources_network, i_label, j_label, matrix_ops.elm)
+            return admittance_connected_to(passive_network, i_label, matrix_ops.elm)
+        return -admittance_between(passive_network, i_label, j_label, matrix_ops.elm)
     node_mapping = node_index_mapper(network)
-    # no_voltage_sources_network = trf.remove_elements(network, [b.id for b in network.branches if b.element.is_ideal_voltage_source])
-    b_list = [b for b in network.branches if not b.element.is_ideal_voltage_source]
-    no_voltage_sources_network = Network(branches=b_list, node_zero_label=b_list[0].node1)
+    passive_network = trf.remove_active_elements(network)
     Y = matrix_ops.zeros((node_mapping.N, node_mapping.N))
     for i_label, j_label in itertools.product(node_mapping, repeat=2):
         Y[node_mapping(i_label, j_label)] = node_matrix_element(i_label, j_label)
