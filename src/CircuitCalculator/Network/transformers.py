@@ -1,5 +1,8 @@
 from .network import Network, Branch
-from .elements import open_circuit, impedance, admittance
+from .norten_thevenin_elements import NortenTheveninElement
+from . import elements as elm
+from . import symbolic_elements as selm
+import sympy as sp
 
 def switch_ground_node(network: Network, new_ground: str) -> Network:
     return Network(network.branches, new_ground)
@@ -24,15 +27,27 @@ def rename_node(network: Network, old_node: str, new_node: str) -> Network:
     return Network(branches, node_zero_label=network.node_zero_label)
 
 def remove_active_elements(network: Network) -> Network:
+    def impedance(e: NortenTheveninElement) -> NortenTheveninElement:
+        try:
+            Z = complex(e.Z)
+        except TypeError:
+            return selm.impedance(name=e.name, Z=sp.sympify(e.Z))
+        return elm.impedance(name=e.name, Z=Z)
+    def admittance(e: NortenTheveninElement) -> NortenTheveninElement:
+        try:
+            Y = complex(e.Y)
+        except TypeError:
+            return selm.admittance(name=e.name, Y=sp.sympify(e.Y))
+        return elm.admittance(name=e.name, Y=Y)
     def remove(b: Branch) -> Branch:
         if b.element.is_ideal_voltage_source:
-            return Branch(b.node1, b.node2, open_circuit(b.element.name))
+            return Branch(b.node1, b.node2, elm.open_circuit(b.element.name))
         if b.element.is_ideal_current_source:
-            return Branch(b.node1, b.node2, open_circuit(b.element.name))
+            return Branch(b.node1, b.node2, elm.open_circuit(b.element.name))
         if b.element.is_voltage_source:
-            return Branch(b.node1, b.node2, impedance(b.element.name, Z=b.element.Z))
+            return Branch(b.node1, b.node2, impedance(b.element))
         if b.element.is_current_source:
-            return Branch(b.node1, b.node2, admittance(b.element.name, Y=b.element.Y))
+            return Branch(b.node1, b.node2, admittance(b.element))
         return b
     return Network(
         branches=[remove(b) for b in network.branches],
