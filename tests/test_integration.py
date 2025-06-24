@@ -141,8 +141,8 @@ def test_network_9_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_current('Vs2'), -0.30, decimal=3)
     np.testing.assert_almost_equal(solution.get_current('R1'), 0.30, decimal=3)
     np.testing.assert_almost_equal(solution.get_potential('0'), 0.00, decimal=2)
-    np.testing.assert_almost_equal(solution.get_potential('1'), 1.00, decimal=2)
-    np.testing.assert_almost_equal(solution.get_potential('2'), 3.00, decimal=2)
+    np.testing.assert_almost_equal(solution.get_potential('1'), -1.00, decimal=2)
+    np.testing.assert_almost_equal(solution.get_potential('2'), 2.00, decimal=2)
 
 def test_network_10_with_advanced_nodal_analysis() -> None:
     network = load_network_from_json(str(json_root / 'example_network_10.json'))
@@ -244,3 +244,19 @@ def test_network_15_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_potential('1'), 1.00, decimal=2)
     np.testing.assert_almost_equal(solution.get_potential('2'), 0.64, decimal=2)
     np.testing.assert_almost_equal(solution.get_potential('3'), 0.64, decimal=2)
+
+def test_network_16_with_advanced_nodal_analysis() -> None:
+    network = load_network_from_json(str(json_root / 'example_network_16.json'))
+    solution = nodal_analysis_bias_point_solver(network)
+    np.testing.assert_almost_equal(solution.get_voltage('Vs'), 1.0, decimal=2)
+    np.testing.assert_almost_equal(solution.get_current('Vs'), 0.0, decimal=3)
+    np.testing.assert_almost_equal(solution.get_potential('0'), 0.00, decimal=2)
+    np.testing.assert_almost_equal(solution.get_potential('1'), 1.00, decimal=2)
+    
+def test_network_17_with_advanced_nodal_analysis() -> None:
+    network = load_network_from_json(str(json_root / 'example_network_17.json'))
+    solution = nodal_analysis_bias_point_solver(network)
+    assert np.isnan(solution.get_voltage('Is'))
+    np.testing.assert_almost_equal(solution.get_current('Is'), 1.0, decimal=3)
+    np.testing.assert_almost_equal(solution.get_potential('0'), 0.00, decimal=2)
+    assert np.isnan(solution.get_potential('1'))

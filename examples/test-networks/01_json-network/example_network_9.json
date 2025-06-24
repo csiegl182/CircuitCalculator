@@ -2,22 +2,22 @@
     {
         "type": "real_voltage_source",
         "id": "Vs1",
-        "N1": "1",
-        "N2": "0",
+        "N1": "0",
+        "N2": "1",
         "V": 1
     },
     {
         "type": "real_voltage_source",
         "id": "Vs2",
         "N1": "2",
-        "N2": "1",
+        "N2": "0",
         "V": 2
     },
     {
         "type": "resistor",
         "id": "R1",
         "N1": "2",
-        "N2": "0",
+        "N2": "1",
         "R": 10
     }
 ]

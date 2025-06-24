@@ -22,10 +22,10 @@ def connected_nodes(network: Network, node: str) -> list[str]:
 def node_admittance_matrix(network: Network, matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations(), node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> mo.Matrix:
     def node_matrix_element(i_label:str, j_label:str) -> complex:
         if i_label == j_label:
-            return admittance_connected_to(no_voltage_sources_network, i_label, matrix_ops.elm)
-        return -admittance_between(no_voltage_sources_network, i_label, j_label, matrix_ops.elm)
+            return admittance_connected_to(passive_network, i_label, matrix_ops.elm)
+        return -admittance_between(passive_network, i_label, j_label, matrix_ops.elm)
     node_mapping = node_index_mapper(network)
-    no_voltage_sources_network = trf.remove_elements(network, [b.id for b in network.branches if b.element.is_ideal_voltage_source])
+    passive_network = trf.remove_active_elements(network)
     Y = matrix_ops.zeros((node_mapping.N, node_mapping.N))
     for i_label, j_label in itertools.product(node_mapping, repeat=2):
         Y[node_mapping(i_label, j_label)] = node_matrix_element(i_label, j_label)
@@ -79,7 +79,7 @@ def nodal_analysis_constants_vector(network: Network, matrix_ops: mo.MatrixOpera
     V = matrix_ops.column_vector([network[vs].element.V for vs in vs_mapping.keys])
     return matrix_ops.vstack((I, V))
 
-def open_circuit_impedance(network: Network, node1: str, node2: str, matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations(), node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> symbolic:
+def open_circuit_impedance(network: Network, node1: str, node2: str, matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations(), node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> complex | symbolic:
     if node1 == node2:
         return matrix_ops.elm(0).value
     if any([b.element.is_ideal_voltage_source for b in network.branches_between(node1, node2)]):
@@ -94,7 +94,7 @@ def open_circuit_impedance(network: Network, node1: str, node2: str, matrix_ops:
     i1 = node_index_mapper(network)[node1]
     return Z.diagonal()[i1]
 
-def element_impedance(network: Network, element: str, matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations(), node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> symbolic:
+def element_impedance(network: Network, element: str, matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations(), node_index_mapper: map.NetworkMapper = map.default_node_mapper) -> complex | symbolic:
     return open_circuit_impedance(
         network=trf.remove_element(network, element),
         node1=network[element].node1,

@@ -1,5 +1,8 @@
 from .network import Network, Branch
-from .elements import NortenTheveninElement, impedance, admittance
+from .norten_thevenin_elements import NortenTheveninElement
+from . import elements as elm
+from . import symbolic_elements as selm
+import sympy as sp
 
 def switch_ground_node(network: Network, new_ground: str) -> Network:
     return Network(network.branches, new_ground)
@@ -12,11 +15,6 @@ def remove_element(network: Network, element: str) -> Network:
        network = rename_node(network, branch_to_remove.node1, network.node_zero_label) 
     branches = [b for b in network.branches if b.element.name != element]
     return Network(branches, node_zero_label=network.node_zero_label)
-    
-def remove_elements(network: Network, elements: list[str]) -> Network:
-    for element in elements:
-        network = remove_element(network, element)
-    return network
 
 def rename_node(network: Network, old_node: str, new_node: str) -> Network:
     def rename(branch: Branch) -> Branch:
@@ -28,52 +26,30 @@ def rename_node(network: Network, old_node: str, new_node: str) -> Network:
     branches = [rename(b) for b in network.branches]
     return Network(branches, node_zero_label=network.node_zero_label)
 
-def remove_open_circuit_elements(network: Network) -> Network:
-    return Network([b for b in network.branches if not b.element.is_open_circuit], node_zero_label=network.node_zero_label)
-
-def remove_short_circuit_elements(network: Network, keep: list[NortenTheveninElement] = []) -> Network:
-    branches = network.branches
-    short_circuits = [b for b in network.branches if b.element.is_short_circuit and b.element not in keep]
-    short_circuit_nodes = [(vs.node1, vs.node2) if not network.is_zero_node(vs.node1) else (vs.node2, vs.node1) for vs in short_circuits]
-    for an, rn in short_circuit_nodes:
-        branches = [Branch(rn, b.node2, b.element) if b.node1 == an else b for b in branches]
-        branches = [Branch(b.node1, rn, b.element) if b.node2 == an else b for b in branches]
-        branches = [b for b in branches if b.node1 != b.node2]
-    return Network(branches, node_zero_label=network.node_zero_label)
-
-def short_circuitify_voltage_sources(network: Network, keep: list[NortenTheveninElement] = []) -> Network:
-    def zero_in_voltage(branch: Branch) -> Branch:
-        return Branch(branch.node1, branch.node2, impedance(branch.element.name, branch.element.Z))
-    def is_intended_voltage_source(branch: Branch) -> bool:
-        if branch.element in keep:
-            return False
-        if branch.element.is_voltage_source:
-            return True
-        return False
+def remove_active_elements(network: Network) -> Network:
+    def impedance(e: NortenTheveninElement) -> NortenTheveninElement:
+        try:
+            Z = complex(e.Z)
+        except TypeError:
+            return selm.impedance(name=e.name, Z=sp.sympify(e.Z))
+        return elm.impedance(name=e.name, Z=Z)
+    def admittance(e: NortenTheveninElement) -> NortenTheveninElement:
+        try:
+            Y = complex(e.Y)
+        except TypeError:
+            return selm.admittance(name=e.name, Y=sp.sympify(e.Y))
+        return elm.admittance(name=e.name, Y=Y)
+    def remove(b: Branch) -> Branch:
+        if b.element.is_ideal_voltage_source:
+            return Branch(b.node1, b.node2, elm.open_circuit(b.element.name))
+        if b.element.is_ideal_current_source:
+            return Branch(b.node1, b.node2, elm.open_circuit(b.element.name))
+        if b.element.is_voltage_source:
+            return Branch(b.node1, b.node2, impedance(b.element))
+        if b.element.is_current_source:
+            return Branch(b.node1, b.node2, admittance(b.element))
+        return b
     return Network(
-        branches=[zero_in_voltage(b) if is_intended_voltage_source(b) else b for b in network.branches],
+        branches=[remove(b) for b in network.branches],
         node_zero_label=network.node_zero_label
     )
-
-def open_circuitify_current_sources(network: Network, keep: list[NortenTheveninElement] = []) -> Network:
-    def zero_in_current(branch: Branch) -> Branch:
-        return Branch(branch.node1, branch.node2, admittance(branch.element.name, branch.element.Y))
-    def is_intended_current_source(branch: Branch) -> bool:
-        if branch.element in keep:
-            return False
-        if branch.element.is_current_source:
-            return True
-        return False
-    return Network(
-        branches=[zero_in_current(b) if is_intended_current_source(b) else b for b in network.branches],
-        node_zero_label=network.node_zero_label
-    )
-
-def remove_ideal_current_sources(network: Network, keep: list[NortenTheveninElement] = []) -> Network:
-    return remove_open_circuit_elements(open_circuitify_current_sources(network, keep=keep))
-
-def remove_ideal_voltage_sources(network: Network, keep: list[NortenTheveninElement] = []) -> Network:
-    return remove_short_circuit_elements(short_circuitify_voltage_sources(network, keep=keep), keep=keep)
-
-def passive_network(network: Network, keep: list[NortenTheveninElement] = []) -> Network:
-    return remove_ideal_voltage_sources(remove_ideal_current_sources(network, keep=keep), keep=keep)

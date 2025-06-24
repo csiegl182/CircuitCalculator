@@ -1,7 +1,7 @@
 import pytest
 from CircuitCalculator.Network.network import Network, Branch
-from CircuitCalculator.Network.elements import voltage_source, current_source, resistor
-from CircuitCalculator.Network.transformers import remove_ideal_current_sources, remove_ideal_voltage_sources, remove_element
+from CircuitCalculator.Network.elements import voltage_source, resistor
+from CircuitCalculator.Network.transformers import remove_element
 
 def test_remove_network_element_removes_element() -> None:
     vs1 = voltage_source('Us1', V=1)
