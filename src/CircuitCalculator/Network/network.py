@@ -58,12 +58,3 @@ class Network:
 
     def __getitem__(self, id: str) -> Branch:
         return {b.id: b for b in self.branches}[id]
-
-def ideal_voltage_sources(network: Network) -> list[Branch]:
-    return [b for b in network.branches if b.element.is_ideal_voltage_source]
-
-def ideal_current_sources(network: Network) -> list[Branch]:
-    return [b for b in network.branches if b.element.is_ideal_current_source]
-
-def passive_elements(network: Network) -> list[Branch]:
-    return [b for b in network.branches if not b.element.is_active]
