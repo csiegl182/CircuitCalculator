@@ -144,3 +144,43 @@ def test_values_may_be_passed_as_strings() -> None:
     circuit = undictify_circuit(test_circuit)
     assert circuit.components[0].value['V'] == V
     assert circuit.components[1].value['R'] == R
+
+def test_missing_arguments_lead_to_error() -> None:
+    test_circuit = { 'components' : 
+        [
+            {
+                'type': 'dc_voltage_source',
+                'id': 'Vs',
+                'nodes': ('1', '0'),
+                'value': {}
+            },
+            {
+                'type': 'resistor',
+                'id': 'R1',
+                'nodes': ('0', '1'),
+                'value': {'R': 10}
+            }
+        ]
+    }
+    with pytest.raises(IncorrectComponentInformation):
+        undictify_circuit(test_circuit)
+
+def test_incorrect_arguments_lead_to_error() -> None:
+    test_circuit = { 'components' : 
+        [
+            {
+                'type': 'dc_voltage_source',
+                'id': 'Vs',
+                'nodes': ('1', '0'),
+                'value': {'I': 10} # Incorrect argument, should be 'V'
+            },
+            {
+                'type': 'resistor',
+                'id': 'R1',
+                'nodes': ('0', '1'),
+                'value': {'R': 10}
+            }
+        ]
+    }
+    with pytest.raises(IncorrectComponentInformation):
+        undictify_circuit(test_circuit)
