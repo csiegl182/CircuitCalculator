@@ -52,6 +52,32 @@ def test_current_source_translator() -> None:
     assert current_source.nodes == current_source_dict['nodes']
     assert current_source.value['I'] == current_source_dict['value']['I']
 
+def test_complex_voltage_source_translator() -> None:
+    voltage_source_dict = {
+        'type': 'complex_voltage_source',
+        'id': 'voltage_source',
+        'nodes': ('0', '1'),
+        'value': {'V': '100 + 50j'}
+    }
+    voltage_source = generate_component(voltage_source_dict)
+    assert voltage_source.id == voltage_source_dict['id']
+    assert voltage_source.nodes == voltage_source_dict['nodes']
+    assert voltage_source.value['V_real'] == complex(voltage_source_dict['value']['V'].replace(' ', '')).real
+    assert voltage_source.value['V_imag'] == complex(voltage_source_dict['value']['V'].replace(' ', '')).imag
+
+def test_complex_current_source_translator() -> None:
+    current_source_dict = {
+        'type': 'complex_current_source',
+        'id': 'current_source',
+        'nodes': ('0', '1'),
+        'value': {'I': "100 + 50j"}
+    }
+    current_source = generate_component(current_source_dict)
+    assert current_source.id == current_source_dict['id']
+    assert current_source.nodes == current_source_dict['nodes']
+    assert current_source.value['I_real'] == complex(current_source_dict['value']['I'].replace(' ', '')).real
+    assert current_source.value['I_imag'] == complex(current_source_dict['value']['I'].replace(' ', '')).imag
+
 def test_ground() -> None:
     ground_dict = {
         'type': 'ground',
