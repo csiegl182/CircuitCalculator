@@ -116,3 +116,31 @@ def test_passing_additional_arguments_to_circuit_components_does_not_lead_to_err
     circuit = undictify_circuit(test_circuit)
     assert circuit.components[0].type == test_circuit['components'][0]['type']
     assert circuit.components[1].type == test_circuit['components'][1]['type']
+
+def test_values_may_be_passed_as_strings() -> None:
+    V = 1
+    R = 100
+    test_circuit = {
+        "components": [
+            {
+                "type": "dc_voltage_source",
+                "id": "Vs",
+                "nodes": [ "a", "b" ],
+                "value": {
+                    "V": str(V),
+                }
+            },
+            {
+                "type": "resistor",
+                "id": "R",
+                "nodes": [ "a", "b"
+                ],
+                "value": {
+                    "R": str(R),
+                }
+            }
+        ]
+    }
+    circuit = undictify_circuit(test_circuit)
+    assert circuit.components[0].value['V'] == V
+    assert circuit.components[1].value['R'] == R
