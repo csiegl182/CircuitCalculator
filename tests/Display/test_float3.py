@@ -1,4 +1,4 @@
-from CircuitCalculator.Utils import Float3
+from CircuitCalculator.Display.ScientificFloat import Float3
 from numpy.testing import assert_almost_equal
 from numpy import isnan
 
@@ -42,3 +42,16 @@ def test_float3_returns_nan_mantissa_and_zero_exponent_for_nan_value() -> None:
     assert isnan(f3.mantissa3)
     assert f3.exponent3 == 0
 
+def test_float3_is_zero_for_zero_value() -> None:
+    f3 = Float3(0)
+    assert f3.is_zero
+    assert f3.mantissa3 == 0
+    assert f3.exponent3 == 0
+
+def test_float3_is_zero_for_smaller_positive_values_than_min_exp() -> None:
+    f3 = Float3(1e-17)
+    assert f3.is_zero
+
+def test_float3_is_zero_for_smaller_negative_values_than_min_exp() -> None:
+    f3 = Float3(-1e-17)
+    assert f3.is_zero

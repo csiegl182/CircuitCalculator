@@ -82,7 +82,7 @@ class ScientificFloat:
     @property
     def value3(self) -> Float3:
         if self.use_exp_prefix:
-            return Float3(value=self.value, precision=self.precision, min_exp=min(self.exp_prefixes.keys()), max_exp=max(self.exp_prefixes.keys()))
+            return Float3(value=self.value, precision=self.precision, min_exp=min(self.exp_prefixes.keys())-2, max_exp=max(self.exp_prefixes.keys()))
         return Float3(value=self.value, precision=self.precision)
 
     def exp_prefix(self, exp) -> str:
@@ -115,6 +115,8 @@ class ScientificFloat:
             return '∞' if self.value3.mantissa >= 0 else '-∞'
         if self.value3.is_nan:
             return 'NaN'
+        if self.value3.is_zero:
+            return f'0.{"0" * (self.precision)}'
         pre_decimal_positions = 0 if np.abs(self.value3.mantissa3) < 1 else len(str(abs(self.value3.mantissa3)).split('.')[0])
         post_decimal_positions = max(self.precision - pre_decimal_positions, 0)
         pre_decimal = int(self.value3.mantissa3)

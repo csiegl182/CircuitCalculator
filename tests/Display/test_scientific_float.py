@@ -1,4 +1,4 @@
-from CircuitCalculator.Utils import ScientificFloat
+from CircuitCalculator.Display.ScientificFloat import ScientificFloat
 from numpy.testing import assert_almost_equal
 
 def test_ScientificFloat_returns_string_of_correct_length_for_values_greater_than_one() -> None:
@@ -64,12 +64,6 @@ def test_zoom_works_with_exponential_prefixes_for_100m() -> None:
     str_repr = str(ScientificFloat(value, precision=precision, use_exp_prefix=True))
     assert str_repr == '100m'
 
-def test_zoom_works_with_exponential_prefixes_for_small_values_out_of_range() -> None:
-    value = 1e-5
-    precision = 3
-    str_repr = str(ScientificFloat(value, precision=precision, use_exp_prefix=True, exp_prefixes={-3: 'm'}))
-    assert str_repr == '10.0e-3m'
-
 def test_unscaled_value_with_exp_prefix() -> None:
     value = 1.56
     precision = 3
@@ -122,6 +116,18 @@ def test_scaled_value_with_low_precision() -> None:
     value = 120
     str_repr = str(ScientificFloat(value, precision=1))
     assert str_repr == '100'
+
+def test_small_positive_values_are_zero() -> None:
+    value = 999.4e-9
+
+    str_repr = str(ScientificFloat(value, use_exp_prefix=True, exp_prefixes={-6: 'u', -3: 'm', 3: 'k'}))
+    assert str_repr == '0.000'
+
+def test_large_negative_values_are_zero() -> None:
+    value = -999.4e-9
+
+    str_repr = str(ScientificFloat(value, use_exp_prefix=True, exp_prefixes={-6: 'u', -3: 'm', 3: 'k'}))
+    assert str_repr == '0.000'
 
 def test_large_positive_values_are_infinity() -> None:
     value = 1e6
