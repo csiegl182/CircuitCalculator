@@ -172,6 +172,13 @@ def short_circuit(short_circuit: cp.Component, *_) -> ntw.Branch:
         elm.short_circuit(short_circuit.id)
     )
 
+def open_circuit(open_circuit: cp.Component, *_) -> ntw.Branch:
+    return ntw.Branch(
+        open_circuit.nodes[0],
+        open_circuit.nodes[1],
+        elm.open_circuit(open_circuit.id)
+    )
+
 def resistive_load(load: cp.Component, *_) -> ntw.Branch:
     return ntw.Branch(
         load.nodes[0],
@@ -193,6 +200,7 @@ transformers : dict[str, CircuitComponentTranslator] = {
     'periodic_voltage_source' : periodic_voltage_source,
     'periodic_current_source' : periodic_current_source,
     'short_circuit' : short_circuit,
+    'open_circuit' : open_circuit,
     'resistive_load' : resistive_load,
     'lamp' : resistive_load
 }

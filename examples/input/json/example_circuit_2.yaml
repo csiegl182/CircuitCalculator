@@ -1,0 +1,34 @@
+components:
+  - type: dc_voltage_source
+    id: Vs
+    nodes:
+      - a
+      - b
+    value:
+      V: 1
+  - type: resistor
+    id: R1
+    nodes:
+      - a
+      - b
+    value:
+      R: 100
+  - type: resistor
+    id: R2
+    nodes:
+      - a
+      - c
+    value:
+      R: 100
+  - type: resistor
+    id: R3
+    nodes:
+      - c
+      - b
+    value:
+      R: 100
+  - type: open_circuit
+    id: V1
+    nodes:
+      - c
+      - b

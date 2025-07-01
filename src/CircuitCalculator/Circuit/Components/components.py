@@ -182,6 +182,13 @@ def short_circuit(id: str, nodes: tuple[str, str], **_) -> Component:
         nodes=nodes
     )        
 
+def open_circuit(id: str, nodes: tuple[str, str], **_) -> Component:
+    return Component(
+        type='open_circuit',
+        id=id,
+        nodes=nodes
+    )        
+
 def ground(id: str='gnd', nodes: tuple[str]=('0',), **_) -> Component:
     return Component(
         type='ground',
