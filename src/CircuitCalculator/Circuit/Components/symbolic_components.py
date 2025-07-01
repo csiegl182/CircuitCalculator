@@ -82,6 +82,13 @@ def current_source(id: str, nodes: tuple[str, str], I: str = '', G: str = '0', *
         nodes=nodes
         )
 
+def open_circuit(id: str, nodes: tuple[str, str], **_) -> Component:
+    return Component(
+        type='open_circuit',
+        id=id,
+        nodes=nodes
+    )        
+
 def short_circuit(id: str, nodes: tuple[str, str], **_) -> Component:
     return Component(
         type='short_circuit',

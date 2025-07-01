@@ -62,6 +62,13 @@ def current_source(current_source: cp.Component, _: sp.Symbol) -> ntw.Branch:
         element
     )
 
+def open_circuit(open_circuit: cp.Component, _: sp.Symbol) -> ntw.Branch:
+    return ntw.Branch(
+        open_circuit.nodes[0],
+        open_circuit.nodes[1],
+        elm.open_circuit(open_circuit.id)
+    )
+
 def short_circuit(short_circuit: cp.Component, _: sp.Symbol) -> ntw.Branch:
     return ntw.Branch(
         short_circuit.nodes[0],
@@ -76,6 +83,7 @@ transformers : dict[str, CircuitComponentTranslator] = {
     'inductance' : inductance,
     'voltage_source' : voltage_source,
     'current_source' : current_source,
+    'open_circuit' : open_circuit,
     'short_circuit' : short_circuit,
     'dc_voltage_source' : voltage_source,
     'dc_current_source' : current_source
