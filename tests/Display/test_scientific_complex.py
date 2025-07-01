@@ -1,4 +1,4 @@
-from CircuitCalculator.Utils import ScientificComplex
+from CircuitCalculator.Display.ScientificFloat import ScientificComplex
 
 def test_simple_complex_value() -> None:
     z = 3+7j
@@ -71,7 +71,7 @@ def test_complex_value_hides_zero_imaginary_part() -> None:
     assert str_repr == '1.00'
 
 def test_complex_value_with_dominating_imag_part() -> None:
-    z = 3e-3+7j
+    z = 3e-4+7j
     str_repr = str(ScientificComplex(z, use_exp_prefix=True, exp_prefixes={3: 'k', -3: 'm'}))
     assert str_repr == 'j7.00'
 

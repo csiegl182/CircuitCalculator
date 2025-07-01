@@ -1,4 +1,4 @@
-from CircuitCalculator.Utils import FloatPrecision
+from CircuitCalculator.Display.ScientificFloat import FloatPrecision
 
 def test_positive_values_near_zero_are_splitted() -> None:
     value = 0.12345678

@@ -1,4 +1,4 @@
-from ..Utils import ScientificFloat, ScientificComplex
+from ..Display.ScientificFloat import ScientificFloat, ScientificComplex
 from math import degrees, pi
 from cmath import phase
 
