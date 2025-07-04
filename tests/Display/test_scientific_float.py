@@ -143,3 +143,8 @@ def test_nan_value() -> None:
     value = float('nan')
     str_repr = str(ScientificFloat(value))
     assert str_repr == 'NaN'
+
+def test_zero_value_shows_unit() -> None:
+    value = 0
+    str_repr = str(ScientificFloat(value, unit='V'))
+    assert str_repr == '0.000V'
