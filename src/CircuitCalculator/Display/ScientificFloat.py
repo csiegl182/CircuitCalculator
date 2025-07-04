@@ -116,7 +116,7 @@ class ScientificFloat:
         if self.value3.is_nan:
             return 'NaN'
         if self.value3.is_zero:
-            return f'0.{"0" * (self.precision)}'
+            return f'0.{"0" * (self.precision)}'+self.unit
         pre_decimal_positions = 0 if np.abs(self.value3.mantissa3) < 1 else len(str(abs(self.value3.mantissa3)).split('.')[0])
         post_decimal_positions = max(self.precision - pre_decimal_positions, 0)
         pre_decimal = int(self.value3.mantissa3)
