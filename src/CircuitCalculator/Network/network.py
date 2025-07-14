@@ -18,10 +18,10 @@ class Branch:
 @dataclass(frozen=True)
 class Network:
     branches: list[Branch]
-    node_zero_label: str = '0'
+    reference_node_label: str = '0'
 
     def __post_init__(self):
-        if self.node_zero_label not in self.node_labels and self.number_of_nodes != 0:
+        if self.reference_node_label not in self.node_labels and self.number_of_nodes != 0:
             raise FloatingGroundNode
         if len(set(self.branch_ids)) != len(self.branches):
             raise AmbiguousBranchIDs
@@ -33,17 +33,31 @@ class Network:
     @property
     def node_labels(self) -> list[str]:
         if len(self.branches) == 0:
-            return [self.node_zero_label]
+            return [self.reference_node_label]
         node1_set = {branch.node1 for branch in self.branches}
         node2_set = {branch.node2 for branch in self.branches}
         return sorted(list(node1_set.union(node2_set)))
+
+    @property
+    def reference_connected_node_labels(self) -> set[str]:
+        connected_nodes = set()
+        nodes_to_assess = set([self.reference_node_label])
+        nodes_already_assessed = set()
+        while nodes_to_assess:
+            new_nodes_to_assess = set()
+            for node in nodes_to_assess:
+                new_nodes_to_assess.update(self.nodes_connected_to(node))
+            nodes_already_assessed.update(nodes_to_assess)
+            nodes_to_assess = new_nodes_to_assess - nodes_already_assessed
+            connected_nodes.update(new_nodes_to_assess)
+        return connected_nodes - set([self.reference_node_label])
 
     @property
     def number_of_nodes(self) -> int:
         return len(self.node_labels)
 
     def is_zero_node(self, node: str) -> bool:
-        return node == self.node_zero_label
+        return node == self.reference_node_label
 
     def branches_connected_to(self, node: str) -> list[Branch]:
         connected_branches = [branch for branch in self.branches if branch.node1 == node or branch.node2 == node]

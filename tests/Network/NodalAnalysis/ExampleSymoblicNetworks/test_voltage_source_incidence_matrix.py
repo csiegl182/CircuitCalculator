@@ -156,7 +156,7 @@ def test_voltage_source_incidence_matrix_from_reference_network_11() -> None:
             Branch('3', '2', voltage_source('Us', V=sp.Symbol('V'))),
             Branch('3', '0', resistor('R4', R=sp.Symbol('R4')))
         ],
-        node_zero_label='0'
+        reference_node_label='0'
     )
     A = voltage_source_incidence_matrix(network)
     A_ref = np.array([
@@ -174,7 +174,7 @@ def test_voltage_source_incidence_matrix_from_reference_network_13() -> None:
             Branch('1', '2', resistor('R2', R=sp.Symbol('R2'))),
             Branch('2', '0', resistor('R3', R=sp.Symbol('R3')))
         ],
-        node_zero_label='0'
+        reference_node_label='0'
     )
     A = voltage_source_incidence_matrix(network)
     A_ref = np.array([

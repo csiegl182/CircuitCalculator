@@ -49,6 +49,16 @@ def test_Network_returns_nodes_connected_to_node() -> None:
     network = Network([branchA, branchB, branchC, branchD])
     assert network.nodes_connected_to(node='0') == {'1', '2'}
 
+def test_Network_returns_reference_connected_nodes() -> None:
+    branchA = Branch('0', '1', resistor('R1', 10))
+    branchB = Branch('0', '2', resistor('R2', 20))
+    branchC = Branch('2', '3', resistor('R3', 30))
+    branchD = Branch('3', '4', resistor('R4', 40))
+    branchE = Branch('3', '5', resistor('R5', 50))
+    branchF = Branch('a', 'b', resistor('R6', 60))
+    network = Network([branchA, branchB, branchC, branchD, branchE, branchF])
+    assert network.reference_connected_node_labels == {'1', '2', '3', '4', '5'}
+
 def test_ground_node_not_part_of_network_raises_error() -> None:
     R1, R2, R3, R4 = 10, 20, 30, 40
     branchA = Branch('0', '1', resistor('R1', R1))
@@ -59,7 +69,7 @@ def test_ground_node_not_part_of_network_raises_error() -> None:
         Network([branchA, branchB, branchC, branchD], '7')
 
 def test_empty_network_can_be_generated() -> None:
-    network = Network([], node_zero_label='x')
+    network = Network([], reference_node_label='x')
     assert len(network.branches) == 0
 
 def test_branch_ids_are_distinct() -> None:

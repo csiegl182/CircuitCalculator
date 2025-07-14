@@ -1,0 +1,30 @@
+[
+    {
+        "type": "voltage_source",
+        "id": "Uq",
+        "N1": "1",
+        "N2": "0",
+        "V": {"real": 1, "imag" : 0}
+    },
+    {
+        "type": "resistor",
+        "id": "R1",
+        "N1": "1",
+        "N2": "2",
+        "R": 1
+    },
+    {
+        "type": "resistor",
+        "id": "R2",
+        "N1": "2",
+        "N2": "0",
+        "R": 1
+    },
+    {
+        "type": "resistor",
+        "id": "Rx",
+        "N1": "a",
+        "N2": "b",
+        "R": 1
+    }
+]

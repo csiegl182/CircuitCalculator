@@ -144,7 +144,7 @@ def test_create_current_vector_from_reference_network_13() -> None:
             Branch('1', '2', resistor('R2', R=R2)),
             Branch('2', '0', resistor('R3', R=R3))
         ],
-        node_zero_label='0'
+        reference_node_label='0'
     )
     I = current_source_incidence_vector(network)
     I_ref = np.array([[0], [0]], dtype=complex)

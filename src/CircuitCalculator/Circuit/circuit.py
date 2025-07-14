@@ -45,7 +45,7 @@ def transform_circuit(circuit: Circuit, w: float, w_resolution: float = 1e-3, rm
     try:
         return Network(
             branches=[transformers[component.type](component, w, w_resolution, rms) for component in circuit],
-            node_zero_label=circuit.ground_node
+            reference_node_label=circuit.ground_node
         )
     except (ValueError, KeyError) as e:
         raise CircuitTransformationError from e
@@ -69,7 +69,7 @@ def transform_symbolic_circuit(circuit: Circuit, s: sp.Symbol = sp.Symbol('s', c
     try:
         return Network(
             branches=[symbolic_transformers[component.type](component, s) for component in circuit],
-            node_zero_label=circuit.ground_node
+            reference_node_label=circuit.ground_node
         )   
     except (ValueError, KeyError) as e:
         raise CircuitTransformationError from e

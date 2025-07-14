@@ -9,12 +9,12 @@ def switch_ground_node(network: Network, new_ground: str) -> Network:
 
 def remove_element(network: Network, element: str) -> Network:
     branch_to_remove = network[element]
-    if branch_to_remove.node1 == network.node_zero_label and len(network.branches_connected_to(branch_to_remove.node1)) == 1:
-       network = rename_node(network, branch_to_remove.node2, network.node_zero_label) 
-    if branch_to_remove.node2 == network.node_zero_label and len(network.branches_connected_to(branch_to_remove.node2)) == 1:
-       network = rename_node(network, branch_to_remove.node1, network.node_zero_label) 
+    if branch_to_remove.node1 == network.reference_node_label and len(network.branches_connected_to(branch_to_remove.node1)) == 1:
+       network = rename_node(network, branch_to_remove.node2, network.reference_node_label) 
+    if branch_to_remove.node2 == network.reference_node_label and len(network.branches_connected_to(branch_to_remove.node2)) == 1:
+       network = rename_node(network, branch_to_remove.node1, network.reference_node_label) 
     branches = [b for b in network.branches if b.element.name != element]
-    return Network(branches, node_zero_label=network.node_zero_label)
+    return Network(branches, reference_node_label=network.reference_node_label)
 
 def rename_node(network: Network, old_node: str, new_node: str) -> Network:
     def rename(branch: Branch) -> Branch:
@@ -24,7 +24,7 @@ def rename_node(network: Network, old_node: str, new_node: str) -> Network:
             branch = Branch(branch.node1, new_node, branch.element)
         return branch
     branches = [rename(b) for b in network.branches]
-    return Network(branches, node_zero_label=network.node_zero_label)
+    return Network(branches, reference_node_label=network.reference_node_label)
 
 def remove_active_elements(network: Network) -> Network:
     def impedance(e: NortenTheveninElement) -> NortenTheveninElement:
@@ -51,5 +51,5 @@ def remove_active_elements(network: Network) -> Network:
         return b
     return Network(
         branches=[remove(b) for b in network.branches],
-        node_zero_label=network.node_zero_label
+        reference_node_label=network.reference_node_label
     )

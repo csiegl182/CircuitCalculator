@@ -36,13 +36,12 @@ class LabelMapping:
 
 def filter(mapping: LabelMapping, filter_fcn: Callable[[str], bool]) -> LabelMapping:
     return LabelMapping({k: mapping[k] for k in mapping.keys if filter_fcn(k)})
-    
 
 NetworkMapper = Callable[[Network], LabelMapping]
 SourceIndexMapper = Callable[[Network], LabelMapping]
 
 def alphabetic_node_mapper(network: Network) -> LabelMapping:
-    node_labels_without_zero = [label for label in sorted(network.node_labels) if label != network.node_zero_label] 
+    node_labels_without_zero = [label for label in sorted(network.node_labels) if label != network.reference_node_label] 
     return LabelMapping({k: v for v, k in enumerate(node_labels_without_zero)})
 
 default_node_mapper = alphabetic_node_mapper

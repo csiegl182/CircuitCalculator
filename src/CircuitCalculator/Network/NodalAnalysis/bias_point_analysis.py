@@ -10,15 +10,27 @@ class NodalAnalysisBiasPointSolution(NodalAnalysisSolution):
     matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations()
 
     def __post_init__(self) -> None:
+        import numpy as np
+
+        def make_matrix_invertible(A):
+            n = A.shape[0]
+            for i in range(n):
+                # Remove i-th row and i-th column
+                A_sub = np.delete(np.delete(A, i, axis=0), i, axis=1)
+                if np.linalg.matrix_rank(A_sub) == n - 1:
+                    print(i)
+                    return A_sub, i
+            return None, None
         A = na.nodal_analysis_coefficient_matrix(self.network, matrix_ops=self.matrix_ops, node_mapper=self.node_mapper, source_mapper=self.voltage_source_mapper)
         b = na.nodal_analysis_constants_vector(self.network, matrix_ops=self.matrix_ops, node_mapper=self.node_mapper, current_source_mapper=self.current_source_mapper, voltage_source_mapper=self.voltage_source_mapper)
+
         try:
             self._solution_vector = self.matrix_ops.solve(A, b)
         except mo.MatrixInversionException:
             self._solution_vector = (float('nan'),) * len(b)
 
     def get_potential(self, node_id: str) -> complex:
-        if node_id == self.network.node_zero_label:
+        if node_id == self.network.reference_node_label:
             return 0
         return self._potentials[self._node_mapping[node_id]]
 

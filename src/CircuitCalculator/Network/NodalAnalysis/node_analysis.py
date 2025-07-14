@@ -57,9 +57,9 @@ def source_incidence_matrix(network: Network, node_mapper: map.NetworkMapper = m
     Q = np.zeros((node_index.N, cs_index.N))
     for cs in cs_index.keys:
         source_element = network[cs]
-        if network.node_zero_label != source_element.node1:
+        if network.reference_node_label != source_element.node1:
             Q[node_index[source_element.node1]][cs_index[cs]] = -1
-        if network.node_zero_label != network[cs].node2:
+        if network.reference_node_label != network[cs].node2:
             Q[node_index[source_element.node2]][cs_index[cs]] = 1
     return Q
 

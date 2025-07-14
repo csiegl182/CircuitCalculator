@@ -158,7 +158,7 @@ def test_node_matrix_from_reference_network_11() -> None:
             Branch('3', '2', voltage_source('Vs', V=sp.Symbol('V'))),
             Branch('3', '0', resistor('R4', R=sp.Symbol('R4')))
         ],
-        node_zero_label='0'
+        reference_node_label='0'
     )
     Y = node_admittance_matrix(network, matrix_ops=SymPyMatrixOperations())
     Y_ref = sp.Matrix([
@@ -176,7 +176,7 @@ def test_node_matrix_from_reference_network_13() -> None:
             Branch('1', '2', resistor('R2', R=sp.Symbol('R2'))),
             Branch('2', '0', resistor('R3', R=sp.Symbol('R3')))
         ],
-        node_zero_label='0'
+        reference_node_label='0'
     )
     Y = node_admittance_matrix(network, matrix_ops=SymPyMatrixOperations())
     Y_ref = sp.Matrix([
