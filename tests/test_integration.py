@@ -1,3 +1,4 @@
+import pytest
 from CircuitCalculator.Network.NodalAnalysis.bias_point_analysis import nodal_analysis_bias_point_solver
 from CircuitCalculator.Network.loaders import load_network_from_json
 from CircuitCalculator.Network.NodalAnalysis.node_analysis import open_circuit_impedance
@@ -128,7 +129,7 @@ def test_network_7_with_advanced_nodal_analysis() -> None:
 
 def test_network_8_with_advanced_nodal_analysis() -> None:
     network = load_network_from_json(str(json_root / 'example_network_8.json'))
-    Rges = open_circuit_impedance(network, '1', '2').real
+    Rges = complex(open_circuit_impedance(network, '1', '2')).real
     np.testing.assert_almost_equal(Rges, 4.66, decimal=2)
 
 def test_network_9_with_advanced_nodal_analysis() -> None:
@@ -260,3 +261,21 @@ def test_network_17_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_current('Is'), 1.0, decimal=3)
     np.testing.assert_almost_equal(solution.get_potential('0'), 0.00, decimal=2)
     assert np.isnan(solution.get_potential('1'))
+    
+def test_network_18_with_advanced_nodal_analysis() -> None:
+    network = load_network_from_json(str(json_root / 'example_network_18.json'))
+    solution = nodal_analysis_bias_point_solver(network)
+    np.testing.assert_almost_equal(solution.get_voltage('Vs'), 1.0, decimal=2)
+    np.testing.assert_almost_equal(solution.get_current('Vs'), -0.5, decimal=2)
+    np.testing.assert_almost_equal(solution.get_voltage('R1'), 0.5, decimal=2)
+    np.testing.assert_almost_equal(solution.get_current('R1'), 0.5, decimal=2)
+    np.testing.assert_almost_equal(solution.get_voltage('R2'), 0.5, decimal=2)
+    np.testing.assert_almost_equal(solution.get_current('R2'), 0.5, decimal=2)
+    np.testing.assert_almost_equal(solution.get_potential('0'), 0.00, decimal=2)
+    np.testing.assert_almost_equal(solution.get_potential('1'), 1.00, decimal=2)
+    np.testing.assert_almost_equal(solution.get_potential('2'), 0.50, decimal=2)
+    with pytest.raises(KeyError): solution.get_voltage('Rx')
+    with pytest.raises(KeyError): solution.get_current('Rx')
+    with pytest.raises(KeyError): solution.get_power('Rx')
+    with pytest.raises(KeyError): solution.get_potential('a')
+    with pytest.raises(KeyError): solution.get_potential('b')

@@ -31,15 +31,7 @@ class Network:
         return [b.id for b in self.branches]
 
     @property
-    def node_labels(self) -> list[str]:
-        if len(self.branches) == 0:
-            return [self.reference_node_label]
-        node1_set = {branch.node1 for branch in self.branches}
-        node2_set = {branch.node2 for branch in self.branches}
-        return sorted(list(node1_set.union(node2_set)))
-
-    @property
-    def reference_connected_node_labels(self) -> set[str]:
+    def node_labels(self) -> set[str]:
         connected_nodes = set()
         nodes_to_assess = set([self.reference_node_label])
         nodes_already_assessed = set()
@@ -50,7 +42,7 @@ class Network:
             nodes_already_assessed.update(nodes_to_assess)
             nodes_to_assess = new_nodes_to_assess - nodes_already_assessed
             connected_nodes.update(new_nodes_to_assess)
-        return connected_nodes - set([self.reference_node_label])
+        return connected_nodes
 
     @property
     def number_of_nodes(self) -> int:
