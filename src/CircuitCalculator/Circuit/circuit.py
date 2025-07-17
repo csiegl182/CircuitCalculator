@@ -31,7 +31,7 @@ class Circuit:
 
     def __getitem__(self, key: str) -> Component:
         if key == self.ground_node:
-            raise KeyError('Ground node is not a component.')
+            raise KeyError('Ground node is not a component.') # TODO: the smell is obvious here!!!
         index = [component.id for component in self.components].index(key)
         return self.components[index]
 
