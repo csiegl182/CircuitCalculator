@@ -12,13 +12,15 @@ import sympy as sp
 
 @dataclass(frozen=True)
 class CircuitSolution(Protocol):
+    def __init__(self, **kwargs): ...
+    
     def get_voltage(self, component_id: str) -> Any: ... 
 
-    def get_current(self, id: str) -> Any: ...
+    def get_current(self, component_id: str) -> Any: ...
 
-    def get_potential(self, id: str) -> Any: ...
+    def get_potential(self, node_id: str) -> Any: ...
 
-    def get_power(self, id: str) -> Any: ...
+    def get_power(self, component_id: str) -> Any: ...
 
 @dataclass(frozen=True)
 class ScalarCircuitSolution:
@@ -30,16 +32,16 @@ class VectorCircuitSolution:
 
 @dataclass(frozen=True)
 class EmptySolution:
-    def get_voltage(self, _: str) -> Any:
+    def get_voltage(self, component_id: str) -> Any:
         return None
 
-    def get_current(self, _: str) -> Any:
+    def get_current(self, component_id: str) -> Any:
         return None
 
-    def get_potential(self, _: str) -> Any:
+    def get_potential(self, node_id: str) -> Any:
         return None
 
-    def get_power(self, _: str) -> Any:
+    def get_power(self, component_id: str) -> Any:
         return None
 
 @dataclass(frozen=True)
@@ -58,6 +60,7 @@ class DCSolution(ScalarCircuitSolution):
 
 @dataclass(frozen=True)
 class ComplexSolution(ScalarCircuitSolution):
+    w: float = 0
     peak_values: bool = False
 
     def get_voltage(self, component_id: str) -> complex:
@@ -160,7 +163,7 @@ def dc_solution(circuit: Circuit, solver: NetworkSolver = nodal_analysis_bias_po
 def complex_solution(circuit: Circuit, w: float = 0, peak_values: bool = False, solver: NetworkSolver = nodal_analysis_bias_point_solver) -> ComplexSolution:
     network = transform(circuit, w=[w], rms=not peak_values)[0]
     solution = solver(network)
-    return ComplexSolution(solution=solution, peak_values=peak_values)
+    return ComplexSolution(solution=solution, w=w, peak_values=peak_values)
 
 def symbolic_solution(circuit: Circuit, solver: NetworkSolver = symbolic_nodal_analysis_bias_point_solver) -> SymbolicSolution:
     network = transform_symbolic_circuit(circuit, s=sp.Symbol('s', complex=True))
