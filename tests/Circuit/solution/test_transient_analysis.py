@@ -1,4 +1,4 @@
-from CircuitCalculator.Circuit.solution import TransientSolution
+from CircuitCalculator.Circuit.solution import transient_solution
 from CircuitCalculator.SignalProcessing.one_sided_functions import step
 from CircuitCalculator.Circuit.circuit import Circuit
 from CircuitCalculator.Circuit.Components import components as cmp
@@ -25,7 +25,7 @@ def test_transient_analysis_of_example_network_1() -> None:
     t_max = 0.3
     t_vec = np.arange(0, t_max, Ts)
     input = {'Vs': lambda t: Vs*step(t, t0=t0)}
-    solution = TransientSolution(circuit, input=input, tin=t_vec)
+    solution = transient_solution(circuit, t_vec, input)
 
     Ri = R1*R2/(R1+R2)+R3
     tau = Ri*C
@@ -75,7 +75,7 @@ def test_transient_analysis_of_example_network_2() -> None:
     t0 = 0.1
     t_vec = np.arange(0, t_max, Ts)
     input = {'Vs': lambda t: Vs*step(t, t0=t0)}
-    solution = TransientSolution(circuit, input=input, tin=t_vec)
+    solution = transient_solution(circuit, t_vec, input)
 
     tau = C*(R1*R2+R1*R3+R2*R3)/(R1+R2)
     V = input['Vs'](solution.t)
@@ -126,7 +126,7 @@ def test_transient_analysis_of_example_network_3() -> None:
     t1 = 0.2
     t_vec = np.arange(0, t_max, Ts)
     input = {'Vs': lambda t: Vs*step(t, t0=t0), 'Is': lambda t: Is*step(t, t0=t1)}
-    solution = TransientSolution(circuit, input=input, tin=t_vec)
+    solution = transient_solution(circuit, t_vec, input)
 
     Ri = R1+R2
     tau = Ri*C
@@ -182,7 +182,7 @@ def test_transient_analysis_of_example_network_4() -> None:
     t0 = 0.1
     t_vec = np.arange(0, t_max, Ts)
     input = {'Vs': lambda t: Vs*step(t, t0=t0)}
-    solution = TransientSolution(circuit, input=input, tin=t_vec)
+    solution = transient_solution(circuit, t_vec, input)
     
     a = C2*R2
     b = C1*R1
@@ -242,7 +242,7 @@ def test_transient_analysis_of_example_network_5() -> None:
     t0 = 0.001
     t_vec = np.arange(0, t_max, Ts)
     input = {'Vs': lambda t: Vs*step(t, t0=t0)}
-    solution = TransientSolution(circuit, input=input, tin=t_vec)
+    solution = transient_solution(circuit, t_vec, input)
 
     Ri = R1*R2/(R1+R2)+R3
     tau = L/Ri
@@ -297,7 +297,7 @@ def test_transient_analysis_of_example_network_6() -> None:
     t0 = 0.001
     t_vec = np.arange(0, t_max, Ts)
     input = {'Vs': lambda t: Vs*step(t, t0=t0)}
-    solution = TransientSolution(circuit, input=input, tin=t_vec)
+    solution = transient_solution(circuit, t_vec, input)
 
     Ri = R1*R2/(R1+R2)+R3
     tau = L/Ri
@@ -355,7 +355,7 @@ def test_transient_analysis_of_example_network_7() -> None:
     t1 = 0.01
     t_vec = np.arange(0, t_max, Ts)
     input = {'Vs': lambda t: Vs*step(t, t0=t0), 'Is': lambda t: Is*step(t, t0=t1)}
-    solution = TransientSolution(circuit, input=input, tin=t_vec)
+    solution = transient_solution(circuit, t_vec, input)
 
     Ri = R1*R2/(R1+R2)+R3
     tau = L/Ri
@@ -418,7 +418,7 @@ def test_transient_analysis_of_example_network_8() -> None:
     t0 = 0.001
     t_vec = np.arange(0, t_max, Ts)
     input = {'Vs': lambda t: Vs*step(t, t0=t0)}
-    solution = TransientSolution(circuit, input=input, tin=t_vec)
+    solution = transient_solution(circuit, t_vec, input)
 
     x1, x2 = quad_equation(1, R2/L1+R1/L1+R2/L2, R1*R2/L1/L2)
     t = solution.t
@@ -474,7 +474,7 @@ def test_transient_analysis_of_example_network_9() -> None:
     t0 = 0.001
     t_vec = np.arange(0, t_max, Ts)
     input = {'Vs': lambda t: Vs*step(t, t0=t0)}
-    solution = TransientSolution(circuit, input=input, tin=t_vec)
+    solution = transient_solution(circuit, t_vec, input)
 
     w0 = 1/np.sqrt(L*C)
     d = R/2/L

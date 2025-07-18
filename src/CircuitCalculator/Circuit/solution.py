@@ -3,7 +3,7 @@ from ..SignalProcessing.types import TimeDomainFunction, FrequencyDomainSeries, 
 from ..SignalProcessing.state_space_model import NumericStateSpaceModel, continuous_state_space_solver
 from ..Network.NodalAnalysis.bias_point_analysis import nodal_analysis_bias_point_solver, symbolic_nodal_analysis_bias_point_solver
 from .state_space_model import numeric_state_space_model_constructor, StateSpaceMatrixConstructor
-from ..Network.solution import NetworkSolution
+from ..Network.solution import NetworkSolution, NetworkSolver
 from typing import Any
 from dataclasses import dataclass
 from typing import Protocol
@@ -58,7 +58,6 @@ class DCSolution(ScalarCircuitSolution):
 
 @dataclass(frozen=True)
 class ComplexSolution(ScalarCircuitSolution):
-    w: float = 0
     peak_values: bool = False
 
     def get_voltage(self, component_id: str) -> complex:
@@ -153,30 +152,30 @@ class TransientSolution:
     def get_power(self, component_id: str) -> TimeDomainSeries:
         return self.t, self.get_voltage(component_id)[1]*self.get_current(component_id)[1]
 
-def dc_solution(circuit: Circuit) -> DCSolution:
+def dc_solution(circuit: Circuit, solver: NetworkSolver = nodal_analysis_bias_point_solver) -> DCSolution:
     network = transform(circuit, w=[0])[0]
-    solution = nodal_analysis_bias_point_solver(network)
+    solution = solver(network)
     return DCSolution(solution=solution)
 
-def complex_solution(circuit: Circuit, w: float = 0, peak_values: bool = False) -> ComplexSolution:
-    network = transform(circuit, w=[0])[0]
-    solution = nodal_analysis_bias_point_solver(network)
-    return ComplexSolution(solution=solution, w=w, peak_values=peak_values)
+def complex_solution(circuit: Circuit, w: float = 0, peak_values: bool = False, solver: NetworkSolver = nodal_analysis_bias_point_solver) -> ComplexSolution:
+    network = transform(circuit, w=[w], rms=not peak_values)[0]
+    solution = solver(network)
+    return ComplexSolution(solution=solution, peak_values=peak_values)
 
-def symbolic_solution(circuit: Circuit) -> SymbolicSolution:
+def symbolic_solution(circuit: Circuit, solver: NetworkSolver = symbolic_nodal_analysis_bias_point_solver) -> SymbolicSolution:
     network = transform_symbolic_circuit(circuit, s=sp.Symbol('s', complex=True))
-    solution = symbolic_nodal_analysis_bias_point_solver(network)
+    solution = solver(network)
     return SymbolicSolution(solution=solution)
 
-def time_domain_solution(circuit: Circuit, w_max: float = 0) -> TimeDomainSolution:
+def time_domain_solution(circuit: Circuit, w_max: float = 0, solver: NetworkSolver = nodal_analysis_bias_point_solver) -> TimeDomainSolution:
     w = frequency_components(circuit, w_max)
-    solutions = [complex_solution(circuit, w=w_, peak_values=True) for w_ in w]
+    solutions = [complex_solution(circuit, w=w_, peak_values=True, solver=solver) for w_ in w]
     return TimeDomainSolution(solutions=solutions, w=w)
 
-def frequency_domain_solution(circuit: Circuit, w_max: float = 0) -> FrequencyDomainSolution:
+def frequency_domain_solution(circuit: Circuit, w_max: float = 0, solver: NetworkSolver = nodal_analysis_bias_point_solver) -> FrequencyDomainSolution:
     w = np.array(frequency_components(circuit, w_max))
     w = np.concatenate((-w[-1:0:-1], w))
-    solutions = [complex_solution(circuit, w=w_, peak_values=False) for w_ in w]
+    solutions = [complex_solution(circuit, w=w_, peak_values=False, solver=solver) for w_ in w]
     return FrequencyDomainSolution(solutions=solutions, w=w)
 
 def transient_solution(circuit: Circuit, tin: np.ndarray, input: dict[str, TimeDomainFunction]) -> TransientSolution:
