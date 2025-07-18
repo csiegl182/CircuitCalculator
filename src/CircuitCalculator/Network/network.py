@@ -1,8 +1,6 @@
 from . import elements as elm
 from dataclasses import dataclass
 
-class FloatingGroundNode(Exception): pass
-
 class AmbiguousBranchIDs(Exception): pass
 
 @dataclass(frozen=True)
@@ -21,18 +19,17 @@ class Network:
     reference_node_label: str = '0'
 
     def __post_init__(self):
-        if self.reference_node_label not in self.node_labels and self.number_of_nodes != 0:
-            raise FloatingGroundNode
-        if len(set(self.branch_ids)) != len(self.branches):
+        branch_ids = [b.id for b in self.branches]
+        if len(set(branch_ids)) != len(branch_ids):
             raise AmbiguousBranchIDs
         
     @property
     def branch_ids(self) -> list[str]:
-        return [b.id for b in self.branches]
+        return [b.id for b in self.branches if b.node1 in self.node_labels or b.node2 in self.node_labels]
 
     @property
     def node_labels(self) -> set[str]:
-        connected_nodes = set()
+        connected_nodes = set([self.reference_node_label])
         nodes_to_assess = set([self.reference_node_label])
         nodes_already_assessed = set()
         while nodes_to_assess:
@@ -63,4 +60,8 @@ class Network:
         return [branch for branch in self.branches if set((branch.node1, branch.node2)) == set((node1, node2))]
 
     def __getitem__(self, id: str) -> Branch:
-        return {b.id: b for b in self.branches}[id]
+        if id not in [b.id for b in self.branches]:
+            raise KeyError(f"Branch with id '{id}' not found in the network.")
+        if id not in self.branch_ids:
+            raise KeyError(f"Branch with id '{id}' is floating.")
+        return {b.id: b for b in self.branches if b.id in self.branch_ids}[id]
