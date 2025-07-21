@@ -37,15 +37,9 @@ class LabelMapping:
     def __iter__(self):
         return iter(self.mapping.keys())
 
-LabelMapper = Callable[[Network], LabelMapping]
-NetworkMapper = Callable[[Network], LabelMapping] ## TODO: Rename to LabelMapper
-SourceIndexMapper = Callable[[Network], LabelMapping] ## TODO: Rename to LabelMapper
-
 def alphabetic_node_mapper(network: Network) -> LabelMapping:
     node_labels_without_zero = [label for label in sorted(network.node_labels) if label != network.reference_node_label] 
     return LabelMapping({k: v for v, k in enumerate(node_labels_without_zero)})
-
-default_node_mapper = alphabetic_node_mapper
 
 def alphabetic_source_mapper(network: Network) -> LabelMapping:
     current_source_labels = [b.id for b in network.branches if b.element.is_current_source]
@@ -61,7 +55,7 @@ def alphabetic_voltage_source_mapper(network: Network) -> LabelMapping:
     voltage_source_labels = sorted([b.id for b in network.branches if b.element.is_ideal_voltage_source])
     return LabelMapping({k: v for v, k in enumerate(voltage_source_labels)})
 
-default_source_mapper = alphabetic_source_mapper
+LabelMapper = Callable[[Network], LabelMapping]
 
 @dataclass(frozen=True)
 class NetworkLabelMappings:
@@ -92,7 +86,7 @@ LabelMappingsFactory = Callable[[Network], NetworkLabelMappings]
 def default_label_mappings_factory(network: Network) -> NetworkLabelMappings:
     return NetworkLabelMappings(
         network=network,
-        node_mapper=default_node_mapper,
+        node_mapper=alphabetic_node_mapper,
         source_mapper = alphabetic_source_mapper,
         current_source_mapper=alphabetic_current_source_mapper,
         voltage_source_mapper=alphabetic_voltage_source_mapper
