@@ -2,8 +2,8 @@ from typing import Mapping
 from .node_analysis import state_space_matrices
 from . import label_mapping as map
 from ..network import Network
-from .. import matrix_operations as mo
-from ..matrix_operations import symbolic
+from . import matrix_operations as mo
+from .matrix_operations import symbolic
 
 class StateSpaceGenericOutput:
     def __init__(self, network: Network, c_values: Mapping[str, float | symbolic], l_values: Mapping[str, float | symbolic], matrix_ops: mo.MatrixOperations, label_mappings_factory: map.LabelMappingsFactory):

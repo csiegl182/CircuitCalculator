@@ -2,7 +2,7 @@ import numpy as np
 import itertools
 from typing import Any, Callable
 from ..network import Network
-from .. import matrix_operations as mo
+from . import matrix_operations as mo
 from .. import transformers as trf
 from .label_mapping import NetworkLabelMappings
 
@@ -14,9 +14,6 @@ def admittance_connected_to(network: Network, node: str, me: Callable[[Any], mo.
 
 def admittance_between(network: Network, node1: str, node2: str, me: Callable[[Any], mo.MatrixElement]) -> complex:
     return sum([e.value for e in [me(b.element.Y) for b in network.branches_between(node1, node2)] if e.isfinite])
-
-def connected_nodes(network: Network, node: str) -> list[str]: ## TODO: Can be removed?
-    return [b.node1 if b.node1 != node else b.node2 for b in network.branches_connected_to(node)]
 
 def node_admittance_matrix(network: Network, matrix_ops: mo.MatrixOperations, label_mappings: NetworkLabelMappings) -> mo.Matrix:
     def node_matrix_element(i_label:str, j_label:str) -> complex:

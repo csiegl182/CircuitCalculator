@@ -1,6 +1,6 @@
 from CircuitCalculator.Network.loaders import load_network_from_json
-from CircuitCalculator.Network.NodalAnalysis.bias_point_analysis import nodal_analysis_bias_point_solver
-from CircuitCalculator.Network.matrix_operations import MatrixInversionException
+from CircuitCalculator.Network.NodalAnalysis.network_analysis import nodal_analysis_bias_point_solver
+from CircuitCalculator.Network.NodalAnalysis.matrix_operations import MatrixInversionException
 
 if __name__ == '__main__':
     network = load_network_from_json('examples/test-networks/01_json-network/example_network_17.json')

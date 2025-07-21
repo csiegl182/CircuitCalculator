@@ -1,17 +1,20 @@
 from typing import Any
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from ..network import Network
 from ..solution import NetworkSolution
-from .. import matrix_operations as mo
+from . import matrix_operations as mo
 from . import label_mapping as map
 from . import node_analysis as na
 
-@dataclass
-class NodalAnalysisSolution(ABC):
+@dataclass(frozen=True)
+class NodalAnalysisSolution:
     network: Network
     solution_vector: tuple
-    label_mappings: map.NetworkLabelMappings
+    label_mappings_factory: map.LabelMappingsFactory
+
+    @property
+    def label_mappings(self) -> map.NetworkLabelMappings:
+        return self.label_mappings_factory(self.network)
 
     @property
     def _potentials(self) -> tuple:
@@ -22,35 +25,6 @@ class NodalAnalysisSolution(ABC):
         all_indices = set(range(len(self.solution_vector)))
         remaining_indices = all_indices - set(self.label_mappings.node_mapping.values)
         return tuple(self.solution_vector[i] for i in sorted(remaining_indices))
-
-    @abstractmethod
-    def get_potential(self, node_id: str) -> Any:
-        ...
-
-    @abstractmethod
-    def get_current(self, branch_id: str) -> Any:
-        ...
-
-    def get_voltage(self, branch_id: str) -> Any:
-        phi1 = self.get_potential(self.network[branch_id].node1)
-        phi2 = self.get_potential(self.network[branch_id].node2)
-        return phi1-phi2
-
-    def get_power(self, branch_id: str) -> Any:
-        return self.get_voltage(branch_id)*self.get_current(branch_id).conjugate()
-
-@dataclass
-class NumericNodalAnalysisSolution(NodalAnalysisSolution):
-    matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations()
-
-    def __post_init__(self) -> None:
-        A = na.nodal_analysis_coefficient_matrix(self.network, matrix_ops=self.matrix_ops, label_mappings=self.label_mappings)
-        b = na.nodal_analysis_constants_vector(self.network, matrix_ops=self.matrix_ops, label_mappings=self.label_mappings)
-
-        try:
-            self.solution_vector = self.matrix_ops.solve(A, b)
-        except mo.MatrixInversionException:
-            self.solution_vector = (float('nan'),) * len(b)
 
     def get_potential(self, node_id: str) -> complex:
         if node_id == self.network.reference_node_label:
@@ -67,16 +41,24 @@ class NumericNodalAnalysisSolution(NodalAnalysisSolution):
         branch = self.network[branch_id]
         return self.get_voltage(branch_id)/branch.element.Z
 
+    def get_voltage(self, branch_id: str) -> Any:
+        phi1 = self.get_potential(self.network[branch_id].node1)
+        phi2 = self.get_potential(self.network[branch_id].node2)
+        return phi1-phi2
+
+    def get_power(self, branch_id: str) -> Any:
+        return self.get_voltage(branch_id)*self.get_current(branch_id).conjugate()
+
 def numeric_nodal_analysis_bias_point_solution(network: Network, label_mappings_factory: map.LabelMappingsFactory = map.default_label_mappings_factory) -> NetworkSolution:
-        return NumericNodalAnalysisSolution(
+        return NodalAnalysisSolution(
             network=network,
             solution_vector=na.nodal_analysis_solution(network, matrix_ops=mo.NumPyMatrixOperations(), label_mappings_factory=label_mappings_factory),
-            label_mappings=label_mappings_factory(network)
+            label_mappings_factory=label_mappings_factory
         )
 
 def symbolic_nodal_analysis_bias_point_solution(network: Network, label_mappings_factory: map.LabelMappingsFactory = map.default_label_mappings_factory) -> NetworkSolution:
-        return NumericNodalAnalysisSolution(
+        return NodalAnalysisSolution(
             network=network,
             solution_vector=na.nodal_analysis_solution(network, matrix_ops=mo.SymPyMatrixOperations(), label_mappings_factory=label_mappings_factory),
-            label_mappings=label_mappings_factory(network)
+            label_mappings_factory=label_mappings_factory
         )

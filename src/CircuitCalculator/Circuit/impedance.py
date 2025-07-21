@@ -2,7 +2,7 @@ import numpy as np
 import sympy as sp
 from .circuit import Circuit, transform_circuit, transform_symbolic_circuit
 from ..Network.NodalAnalysis import node_analysis as na
-from ..Network import matrix_operations as mo
+from ..Network.NodalAnalysis import matrix_operations as mo
 
 def open_circuit_impedance(circuit: Circuit, node1: str, node2: str, w: np.ndarray = np.array([0])) -> np.ndarray:
     return np.array([na.open_circuit_impedance(transform_circuit(circuit, w0), node1, node2) for w0 in w])

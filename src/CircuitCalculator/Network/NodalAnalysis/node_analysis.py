@@ -2,8 +2,8 @@ import numpy as np
 import itertools
 from typing import Mapping
 from ..network import Network
-from .. import matrix_operations as mo
-from ..matrix_operations import symbolic
+from . import matrix_operations as mo
+from .matrix_operations import symbolic
 from .. import transformers as trf
 from .label_mapping import LabelMappingsFactory, default_label_mappings_factory
 from .node_analysis_calculations import nodal_analysis_coefficient_matrix, nodal_analysis_constants_vector, source_incidence_matrix

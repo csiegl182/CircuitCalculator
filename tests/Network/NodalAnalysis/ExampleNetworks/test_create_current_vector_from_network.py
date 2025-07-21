@@ -1,6 +1,6 @@
 from CircuitCalculator.Network.NodalAnalysis.node_analysis_calculations import current_source_incidence_vector
 from CircuitCalculator.Network.NodalAnalysis.label_mapping import default_label_mappings_factory
-from CircuitCalculator.Network.matrix_operations import NumPyMatrixOperations
+from CircuitCalculator.Network.NodalAnalysis.matrix_operations import NumPyMatrixOperations
 from CircuitCalculator.Network.network import Network, Branch
 from CircuitCalculator.Network.elements import resistor, voltage_source, current_source
 import numpy as np
