@@ -1,10 +1,10 @@
-from CircuitCalculator.Network.NodalAnalysis.label_mapping import LabelMapping, filter
+from CircuitCalculator.Network.NodalAnalysis.label_mapping import LabelMapping
 import pytest
 
 def test_label_mapper_returns_filtered_object() -> None:
-    d = {'a': 1, 'b': 2, 'c': 3}
+    lm = LabelMapping({'a': 1, 'b': 2, 'c': 3})
 
-    filtered_label_mapper = filter(LabelMapping(d), lambda x: x > 'a')
+    filtered_label_mapper = lm.filter_keys(lambda x: x > 'a')
 
     with pytest.raises(KeyError):
         filtered_label_mapper['a']

@@ -1,4 +1,6 @@
-from CircuitCalculator.Network.NodalAnalysis.node_analysis import current_source_incidence_vector
+from CircuitCalculator.Network.NodalAnalysis.node_analysis_calculations import current_source_incidence_vector
+from CircuitCalculator.Network.NodalAnalysis.label_mapping import default_label_mappings_factory
+from CircuitCalculator.Network.matrix_operations import NumPyMatrixOperations
 from CircuitCalculator.Network.network import Network, Branch
 from CircuitCalculator.Network.elements import resistor, voltage_source, current_source
 import numpy as np
@@ -12,7 +14,7 @@ def test_create_current_vector_from_reference_network_1() -> None:
             Branch('1', '0', resistor('R1', R=R))
         ]
     )
-    I = current_source_incidence_vector(network)
+    I = current_source_incidence_vector(network, NumPyMatrixOperations(), default_label_mappings_factory(network))
     I_ref = np.array([[0],], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
@@ -25,7 +27,7 @@ def test_create_current_vector_from_reference_network_2() -> None:
             Branch('1', '0', resistor('R1', R=R))
         ]
     )
-    I = current_source_incidence_vector(network)
+    I = current_source_incidence_vector(network, NumPyMatrixOperations(), default_label_mappings_factory(network))
     I_ref = np.array([[Iq],], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
@@ -39,7 +41,7 @@ def test_create_current_vector_from_reference_network_3() -> None:
             Branch('2', '0', resistor('R2', R=R2))
         ]
     )
-    I = current_source_incidence_vector(network)
+    I = current_source_incidence_vector(network, NumPyMatrixOperations(), default_label_mappings_factory(network))
     I_ref = np.array([[Iq],
                       [0]], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
@@ -55,7 +57,7 @@ def test_create_current_vector_from_reference_network_4() -> None:
             Branch('2', '0', resistor('R3', R=R3))
         ]
     )
-    I = current_source_incidence_vector(network)
+    I = current_source_incidence_vector(network, NumPyMatrixOperations(), default_label_mappings_factory(network))
     I_ref = np.array([[0], [0]], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
@@ -71,7 +73,7 @@ def test_create_current_vector_from_reference_network_5() -> None:
             Branch('0', '4', voltage_source('Uq2', V=U2))
         ]
     )
-    I = current_source_incidence_vector(network)
+    I = current_source_incidence_vector(network, NumPyMatrixOperations(), default_label_mappings_factory(network))
     I_ref = np.array([[0], [0], [0], [0]], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
@@ -90,7 +92,7 @@ def test_create_current_vector_from_reference_network_6() -> None:
             Branch('3', '2', voltage_source('Us2', V=V2))
         ]
     )
-    I = current_source_incidence_vector(network)
+    I = current_source_incidence_vector(network, NumPyMatrixOperations(), default_label_mappings_factory(network))
     I_ref = np.array([[0], [0], [0], [0]], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
@@ -110,7 +112,7 @@ def test_create_current_vector_from_reference_network_7() -> None:
             Branch('0', '5', voltage_source('Us1', V=V1))
         ]
     )
-    I = current_source_incidence_vector(network)
+    I = current_source_incidence_vector(network, NumPyMatrixOperations(), default_label_mappings_factory(network))
     I_ref = np.array([[0], [0], [-I4], [0], [I4]], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
@@ -129,7 +131,7 @@ def test_create_current_vector_from_reference_network_10() -> None:
             Branch('2', '4', resistor('R5', R=R5)),
         ]
     )
-    I = current_source_incidence_vector(network)
+    I = current_source_incidence_vector(network, NumPyMatrixOperations(), default_label_mappings_factory(network))
     I_ref = np.array([[0], [0], [I4], [-I4]], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)
 
@@ -146,6 +148,6 @@ def test_create_current_vector_from_reference_network_13() -> None:
         ],
         reference_node_label='0'
     )
-    I = current_source_incidence_vector(network)
+    I = current_source_incidence_vector(network, NumPyMatrixOperations(), default_label_mappings_factory(network))
     I_ref = np.array([[0], [0]], dtype=complex)
     np.testing.assert_almost_equal(I, I_ref)

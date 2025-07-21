@@ -1,51 +1,26 @@
-from dataclasses import dataclass
 from . import node_analysis as na
-from .solution import NodalAnalysisSolution
+from .solution import NodalAnalysisSolution, NumericNodalAnalysisSolution
 from ..network import Network
 from ..solution import NetworkSolution
 from .. import matrix_operations as mo
+from . import label_mapping as map
 
-@dataclass
-class NodalAnalysisBiasPointSolution(NodalAnalysisSolution):
-    matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations()
+def numeric_nodal_analysis_bias_point_solution(network: Network, label_mappings_factory: map.LabelMappingsFactory = map.default_label_mappings_factory) -> NodalAnalysisSolution:
+        return NumericNodalAnalysisSolution(
+            network=network,
+            solution_vector=na.nodal_analysis_solution(network, matrix_ops=mo.NumPyMatrixOperations(), label_mappings_factory=label_mappings_factory),
+            label_mappings=label_mappings_factory(network)
+        )
 
-    def __post_init__(self) -> None:
-        import numpy as np
-
-        def make_matrix_invertible(A):
-            n = A.shape[0]
-            for i in range(n):
-                # Remove i-th row and i-th column
-                A_sub = np.delete(np.delete(A, i, axis=0), i, axis=1)
-                if np.linalg.matrix_rank(A_sub) == n - 1:
-                    print(i)
-                    return A_sub, i
-            return None, None
-        A = na.nodal_analysis_coefficient_matrix(self.network, matrix_ops=self.matrix_ops, node_mapper=self.node_mapper, source_mapper=self.voltage_source_mapper)
-        b = na.nodal_analysis_constants_vector(self.network, matrix_ops=self.matrix_ops, node_mapper=self.node_mapper, current_source_mapper=self.current_source_mapper, voltage_source_mapper=self.voltage_source_mapper)
-
-        try:
-            self._solution_vector = self.matrix_ops.solve(A, b)
-        except mo.MatrixInversionException:
-            self._solution_vector = (float('nan'),) * len(b)
-
-    def get_potential(self, node_id: str) -> complex:
-        if node_id == self.network.reference_node_label:
-            return 0
-        return self._potentials[self._node_mapping[node_id]]
-
-    def get_current(self, branch_id: str) -> complex:
-        if branch_id in self._voltage_source_mapping.keys:
-            return self._voltage_source_currents[self._voltage_source_mapping[branch_id]]
-        if self.network[branch_id].element.is_ideal_current_source:
-            return complex(self.network[branch_id].element.I)
-        if self.network[branch_id].element.is_current_source:
-            return - (self.network[branch_id].element.I + self.get_voltage(branch_id)/self.network[branch_id].element.Z)
-        branch = self.network[branch_id]
-        return self.get_voltage(branch_id)/branch.element.Z
+def symbolic_nodal_analysis_bias_point_solution(network: Network, label_mappings_factory: map.LabelMappingsFactory = map.default_label_mappings_factory) -> NodalAnalysisSolution:
+        return NumericNodalAnalysisSolution(
+            network=network,
+            solution_vector=na.nodal_analysis_solution(network, matrix_ops=mo.SymPyMatrixOperations(), label_mappings_factory=label_mappings_factory),
+            label_mappings=label_mappings_factory(network)
+        )
 
 def open_circuit_voltage(network: Network, node1: str, node2: str) -> complex:
-    solution = NodalAnalysisBiasPointSolution(network)
+    solution = numeric_nodal_analysis_bias_point_solution(network)
     if node1 == node2:
         return 0
     phi1 = solution.get_potential(node_id=node1)
@@ -57,8 +32,8 @@ def short_circuit_current(network: Network, node1: str, node2: str) -> complex:
     V = open_circuit_voltage(network, node1, node2)
     return V/Z
 
-def nodal_analysis_bias_point_solver(network: Network) -> NetworkSolution:
-    return NodalAnalysisBiasPointSolution(network)
+def nodal_analysis_bias_point_solver(network: Network) -> NetworkSolution: ## TODO still needs to be implemented
+    return numeric_nodal_analysis_bias_point_solution(network)
 
-def symbolic_nodal_analysis_bias_point_solver(network: Network) -> NetworkSolution:
-    return NodalAnalysisBiasPointSolution(network, matrix_ops=mo.SymPyMatrixOperations())
+def symbolic_nodal_analysis_bias_point_solver(network: Network) -> NetworkSolution: ## TODO still needs to be implemented
+    return symbolic_nodal_analysis_bias_point_solution(network)

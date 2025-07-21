@@ -32,8 +32,8 @@ def test_total_impedeance_returns_correct_values() -> None:
         Branch('1', '2', resistor('R2', R2)),
         Branch('2', '0', resistor('R3', R3)),
         ])
-    assert_almost_equal(open_circuit_impedance(network, '1', '0'), R1*(R2+R3)/(R1+R2+R3), decimal=4)
-    assert_almost_equal(open_circuit_impedance(network, '2', '0'), (R1+R2)*R3/(R1+R2+R3), decimal=4)
-    assert_almost_equal(open_circuit_impedance(network, '1', '2'), R2*(R1+R3)/(R1+R2+R3), decimal=4)
-    assert_almost_equal(open_circuit_impedance(network, '0', '1'), R1*(R2+R3)/(R1+R2+R3), decimal=4)
-    assert_almost_equal(open_circuit_impedance(network, '0', '2'), (R1+R2)*R3/(R1+R2+R3), decimal=4)
+    assert_almost_equal(complex(open_circuit_impedance(network, '1', '0')), R1*(R2+R3)/(R1+R2+R3), decimal=4)
+    assert_almost_equal(complex(open_circuit_impedance(network, '2', '0')), (R1+R2)*R3/(R1+R2+R3), decimal=4)
+    assert_almost_equal(complex(open_circuit_impedance(network, '1', '2')), R2*(R1+R3)/(R1+R2+R3), decimal=4)
+    assert_almost_equal(complex(open_circuit_impedance(network, '0', '1')), R1*(R2+R3)/(R1+R2+R3), decimal=4)
+    assert_almost_equal(complex(open_circuit_impedance(network, '0', '2')), (R1+R2)*R3/(R1+R2+R3), decimal=4)

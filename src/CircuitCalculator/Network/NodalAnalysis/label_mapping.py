@@ -5,7 +5,7 @@ from ..network import Network
 class DistinctValues(Exception):
     ...
 
-@dataclass
+@dataclass(frozen=True)
 class LabelMapping:
     mapping: dict[str, int]
 
@@ -18,6 +18,9 @@ class LabelMapping:
 
     def __call__(self, *labels: str) -> tuple[int, ...]:
         return tuple(self[label] for label in labels)
+
+    def filter_keys(self, filter_fcn: Callable[[str], bool]) -> "LabelMapping":
+        return LabelMapping({k: self.mapping[k] for k in self.mapping.keys() if filter_fcn(k)})
 
     @property
     def keys(self) -> list[str]:
@@ -34,11 +37,9 @@ class LabelMapping:
     def __iter__(self):
         return iter(self.mapping.keys())
 
-def filter(mapping: LabelMapping, filter_fcn: Callable[[str], bool]) -> LabelMapping:
-    return LabelMapping({k: mapping[k] for k in mapping.keys if filter_fcn(k)})
-
-NetworkMapper = Callable[[Network], LabelMapping]
-SourceIndexMapper = Callable[[Network], LabelMapping]
+LabelMapper = Callable[[Network], LabelMapping]
+NetworkMapper = Callable[[Network], LabelMapping] ## TODO: Rename to LabelMapper
+SourceIndexMapper = Callable[[Network], LabelMapping] ## TODO: Rename to LabelMapper
 
 def alphabetic_node_mapper(network: Network) -> LabelMapping:
     node_labels_without_zero = [label for label in sorted(network.node_labels) if label != network.reference_node_label] 
@@ -61,3 +62,38 @@ def alphabetic_voltage_source_mapper(network: Network) -> LabelMapping:
     return LabelMapping({k: v for v, k in enumerate(voltage_source_labels)})
 
 default_source_mapper = alphabetic_source_mapper
+
+@dataclass(frozen=True)
+class NetworkLabelMappings:
+    network: Network
+    node_mapper: LabelMapper
+    source_mapper: LabelMapper
+    current_source_mapper: LabelMapper
+    voltage_source_mapper: LabelMapper
+
+    @property
+    def node_mapping(self) -> LabelMapping:
+        return self.node_mapper(self.network)
+
+    @property
+    def source_mapping(self) -> LabelMapping:
+        return self.source_mapper(self.network)
+
+    @property
+    def current_source_mapping(self) -> LabelMapping:
+        return self.current_source_mapper(self.network)
+
+    @property
+    def voltage_source_mapping(self) -> LabelMapping:
+        return self.voltage_source_mapper(self.network)
+
+LabelMappingsFactory = Callable[[Network], NetworkLabelMappings]
+
+def default_label_mappings_factory(network: Network) -> NetworkLabelMappings:
+    return NetworkLabelMappings(
+        network=network,
+        node_mapper=default_node_mapper,
+        source_mapper = alphabetic_source_mapper,
+        current_source_mapper=alphabetic_current_source_mapper,
+        voltage_source_mapper=alphabetic_voltage_source_mapper
+    )
