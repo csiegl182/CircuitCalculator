@@ -1,9 +1,10 @@
 from typing import Any
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from ..network import Network
-from . import label_mapping as map
+from ..solution import NetworkSolution
 from .. import matrix_operations as mo
+from . import label_mapping as map
 from . import node_analysis as na
 
 @dataclass
@@ -65,3 +66,17 @@ class NumericNodalAnalysisSolution(NodalAnalysisSolution):
             return - (self.network[branch_id].element.I + self.get_voltage(branch_id)/self.network[branch_id].element.Z)
         branch = self.network[branch_id]
         return self.get_voltage(branch_id)/branch.element.Z
+
+def numeric_nodal_analysis_bias_point_solution(network: Network, label_mappings_factory: map.LabelMappingsFactory = map.default_label_mappings_factory) -> NetworkSolution:
+        return NumericNodalAnalysisSolution(
+            network=network,
+            solution_vector=na.nodal_analysis_solution(network, matrix_ops=mo.NumPyMatrixOperations(), label_mappings_factory=label_mappings_factory),
+            label_mappings=label_mappings_factory(network)
+        )
+
+def symbolic_nodal_analysis_bias_point_solution(network: Network, label_mappings_factory: map.LabelMappingsFactory = map.default_label_mappings_factory) -> NetworkSolution:
+        return NumericNodalAnalysisSolution(
+            network=network,
+            solution_vector=na.nodal_analysis_solution(network, matrix_ops=mo.SymPyMatrixOperations(), label_mappings_factory=label_mappings_factory),
+            label_mappings=label_mappings_factory(network)
+        )
