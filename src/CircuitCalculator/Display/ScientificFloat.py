@@ -164,7 +164,7 @@ class ScientificComplex:
     
     @property
     def real_sign(self) -> str:
-        sign = '' if self.value.real >= 0 else '- '
+        sign = '- ' if self.value.real < 0 else ''
         if self.compact:
             return sign.strip()
         return sign
