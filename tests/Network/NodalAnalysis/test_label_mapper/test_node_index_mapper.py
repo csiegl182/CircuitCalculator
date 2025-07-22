@@ -34,7 +34,7 @@ def test_alphabetic_mapper_has_no_mapping_for_zero_node() -> None:
             Branch('2', '5', resistor('R7', 1)),
             Branch('0', '5', resistor('R8', 1))
         ],
-        node_zero_label='2'
+        reference_node_label='2'
     )
     mapping = alphabetic_node_mapper(network)
     assert '2' not in mapping.keys

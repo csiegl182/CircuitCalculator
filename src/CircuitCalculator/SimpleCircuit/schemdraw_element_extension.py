@@ -120,7 +120,7 @@ def linear_current_source(element: Type[schemdraw.elements.Element2Term]) -> Typ
             self.anchors['value_label'] = (0.5, -0.6)
             self.anchors['v_label'] = (1.5, -2.5)
             self.anchors['s_label'] = (0.5, -1.2)
-            return super().up(length=length)
+            return super().up()
 
     return extended_linear_source
 
@@ -135,7 +135,7 @@ def linear_voltage_source(element: Type[schemdraw.elements.Element2Term]) -> Typ
 
         def up(self, length: Optional[float] = None) -> schemdraw.elements.Element:
             self.anchors['v_label'] = (-1.5, -2.5)
-            return super().up(length=length)
+            return super().up()
 
     return extended_linear_source
 

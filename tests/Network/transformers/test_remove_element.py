@@ -15,7 +15,7 @@ def test_remove_network_element_removes_element() -> None:
             Branch('2', '3', r1),
             Branch('3', '4', r2),
         ],
-        node_zero_label='4'
+        reference_node_label='4'
     )
     network = remove_element(network, 'Us1')
     with pytest.raises(KeyError):
@@ -47,7 +47,7 @@ def test_remove_element_keeps_zero_node_label() -> None:
         ]
     )
     new_network = remove_element(network, 'R2')
-    assert new_network.node_zero_label == '0'
+    assert new_network.reference_node_label == '0'
     assert new_network['R1'].node1 == '2'
     assert new_network['R1'].node2 == '0'
     

@@ -1,5 +1,5 @@
-from ..Circuit.solution import CircuitSolution, DCSolution, ComplexSolution
-from ..Circuit.circuit import Circuit
+from ..Circuit.solution import DCSolution, ComplexSolution, EmptySolution
+from ..Circuit import solution as sol
 
 from . import Elements as elm
 from . import Display as dsp
@@ -19,12 +19,12 @@ class DiagramSolution(Protocol):
     def get_potential(self, name: str) -> str:
         ...
     @property
-    def solution(self) -> CircuitSolution:
+    def solution(self) -> object:
         ...
 
 @dataclass
 class EmptyDiagramSolution:
-    solution: CircuitSolution = field(default_factory=lambda: DCSolution(circuit=Circuit([])))
+    solution: EmptySolution = field(default_factory=lambda: EmptySolution())
     def get_voltage(self, name: str, reverse: bool) -> str:
         return f'V[{name}]'
     def get_current(self, name: str, reverse: bool) -> str:
@@ -222,7 +222,7 @@ def empty_solution(schematic: elm.Schematic) -> SchematicDiagramSolution:
 def single_frequency_time_domain_steady_state_solution(schematic: elm.Schematic, w: float = 0, sin: bool = False, deg: bool = False, hertz: bool = False) -> SchematicDiagramSolution:
     digagram_parser = SchematicDiagramParser(schematic)
     solution = TimeDomainSteadyStateDiagramSolution(
-        solution=ComplexSolution(circuit=circuit_translator(schematic), w=w),
+        solution=sol.complex_solution(circuit=circuit_translator(schematic), w=w),
         deg=deg,
         hertz=hertz,
         sin=sin
@@ -235,7 +235,7 @@ def single_frequency_time_domain_steady_state_solution(schematic: elm.Schematic,
 def single_frequency_complex_solution(schematic: elm.Schematic, w: float = 0, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
     diagram_parser = SchematicDiagramParser(schematic)
     solution = ComplexNetworkDiagramSolution(
-        solution=ComplexSolution(circuit=circuit_translator(schematic), w=w),
+        solution=sol.complex_solution(circuit=circuit_translator(schematic), w=w),
         deg=deg,
         polar=polar,
         precision=precision
@@ -248,7 +248,7 @@ def single_frequency_complex_solution(schematic: elm.Schematic, w: float = 0, pr
 def complex_solution(schematic: elm.Schematic, precision: int = 3, polar: bool = False, deg: bool = False) -> SchematicDiagramSolution:
     diagram_parser = SchematicDiagramParser(schematic)
     solution = ComplexNetworkDiagramSolution(
-        solution=ComplexSolution(circuit=circuit_translator(schematic)),
+        solution=sol.complex_solution(circuit=circuit_translator(schematic)),
         deg=deg,
         polar=polar,
         precision=precision
@@ -261,7 +261,7 @@ def complex_solution(schematic: elm.Schematic, precision: int = 3, polar: bool =
 def real_solution(schematic: elm.Schematic, precision: int = 3) -> SchematicDiagramSolution:
     diagram_parser = SchematicDiagramParser(schematic)
     solution = RealNetworkDiagramSolution(
-        solution=DCSolution(circuit=circuit_translator(schematic)),
+        solution=sol.dc_solution(circuit=circuit_translator(schematic)),
         precision=precision
     )
     return SchematicDiagramSolution(

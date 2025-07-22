@@ -1,5 +1,6 @@
-from CircuitCalculator.Network.NodalAnalysis.node_analysis import current_source_incidence_vector
-from CircuitCalculator.Network.matrix_operations import SymPyMatrixOperations
+from CircuitCalculator.Network.NodalAnalysis.node_analysis_calculations import current_source_incidence_vector
+from CircuitCalculator.Network.NodalAnalysis.label_mapping import default_label_mappings_factory
+from CircuitCalculator.Network.NodalAnalysis.matrix_operations import SymPyMatrixOperations
 from CircuitCalculator.Network.network import Network, Branch
 from CircuitCalculator.Network.symbolic_elements import resistor, voltage_source, current_source
 import sympy as sp
@@ -11,7 +12,7 @@ def test_create_current_vector_from_reference_network_1() -> None:
             Branch('1', '0', resistor('R1', R=sp.Symbol('R')))
         ]
     )
-    I = current_source_incidence_vector(network, matrix_ops=SymPyMatrixOperations())
+    I = current_source_incidence_vector(network, matrix_ops=SymPyMatrixOperations(), label_mappings=default_label_mappings_factory(network))
     I_ref = sp.Matrix([0])
     assert I == I_ref
 
@@ -22,7 +23,7 @@ def test_create_current_vector_from_reference_network_2() -> None:
             Branch('1', '0', resistor('R1', R=sp.Symbol('R')))
         ]
     )
-    I = current_source_incidence_vector(network, matrix_ops=SymPyMatrixOperations())
+    I = current_source_incidence_vector(network, matrix_ops=SymPyMatrixOperations(), label_mappings=default_label_mappings_factory(network))
     I_ref = sp.Matrix(['1.0*Iq'])
     assert sp.simplify(I) == I_ref
 
@@ -34,7 +35,7 @@ def test_create_current_vector_from_reference_network_3() -> None:
             Branch('2', '0', resistor('R2', R=sp.Symbol('R2')))
         ]
     )
-    I = current_source_incidence_vector(network, matrix_ops=SymPyMatrixOperations())
+    I = current_source_incidence_vector(network, matrix_ops=SymPyMatrixOperations(), label_mappings=default_label_mappings_factory(network))
     I_ref = sp.Matrix([['1.0*Iq'],
                        ['0']])
     assert I == I_ref
@@ -48,7 +49,7 @@ def test_create_current_vector_from_reference_network_4() -> None:
             Branch('2', '0', resistor('R3', R=sp.Symbol('R3')))
         ]
     )
-    I = current_source_incidence_vector(network, matrix_ops=SymPyMatrixOperations())
+    I = current_source_incidence_vector(network, matrix_ops=SymPyMatrixOperations(), label_mappings=default_label_mappings_factory(network))
     I_ref = sp.Matrix([[0], [0]])
     assert I == I_ref
 
@@ -62,7 +63,7 @@ def test_create_current_vector_from_reference_network_5() -> None:
             Branch('0', '4', voltage_source('Vs2', V=sp.Symbol('V2')))
         ]
     )
-    I = current_source_incidence_vector(network, matrix_ops=SymPyMatrixOperations())
+    I = current_source_incidence_vector(network, matrix_ops=SymPyMatrixOperations(), label_mappings=default_label_mappings_factory(network))
     I_ref = sp.Matrix([[0], [0], [0], [0]])
     assert I == I_ref
 
@@ -78,7 +79,7 @@ def test_create_current_vector_from_reference_network_6() -> None:
             Branch('3', '2', voltage_source('Vs2', V=sp.Symbol('V2')))
         ]
     )
-    I = current_source_incidence_vector(network, matrix_ops=SymPyMatrixOperations())
+    I = current_source_incidence_vector(network, matrix_ops=SymPyMatrixOperations(), label_mappings=default_label_mappings_factory(network))
     I_ref = sp.Matrix([[0], [0], [0], [0]])
     assert I == I_ref
 
@@ -95,7 +96,7 @@ def test_create_current_vector_from_reference_network_7() -> None:
             Branch('0', '5', voltage_source('Vs1', V=sp.Symbol('V1')))
         ]
     )
-    I = current_source_incidence_vector(network, matrix_ops=SymPyMatrixOperations())
+    I = current_source_incidence_vector(network, matrix_ops=SymPyMatrixOperations(), label_mappings=default_label_mappings_factory(network))
     I_ref = sp.Matrix([[0], [0], ['-1.0*I4'], [0], ['1.0*I4']])
     assert I == I_ref
 
@@ -112,7 +113,7 @@ def test_create_current_vector_from_reference_network_10() -> None:
             Branch('2', '4', resistor('R5', R=sp.Symbol('R5'))),
         ]
     )
-    I = current_source_incidence_vector(network, matrix_ops=SymPyMatrixOperations())
+    I = current_source_incidence_vector(network, matrix_ops=SymPyMatrixOperations(), label_mappings=default_label_mappings_factory(network))
     I_ref = sp.Matrix([[0], [0], ['1.0*I4'], ['-1.0*I4']])
     assert I == I_ref
 
@@ -124,8 +125,8 @@ def test_create_current_vector_from_reference_network_13() -> None:
             Branch('1', '2', resistor('R2', R=sp.Symbol('R2'))),
             Branch('2', '0', resistor('R3', R=sp.Symbol('R3')))
         ],
-        node_zero_label='0'
+        reference_node_label='0'
     )
-    I = current_source_incidence_vector(network, matrix_ops=SymPyMatrixOperations())
+    I = current_source_incidence_vector(network, matrix_ops=SymPyMatrixOperations(), label_mappings=default_label_mappings_factory(network))
     I_ref = sp.Matrix([[0], [0]], dtype=complex)
     assert I == I_ref

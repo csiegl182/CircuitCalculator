@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Callable
 from .schematic import draw_schematic, create_schematic
 from . import errors
 from matplotlib.axes import Axes
@@ -30,13 +30,13 @@ def show_schematic_from_file(name: str, ax: Optional[Axes] = None) -> None:
         print(e)
         return
 
-solutions : dict[str, type[solution.CircuitSolution]]= {
-    'dc': solution.DCSolution,
-    'complex': solution.ComplexSolution,
-    'time_domain': solution.TimeDomainSolution,
-    'frequency_domain': solution.FrequencyDomainSolution,
-    'transient': solution.TransientSolution,
-    'symbolic': solution.SymbolicSolution
+solutions: dict[str, Callable[[Circuit], solution.CircuitSolution]] = {
+    'dc': solution.dc_solution,
+    'complex': solution.complex_solution,
+    'time_domain': solution.time_domain_solution,
+    'frequency_domain': solution.frequency_domain_solution,
+    'transient': solution.transient_solution,
+    'symbolic': solution.symbolic_solution
 }
 
 def get_solution(solution_type: str, circuit: Circuit, **kwargs) -> solution.CircuitSolution:
@@ -65,3 +65,19 @@ def simulate_schematic_from_file(name: str, solution_type: str, **kwargs) -> sol
     except errors.simulation_exceptions as e:
         print(e)
         return solution.EmptySolution()
+
+def circuit_information(data: dict) -> Circuit:
+    try:
+        schematic = create_schematic(data)
+        return circuit_translator(schematic)
+    except errors.simulation_exceptions as e:
+        print(e)
+        return Circuit([])
+
+def circuit_information_from_file(name: str) -> Circuit:
+    try:
+        data = load_simulation_file(name)
+        return circuit_information(data)
+    except errors.simulation_exceptions as e:
+        print(e)
+        return Circuit([])

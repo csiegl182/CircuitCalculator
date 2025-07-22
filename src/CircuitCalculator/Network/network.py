@@ -1,8 +1,6 @@
 from . import elements as elm
 from dataclasses import dataclass
 
-class FloatingGroundNode(Exception): pass
-
 class AmbiguousBranchIDs(Exception): pass
 
 @dataclass(frozen=True)
@@ -18,32 +16,37 @@ class Branch:
 @dataclass(frozen=True)
 class Network:
     branches: list[Branch]
-    node_zero_label: str = '0'
+    reference_node_label: str = '0'
 
     def __post_init__(self):
-        if self.node_zero_label not in self.node_labels and self.number_of_nodes != 0:
-            raise FloatingGroundNode
-        if len(set(self.branch_ids)) != len(self.branches):
+        branch_ids = [b.id for b in self.branches]
+        if len(set(branch_ids)) != len(branch_ids):
             raise AmbiguousBranchIDs
         
     @property
     def branch_ids(self) -> list[str]:
-        return [b.id for b in self.branches]
+        return [b.id for b in self.branches if b.node1 in self.node_labels or b.node2 in self.node_labels]
 
     @property
-    def node_labels(self) -> list[str]:
-        if len(self.branches) == 0:
-            return [self.node_zero_label]
-        node1_set = {branch.node1 for branch in self.branches}
-        node2_set = {branch.node2 for branch in self.branches}
-        return sorted(list(node1_set.union(node2_set)))
+    def node_labels(self) -> set[str]:
+        connected_nodes = set([self.reference_node_label])
+        nodes_to_assess = set([self.reference_node_label])
+        nodes_already_assessed = set()
+        while nodes_to_assess:
+            new_nodes_to_assess = set()
+            for node in nodes_to_assess:
+                new_nodes_to_assess.update(self.nodes_connected_to(node))
+            nodes_already_assessed.update(nodes_to_assess)
+            nodes_to_assess = new_nodes_to_assess - nodes_already_assessed
+            connected_nodes.update(new_nodes_to_assess)
+        return connected_nodes
 
     @property
     def number_of_nodes(self) -> int:
         return len(self.node_labels)
 
     def is_zero_node(self, node: str) -> bool:
-        return node == self.node_zero_label
+        return node == self.reference_node_label
 
     def branches_connected_to(self, node: str) -> list[Branch]:
         connected_branches = [branch for branch in self.branches if branch.node1 == node or branch.node2 == node]
@@ -57,4 +60,8 @@ class Network:
         return [branch for branch in self.branches if set((branch.node1, branch.node2)) == set((node1, node2))]
 
     def __getitem__(self, id: str) -> Branch:
-        return {b.id: b for b in self.branches}[id]
+        if id not in [b.id for b in self.branches]:
+            raise KeyError(f"Branch with id '{id}' not found in the network.")
+        if id not in self.branch_ids:
+            raise KeyError(f"Branch with id '{id}' is floating.")
+        return {b.id: b for b in self.branches if b.id in self.branch_ids}[id]

@@ -1,6 +1,6 @@
 from .Elements import Schematic
 from .DiagramTranslator import SchematicDiagramParser, circuit_translator
-from ..Circuit.solution import ComplexSolution
+from ..Circuit.solution import complex_solution
 import schemdraw
 import matplotlib as mpl
 from typing import Callable
@@ -17,8 +17,9 @@ def light_lamps(schematic: Schematic, on_threshold_percentage: float = 0.05, bre
             return (0.2, 0.2, 0.2)
         return colormap(brightness)
     diagram_parser = SchematicDiagramParser(schematic)
-    solution = ComplexSolution(circuit=circuit_translator(schematic))
-    lamps = [component for component in solution.circuit.components if component.type == 'lamp']
+    circuit = circuit_translator(schematic)
+    solution = complex_solution(circuit)
+    lamps = [component for component in circuit.components if component.type == 'lamp']
     brightness_percentages = [solution.get_power(lamp.id).real/float(lamp.value['P']) for lamp in lamps]
     for lamp, brght_pct in zip(lamps, brightness_percentages):
         schemdraw_lamp = diagram_parser.get_element(lamp.id)

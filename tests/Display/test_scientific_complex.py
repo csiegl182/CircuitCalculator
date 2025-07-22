@@ -84,3 +84,8 @@ def test_negative_imaginary_part() -> None:
     z = -0.25j
     str_repr = str(ScientificComplex(z, use_exp_prefix=False, compact=True))
     assert str_repr == '-j250e-3'
+
+def test_nan_value() -> None:
+    value = float('nan')
+    str_repr = str(ScientificComplex(value))
+    assert str_repr == 'NaN'
