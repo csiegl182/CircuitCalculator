@@ -30,13 +30,13 @@ def show_schematic_from_file(name: str, ax: Optional[Axes] = None) -> None:
         print(e)
         return
 
-solutions : dict[str, type[solution.CircuitSolution]]= {
-    'dc': solution.DCSolution,
-    'complex': solution.ComplexSolution,
-    'time_domain': solution.TimeDomainSolution,
-    'frequency_domain': solution.FrequencyDomainSolution,
-    'transient': solution.TransientSolution,
-    'symbolic': solution.SymbolicSolution
+solutions: dict[str, Callable[[Circuit], solution.CircuitSolution]] = {
+    'dc': solution.dc_solution,
+    'complex': solution.complex_solution,
+    'time_domain': solution.time_domain_solution,
+    'frequency_domain': solution.frequency_domain_solution,
+    'transient': solution.transient_solution,
+    'symbolic': solution.symbolic_solution
 }
 
 def get_solution(solution_type: str, circuit: Circuit, **kwargs) -> solution.CircuitSolution:
