@@ -162,8 +162,8 @@ def complex_solution(circuit: Circuit, w: float = 0, peak_values: bool = False, 
     solution = solver(network)
     return ComplexSolution(solution=solution, w=w, peak_values=peak_values)
 
-def symbolic_solution(circuit: Circuit, solver: NetworkSolver = symbolic_nodal_analysis_bias_point_solution) -> SymbolicSolution:
-    network = transform_symbolic_circuit(circuit, s=sp.Symbol('s', complex=True))
+def symbolic_solution(circuit: Circuit, s: sp.core.symbol.Symbol = sp.Symbol('s', complex=True), solver: NetworkSolver = symbolic_nodal_analysis_bias_point_solution) -> SymbolicSolution:
+    network = transform_symbolic_circuit(circuit, s=s)
     solution = solver(network)
     return SymbolicSolution(solution=solution)
 
@@ -174,11 +174,10 @@ def time_domain_solution(circuit: Circuit, w_max: float = 0, solver: NetworkSolv
 
 def frequency_domain_solution(circuit: Circuit, w_max: float = 0, solver: NetworkSolver = numeric_nodal_analysis_bias_point_solution) -> FrequencyDomainSolution:
     w = np.array(frequency_components(circuit, w_max))
-    w = np.concatenate((-w[-1:0:-1], w))
     solutions = [complex_solution(circuit, w=w_, peak_values=False, solver=solver) for w_ in w]
     return FrequencyDomainSolution(solutions=solutions, w=w)
 
-def transient_solution(circuit: Circuit, tin: np.ndarray, input: dict[str, TimeDomainFunction]) -> TransientSolution:
+def transient_solution(circuit: Circuit, tin: np.ndarray = np.zeros(0), input: dict[str, TimeDomainFunction] = {'': lambda t: np.zeros(0)}) -> TransientSolution:
     def _input_fcn(input_id: str) -> TimeDomainFunction:
         try:
             return input[input_id]
