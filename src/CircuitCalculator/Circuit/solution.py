@@ -10,10 +10,7 @@ from typing import Protocol
 import numpy as np
 import sympy as sp
 
-@dataclass(frozen=True)
 class CircuitSolution(Protocol):
-    def __init__(self, **kwargs): ...
-    
     def get_voltage(self, component_id: str) -> Any: ... 
 
     def get_current(self, component_id: str) -> Any: ...
@@ -140,16 +137,16 @@ class TransientSolution:
     u: np.ndarray
     x: np.ndarray
 
-    def get_potential(self, node_id: str) -> TimeDomainSeries:
-        c, d = self.ssm.c_d_row_for_potential(node_id)
-        return self.t, np.reshape(c@self.x + d@self.u, (-1,))
-
     def get_voltage(self, component_id: str) -> TimeDomainSeries:
         c, d = self.ssm.c_d_row_for_voltage(component_id)
         return self.t, np.reshape(c@self.x + d@self.u, (-1,))
 
     def get_current(self, component_id: str) -> TimeDomainSeries:
         c, d = self.ssm.c_d_row_for_current(component_id)
+        return self.t, np.reshape(c@self.x + d@self.u, (-1,))
+
+    def get_potential(self, node_id: str) -> TimeDomainSeries:
+        c, d = self.ssm.c_d_row_for_potential(node_id)
         return self.t, np.reshape(c@self.x + d@self.u, (-1,))
 
     def get_power(self, component_id: str) -> TimeDomainSeries:
