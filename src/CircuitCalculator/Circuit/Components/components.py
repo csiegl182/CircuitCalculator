@@ -188,10 +188,3 @@ def open_circuit(id: str, nodes: tuple[str, str], **_) -> Component:
         id=id,
         nodes=nodes
     )        
-
-def ground(id: str='gnd', nodes: tuple[str]=('0',), **_) -> Component:
-    return Component(
-        type='ground',
-        id=id,
-        nodes=nodes
-    )

@@ -50,8 +50,7 @@ circuit_component_translators : dict[str, Callable[..., cp.Component]] = {
     "complex_voltage_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.complex_voltage_source, s_cp.voltage_source), numeric_keys={'V': complex}),
     "dc_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.dc_current_source, s_cp.current_source), numeric_keys={'I': float}),
     "ac_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.ac_current_source, s_cp.current_source), numeric_keys={'I': float, 'f': float}),
-    "complex_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.complex_current_source, s_cp.current_source), numeric_keys={'I': complex}),
-    "ground" : functools.partial(numeric_component_factory, factory_fcn=(cp.ground, s_cp.ground), numeric_keys={}),
+    "complex_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.complex_current_source, s_cp.current_source), numeric_keys={'I': complex})
 }
 
 def generate_component(component: dict[str, Any]) -> Component:
@@ -82,13 +81,13 @@ def generate_component(component: dict[str, Any]) -> Component:
         raise IncorrectComponentInformation(f"Missing information '{e.args[0]}' for component '{component_id}' of type '{component_type}'.") from e
 
 def undictify_circuit(circuit: dict) -> Circuit:
-    return Circuit([generate_component(entry) for entry in circuit['components']])
+    return Circuit([generate_component(entry) for entry in circuit['components']], ground_node=circuit.get('ground_node', ''))
 
 deserialize = functools.partial(dump_load.deserialize, dict_preprocessor=undictify_circuit)
 load = functools.partial(dump_load.load, deserialize_fcn=deserialize)
 
 def dictify_circuit(circuit: Circuit) -> dict:
-    return {'components' : [asdict(c) for c in circuit.components]}
+    return {'components' : [asdict(c) for c in circuit.components], 'ground_node' : circuit.ground_node}
 
 serialize = functools.partial(dump_load.serialize, dict_processor=dictify_circuit)
 save = functools.partial(dump_load.dump, dump_fcn=serialize)

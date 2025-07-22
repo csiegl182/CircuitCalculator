@@ -27,8 +27,8 @@ def _remove_none(l: list) -> list:
 def circuit_translator(schematic: elm.Schematic) -> Circuit:
     parser = SchematicDiagramParser(schematic)
     translator = DiagramTranslator(parser, circuit_translator_map)
-    return Circuit(_remove_none([translator(e) for e in parser.all_elements]))
+    return Circuit(components=_remove_none([translator(e) for e in parser.all_elements]), ground_node=parser.ground_label)
 
 def symbolic_circuit_translator(schematic: elm.Schematic) -> Circuit:
     circuit = circuit_translator(schematic)
-    return Circuit(components=[Component(type=c.type, id=c.id, nodes=c.nodes) for c in circuit.components])
+    return Circuit(components=[Component(type=c.type, id=c.id, nodes=c.nodes) for c in circuit.components], ground_node=circuit.ground_node)

@@ -22,9 +22,6 @@ def inductance_translator(element: elm.Inductance, nodes: tuple[str, ...]) -> cp
 def lamp_translator(element: elm.Lamp, nodes: tuple[str, ...]) -> cp.Component:
     return cp.lamp(nodes=(nodes[0], nodes[1]), id=element.name, P=element.P_ref, V_ref=element.V_ref)
 
-def ground_translator(element: elm.Ground, nodes: tuple[str, ...]) -> cp.Component:
-    return cp.ground(nodes=(nodes[0],), id=element.name)
-
 def dc_voltage_source_translator(element: elm.VoltageSource, nodes: tuple[str, ...]) -> cp.Component:
     return cp.dc_voltage_source(
         nodes=(nodes[0], nodes[1]) if not element.is_reverse else (nodes[1], nodes[0]),
@@ -186,7 +183,7 @@ circuit_translator_map : ElementTranslatorMap = {
     elm.Capacitor : capacitor_translator,
     elm.Inductance : inductance_translator,
     elm.Lamp : lamp_translator,
-    elm.Ground : ground_translator,
+    elm.Ground : none_translator,
     elm.Line: none_translator,
     elm.LabeledLine: short_circuit_translator,
     elm.Node: none_translator,

@@ -12,14 +12,16 @@ def test_transient_analysis_of_example_network_1() -> None:
     Vs = 1
     R1, R2, R3 = 10, 20, 30
     C = 1e-3
-    circuit = Circuit([
-        cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
-        cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
-        cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
-        cmp.resistor(id='R3', R=R3, nodes=('2', '3')),
-        cmp.capacitor(id='C', C=C, nodes=('3', '0')),
-        cmp.ground(nodes=('0',))
-    ])
+    circuit = Circuit(
+        components=[
+            cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
+            cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
+            cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
+            cmp.resistor(id='R3', R=R3, nodes=('2', '3')),
+            cmp.capacitor(id='C', C=C, nodes=('3', '0'))
+        ],
+        ground_node='0'
+    )
     Ts = 0.0003
     t0 = 0.1
     t_max = 0.3
@@ -62,14 +64,16 @@ def test_transient_analysis_of_example_network_2() -> None:
     Vs = 5
     R1, R2, R3 = 10, 20, 30
     C = 1e-3
-    circuit = Circuit([
-        cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
-        cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
-        cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
-        cmp.capacitor(id='C', C=C, nodes=('2', '3')),
-        cmp.resistor(id='R3', R=R3, nodes=('3', '0')),
-        cmp.ground(nodes=('0',))
-    ])
+    circuit = Circuit(
+        components=[
+            cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
+            cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
+            cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
+            cmp.capacitor(id='C', C=C, nodes=('2', '3')),
+            cmp.resistor(id='R3', R=R3, nodes=('3', '0'))
+        ],
+        ground_node='0'
+    )
     Ts = 0.00003
     t_max = 0.3
     t0 = 0.1
@@ -112,14 +116,16 @@ def test_transient_analysis_of_example_network_3() -> None:
     Is = -0.1
     R1, R2 = 10, 20
     C = 1e-3
-    circuit = Circuit([
-        cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
-        cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
-        cmp.capacitor(id='C', C=C, nodes=('2', '3')),
-        cmp.resistor(id='R2', R=R2, nodes=('3', '0')),
-        cmp.dc_current_source(id='Is', I=Is, nodes=('0', '3')),
-        cmp.ground(nodes=('0',))
-    ])
+    circuit = Circuit(
+        components=[
+            cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
+            cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
+            cmp.capacitor(id='C', C=C, nodes=('2', '3')),
+            cmp.resistor(id='R2', R=R2, nodes=('3', '0')),
+            cmp.dc_current_source(id='Is', I=Is, nodes=('0', '3'))
+        ],
+        ground_node='0'
+    )
     Ts = 0.00003
     t_max = 0.3
     t0 = 0.1
@@ -169,14 +175,16 @@ def test_transient_analysis_of_example_network_4() -> None:
     R1, R2 = 10, 20
     C1 = 5e-3
     C2 = 1e-3
-    circuit = Circuit([
-        cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
-        cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
-        cmp.capacitor(id='C1', C=C1, nodes=('2', '3')),
-        cmp.resistor(id='R2', R=R2, nodes=('3', '0')),
-        cmp.capacitor(id='C2', C=C2, nodes=('3', '0')),
-        cmp.ground(nodes=('0',))
-    ])
+    circuit = Circuit(
+        components=[
+            cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
+            cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
+            cmp.capacitor(id='C1', C=C1, nodes=('2', '3')),
+            cmp.resistor(id='R2', R=R2, nodes=('3', '0')),
+            cmp.capacitor(id='C2', C=C2, nodes=('3', '0')),
+        ],
+        ground_node='0'
+    )
     Ts = 0.00003
     t_max = 0.5
     t0 = 0.1
@@ -229,14 +237,16 @@ def test_transient_analysis_of_example_network_5() -> None:
     Vs = 5
     R1, R2, R3 = 10, 20, 30
     L = 0.1
-    circuit = Circuit([
-        cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
-        cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
-        cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
-        cmp.resistor(id='R3', R=R3, nodes=('2', '3')),
-        cmp.inductance(id='L', L=L, nodes=('3', '0')),
-        cmp.ground(nodes=('0',))
-    ])
+    circuit = Circuit(
+        components=[
+            cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
+            cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
+            cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
+            cmp.resistor(id='R3', R=R3, nodes=('2', '3')),
+            cmp.inductance(id='L', L=L, nodes=('3', '0')),
+        ],
+        ground_node='0'
+    )
     Ts = 0.000001
     t_max = 0.02
     t0 = 0.001
@@ -284,14 +294,16 @@ def test_transient_analysis_of_example_network_6() -> None:
     Vs = 5
     R1, R2, R3 = 10, 20, 30
     L = 0.1
-    circuit = Circuit([
-        cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
-        cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
-        cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
-        cmp.inductance(id='L', L=L, nodes=('2', '3')),
-        cmp.resistor(id='R3', R=R3, nodes=('3', '0')),
-        cmp.ground(nodes=('0',))
-    ])
+    circuit = Circuit(
+        components=[
+            cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
+            cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
+            cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
+            cmp.inductance(id='L', L=L, nodes=('2', '3')),
+            cmp.resistor(id='R3', R=R3, nodes=('3', '0')),
+        ],
+        ground_node='0'
+    )
     Ts = 0.000001
     t_max = 0.02
     t0 = 0.001
@@ -340,15 +352,17 @@ def test_transient_analysis_of_example_network_7() -> None:
     Is = 1
     R1, R2, R3 = 10, 20, 30
     L = 0.1
-    circuit = Circuit([
-        cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
-        cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
-        cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
-        cmp.inductance(id='L', L=L, nodes=('2', '3')),
-        cmp.resistor(id='R3', R=R3, nodes=('3', '0')),
-        cmp.dc_current_source(id='Is', I=Is, nodes=('0', '3')),
-        cmp.ground(nodes=('0',))
-    ])
+    circuit = Circuit(
+        components=[
+            cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
+            cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
+            cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
+            cmp.inductance(id='L', L=L, nodes=('2', '3')),
+            cmp.resistor(id='R3', R=R3, nodes=('3', '0')),
+            cmp.dc_current_source(id='Is', I=Is, nodes=('0', '3'))
+        ],
+        ground_node='0'
+    )
     Ts = 0.0000001
     t_max = 0.02
     t0 = 0.001
@@ -405,14 +419,16 @@ def test_transient_analysis_of_example_network_8() -> None:
     Vs = 5
     R1, R2 = 10, 20
     L1, L2 = 0.1, 0.2
-    circuit = Circuit([
-        cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
-        cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
-        cmp.inductance(id='L1', L=L1, nodes=('2', '3')),
-        cmp.resistor(id='R2', R=R2, nodes=('3', '0')),
-        cmp.inductance(id='L2', L=L2, nodes=('3', '0')),
-        cmp.ground(nodes=('0',))
-    ])
+    circuit = Circuit(
+        components=[
+            cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
+            cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
+            cmp.inductance(id='L1', L=L1, nodes=('2', '3')),
+            cmp.resistor(id='R2', R=R2, nodes=('3', '0')),
+            cmp.inductance(id='L2', L=L2, nodes=('3', '0'))
+        ],
+        ground_node='0'
+    )
     Ts = 0.000001
     t_max = 0.02
     t0 = 0.001
@@ -462,13 +478,15 @@ def test_transient_analysis_of_example_network_9() -> None:
     R = 2
     L = 2e-3
     C = 0.5e-3
-    circuit = Circuit([
-        cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
-        cmp.resistor(id='R', R=R, nodes=('1', '2')),
-        cmp.inductance(id='L', L=L, nodes=('2', '3')),
-        cmp.capacitor(id='C', C=C, nodes=('3', '0')),
-        cmp.ground(nodes=('0',))
-    ])
+    circuit = Circuit(
+        components=[
+            cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
+            cmp.resistor(id='R', R=R, nodes=('1', '2')),
+            cmp.inductance(id='L', L=L, nodes=('2', '3')),
+            cmp.capacitor(id='C', C=C, nodes=('3', '0')),
+        ],
+        ground_node='0'
+    )
     Ts = 0.0000001
     t_max = 0.02
     t0 = 0.001
