@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Callable
 from .schematic import draw_schematic, create_schematic
 from . import errors
 from matplotlib.axes import Axes
@@ -65,3 +65,19 @@ def simulate_schematic_from_file(name: str, solution_type: str, **kwargs) -> sol
     except errors.simulation_exceptions as e:
         print(e)
         return solution.EmptySolution()
+
+def circuit_information(data: dict) -> Circuit:
+    try:
+        schematic = create_schematic(data)
+        return circuit_translator(schematic)
+    except errors.simulation_exceptions as e:
+        print(e)
+        return Circuit([])
+
+def circuit_information_from_file(name: str) -> Circuit:
+    try:
+        data = load_simulation_file(name)
+        return circuit_information(data)
+    except errors.simulation_exceptions as e:
+        print(e)
+        return Circuit([])
