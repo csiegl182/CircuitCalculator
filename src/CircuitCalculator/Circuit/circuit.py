@@ -6,7 +6,6 @@ import numpy as np
 import sympy as sp
 from dataclasses import dataclass, field
 
-class MultipleGroundNodes(Exception): pass
 class AmbiguousComponentID(Exception): pass
 class CircuitTransformationError(Exception): pass
 
@@ -16,22 +15,10 @@ class Circuit:
     ground_node : str | None = field(default=None)
 
     def __post_init__(self) -> None:
-        # if len(self.components) == 0:
-        #     self.ground_node = ''
-        #     return
-        # ground_nodes = [component.nodes[0] for component in self.components if component.type == 'ground']
-        # if len(ground_nodes) > 1:
-        #     raise MultipleGroundNodes(f'Component list contains multiple ground nodes: {str(ground_nodes)}')
-        # if len(ground_nodes) == 0:
-        #     self.ground_node = self.components[0].nodes[0]
-        # else:
-        #     self.ground_node = ground_nodes[0]
         if len(set([component.id for component in self.components])) != len(self.components):
             raise AmbiguousComponentID(f'Component list contains multiple components with the same ID.')
 
     def __getitem__(self, key: str) -> Component:
-        if key == self.ground_node:
-            raise KeyError('Ground node is not a component.') # TODO: the smell is obvious here!!!
         index = [component.id for component in self.components].index(key)
         return self.components[index]
 
