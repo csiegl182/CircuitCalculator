@@ -13,14 +13,15 @@ def test_example_circuit_1() -> None:
     Ts = 0.0003
     t = np.arange(0, t_max, Ts)
     V = V0*np.heaviside(t-t0, 1)
-    circuit = Circuit([
-        cmp.dc_voltage_source(id='Vs', V=V0, nodes=('1', '0')),
-        cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
-        cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
-        cmp.resistor(id='R3', R=R3, nodes=('2', '3')),
-        cmp.capacitor(id='C', C=C, nodes=('3', '0')),
-        cmp.ground(nodes=('0',))
-    ])
+    circuit = Circuit(
+        components=[
+            cmp.dc_voltage_source(id='Vs', V=V0, nodes=('1', '0')),
+            cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
+            cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
+            cmp.resistor(id='R3', R=R3, nodes=('2', '3')),
+            cmp.capacitor(id='C', C=C, nodes=('3', '0'))
+        ],
+        ground_node='0')
     ss = numeric_state_space_model(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vs', 'R1', 'R2', 'R3', 'C'], current_ids=['Vs', 'R1', 'R2', 'R3', 'C'])
     sys = signal.StateSpace(ss.A, ss.B, ss.C, ss.D)
 
@@ -67,14 +68,15 @@ def test_example_circuit_2() -> None:
     Ts = 0.0003
     t = np.arange(0, t_max, Ts)
     V = V0*np.heaviside(t-t0, 1)
-    circuit = Circuit([
-        cmp.dc_voltage_source(id='Vs', V=V0, nodes=('1', '0')),
-        cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
-        cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
-        cmp.capacitor(id='C', C=C, nodes=('2', '3')),
-        cmp.resistor(id='R3', R=R3, nodes=('3', '0')),
-        cmp.ground(nodes=('0',))
-    ])
+    circuit = Circuit(
+        components=[
+            cmp.dc_voltage_source(id='Vs', V=V0, nodes=('1', '0')),
+            cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
+            cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
+            cmp.capacitor(id='C', C=C, nodes=('2', '3')),
+            cmp.resistor(id='R3', R=R3, nodes=('3', '0'))
+        ],
+        ground_node='0')
 
     ss = numeric_state_space_model(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vs', 'R1', 'R2', 'R3', 'C'], current_ids=['Vs', 'R1', 'R2', 'R3', 'C'])
     sys = signal.StateSpace(ss.A, ss.B, ss.C, ss.D)
@@ -123,14 +125,16 @@ def test_example_circuit_3() -> None:
     t = np.arange(0, t_max, Ts)
     V = V0*np.heaviside(t-t0, 1)
     I = I0*np.heaviside(t-t1, 1)
-    circuit = Circuit([
-        cmp.dc_voltage_source(id='Vs', V=V0, nodes=('1', '0')),
-        cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
-        cmp.capacitor(id='C', C=C, nodes=('2', '3')),
-        cmp.resistor(id='R2', R=R2, nodes=('3', '0')),
-        cmp.dc_current_source(id='Is', I=I0, nodes=('0', '3')),
-        cmp.ground(nodes=('0',))
-    ])
+    circuit = Circuit(
+        components=[
+            cmp.dc_voltage_source(id='Vs', V=V0, nodes=('1', '0')),
+            cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
+            cmp.capacitor(id='C', C=C, nodes=('2', '3')),
+            cmp.resistor(id='R2', R=R2, nodes=('3', '0')),
+            cmp.dc_current_source(id='Is', I=I0, nodes=('0', '3'))
+        ],
+        ground_node='0'
+    )
 
     ss = numeric_state_space_model(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vs', 'R1', 'R2', 'C', 'Is'], current_ids=['Vs', 'R1', 'R2', 'C', 'Is'])
     sys = signal.StateSpace(ss.A, ss.B, ss.C, ss.D)
@@ -181,14 +185,16 @@ def test_example_circuit_4() -> None:
     Ts = 0.0003
     t = np.arange(0, t_max, Ts)
     V = V0*np.heaviside(t-t0, 1)
-    circuit = Circuit([
-        cmp.dc_voltage_source(id='Vs', V=V0, nodes=('1', '0')),
-        cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
-        cmp.capacitor(id='C1', C=C1, nodes=('2', '3')),
-        cmp.resistor(id='R2', R=R2, nodes=('3', '0')),
-        cmp.capacitor(id='C2', C=C2, nodes=('3', '0')),
-        cmp.ground(nodes=('0',))
-    ])
+    circuit = Circuit(
+        components=[
+            cmp.dc_voltage_source(id='Vs', V=V0, nodes=('1', '0')),
+            cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
+            cmp.capacitor(id='C1', C=C1, nodes=('2', '3')),
+            cmp.resistor(id='R2', R=R2, nodes=('3', '0')),
+            cmp.capacitor(id='C2', C=C2, nodes=('3', '0'))
+        ],
+        ground_node='0'
+    )
 
     ss = numeric_state_space_model(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vs', 'R1', 'R2', 'C1', 'C2'], current_ids=['Vs', 'R1', 'R2', 'C1', 'C2'])
     sys = signal.StateSpace(ss.A, ss.B, ss.C, ss.D)
@@ -251,14 +257,16 @@ def test_example_circuit_5() -> None:
     Ts = t_max/5000
     t = np.arange(0, t_max, Ts)
     V = V0*np.heaviside(t-t0, 1)
-    circuit = Circuit([
-        cmp.dc_voltage_source(id='Vq', V=V0, nodes=('1', '0')),
-        cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
-        cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
-        cmp.resistor(id='R3', R=R3, nodes=('2', '3')),
-        cmp.inductance(id='L', L=L, nodes=('3', '0')),
-        cmp.ground(nodes=('0',))
-    ])
+    circuit = Circuit(
+        components=[
+            cmp.dc_voltage_source(id='Vq', V=V0, nodes=('1', '0')),
+            cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
+            cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
+            cmp.resistor(id='R3', R=R3, nodes=('2', '3')),
+            cmp.inductance(id='L', L=L, nodes=('3', '0'))
+        ],
+        ground_node='0'
+    )
 
     ssm = numeric_state_space_model(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vq', 'R1', 'R2', 'R3', 'L'], current_ids=['R1', 'R2', 'R3', 'L', 'Vq'])
     sys = signal.StateSpace(ssm.A, ssm.B, ssm.C, ssm.D)
@@ -309,14 +317,16 @@ def test_example_circuit_6() -> None:
     Ts = t_max/5000
     t = np.arange(0, t_max, Ts)
     V = V0*np.heaviside(t-t0, 1)
-    circuit = Circuit([
-        cmp.dc_voltage_source(id='Vq', V=V0, nodes=('1', '0')),
-        cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
-        cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
-        cmp.inductance(id='L', L=L, nodes=('2', '3')),
-        cmp.resistor(id='R3', R=R3, nodes=('3', '0')),
-        cmp.ground(nodes=('0',))
-    ])
+    circuit = Circuit(
+        components=[
+            cmp.dc_voltage_source(id='Vq', V=V0, nodes=('1', '0')),
+            cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
+            cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
+            cmp.inductance(id='L', L=L, nodes=('2', '3')),
+            cmp.resistor(id='R3', R=R3, nodes=('3', '0'))
+        ],
+        ground_node='0'
+    )
 
     ssm = numeric_state_space_model(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vq', 'R1', 'R2', 'R3', 'L'], current_ids=['R1', 'R2', 'R3', 'L', 'Vq'])
     sys = signal.StateSpace(ssm.A, ssm.B, ssm.C, ssm.D)
@@ -370,15 +380,17 @@ def test_example_circuit_7() -> None:
     t = np.arange(0, t_max, Ts)
     V = V0*np.heaviside(t-t0, 1)
     I = I0*np.heaviside(t-t1, 1)
-    circuit = Circuit([
-        cmp.dc_voltage_source(id='Vq', V=V0, nodes=('1', '0')),
-        cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
-        cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
-        cmp.inductance(id='L', L=L, nodes=('2', '3')),
-        cmp.resistor(id='R3', R=R3, nodes=('3', '0')),
-        cmp.dc_current_source(id='Iq', I=I0, nodes=('0', '3')),
-        cmp.ground(nodes=('0',))
-    ])
+    circuit = Circuit(
+        components=[
+            cmp.dc_voltage_source(id='Vq', V=V0, nodes=('1', '0')),
+            cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
+            cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
+            cmp.inductance(id='L', L=L, nodes=('2', '3')),
+            cmp.resistor(id='R3', R=R3, nodes=('3', '0')),
+            cmp.dc_current_source(id='Iq', I=I0, nodes=('0', '3'))
+        ],
+        ground_node='0'
+    )
     
     ssm = numeric_state_space_model(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vq', 'R1', 'R2', 'R3', 'L', 'Iq'], current_ids=['R1', 'R2', 'R3', 'L', 'Vq', 'Iq'])
     sys = signal.StateSpace(ssm.A, ssm.B, ssm.C, ssm.D)
@@ -437,14 +449,16 @@ def test_example_circuit_8() -> None:
     Ts = t_max/5000
     t = np.arange(0, t_max, Ts)
     V = V0*np.heaviside(t-t0, 1)
-    circuit = Circuit([
-        cmp.dc_voltage_source(id='Vq', V=V0, nodes=('1', '0')),
-        cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
-        cmp.inductance(id='L1', L=L1, nodes=('2', '3')),
-        cmp.resistor(id='R2', R=R2, nodes=('3', '0')),
-        cmp.inductance(id='L2', L=L2, nodes=('3', '0')),
-        cmp.ground(nodes=('0',))
-    ])
+    circuit = Circuit(
+        components=[
+            cmp.dc_voltage_source(id='Vq', V=V0, nodes=('1', '0')),
+            cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
+            cmp.inductance(id='L1', L=L1, nodes=('2', '3')),
+            cmp.resistor(id='R2', R=R2, nodes=('3', '0')),
+            cmp.inductance(id='L2', L=L2, nodes=('3', '0'))
+        ],
+        ground_node='0'
+    )
 
     ssm = numeric_state_space_model(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vq', 'R1', 'R2', 'L1', 'L2'], current_ids=['R1', 'R2', 'L1', 'L2', 'Vq'])
     sys = signal.StateSpace(ssm.A, ssm.B, ssm.C, ssm.D)
@@ -503,13 +517,15 @@ def test_example_circuit_9() -> None:
     Ts = t_max/5000
     t = np.arange(0, t_max, Ts)
     V = V0*np.heaviside(t-t0, 1)
-    circuit = Circuit([
-        cmp.dc_voltage_source(id='Vq', V=V0, nodes=('1', '0')),
-        cmp.resistor(id='R', R=R, nodes=('1', '2')),
-        cmp.inductance(id='L', L=L, nodes=('2', '3')),
-        cmp.capacitor(id='C', C=C, nodes=('3', '0')),
-        cmp.ground(nodes=('0',))
-    ])
+    circuit = Circuit(
+        components=[
+            cmp.dc_voltage_source(id='Vq', V=V0, nodes=('1', '0')),
+            cmp.resistor(id='R', R=R, nodes=('1', '2')),
+            cmp.inductance(id='L', L=L, nodes=('2', '3')),
+            cmp.capacitor(id='C', C=C, nodes=('3', '0'))
+        ],
+        ground_node='0'
+    )
 
     ssm = numeric_state_space_model(circuit=circuit, potential_nodes=['1', '2', '3'], voltage_ids=['Vq', 'R', 'L', 'C'], current_ids=['R', 'L', 'C', 'Vq'])
     sys = signal.StateSpace(ssm.A, ssm.B, ssm.C, ssm.D)

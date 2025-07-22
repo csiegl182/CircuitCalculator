@@ -16,7 +16,7 @@ class Branch:
 @dataclass(frozen=True)
 class Network:
     branches: list[Branch]
-    reference_node_label: str = '0'
+    reference_node_label: str = '0' ## TODO: a default value does not make sense here
 
     def __post_init__(self):
         branch_ids = [b.id for b in self.branches]
