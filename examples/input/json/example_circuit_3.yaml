@@ -1,0 +1,29 @@
+components:
+  - type: dc_voltage_source
+    id: Vs
+    nodes:
+      - a
+      - b
+    value:
+      V: 1
+  - type: resistor
+    id: R1
+    nodes:
+      - a
+      - c
+    value:
+      R: 1
+  - type: resistor
+    id: R2
+    nodes:
+      - c
+      - b
+    value:
+      R: 1
+  - type: switch
+    id: S1
+    nodes:
+      - c
+      - b
+    value:
+      state: closed

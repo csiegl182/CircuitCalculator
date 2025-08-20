@@ -47,6 +47,7 @@ circuit_component_translators : dict[str, Callable[..., cp.Component]] = {
     "ac_voltage_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.ac_voltage_source, s_cp.voltage_source), numeric_keys={'V': float,  'f': float}),
     "open_circuit" : functools.partial(numeric_component_factory, factory_fcn=(cp.open_circuit, s_cp.open_circuit), numeric_keys={}),
     "short_circuit" : functools.partial(numeric_component_factory, factory_fcn=(cp.short_circuit, s_cp.short_circuit), numeric_keys={}),
+    "switch" : functools.partial(numeric_component_factory, factory_fcn=(cp.switch, s_cp.open_circuit), numeric_keys={}),
     "complex_voltage_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.complex_voltage_source, s_cp.voltage_source), numeric_keys={'V': complex}),
     "dc_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.dc_current_source, s_cp.current_source), numeric_keys={'I': float}),
     "ac_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.ac_current_source, s_cp.current_source), numeric_keys={'I': float, 'f': float}),
