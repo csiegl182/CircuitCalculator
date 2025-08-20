@@ -186,6 +186,13 @@ def resistive_load(load: cp.Component, *_) -> ntw.Branch:
         elm.load(load.id, float(load.value['P']), float(load.value['V_ref']))
     )
 
+def switch(switch: cp.Component, *_) -> ntw.Branch:
+    if switch.value['state'] not in ['open', 'closed']:
+        raise ValueError("Switch state must be 'open' or 'closed'.")
+    if switch.value['state'] == 'open':
+        return open_circuit(switch)
+    return short_circuit(switch)
+
 transformers : dict[str, CircuitComponentTranslator] = {
     'resistor' : resistor,
     'impedance' : impedance,
@@ -202,5 +209,6 @@ transformers : dict[str, CircuitComponentTranslator] = {
     'short_circuit' : short_circuit,
     'open_circuit' : open_circuit,
     'resistive_load' : resistive_load,
+    'switch' : switch,
     'lamp' : resistive_load
 }

@@ -175,6 +175,16 @@ def resistive_load(id: str, nodes: tuple[str, str], P: float, V_ref: float, **_)
         nodes=nodes
         )
 
+def switch(id: str, nodes: tuple[str, str], state: str = 'open', **_) -> Component:
+    if state not in ['open', 'closed']:
+        raise ValueError("Switch state must be 'open' or 'closed'.")
+    return Component(
+        type='switch',
+        id=id,
+        value={'state': state},
+        nodes=nodes
+    )
+
 def short_circuit(id: str, nodes: tuple[str, str], **_) -> Component:
     return Component(
         type='short_circuit',
