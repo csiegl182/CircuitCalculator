@@ -1,5 +1,6 @@
 from . import elements as elm
 from dataclasses import dataclass
+from functools import cached_property
 
 class AmbiguousBranchIDs(Exception): pass
 
@@ -22,12 +23,16 @@ class Network:
         branch_ids = [b.id for b in self.branches]
         if len(set(branch_ids)) != len(branch_ids):
             raise AmbiguousBranchIDs
-        
-    @property
+
+    @cached_property
+    def all_branch_ids(self) -> list[str]:
+        return [b.id for b in self.branches]
+
+    @cached_property
     def branch_ids(self) -> list[str]:
         return [b.id for b in self.branches if b.node1 in self.node_labels or b.node2 in self.node_labels]
 
-    @property
+    @cached_property
     def node_labels(self) -> set[str]:
         connected_nodes = set([self.reference_node_label])
         nodes_to_assess = set([self.reference_node_label])
@@ -41,7 +46,7 @@ class Network:
             connected_nodes.update(new_nodes_to_assess)
         return connected_nodes
 
-    @property
+    @cached_property
     def number_of_nodes(self) -> int:
         return len(self.node_labels)
 
@@ -60,8 +65,8 @@ class Network:
         return [branch for branch in self.branches if set((branch.node1, branch.node2)) == set((node1, node2))]
 
     def __getitem__(self, id: str) -> Branch:
-        if id not in [b.id for b in self.branches]:
+        if id not in self.all_branch_ids:
             raise KeyError(f"Branch with id '{id}' not found in the network.")
         if id not in self.branch_ids:
             raise KeyError(f"Branch with id '{id}' is floating.")
-        return {b.id: b for b in self.branches if b.id in self.branch_ids}[id]
+        return self.branches[self.all_branch_ids.index(id)]
