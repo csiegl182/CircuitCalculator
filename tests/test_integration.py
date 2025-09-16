@@ -299,3 +299,7 @@ def test_network_19_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_potential('1'), 1.00, decimal=2)
     np.testing.assert_almost_equal(solution.get_potential('2'), 0.50, decimal=2)
     np.testing.assert_almost_equal(solution.get_potential('3'), 0.50, decimal=2)
+    
+def test_network_20_with_advanced_nodal_analysis() -> None:
+    network = load_network_from_json(str(json_root / 'example_network_20.json'))
+    solution = numeric_nodal_analysis_bias_point_solution(network)
