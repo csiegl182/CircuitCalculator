@@ -135,3 +135,6 @@ dmypy.json
 .vscode/
 
 .tmp/
+
+/test*.py
+/test*.ipynb
