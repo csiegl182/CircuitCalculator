@@ -15,6 +15,8 @@ class Circuit:
     ground_node : str | None = field(default=None)
 
     def __post_init__(self) -> None:
+        if any(component.id == '' for component in self.components):
+            raise ValueError('Component ID must not be empty.')
         if len(set([component.id for component in self.components])) != len(self.components):
             raise AmbiguousComponentID(f'Component list contains multiple components with the same ID.')
 

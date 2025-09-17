@@ -18,3 +18,7 @@ def test_component_id_can_be_accessed_from_circuit() -> None:
     c = circuit.Circuit([ccp.dc_voltage_source(V=1, nodes=('1', '0'), id='V1'), ccp.dc_voltage_source(V=1, nodes=('1', '0'), id='V2')])
     assert c['V1'] == c.components[0]
     assert c['V2'] == c.components[1]
+
+def test_component_id_must_not_be_empty() -> None:
+    with pytest.raises(ValueError):
+        circuit.Circuit([ccp.dc_voltage_source(V=1, nodes=('1', '0'), id='')])
