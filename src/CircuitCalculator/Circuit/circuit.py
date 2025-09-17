@@ -28,10 +28,18 @@ class Circuit:
 def w(f: float) -> float:
     return 2*np.pi*f
 
+def define_reference_node(circuit: Circuit) -> str:
+    element_order = ['dc_voltage_source', 'ac_voltage_source', 'complex_voltage_source', 'dc_current_source', 'ac_current_source']
+    circuit_elements = [c.type for c in circuit.components]
+    for element in element_order:
+        if element in circuit_elements:
+            return circuit.components[circuit_elements.index(element)].nodes[1]
+    return circuit.components[0].nodes[0] if circuit.components else '0'
+
 def transform_circuit(circuit: Circuit, w: float, w_resolution: float = 1e-3, rms: bool = True) -> Network:
     reference_node_label = str(circuit.ground_node)
     if not circuit.ground_node:
-        reference_node_label = circuit.components[0].nodes[0] if circuit.components else '0'
+        reference_node_label = define_reference_node(circuit)
     try:
         return Network(
             branches=[transformers[component.type](component, w, w_resolution, rms) for component in circuit],

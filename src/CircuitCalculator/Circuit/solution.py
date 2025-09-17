@@ -44,13 +44,22 @@ class EmptySolution:
 @dataclass(frozen=True)
 class DCSolution(ScalarCircuitSolution):
     def get_voltage(self, component_id: str) -> float:
-        return self.solution.get_voltage(component_id).real
+        try:
+            return self.solution.get_voltage(component_id).real
+        except KeyError:
+            return np.nan
 
     def get_current(self, component_id: str) -> float:
-        return self.solution.get_current(component_id).real
+        try:
+            return self.solution.get_current(component_id).real
+        except KeyError:
+            return np.nan
 
     def get_potential(self, node_id: str) -> float:
-        return self.solution.get_potential(node_id).real
+        try:
+            return self.solution.get_potential(node_id).real
+        except KeyError:
+            return np.nan
 
     def get_power(self, component_id: str) -> float:
         return self.get_voltage(component_id)*self.get_current(component_id)
@@ -61,13 +70,22 @@ class ComplexSolution(ScalarCircuitSolution):
     peak_values: bool = False
 
     def get_voltage(self, component_id: str) -> complex:
-        return self.solution.get_voltage(component_id)
+        try:
+            return self.solution.get_voltage(component_id)
+        except KeyError:
+            return np.nan
 
     def get_current(self, component_id: str) -> complex:
-        return self.solution.get_current(component_id)
+        try:
+            return self.solution.get_current(component_id)
+        except KeyError:
+            return np.nan
 
     def get_potential(self, node_id: str) -> complex:
-        return self.solution.get_potential(node_id)
+        try:
+            return self.solution.get_potential(node_id)
+        except KeyError:
+            return np.nan
 
     def get_power(self, component_id: str) -> complex:
         if self.peak_values:
