@@ -25,12 +25,18 @@ class Network:
             raise AmbiguousBranchIDs
 
     @cached_property
-    def all_branch_ids(self) -> list[str]:
+    def _all_branch_ids(self) -> list[str]:
         return [b.id for b in self.branches]
+
+    def _is_connected_branch(self, id: str) -> bool:
+        branch = self.branches[self._all_branch_ids.index(id)]
+        if branch.node1 in self.node_labels or branch.node2 in self.node_labels:
+            return True
+        return False
 
     @cached_property
     def branch_ids(self) -> list[str]:
-        return [b.id for b in self.branches if b.node1 in self.node_labels or b.node2 in self.node_labels]
+        return [b.id for b in self.branches if self._is_connected_branch(b.id)]
 
     @cached_property
     def node_labels(self) -> set[str]:
@@ -65,8 +71,8 @@ class Network:
         return [branch for branch in self.branches if set((branch.node1, branch.node2)) == set((node1, node2))]
 
     def __getitem__(self, id: str) -> Branch:
-        if id not in self.all_branch_ids:
+        if id not in self._all_branch_ids:
             raise KeyError(f"Branch with id '{id}' not found in the network.")
-        if id not in self.branch_ids:
+        if not self._is_connected_branch(id):
             raise KeyError(f"Branch with id '{id}' is floating.")
-        return self.branches[self.all_branch_ids.index(id)]
+        return self.branches[self._all_branch_ids.index(id)]

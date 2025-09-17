@@ -1,5 +1,6 @@
 from typing import Any
 from dataclasses import dataclass
+from functools import cached_property
 from ..network import Network
 from ..solution import NetworkSolution
 from . import matrix_operations as mo
@@ -12,42 +13,26 @@ class NodalAnalysisSolution:
     solution_vector: tuple
     label_mappings_factory: map.LabelMappingsFactory
 
-    @property
+    @cached_property
     def label_mappings(self) -> map.NetworkLabelMappings:
         return self.label_mappings_factory(self.network)
 
-    @property
+    @cached_property
     def _potentials(self) -> tuple:
         return tuple(self.solution_vector[i] for i in sorted(self.label_mappings.node_mapping.values))
 
-    @property
+    @cached_property
     def _voltage_source_currents(self) -> tuple:
         all_indices = set(range(len(self.solution_vector)))
         remaining_indices = all_indices - set(self.label_mappings.node_mapping.values)
         return tuple(self.solution_vector[i] for i in sorted(remaining_indices))
 
-    def _is_floating_node(self, node_id: str) -> bool:
-        all_node_ids = {b.node1 for b in self.network.branches} | {b.node2 for b in self.network.branches}
-        if node_id not in all_node_ids:
-            raise KeyError(f"Node '{node_id}' not found in the network.")
-        return node_id not in self.network.node_labels
-
-    def _is_floating_branch(self, branch_id: str) -> bool:
-        all_branch_ids = [b.id for b in self.network.branches]
-        if branch_id not in all_branch_ids:
-            raise KeyError(f"Branch '{branch_id}' not found in the network.")
-        return branch_id not in self.network.branch_ids
-
     def get_potential(self, node_id: str) -> complex:
-        if self._is_floating_node(node_id):
-            return float('nan')
         if node_id == self.network.reference_node_label:
             return 0
         return self._potentials[self.label_mappings.node_mapping[node_id]]
 
     def get_current(self, branch_id: str) -> complex:
-        if self._is_floating_branch(branch_id):
-            return float('nan')
         if branch_id in self.label_mappings.voltage_source_mapping.keys:
             return self._voltage_source_currents[self.label_mappings.voltage_source_mapping[branch_id]]
         if self.network[branch_id].element.is_ideal_current_source:
@@ -58,8 +43,6 @@ class NodalAnalysisSolution:
         return self.get_voltage(branch_id)/branch.element.Z
 
     def get_voltage(self, branch_id: str) -> Any:
-        if self._is_floating_branch(branch_id):
-            return float('nan')
         phi1 = self.get_potential(self.network[branch_id].node1)
         phi2 = self.get_potential(self.network[branch_id].node2)
         return phi1-phi2

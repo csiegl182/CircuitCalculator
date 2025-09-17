@@ -38,21 +38,21 @@ class LabelMapping:
         return iter(self.mapping.keys())
 
 def alphabetic_node_mapper(network: Network) -> LabelMapping:
-    node_labels_without_zero = [label for label in sorted(network.node_labels) if label != network.reference_node_label] 
+    node_labels_without_zero = [label for label in sorted(network.node_labels) if label != network.reference_node_label]
     return LabelMapping({k: v for v, k in enumerate(node_labels_without_zero)})
 
 def alphabetic_source_mapper(network: Network) -> LabelMapping:
-    current_source_labels = [b.id for b in network.branches if b.element.is_current_source]
-    voltage_source_labels = [b.id for b in network.branches if b.element.is_ideal_voltage_source]
+    current_source_labels = [id for id in network.branch_ids if network[id].element.is_current_source]
+    voltage_source_labels = [id for id in network.branch_ids if network[id].element.is_ideal_voltage_source]
     sorted_soruce_labels = sorted(current_source_labels+voltage_source_labels)
     return LabelMapping({k: v for v, k in enumerate(sorted_soruce_labels)})
 
 def alphabetic_current_source_mapper(network: Network) -> LabelMapping:
-    current_source_labels = sorted([b.id for b in network.branches if b.element.is_current_source])
+    current_source_labels = sorted([id for id in network.branch_ids if network[id].element.is_current_source])
     return LabelMapping({k: v for v, k in enumerate(current_source_labels)})
 
 def alphabetic_voltage_source_mapper(network: Network) -> LabelMapping:
-    voltage_source_labels = sorted([b.id for b in network.branches if b.element.is_ideal_voltage_source])
+    voltage_source_labels = sorted([id for id in network.branch_ids if network[id].element.is_ideal_voltage_source])
     return LabelMapping({k: v for v, k in enumerate(voltage_source_labels)})
 
 LabelMapper = Callable[[Network], LabelMapping]
