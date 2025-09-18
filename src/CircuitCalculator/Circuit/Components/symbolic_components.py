@@ -40,7 +40,7 @@ def capacitor(id: str, nodes: tuple[str, str], C: str = '', **_) -> Component:
         nodes=nodes
     )
 
-def inductance(id: str, nodes: tuple[str, str], L: str = '', **_) -> Component:
+def inductor(id: str, nodes: tuple[str, str], L: str = '', **_) -> Component:
     if value_less_than_zero(L):
         raise ValueError('L must be greater than zero.')
     return Component(

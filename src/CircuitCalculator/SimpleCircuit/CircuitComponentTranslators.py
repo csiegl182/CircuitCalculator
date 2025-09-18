@@ -17,7 +17,7 @@ def capacitor_translator(element: elm.Capacitor, nodes: tuple[str, ...]) -> cp.C
     return cp.capacitor(nodes=(nodes[0], nodes[1]), id=element.name, C=element.C)
 
 def inductance_translator(element: elm.Inductance, nodes: tuple[str, ...]) -> cp.Component:
-    return cp.inductance(nodes=(nodes[0], nodes[1]), id=element.name, L=element.L)
+    return cp.inductor(nodes=(nodes[0], nodes[1]), id=element.name, L=element.L)
 
 def lamp_translator(element: elm.Lamp, nodes: tuple[str, ...]) -> cp.Component:
     return cp.lamp(nodes=(nodes[0], nodes[1]), id=element.name, P=element.P_ref, V_ref=element.V_ref)

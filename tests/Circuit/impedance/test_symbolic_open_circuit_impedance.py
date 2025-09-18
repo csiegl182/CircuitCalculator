@@ -14,7 +14,7 @@ def test_impedance_of_simple_network_can_be_calculated() -> None:
 
 def test_impedance_of_inductance_is_zero() -> None:
     circuit = Circuit([
-        cp.inductance(id='L', nodes=('1', '0')),
+        cp.inductor(id='L', nodes=('1', '0')),
         cp.ground(nodes=('0',))
     ])
     assert symbolic_open_circuit_dc_resistance(circuit, '1', '0') == 0
