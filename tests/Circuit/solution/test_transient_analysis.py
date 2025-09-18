@@ -243,7 +243,7 @@ def test_transient_analysis_of_example_network_5() -> None:
             cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
             cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
             cmp.resistor(id='R3', R=R3, nodes=('2', '3')),
-            cmp.inductance(id='L', L=L, nodes=('3', '0')),
+            cmp.inductor(id='L', L=L, nodes=('3', '0')),
         ],
         ground_node='0'
     )
@@ -299,7 +299,7 @@ def test_transient_analysis_of_example_network_6() -> None:
             cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
             cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
             cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
-            cmp.inductance(id='L', L=L, nodes=('2', '3')),
+            cmp.inductor(id='L', L=L, nodes=('2', '3')),
             cmp.resistor(id='R3', R=R3, nodes=('3', '0')),
         ],
         ground_node='0'
@@ -357,7 +357,7 @@ def test_transient_analysis_of_example_network_7() -> None:
             cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
             cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
             cmp.resistor(id='R2', R=R2, nodes=('2', '0')),
-            cmp.inductance(id='L', L=L, nodes=('2', '3')),
+            cmp.inductor(id='L', L=L, nodes=('2', '3')),
             cmp.resistor(id='R3', R=R3, nodes=('3', '0')),
             cmp.dc_current_source(id='Is', I=Is, nodes=('0', '3'))
         ],
@@ -423,9 +423,9 @@ def test_transient_analysis_of_example_network_8() -> None:
         components=[
             cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
             cmp.resistor(id='R1', R=R1, nodes=('1', '2')),
-            cmp.inductance(id='L1', L=L1, nodes=('2', '3')),
+            cmp.inductor(id='L1', L=L1, nodes=('2', '3')),
             cmp.resistor(id='R2', R=R2, nodes=('3', '0')),
-            cmp.inductance(id='L2', L=L2, nodes=('3', '0'))
+            cmp.inductor(id='L2', L=L2, nodes=('3', '0'))
         ],
         ground_node='0'
     )
@@ -482,7 +482,7 @@ def test_transient_analysis_of_example_network_9() -> None:
         components=[
             cmp.dc_voltage_source(id='Vs', V=Vs, nodes=('1', '0')),
             cmp.resistor(id='R', R=R, nodes=('1', '2')),
-            cmp.inductance(id='L', L=L, nodes=('2', '3')),
+            cmp.inductor(id='L', L=L, nodes=('2', '3')),
             cmp.capacitor(id='C', C=C, nodes=('3', '0')),
         ],
         ground_node='0'

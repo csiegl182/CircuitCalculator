@@ -12,7 +12,7 @@ def test_impedance_of_simple_network_can_be_calculated() -> None:
 
 def test_impedance_of_inductance_is_zero() -> None:
     L = 100
-    circuit = Circuit(components=[cp.inductance(L=L, id='L', nodes=('1', '0'))], ground_node='0')
+    circuit = Circuit(components=[cp.inductor(L=L, id='L', nodes=('1', '0'))], ground_node='0')
     assert open_circuit_impedance(circuit, '1', '0') == 0
 
 def test_impedance_of_resistor_with_following_short_circuit() -> None:

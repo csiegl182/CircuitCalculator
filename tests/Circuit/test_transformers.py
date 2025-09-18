@@ -114,7 +114,7 @@ def test_inductance_is_transformed_to_impedance() -> None:
     id = 'L'
     L = 1e-3
     w = 100
-    inductance = ccp.inductance(nodes=nodes, id=id, L=L)
+    inductance = ccp.inductor(nodes=nodes, id=id, L=L)
     transformed_inductance = transform.inductance(inductance, w=w)
     assert (transformed_inductance.node1, transformed_inductance.node2) == nodes
     assert transformed_inductance.id == id
@@ -125,7 +125,7 @@ def test_inductance_is_transformed_to_short_circuit_at_zero_frequency() -> None:
     id = 'L'
     L = 1e-3
     w = 0
-    inductance = ccp.inductance(nodes=nodes, id=id, L=L)
+    inductance = ccp.inductor(nodes=nodes, id=id, L=L)
     transformed_inductance = transform.inductance(inductance, w=w)
     assert (transformed_inductance.node1, transformed_inductance.node2) == nodes
     assert transformed_inductance.id == id
@@ -136,7 +136,7 @@ def test_inductance_is_transformed_to_open_circuit_at_infinite_frequency() -> No
     id = 'L'
     L = 1e-3
     w = np.inf
-    inductance = ccp.inductance(nodes=nodes, id=id, L=L)
+    inductance = ccp.inductor(nodes=nodes, id=id, L=L)
     transformed_inductance = transform.inductance(inductance, w=w)
     assert (transformed_inductance.node1, transformed_inductance.node2) == nodes
     assert transformed_inductance.id == id

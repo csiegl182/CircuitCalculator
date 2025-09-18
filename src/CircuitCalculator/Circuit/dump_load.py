@@ -41,6 +41,8 @@ def numeric_component_factory(*_, factory_fcn: tuple[Callable[..., cp.Component]
 circuit_component_translators : dict[str, Callable[..., cp.Component]] = {
     "resistor" : functools.partial(numeric_component_factory, factory_fcn=(cp.resistor, s_cp.resistor), numeric_keys={'R': float}),
     "conductance" : functools.partial(numeric_component_factory, factory_fcn=(cp.conductance, s_cp.conductance), numeric_keys={'G': float}),
+    "capacitor" : functools.partial(numeric_component_factory, factory_fcn=(cp.capacitor, s_cp.capacitor), numeric_keys={'C': float}),
+    "inductor" : functools.partial(numeric_component_factory, factory_fcn=(cp.inductor, s_cp.inductor), numeric_keys={'L': float}),
     "impedance" : functools.partial(numeric_component_factory, factory_fcn=(cp.impedance, s_cp.impedance), numeric_keys={'Z': float}),
     "admittance" : functools.partial(numeric_component_factory, factory_fcn=(cp.admittance, s_cp.admittance), numeric_keys={'Y': float}),
     "dc_voltage_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.dc_voltage_source, s_cp.voltage_source), numeric_keys={'V': float}),
