@@ -49,7 +49,7 @@ def load_network(network_dict: list[dict[str, Any]]) -> Network:
     try: 
         return Network([entry_to_branch(entry) for entry in network_dict])
     except KeyError:
-        raise FileExistsError
+        raise FileFormatError
 
 def load_network_from_json(filename: str) -> Network:
     import json

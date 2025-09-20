@@ -1,0 +1,23 @@
+[
+    {
+        "type": "resistor",
+        "id": "Rx",
+        "N1": "a",
+        "N2": "b",
+        "R": 1
+    },
+    {
+        "type": "real_voltage_source",
+        "id": "Vs",
+        "N1": "1",
+        "N2": "0",
+        "V": 1
+    },
+    {
+        "type": "resistor",
+        "id": "R1",
+        "N1": "1",
+        "N2": "0",
+        "R": 1
+    }
+]

@@ -1,0 +1,28 @@
+[
+    {
+        "type": "real_current_source",
+        "id": "Is",
+        "N1": "1",
+        "N2": "0",
+        "I": 1
+    },
+    {
+        "type": "resistor",
+        "id": "R1",
+        "N1": "1",
+        "N2": "0",
+        "R": 1
+    },
+    {
+        "type": "short_circuit",
+        "id": "X1",
+        "N1": "1",
+        "N2": "0"
+    },
+    {
+        "type": "short_circuit",
+        "id": "X2",
+        "N1": "1",
+        "N2": "0"
+    }
+]

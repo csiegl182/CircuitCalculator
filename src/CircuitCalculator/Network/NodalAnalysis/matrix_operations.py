@@ -132,10 +132,23 @@ class NumPyMatrixOperations:
 
     @staticmethod
     def solve(A: np.ndarray, b: np.ndarray) -> tuple[complex, ...]:
+        def solve_robust(A: np.ndarray, b: np.ndarray) -> np.ndarray:
+            Ainv = np.linalg.pinv(A)
+            x = Ainv @ b
+            null_columns = np.all(A == 0, axis=0)
+            x[null_columns] = np.nan
+            null_rows = np.all(A == 0, axis=1)
+            for i in np.where(null_rows)[0]:
+                if not np.isclose(b[i], 0):
+                    raise MatrixInversionException("Matrix inversion failed, possibly due to singular matrix.")
+            return x
         try:
             return tuple(np.linalg.solve(A, b).flatten())
         except np.linalg.LinAlgError:
-            raise MatrixInversionException("Matrix inversion failed, possibly due to singular matrix.")
+            try:
+                return tuple(solve_robust(A, b).flatten())
+            except np.linalg.LinAlgError:
+                raise MatrixInversionException("Matrix inversion failed, possibly due to singular matrix.")
 
     @staticmethod
     def elm(value: complex | symbolic) -> NumericMatrixElement:
