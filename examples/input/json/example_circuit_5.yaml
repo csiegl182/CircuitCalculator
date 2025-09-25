@@ -1,0 +1,22 @@
+components:
+  - type: complex_voltage_source
+    id: Vs
+    nodes:
+      - a
+      - b
+    value:
+      V: !complex 1+1j
+  - type: resistor
+    id: R
+    nodes:
+      - a
+      - c
+    value:
+      R: 1
+  - type: impedance
+    id: Z
+    nodes:
+      - c
+      - b
+    value:
+      Z: !complex 1+1j

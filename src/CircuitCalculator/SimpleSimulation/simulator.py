@@ -2,7 +2,7 @@ from typing import Optional, Callable
 from .schematic import draw_schematic, create_schematic
 from . import errors
 from matplotlib.axes import Axes
-from CircuitCalculator.dump_load import load, FormatError
+from CircuitCalculator.dump_load import load, ParseError
 import CircuitCalculator.Circuit.solution as solution
 from CircuitCalculator.Circuit.circuit import Circuit
 from CircuitCalculator.SimpleCircuit.DiagramTranslator import circuit_translator
@@ -12,8 +12,8 @@ def load_simulation_file(name: str) -> dict:
         return load(name)
     except FileNotFoundError as e:
         raise FileNotFoundError(f'Simulation file "{name}" does not exist.') from e
-    except FormatError as e:
-        raise FormatError(f'Cannot parse "{name}" as simulation file due to format issues.') from e
+    except ParseError as e:
+        raise ParseError(f'Cannot parse "{name}" as simulation file due to format issues.') from e
     
 def show_schematic(data: dict, ax: Optional[Axes] = None) -> None:
     try:
