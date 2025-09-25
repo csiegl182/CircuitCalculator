@@ -29,14 +29,14 @@ class JSONEncoder(json.JSONEncoder):
         return super().default(obj)
 
 def complex_representer(dumper, data):
-    return dumper.represent_scalar("!complex", str(data))
+    return dumper.represent_scalar("!complex", str(data).strip('()'))
 
 yaml.SafeDumper.add_representer(complex, complex_representer)
 
 serializers = {
     'json': functools.partial(json.dumps, cls=JSONEncoder),
-    'yaml': yaml.dump,
-    'yml': yaml.dump
+    'yaml': functools.partial(yaml.dump, Dumper=yaml.SafeDumper),
+    'yml': functools.partial(yaml.dump, Dumper=yaml.SafeDumper)
 }
 
 class ParseError(Exception):
