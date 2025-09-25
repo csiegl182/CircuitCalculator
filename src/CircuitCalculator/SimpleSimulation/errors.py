@@ -1,5 +1,5 @@
 from CircuitCalculator.Circuit.circuit import AmbiguousComponentID
-from CircuitCalculator.dump_load import FormatError
+from CircuitCalculator.dump_load import ParseError
 
 class UnknownCircuitElement(Exception):
     def __init__(self, element_type: str) -> None:
@@ -46,7 +46,7 @@ simulation_exceptions : tuple[type[Exception], ...] = (
     UnknownArgument,
     AmbiguousComponentID,
     FileNotFoundError,
-    FormatError,
+    ParseError,
     UnknownSolutionType,
     SolutionUsageError,
     EmptyCircuit,

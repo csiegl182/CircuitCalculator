@@ -80,8 +80,6 @@ def test_missing_component_id_leads_to_error() -> None:
     with pytest.raises(UnidentifiedComponent):
         undictify_circuit(test_circuit)
 
-
-
 def test_passing_additional_arguments_to_circuit_components_does_not_lead_to_error() -> None:
     test_circuit = {
         "components": [

@@ -86,11 +86,17 @@ def generate_component(component: dict[str, Any]) -> Component:
 def undictify_circuit(circuit: dict) -> Circuit:
     return Circuit([generate_component(entry) for entry in circuit['components']], ground_node=circuit.get('ground_node', ''))
 
-deserialize = functools.partial(dump_load.deserialize, dict_preprocessor=undictify_circuit)
-load = functools.partial(dump_load.load, deserialize_fcn=deserialize)
+def deserialize(data: str, format: str, **kwargs) -> Circuit:
+    return undictify_circuit(dump_load.deserialize(data, format, **kwargs))
+
+def load(file: str, **kwargs) -> Circuit:
+    return undictify_circuit(dump_load.load(file, **kwargs))
 
 def dictify_circuit(circuit: Circuit) -> dict:
     return {'components' : [asdict(c) for c in circuit.components], 'ground_node' : circuit.ground_node}
 
-serialize = functools.partial(dump_load.serialize, dict_processor=dictify_circuit)
-save = functools.partial(dump_load.dump, dump_fcn=serialize)
+def serialize(circuit: Circuit, format: str, **kwargs) -> str:
+    return dump_load.serialize(dictify_circuit(circuit), format, **kwargs)
+
+def save(circuit: Circuit, file: str, **kwargs) -> None:
+    dump_load.dump(file, dictify_circuit(circuit), **kwargs)
