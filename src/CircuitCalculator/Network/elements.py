@@ -9,8 +9,8 @@ def admittance(name : str, Y : complex) -> NortenTheveninElement:
 def resistor(name : str, R : float) -> NortenTheveninElement:
     return NortenElement(Z=R, V=0, name=name, type='resistor')
 
-def conductor(name : str, G : float) -> NortenTheveninElement:
-    return TheveninElement(Y=G, I=0, name=name, type='conductor')
+def conductance(name : str, G : float) -> NortenTheveninElement:
+    return TheveninElement(Y=G, I=0, name=name, type='conductance')
 
 def load(name : str, P : float, V_ref: float = -1, I_ref: float = -1, Q : float = 0) -> NortenTheveninElement:
     if V_ref < 0 and I_ref < 0:

@@ -12,11 +12,11 @@ def test_inf_resistance_has_zero_conductance() -> None:
     assert R.Y == 0
 
 def test_zero_conductance_has_inf_resistance() -> None:
-    G = elm.conductor('G1', G=0)
+    G = elm.conductance('G1', G=0)
     assert G.Z == inf
 
 def test_inf_conductance_has_zero_resistance() -> None:
-    G = elm.conductor('G1', G=inf)
+    G = elm.conductance('G1', G=inf)
     assert G.Z == 0
 
 def test_linear_current_source_with_zero_conductance_has_inf_resistance() -> None:

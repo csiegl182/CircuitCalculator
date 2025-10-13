@@ -12,6 +12,16 @@ def test_resistor_transformer() -> None:
     assert transformed_resistor.id == id
     assert transformed_resistor.element.Z == R 
 
+def test_conductance_transformer() -> None:
+    nodes = ('0', '1')
+    id = 'G'
+    G = 0.01
+    cond = ccp.conductance(nodes=nodes, id=id, G=G)
+    transformed_conductance = transform.conductance(cond)
+    assert (transformed_conductance.node1, transformed_conductance.node2) == nodes
+    assert transformed_conductance.id == id
+    assert transformed_conductance.element.Y == G
+
 def test_voltage_source_transformer_transforms_dc_voltage_source() -> None:
     nodes = ('0', '1')
     id = 'U'

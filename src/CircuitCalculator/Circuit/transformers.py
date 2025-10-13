@@ -12,6 +12,10 @@ def resistor(resistor: cp.Component, *_) -> ntw.Branch:
     R = float(resistor.value['R'])
     return ntw.Branch(resistor.nodes[0], resistor.nodes[1], elm.resistor(resistor.id, R))
 
+def conductance(conductance: cp.Component, *_) -> ntw.Branch:
+    G = float(conductance.value['G'])
+    return ntw.Branch(conductance.nodes[0], conductance.nodes[1], elm.conductance(conductance.id, G))
+
 def impedance(impedance: cp.Component, *_) -> ntw.Branch:
     Z = complex(
         float(impedance.value['R']),
@@ -195,6 +199,7 @@ def switch(switch: cp.Component, *_) -> ntw.Branch:
 
 transformers : dict[str, CircuitComponentTranslator] = {
     'resistor' : resistor,
+    'conductance' : conductance,
     'impedance' : impedance,
     'capacitor' : capacitor,
     'inductance' : inductance,

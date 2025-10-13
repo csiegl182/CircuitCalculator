@@ -1,12 +1,12 @@
 from CircuitCalculator.Network.network import Branch
-from CircuitCalculator.Network.elements import current_source, voltage_source, resistor, conductor
+from CircuitCalculator.Network.elements import current_source, voltage_source, resistor, conductance
 
 def test_resistor_is_not_active() -> None:
     b = Branch('1', '0', resistor('R1', R=1))
     assert b.element.is_active == False
 
 def test_condutor_is_not_active() -> None:
-    b = Branch('1', '0', conductor('G1', G=1))
+    b = Branch('1', '0', conductance('G1', G=1))
     assert b.element.is_active == False
 
 def test_voltage_source_is_active() -> None:
