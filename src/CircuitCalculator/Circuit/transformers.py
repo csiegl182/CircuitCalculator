@@ -23,6 +23,13 @@ def impedance(impedance: cp.Component, *_) -> ntw.Branch:
     )
     return ntw.Branch(impedance.nodes[0], impedance.nodes[1], elm.impedance(impedance.id, Z))
 
+def admittance(admittance: cp.Component, *_) -> ntw.Branch:
+    Y = complex(
+        float(admittance.value['G']),
+        float(impedance.value['B'])
+    )
+    return ntw.Branch(admittance.nodes[0], admittance.nodes[1], elm.admittance(admittance.id, Y))
+
 def capacitor(capacitor: cp.Component, w: float = 0, *_) -> ntw.Branch:
     C = float(capacitor.value['C'])
     return ntw.Branch(
@@ -201,6 +208,7 @@ transformers : dict[str, CircuitComponentTranslator] = {
     'resistor' : resistor,
     'conductance' : conductance,
     'impedance' : impedance,
+    'admittance' : admittance,
     'capacitor' : capacitor,
     'inductance' : inductance,
     'dc_voltage_source' : dc_voltage_source,
