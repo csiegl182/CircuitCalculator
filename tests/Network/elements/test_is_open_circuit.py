@@ -1,5 +1,5 @@
 from CircuitCalculator.Network.network import Branch
-from CircuitCalculator.Network.elements import voltage_source, current_source, resistor, conductor
+from CircuitCalculator.Network.elements import voltage_source, current_source, resistor, conductance
 
 def test_ideal_voltage_source_is_not_open_circuit() -> None:
     b = Branch('1', '0', voltage_source('Us1', V=1))
@@ -38,5 +38,5 @@ def test_resistor_is_not_open_circuit() -> None:
     assert b.element.is_open_circuit == False
 
 def test_conductor_is_not_open_circuit() -> None:
-    b = Branch('1', '0', conductor('G1', G=1))
+    b = Branch('1', '0', conductance('G1', G=1))
     assert b.element.is_open_circuit == False

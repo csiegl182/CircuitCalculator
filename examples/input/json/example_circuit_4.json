@@ -5,7 +5,7 @@
                 "type": "complex_voltage_source",
                 "id": "Vs",
                 "nodes": ["a", "b"],
-                "value": { "V": 1 }
+                "value": { "V": { "__complex__": true, "real": 1, "imag": 1 } }
             },
             {
                 "type": "resistor",

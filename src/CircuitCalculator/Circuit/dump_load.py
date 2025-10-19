@@ -77,7 +77,7 @@ def generate_component(component: dict[str, Any]) -> Component:
     try:
         component_factory = circuit_component_translators[component_type]
     except KeyError:
-        raise UnknownCircuitComponent(f"Unknown type '{component_type}' of component '{component_id}' is unknown.")
+        raise UnknownCircuitComponent(f"Unknown type '{component_type}' of component '{component_id}'.")
     try:
         return component_factory(id=component_id, nodes=component_nodes, **component_value)
     except KeyError as e:

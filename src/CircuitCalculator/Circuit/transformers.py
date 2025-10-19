@@ -12,12 +12,23 @@ def resistor(resistor: cp.Component, *_) -> ntw.Branch:
     R = float(resistor.value['R'])
     return ntw.Branch(resistor.nodes[0], resistor.nodes[1], elm.resistor(resistor.id, R))
 
+def conductance(conductance: cp.Component, *_) -> ntw.Branch:
+    G = float(conductance.value['G'])
+    return ntw.Branch(conductance.nodes[0], conductance.nodes[1], elm.conductance(conductance.id, G))
+
 def impedance(impedance: cp.Component, *_) -> ntw.Branch:
     Z = complex(
         float(impedance.value['R']),
         float(impedance.value['X'])
     )
     return ntw.Branch(impedance.nodes[0], impedance.nodes[1], elm.impedance(impedance.id, Z))
+
+def admittance(admittance: cp.Component, *_) -> ntw.Branch:
+    Y = complex(
+        float(admittance.value['G']),
+        float(impedance.value['B'])
+    )
+    return ntw.Branch(admittance.nodes[0], admittance.nodes[1], elm.admittance(admittance.id, Y))
 
 def capacitor(capacitor: cp.Component, w: float = 0, *_) -> ntw.Branch:
     C = float(capacitor.value['C'])
@@ -195,7 +206,9 @@ def switch(switch: cp.Component, *_) -> ntw.Branch:
 
 transformers : dict[str, CircuitComponentTranslator] = {
     'resistor' : resistor,
+    'conductance' : conductance,
     'impedance' : impedance,
+    'admittance' : admittance,
     'capacitor' : capacitor,
     'inductance' : inductance,
     'dc_voltage_source' : dc_voltage_source,
