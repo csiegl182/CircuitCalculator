@@ -20,7 +20,7 @@ class CircuitSolution(Protocol):
     def get_power(self, component_id: str) -> Any: ...
 
 @dataclass(frozen=True)
-class ScalarCircuitSolution(Protocol):
+class ScalarCircuitSolution:
     solution: NetworkSolution
 
 @dataclass(frozen=True)
