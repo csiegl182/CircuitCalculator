@@ -47,13 +47,14 @@ circuit_component_translators : dict[str, Callable[..., cp.Component]] = {
     "admittance" : functools.partial(numeric_component_factory, factory_fcn=(cp.admittance, s_cp.admittance), numeric_keys={'Y': float}),
     "dc_voltage_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.dc_voltage_source, s_cp.voltage_source), numeric_keys={'V': float}),
     "ac_voltage_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.ac_voltage_source, s_cp.voltage_source), numeric_keys={'V': float,  'w': float}),
+    "complex_voltage_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.complex_voltage_source, s_cp.voltage_source), numeric_keys={'V': complex}),
     "open_circuit" : functools.partial(numeric_component_factory, factory_fcn=(cp.open_circuit, s_cp.open_circuit), numeric_keys={}),
     "short_circuit" : functools.partial(numeric_component_factory, factory_fcn=(cp.short_circuit, s_cp.short_circuit), numeric_keys={}),
     "switch" : functools.partial(numeric_component_factory, factory_fcn=(cp.switch, s_cp.open_circuit), numeric_keys={}),
-    "complex_voltage_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.complex_voltage_source, s_cp.voltage_source), numeric_keys={'V': complex}),
     "dc_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.dc_current_source, s_cp.current_source), numeric_keys={'I': float}),
     "ac_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.ac_current_source, s_cp.current_source), numeric_keys={'I': float, 'w': float}),
-    "complex_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.complex_current_source, s_cp.current_source), numeric_keys={'I': complex})
+    "complex_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.complex_current_source, s_cp.current_source), numeric_keys={'I': complex}),
+    "lamp" : functools.partial(numeric_component_factory, factory_fcn=(cp.resistive_load, s_cp.open_circuit), numeric_keys={'P': float, 'V_ref': float})
 }
 
 def generate_component(component: dict[str, Any]) -> Component:
