@@ -354,3 +354,13 @@ def test_network_23_with_advanced_nodal_analysis() -> None:
     np.testing.assert_almost_equal(solution.get_current('X2'), -0.5, decimal=2)
     np.testing.assert_almost_equal(solution.get_potential('0'), 0.0, decimal=2)
     np.testing.assert_almost_equal(solution.get_potential('1'), 0.0, decimal=2)
+
+def test_network_24_with_advanced_nodal_analysis() -> None:
+    network = load_network_from_json(str(json_root / 'example_network_24.json'))
+    with pytest.raises(SomeFuckingError):
+        numeric_nodal_analysis_bias_point_solution(network)
+        
+def test_network_25_with_advanced_nodal_analysis() -> None:
+    network = load_network_from_json(str(json_root / 'example_network_25.json'))
+    with pytest.raises(SomeFuckingError):
+        numeric_nodal_analysis_bias_point_solution(network)

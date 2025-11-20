@@ -1,0 +1,23 @@
+[
+    {
+        "type": "real_current_source",
+        "id": "Iq1",
+        "N1": "1",
+        "N2": "0",
+        "I": 1
+    },
+    {
+        "type": "real_current_source",
+        "id": "Iq2",
+        "N1": "2",
+        "N2": "1",
+        "I": 2
+    },
+    {
+        "type": "resistor",
+        "id": "R",
+        "N1": "2",
+        "N2": "0",
+        "R": 1
+    }
+]
