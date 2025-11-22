@@ -1,0 +1,23 @@
+[
+    {
+        "type": "real_voltage_source",
+        "id": "Vq1",
+        "N1": "1",
+        "N2": "0",
+        "V": 1
+    },
+    {
+        "type": "real_voltage_source",
+        "id": "Vq2",
+        "N1": "1",
+        "N2": "0",
+        "V": 2
+    },
+    {
+        "type": "resistor",
+        "id": "R",
+        "N1": "1",
+        "N2": "0",
+        "R": 1
+    }
+]

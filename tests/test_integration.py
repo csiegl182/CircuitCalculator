@@ -1,4 +1,5 @@
 import pytest
+from CircuitCalculator.Network.solution import NetworkSolutionException
 from CircuitCalculator.Network.NodalAnalysis.solution import numeric_nodal_analysis_bias_point_solution
 from CircuitCalculator.Network.loaders import load_network_from_json
 from CircuitCalculator.Network.NodalAnalysis.node_analysis import open_circuit_impedance
@@ -256,11 +257,8 @@ def test_network_16_with_advanced_nodal_analysis() -> None:
     
 def test_network_17_with_advanced_nodal_analysis() -> None:
     network = load_network_from_json(str(json_root / 'example_network_17.json'))
-    solution = numeric_nodal_analysis_bias_point_solution(network)
-    assert np.isnan(solution.get_voltage('Is'))
-    np.testing.assert_almost_equal(solution.get_current('Is'), 1.0, decimal=3)
-    np.testing.assert_almost_equal(solution.get_potential('0'), 0.00, decimal=2)
-    assert np.isnan(solution.get_potential('1'))
+    with pytest.raises(NetworkSolutionException):
+        numeric_nodal_analysis_bias_point_solution(network)
     
 def test_network_18_with_advanced_nodal_analysis() -> None:
     network = load_network_from_json(str(json_root / 'example_network_18.json'))
@@ -327,30 +325,20 @@ def test_network_21_with_advanced_nodal_analysis() -> None:
 
 def test_network_22_with_advanced_nodal_analysis() -> None:
     network = load_network_from_json(str(json_root / 'example_network_22.json'))
-    solution = numeric_nodal_analysis_bias_point_solution(network)
-    np.testing.assert_almost_equal(solution.get_voltage('Vs'), 1.0, decimal=2)
-    np.testing.assert_almost_equal(solution.get_current('Vs'), 0.0, decimal=2)
-    np.testing.assert_almost_equal(solution.get_voltage('R1'), 0.0, decimal=2)
-    np.testing.assert_almost_equal(solution.get_current('R1'), 0.0, decimal=2)
-    assert np.isnan(solution.get_voltage('X1'))
-    np.testing.assert_almost_equal(solution.get_current('X1'), 0.0, decimal=2)
-    assert np.isnan(solution.get_voltage('X2'))
-    np.testing.assert_almost_equal(solution.get_current('X2'), 0.0, decimal=2)
-    np.testing.assert_almost_equal(solution.get_potential('0'), 0.0, decimal=2)
-    np.testing.assert_almost_equal(solution.get_potential('1'), 1.0, decimal=2)
-    np.testing.assert_almost_equal(solution.get_potential('2'), 1.0, decimal=2)
-    assert np.isnan(solution.get_potential('3'))
+    with pytest.raises(NetworkSolutionException):
+        numeric_nodal_analysis_bias_point_solution(network)
 
 def test_network_23_with_advanced_nodal_analysis() -> None:
     network = load_network_from_json(str(json_root / 'example_network_23.json'))
-    solution = numeric_nodal_analysis_bias_point_solution(network)
-    np.testing.assert_almost_equal(solution.get_voltage('Is'), 0.0, decimal=2)
-    np.testing.assert_almost_equal(solution.get_current('Is'), 1.0, decimal=2)
-    np.testing.assert_almost_equal(solution.get_voltage('R1'), 0.0, decimal=2)
-    np.testing.assert_almost_equal(solution.get_current('R1'), 0.0, decimal=2)
-    np.testing.assert_almost_equal(solution.get_voltage('X1'), 0.0, decimal=2)
-    np.testing.assert_almost_equal(solution.get_current('X1'), -0.5, decimal=2)
-    np.testing.assert_almost_equal(solution.get_voltage('X2'), 0.0, decimal=2)
-    np.testing.assert_almost_equal(solution.get_current('X2'), -0.5, decimal=2)
-    np.testing.assert_almost_equal(solution.get_potential('0'), 0.0, decimal=2)
-    np.testing.assert_almost_equal(solution.get_potential('1'), 0.0, decimal=2)
+    with pytest.raises(NetworkSolutionException):
+        numeric_nodal_analysis_bias_point_solution(network)
+
+def test_network_24_with_advanced_nodal_analysis() -> None:
+    network = load_network_from_json(str(json_root / 'example_network_24.json'))
+    with pytest.raises(NetworkSolutionException):
+        numeric_nodal_analysis_bias_point_solution(network)
+        
+def test_network_25_with_advanced_nodal_analysis() -> None:
+    network = load_network_from_json(str(json_root / 'example_network_25.json'))
+    with pytest.raises(NetworkSolutionException):
+        numeric_nodal_analysis_bias_point_solution(network)

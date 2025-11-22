@@ -8,14 +8,26 @@ from .. import transformers as trf
 from .label_mapping import LabelMappingsFactory, default_label_mappings_factory
 from .node_analysis_calculations import nodal_analysis_coefficient_matrix, nodal_analysis_constants_vector, source_incidence_matrix
 
+class NodalAnalysisException(Exception):
+    def __init__(self, message: str, floating_nodes: tuple[str, ...], contradictional_elements: tuple[str, ...]) -> None:
+        super().__init__(message)
+        self.floating_nodes = floating_nodes
+        self.contradictional_elements = contradictional_elements
+
 def nodal_analysis_solution(network: Network, matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations(), label_mappings_factory: LabelMappingsFactory = default_label_mappings_factory) -> tuple[complex | symbolic, ...]:
     label_mappings = label_mappings_factory(network)
     A = nodal_analysis_coefficient_matrix(network, matrix_ops=matrix_ops, label_mappings=label_mappings)
     b = nodal_analysis_constants_vector(network, matrix_ops=matrix_ops, label_mappings=label_mappings)
     try:
         return matrix_ops.solve(A, b)
-    except mo.MatrixInversionException:
-        return (float('nan'),) * len(b)
+    except mo.SolvingLineareEquationSystemFailed as e:
+        inv_node_mapping = {v: k for v, k in zip(label_mappings.node_mapping.values, label_mappings.node_mapping.keys)}
+        inv_voltage_source_mapping = {v: k for v, k in zip(label_mappings.voltage_source_mapping.values, label_mappings.voltage_source_mapping)}
+        raise NodalAnalysisException(
+            message="Solving network with nodal analysis failed.",
+            floating_nodes=tuple(inv_node_mapping.get(i, 'unknown') for i in e.zero_columns),
+            contradictional_elements=tuple(inv_voltage_source_mapping.get(i, 'unknown') for i in e.dependent_columns)
+        )
 
 def open_circuit_impedance(network: Network, node1: str, node2: str, matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations(), label_mappings_factory: LabelMappingsFactory = default_label_mappings_factory) -> complex | symbolic:
     if node1 == node2:
