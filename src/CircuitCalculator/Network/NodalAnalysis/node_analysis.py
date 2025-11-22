@@ -22,7 +22,7 @@ def nodal_analysis_solution(network: Network, matrix_ops: mo.MatrixOperations = 
         return matrix_ops.solve(A, b)
     except mo.SolvingLineareEquationSystemFailed as e:
         inv_node_mapping = {v: k for v, k in zip(label_mappings.node_mapping.values, label_mappings.node_mapping.keys)}
-        inv_voltage_source_mapping = {v: k for v, k in zip(label_mappings.voltage_source_mapping.values, label_mappings.voltage_source_mapping)}
+        inv_voltage_source_mapping = {v+len(inv_node_mapping): k for v, k in zip(label_mappings.voltage_source_mapping.values, label_mappings.voltage_source_mapping)}
         raise NodalAnalysisException(
             message="Solving network with nodal analysis failed.",
             floating_nodes=tuple(inv_node_mapping.get(i, 'unknown') for i in e.zero_columns),
