@@ -10,6 +10,12 @@ class MatrixInversionException(Exception):
     """Exception raised when matrix inversion fails."""
     pass
 
+class SolvingLineareEquationSystemFailed(Exception):
+    def __init__(self, message: str, zero_columns: tuple[int, ...] = (), dependent_columns: tuple[int, ...] = ()) -> None:
+        super().__init__(message)
+        self.zero_columns = zero_columns
+        self.dependent_columns = dependent_columns
+
 class MatrixElement(Protocol):
     def __init__(self, value: complex | symbolic) -> None: ...
     @property
@@ -132,23 +138,24 @@ class NumPyMatrixOperations:
 
     @staticmethod
     def solve(A: np.ndarray, b: np.ndarray) -> tuple[complex, ...]:
-        def solve_robust(A: np.ndarray, b: np.ndarray) -> np.ndarray:
-            Ainv = np.linalg.pinv(A)
-            x = Ainv @ b
+        def zero_cols(A: np.ndarray) -> tuple[int, ...]:
             null_columns = np.all(A == 0, axis=0)
-            x[null_columns] = np.nan
-            null_rows = np.all(A == 0, axis=1)
-            for i in np.where(null_rows)[0]:
-                if not np.isclose(b[i], 0):
-                    raise MatrixInversionException("Matrix inversion failed, possibly due to singular matrix.")
-            return x
+            return tuple(np.where(null_columns)[0])
+        def dependent_cols(A: np.ndarray) -> tuple[int, ...]:
+            tol = 1e-10
+            U, S, Vh = np.linalg.svd(A)
+            rank = np.sum(S > tol, dtype=int)
+            independent_columns = np.argsort(np.abs(Vh[:rank]).max(axis=0))[-rank:] if rank > 0 else np.array([], dtype=int)
+            dependent_columns = tuple(np.setdiff1d(np.arange(A.shape[1]), independent_columns))
+            return tuple(sorted(dependent_columns))
         try:
             return tuple(np.linalg.solve(A, b).flatten())
-        except np.linalg.LinAlgError:
-            try:
-                return tuple(solve_robust(A, b).flatten())
-            except np.linalg.LinAlgError:
-                raise MatrixInversionException("Matrix inversion failed, possibly due to singular matrix.")
+        except np.linalg.LinAlgError as e:
+            raise SolvingLineareEquationSystemFailed(
+                message="Solving linear equation system failed.",
+                zero_columns=zero_cols(A),
+                dependent_columns=dependent_cols(A)
+            ) from e
 
     @staticmethod
     def elm(value: complex | symbolic) -> NumericMatrixElement:

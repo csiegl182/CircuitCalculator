@@ -1,8 +1,9 @@
 from typing import Any
 from dataclasses import dataclass
 from functools import cached_property
+import numpy as np
 from ..network import Network
-from ..solution import NetworkSolution
+from ..solution import NetworkSolution, NetworkSolutionException
 from . import matrix_operations as mo
 from . import label_mapping as map
 from . import node_analysis as na
@@ -51,11 +52,14 @@ class NodalAnalysisSolution:
         return self.get_voltage(branch_id)*self.get_current(branch_id).conjugate()
 
 def numeric_nodal_analysis_bias_point_solution(network: Network, label_mappings_factory: map.LabelMappingsFactory = map.default_label_mappings_factory) -> NetworkSolution:
-        return NodalAnalysisSolution(
-            network=network,
-            solution_vector=na.nodal_analysis_solution(network, matrix_ops=mo.NumPyMatrixOperations(), label_mappings_factory=label_mappings_factory),
-            label_mappings_factory=label_mappings_factory
-        )
+        try:
+            return NodalAnalysisSolution(
+                network=network,
+                solution_vector=na.nodal_analysis_solution(network, matrix_ops=mo.NumPyMatrixOperations(), label_mappings_factory=label_mappings_factory),
+                label_mappings_factory=label_mappings_factory
+            )
+        except na.NodalAnalysisException as e:
+            raise NetworkSolutionException("Solving network failed.", floating_nodes=e.floating_nodes, contradictional_elements=e.contradictional_elements)
 
 def symbolic_nodal_analysis_bias_point_solution(network: Network, label_mappings_factory: map.LabelMappingsFactory = map.default_label_mappings_factory) -> NetworkSolution:
         return NodalAnalysisSolution(
