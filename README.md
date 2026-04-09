@@ -29,7 +29,7 @@ Example
 ```python
 from CircuitCalculator.Circuit.circuit import Circuit
 import CircuitCalculator.Circuit.Components.components as ccp
-from CircuitCalculator.Circuit.solution import DCSolution
+from CircuitCalculator.Circuit.solution import dc_solution
 
 # Define the circuit
 circuit = Circuit([
@@ -38,7 +38,7 @@ circuit = Circuit([
 ])
 
 # Solve the circuit
-solution = DCSolution(circuit)
+solution = dc_solution(circuit)
 print(f'I(R)={solution.get_current("R"):2.2f}A')
 print(f'V(R)={solution.get_voltage("R"):2.2f}V')
 ```
