@@ -31,7 +31,7 @@ def w(f: float) -> float:
     return 2*np.pi*f
 
 def define_reference_node(circuit: Circuit) -> str:
-    element_order = ['dc_voltage_source', 'ac_voltage_source', 'complex_voltage_source', 'dc_current_source', 'ac_current_source']
+    element_order = ['dc_voltage_source', 'ac_voltage_source', 'complex_voltage_source', 'dc_current_source', 'ac_current_source', 'voltage_controlled_current_source']
     circuit_elements = [c.type for c in circuit.components]
     for element in element_order:
         if element in circuit_elements:

@@ -1,4 +1,4 @@
-from .norten_thevenin_elements import NortenTheveninElement, SymbolicNortenElement, SymbolicTheveninElement
+from .norten_thevenin_elements import NortenTheveninElement, SymbolicNortenElement, SymbolicTheveninElement, VoltageControlledCurrentSource
 import sympy as sp
 
 def impedance(name : str, Z : sp.Symbol) -> NortenTheveninElement:
@@ -18,6 +18,14 @@ def voltage_source(name : str, V : sp.Symbol, Z : sp.Symbol = sp.sympify(0)) -> 
 
 def current_source(name : str, I : sp.Symbol, Y : sp.Symbol = sp.sympify(0)) -> NortenTheveninElement:
     return SymbolicTheveninElement(I=I, Y=sp.sympify(Y), name=name, type='current_source')
+
+def voltage_controlled_current_source(name: str, G: sp.Symbol, control_nodes: tuple[str, str]) -> NortenTheveninElement:
+    return VoltageControlledCurrentSource(
+        name=name,
+        transconductance=sp.sympify(G),
+        control_node1=control_nodes[0],
+        control_node2=control_nodes[1]
+    )
 
 def open_circuit(name : str) -> NortenTheveninElement:
     return SymbolicTheveninElement(I=sp.sympify(0), Y=sp.sympify(0), name=name, type='open_circuit')

@@ -5,7 +5,7 @@ class Component:
     type : str
     id : str = field(default='0')
     nodes : tuple[str, ...] = field(default=('0',))
-    value: dict[str, float | str] = field(default_factory=dict)
+    value: dict[str, float | str | tuple[str, str]] = field(default_factory=dict)
 
 def resistor(id: str, nodes: tuple[str, str], R: float, **_) -> Component:
     if R < 0:
@@ -138,6 +138,19 @@ def complex_current_source(id: str, nodes: tuple[str, str], I: complex, Y: compl
         value={'I_real': I.real, 'I_imag': I.imag, 'G': Y.real, 'B': Y.imag},
         nodes=nodes
         )
+
+def voltage_controlled_current_source(id: str, nodes: tuple[str, str], G: float, *, control_nodes: tuple[str, str], **_) -> Component:
+    if len(nodes) != 2:
+        raise ValueError('Voltage controlled current source output nodes must contain two nodes.')
+    if len(control_nodes) != 2:
+        raise ValueError('Voltage controlled current source control nodes must contain two nodes.')
+    control_nodes = tuple(control_nodes)
+    return Component(
+        type='voltage_controlled_current_source',
+        id=id,
+        value={'G': G, 'control_nodes': control_nodes},
+        nodes=nodes
+    )
 
 def periodic_current_source(id: str, nodes: tuple[str, str], wavetype: str, I: float, w: float, phi: float, G: float = 0, **_) -> Component:
     return Component(

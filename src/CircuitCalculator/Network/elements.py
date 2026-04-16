@@ -1,4 +1,4 @@
-from .norten_thevenin_elements import NortenTheveninElement, NortenElement, TheveninElement
+from .norten_thevenin_elements import NortenTheveninElement, NortenElement, TheveninElement, VoltageControlledCurrentSource
 
 def impedance(name : str, Z : complex) -> NortenTheveninElement:
     return NortenElement(Z=Z, V=0, name=name, type='impedance')
@@ -30,6 +30,14 @@ def voltage_source(name : str, V : complex, Z : complex = 0) -> NortenTheveninEl
 
 def current_source(name : str, I : complex, Y : complex = 0) -> NortenTheveninElement:
     return TheveninElement(I=I, Y=Y, name=name, type='current_source')
+
+def voltage_controlled_current_source(name: str, G: complex, control_nodes: tuple[str, str]) -> NortenTheveninElement:
+    return VoltageControlledCurrentSource(
+        name=name,
+        transconductance=G,
+        control_node1=control_nodes[0],
+        control_node2=control_nodes[1]
+    )
 
 def open_circuit(name : str) -> NortenTheveninElement:
     return TheveninElement(I=0, Y=0, name=name, type='open_circuit')

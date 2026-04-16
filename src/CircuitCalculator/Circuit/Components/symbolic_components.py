@@ -82,6 +82,19 @@ def current_source(id: str, nodes: tuple[str, str], I: str = '', G: str = '0', *
         nodes=nodes
         )
 
+def voltage_controlled_current_source(id: str, nodes: tuple[str, str], G: str = '', *, control_nodes: tuple[str, str], **_) -> Component:
+    if len(nodes) != 2:
+        raise ValueError('Voltage controlled current source output nodes must contain two nodes.')
+    if len(control_nodes) != 2:
+        raise ValueError('Voltage controlled current source control nodes must contain two nodes.')
+    control_nodes = tuple(control_nodes)
+    return Component(
+        type='voltage_controlled_current_source',
+        id=id,
+        value={'G': G if len(G) > 0 else id, 'control_nodes': control_nodes},
+        nodes=nodes
+    )
+
 def open_circuit(id: str, nodes: tuple[str, str], **_) -> Component:
     return Component(
         type='open_circuit',

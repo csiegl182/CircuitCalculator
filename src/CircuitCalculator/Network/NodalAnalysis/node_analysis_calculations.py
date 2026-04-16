@@ -15,6 +15,33 @@ def admittance_connected_to(network: Network, node: str, me: Callable[[Any], mo.
 def admittance_between(network: Network, node1: str, node2: str, me: Callable[[Any], mo.MatrixElement]) -> complex:
     return sum([e.value for e in [me(b.element.Y) for b in network.branches_between(node1, node2)] if e.isfinite])
 
+def voltage_controlled_current_source_matrix(network: Network, matrix_ops: mo.MatrixOperations, label_mappings: NetworkLabelMappings) -> mo.Matrix:
+    def node_index(node: str) -> int | None:
+        if node == network.reference_node_label:
+            return None
+        return label_mappings.node_mapping[node]
+
+    def stamp(source: Any) -> None:
+        transconductance = matrix_ops.elm(source.element.transconductance).value
+        output_nodes = ((source.node1, 1), (source.node2, -1))
+        control_nodes = ((source.element.control_node1, 1), (source.element.control_node2, -1))
+        for output_node, output_sign in output_nodes:
+            row = node_index(output_node)
+            if row is None:
+                continue
+            for control_node, control_sign in control_nodes:
+                column = node_index(control_node)
+                if column is None:
+                    continue
+                Y[row, column] += output_sign*control_sign*transconductance
+
+    node_mapping = label_mappings.node_mapper(network)
+    Y = matrix_ops.zeros((node_mapping.N, node_mapping.N))
+    for branch in network.branches:
+        if branch.element.is_voltage_controlled_current_source:
+            stamp(branch)
+    return Y
+
 def node_admittance_matrix(network: Network, matrix_ops: mo.MatrixOperations, label_mappings: NetworkLabelMappings) -> mo.Matrix:
     def node_matrix_element(i_label:str, j_label:str) -> complex:
         if i_label == j_label:
@@ -25,7 +52,7 @@ def node_admittance_matrix(network: Network, matrix_ops: mo.MatrixOperations, la
     Y = matrix_ops.zeros((node_mapping.N, node_mapping.N))
     for i_label, j_label in itertools.product(node_mapping, repeat=2):
         Y[node_mapping(i_label, j_label)] = node_matrix_element(i_label, j_label)
-    return Y
+    return Y + voltage_controlled_current_source_matrix(network, matrix_ops, label_mappings)
 
 def voltage_source_incidence_matrix(network: Network, matrix_ops: mo.MatrixOperations, label_mappings: NetworkLabelMappings) -> mo.Matrix:
     def voltage_source_direction(voltage_source: str, node: str) -> int:

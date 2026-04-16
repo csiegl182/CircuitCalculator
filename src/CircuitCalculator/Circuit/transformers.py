@@ -154,6 +154,22 @@ def complex_current_source(current_source: cp.Component, w: float = 0, w_resolut
         current_source.nodes[1],
         element)
 
+def voltage_controlled_current_source(current_source: cp.Component, *_) -> ntw.Branch:
+    G = complex(float(current_source.value['G']), 0)
+    control_nodes = current_source.value['control_nodes']
+    if not isinstance(control_nodes, (tuple, list)) or len(control_nodes) != 2:
+        raise ValueError('Voltage controlled current source control nodes must contain two nodes.')
+    element = elm.voltage_controlled_current_source(
+        current_source.id,
+        G,
+        control_nodes=(str(control_nodes[0]), str(control_nodes[1]))
+    )
+    return ntw.Branch(
+        current_source.nodes[0],
+        current_source.nodes[1],
+        element
+    )
+
 def periodic_current_source(source: cp.Component, w: float = 0, w_resolution: float = 1e-3, *_) -> ntw.Branch:
     wavetype = str(source.value['wavetype'])
     w0 = float(source.value['w'])
@@ -217,6 +233,7 @@ transformers : dict[str, CircuitComponentTranslator] = {
     'dc_current_source' : dc_current_source,
     'ac_current_source' : ac_current_source,
     'complex_current_source' : complex_current_source,
+    'voltage_controlled_current_source' : voltage_controlled_current_source,
     'periodic_voltage_source' : periodic_voltage_source,
     'periodic_current_source' : periodic_current_source,
     'short_circuit' : short_circuit,

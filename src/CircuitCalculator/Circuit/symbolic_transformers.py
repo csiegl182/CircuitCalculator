@@ -62,6 +62,24 @@ def current_source(current_source: cp.Component, _: sp.Symbol) -> ntw.Branch:
         element
     )
 
+def voltage_controlled_current_source(current_source: cp.Component, _: sp.Symbol) -> ntw.Branch:
+    G = sp.sympify(current_source.value.get('G', 'nan'))
+    if G == sp.nan or current_source.id == current_source.value['G']:
+        G = sp.Symbol(current_source.id, real=True)
+    control_nodes = current_source.value['control_nodes']
+    if not isinstance(control_nodes, (tuple, list)) or len(control_nodes) != 2:
+        raise ValueError('Voltage controlled current source control nodes must contain two nodes.')
+    element = elm.voltage_controlled_current_source(
+        current_source.id,
+        G,
+        control_nodes=(str(control_nodes[0]), str(control_nodes[1]))
+    )
+    return ntw.Branch(
+        current_source.nodes[0],
+        current_source.nodes[1],
+        element
+    )
+
 def open_circuit(open_circuit: cp.Component, _: sp.Symbol) -> ntw.Branch:
     return ntw.Branch(
         open_circuit.nodes[0],
@@ -83,6 +101,7 @@ transformers : dict[str, CircuitComponentTranslator] = {
     'inductance' : inductance,
     'voltage_source' : voltage_source,
     'current_source' : current_source,
+    'voltage_controlled_current_source' : voltage_controlled_current_source,
     'open_circuit' : open_circuit,
     'short_circuit' : short_circuit,
     'dc_voltage_source' : voltage_source,
