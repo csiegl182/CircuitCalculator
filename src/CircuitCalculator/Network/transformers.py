@@ -1,5 +1,5 @@
 from .network import Network, Branch
-from .norten_thevenin_elements import NortenTheveninElement
+from .network_components import NortenTheveninElement
 from . import elements as elm
 from . import symbolic_elements as selm
 import sympy as sp

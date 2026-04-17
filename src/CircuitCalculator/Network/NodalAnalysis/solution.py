@@ -38,6 +38,9 @@ class NodalAnalysisSolution:
             element = self.network[branch_id].element
             control_voltage = self.get_potential(element.control_node1) - self.get_potential(element.control_node2)
             return element.transconductance*control_voltage
+        if self.network[branch_id].element.is_current_controlled_current_source:
+            element = self.network[branch_id].element
+            return element.current_gain*self.get_current(element.control_branch)
         if branch_id in self.label_mappings.voltage_source_mapping.keys:
             return self._voltage_source_currents[self.label_mappings.voltage_source_mapping[branch_id]]
         if self.network[branch_id].element.is_ideal_current_source:

@@ -1,6 +1,7 @@
-from . import elements as elm
 from dataclasses import dataclass
 from functools import cached_property
+
+from .network_components import TwoTerminalComponent
 
 class AmbiguousBranchIDs(Exception): pass
 
@@ -8,7 +9,7 @@ class AmbiguousBranchIDs(Exception): pass
 class Branch:
     node1 : str
     node2 : str
-    element : elm.NortenTheveninElement
+    element : TwoTerminalComponent
 
     @property
     def id(self) -> str:

@@ -80,6 +80,60 @@ def voltage_controlled_current_source(current_source: cp.Component, _: sp.Symbol
         element
     )
 
+def current_controlled_current_source(current_source: cp.Component, _: sp.Symbol) -> ntw.Branch:
+    current_gain = sp.sympify(current_source.value.get('current_gain', 'nan'))
+    if current_gain == sp.nan or current_source.id == current_source.value['current_gain']:
+        current_gain = sp.Symbol(current_source.id, real=True)
+    control_branch = str(current_source.value['control_branch'])
+    if len(control_branch) == 0:
+        raise ValueError('Current controlled current source control branch must not be empty.')
+    element = elm.current_controlled_current_source(
+        current_source.id,
+        current_gain,
+        control_branch=control_branch
+    )
+    return ntw.Branch(
+        current_source.nodes[0],
+        current_source.nodes[1],
+        element
+    )
+
+def voltage_controlled_voltage_source(voltage_source: cp.Component, _: sp.Symbol) -> ntw.Branch:
+    voltage_gain = sp.sympify(voltage_source.value.get('voltage_gain', 'nan'))
+    if voltage_gain == sp.nan or voltage_source.id == voltage_source.value['voltage_gain']:
+        voltage_gain = sp.Symbol(voltage_source.id, real=True)
+    control_nodes = voltage_source.value['control_nodes']
+    if not isinstance(control_nodes, (tuple, list)) or len(control_nodes) != 2:
+        raise ValueError('Voltage controlled voltage source control nodes must contain two nodes.')
+    element = elm.voltage_controlled_voltage_source(
+        voltage_source.id,
+        voltage_gain,
+        control_nodes=(str(control_nodes[0]), str(control_nodes[1]))
+    )
+    return ntw.Branch(
+        voltage_source.nodes[0],
+        voltage_source.nodes[1],
+        element
+    )
+
+def current_controlled_voltage_source(voltage_source: cp.Component, _: sp.Symbol) -> ntw.Branch:
+    transresistance = sp.sympify(voltage_source.value.get('transresistance', 'nan'))
+    if transresistance == sp.nan or voltage_source.id == voltage_source.value['transresistance']:
+        transresistance = sp.Symbol(voltage_source.id, real=True)
+    control_branch = str(voltage_source.value['control_branch'])
+    if len(control_branch) == 0:
+        raise ValueError('Current controlled voltage source control branch must not be empty.')
+    element = elm.current_controlled_voltage_source(
+        voltage_source.id,
+        transresistance,
+        control_branch=control_branch
+    )
+    return ntw.Branch(
+        voltage_source.nodes[0],
+        voltage_source.nodes[1],
+        element
+    )
+
 def open_circuit(open_circuit: cp.Component, _: sp.Symbol) -> ntw.Branch:
     return ntw.Branch(
         open_circuit.nodes[0],
@@ -102,6 +156,9 @@ transformers : dict[str, CircuitComponentTranslator] = {
     'voltage_source' : voltage_source,
     'current_source' : current_source,
     'voltage_controlled_current_source' : voltage_controlled_current_source,
+    'current_controlled_current_source' : current_controlled_current_source,
+    'voltage_controlled_voltage_source' : voltage_controlled_voltage_source,
+    'current_controlled_voltage_source' : current_controlled_voltage_source,
     'open_circuit' : open_circuit,
     'short_circuit' : short_circuit,
     'dc_voltage_source' : voltage_source,

@@ -152,6 +152,43 @@ def voltage_controlled_current_source(id: str, nodes: tuple[str, str], G: float,
         nodes=nodes
     )
 
+def current_controlled_current_source(id: str, nodes: tuple[str, str], current_gain: float, *, control_branch: str, **_) -> Component:
+    if len(nodes) != 2:
+        raise ValueError('Current controlled current source output nodes must contain two nodes.')
+    if len(control_branch) == 0:
+        raise ValueError('Current controlled current source control branch must not be empty.')
+    return Component(
+        type='current_controlled_current_source',
+        id=id,
+        value={'current_gain': current_gain, 'control_branch': control_branch},
+        nodes=nodes
+    )
+
+def voltage_controlled_voltage_source(id: str, nodes: tuple[str, str], voltage_gain: float, *, control_nodes: tuple[str, str], **_) -> Component:
+    if len(nodes) != 2:
+        raise ValueError('Voltage controlled voltage source output nodes must contain two nodes.')
+    if len(control_nodes) != 2:
+        raise ValueError('Voltage controlled voltage source control nodes must contain two nodes.')
+    control_nodes = tuple(control_nodes)
+    return Component(
+        type='voltage_controlled_voltage_source',
+        id=id,
+        value={'voltage_gain': voltage_gain, 'control_nodes': control_nodes},
+        nodes=nodes
+    )
+
+def current_controlled_voltage_source(id: str, nodes: tuple[str, str], transresistance: float, *, control_branch: str, **_) -> Component:
+    if len(nodes) != 2:
+        raise ValueError('Current controlled voltage source output nodes must contain two nodes.')
+    if len(control_branch) == 0:
+        raise ValueError('Current controlled voltage source control branch must not be empty.')
+    return Component(
+        type='current_controlled_voltage_source',
+        id=id,
+        value={'transresistance': transresistance, 'control_branch': control_branch},
+        nodes=nodes
+    )
+
 def periodic_current_source(id: str, nodes: tuple[str, str], wavetype: str, I: float, w: float, phi: float, G: float = 0, **_) -> Component:
     return Component(
         type='periodic_current_source',

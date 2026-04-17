@@ -1,6 +1,7 @@
 from typing import Any, Callable
 from .network import Network, Branch
 from . import elements as elm
+from .network_components import TwoTerminalComponent
 import numpy as np
 
 class FileFormatError(Exception):
@@ -23,7 +24,58 @@ def translate_to_complex(keys : list[str], **kwargs):
         kwargs.update({value : to_complex(kwargs[value])})
     return kwargs
 
-network_branch_translators : dict[str, Callable[..., elm.NortenTheveninElement]] = {
+
+def current_controlled_current_source_from_dict(**kwargs) -> TwoTerminalComponent:
+    try:
+        current_gain = kwargs.pop('current_gain')
+    except KeyError:
+        current_gain = kwargs.pop('beta', None)
+    if current_gain is None:
+        raise FileFormatError
+    return elm.current_controlled_current_source(
+        current_gain=current_gain,
+        control_branch=kwargs.pop('control_branch'),
+        **kwargs,
+    )
+
+
+def voltage_controlled_current_source_from_dict(**kwargs) -> TwoTerminalComponent:
+    return elm.voltage_controlled_current_source(
+        G=kwargs.pop('G'),
+        control_nodes=(kwargs.pop('NC1'), kwargs.pop('NC2')),
+        **kwargs,
+    )
+
+
+def current_controlled_voltage_source_from_dict(**kwargs) -> TwoTerminalComponent:
+    try:
+        transresistance = kwargs.pop('transresistance')
+    except KeyError:
+        transresistance = kwargs.pop('R', None)
+    if transresistance is None:
+        raise FileFormatError
+    return elm.current_controlled_voltage_source(
+        transresistance=transresistance,
+        control_branch=kwargs.pop('control_branch'),
+        **kwargs,
+    )
+
+
+def voltage_controlled_voltage_source_from_dict(**kwargs) -> TwoTerminalComponent:
+    try:
+        voltage_gain = kwargs.pop('voltage_gain')
+    except KeyError:
+        voltage_gain = kwargs.pop('gain', None)
+    if voltage_gain is None:
+        raise FileFormatError
+    return elm.voltage_controlled_voltage_source(
+        voltage_gain=voltage_gain,
+        control_nodes=(kwargs.pop('NC1'), kwargs.pop('NC2')),
+        **kwargs,
+    )
+
+
+network_branch_translators : dict[str, Callable[..., TwoTerminalComponent]] = {
     "resistor" : elm.resistor,
     "conductor" : elm.conductance,
     "impedance" : lambda **kwargs: elm.impedance(Z=to_complex(kwargs.pop('Z')), **kwargs),
@@ -31,7 +83,10 @@ network_branch_translators : dict[str, Callable[..., elm.NortenTheveninElement]]
     "linear_current_source" : lambda **kwargs: elm.current_source(**translate_to_complex(keys=['I', 'Y'], **kwargs)),
     "current_source" : lambda **kwargs: elm.current_source(I=to_complex(kwargs.pop('I')), **kwargs),
     "real_current_source" : elm.current_source,
-    "voltage_controlled_current_source" : lambda **kwargs: elm.voltage_controlled_current_source(G=kwargs.pop('G'), control_nodes=(kwargs.pop('NC1'), kwargs.pop('NC2')), **kwargs),
+    "voltage_controlled_current_source" : voltage_controlled_current_source_from_dict,
+    "current_controlled_current_source" : current_controlled_current_source_from_dict,
+    "voltage_controlled_voltage_source" : voltage_controlled_voltage_source_from_dict,
+    "current_controlled_voltage_source" : current_controlled_voltage_source_from_dict,
     "linear_voltage_source" : lambda **kwargs: elm.voltage_source(V=to_complex(kwargs.pop('V')), Z=to_complex(kwargs.pop('Z')), **kwargs),
     "voltage_source" : lambda **kwargs: elm.voltage_source(V=to_complex(kwargs.pop('V')), **kwargs),
     "real_voltage_source" : elm.voltage_source,

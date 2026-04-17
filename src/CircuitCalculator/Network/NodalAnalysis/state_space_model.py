@@ -37,12 +37,19 @@ class StateSpaceGenericOutput:
         return c_pos - c_neg
 
     def c_row_current(self, branch_id: str) -> mo.Matrix:
-        voltage_source_mapping = self._voltage_source_label_mapping.filter_keys(lambda x: self.network[x].element.is_ideal_voltage_source)
+        element = self.network[branch_id].element
+        if element.is_voltage_controlled_current_source:
+            return element.transconductance * (
+                self.c_row_for_potential(element.control_node1)
+                - self.c_row_for_potential(element.control_node2)
+            )
+        if element.is_current_controlled_current_source:
+            return element.current_gain * self.c_row_current(element.control_branch)
         if branch_id in self.c_values:
             idx = list(self.c_values.keys()).index(branch_id)
             return self.c_values[branch_id] * self.A[idx, :] # type: ignore
         if branch_id in self._voltage_source_label_mapping:
-            return self.C[voltage_source_mapping[branch_id] + self._node_label_mapping.N, :] # type: ignore
+            return self.C[self._voltage_source_label_mapping[branch_id] + self._node_label_mapping.N, :] # type: ignore
         if branch_id in self._current_source_label_mapping:
             return self.matrix_ops.zeros((1, self.C.shape[1]))
         branch = self.network[branch_id]
@@ -60,6 +67,14 @@ class StateSpaceGenericOutput:
         return d_pos - d_neg
 
     def d_row_current(self, branch_id: str) -> mo.Matrix:
+        element = self.network[branch_id].element
+        if element.is_voltage_controlled_current_source:
+            return element.transconductance * (
+                self.d_row_for_potential(element.control_node1)
+                - self.d_row_for_potential(element.control_node2)
+            )
+        if element.is_current_controlled_current_source:
+            return element.current_gain * self.d_row_current(element.control_branch)
         if branch_id in self.c_values:
             idx = list(self.c_values.keys()).index(branch_id)
             return self.c_values[branch_id] * self.B[idx, :] # type: ignore
