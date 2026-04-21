@@ -120,6 +120,19 @@ def voltage_controlled_voltage_source(id: str, nodes: tuple[str, str], voltage_g
         nodes=nodes
     )
 
+def operational_amplifier(id: str, nodes: tuple[str, str], *, input_nodes: tuple[str, str], gain: str = '100000', **_) -> Component:
+    if len(nodes) != 2:
+        raise ValueError('Operational amplifier output nodes must contain two nodes.')
+    if len(input_nodes) != 2:
+        raise ValueError('Operational amplifier input nodes must contain two nodes.')
+    input_nodes = tuple(input_nodes)
+    return Component(
+        type='operational_amplifier',
+        id=id,
+        value={'gain': gain if len(gain) > 0 else id, 'input_nodes': input_nodes},
+        nodes=nodes
+    )
+
 def current_controlled_voltage_source(id: str, nodes: tuple[str, str], transresistance: str = '', *, control_branch: str, **_) -> Component:
     if len(nodes) != 2:
         raise ValueError('Current controlled voltage source output nodes must contain two nodes.')

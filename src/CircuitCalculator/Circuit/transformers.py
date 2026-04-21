@@ -202,6 +202,22 @@ def voltage_controlled_voltage_source(voltage_source: cp.Component, *_) -> ntw.B
         element
     )
 
+def operational_amplifier(opamp: cp.Component, *_) -> ntw.Branch:
+    voltage_gain = complex(float(opamp.value['gain']), 0)
+    input_nodes = opamp.value['input_nodes']
+    if not isinstance(input_nodes, (tuple, list)) or len(input_nodes) != 2:
+        raise ValueError('Operational amplifier input nodes must contain two nodes.')
+    element = elm.voltage_controlled_voltage_source(
+        opamp.id,
+        voltage_gain,
+        control_nodes=(str(input_nodes[0]), str(input_nodes[1]))
+    )
+    return ntw.Branch(
+        opamp.nodes[0],
+        opamp.nodes[1],
+        element
+    )
+
 def current_controlled_voltage_source(voltage_source: cp.Component, *_) -> ntw.Branch:
     transresistance = complex(float(voltage_source.value['transresistance']), 0)
     control_branch = str(voltage_source.value['control_branch'])
@@ -284,6 +300,7 @@ transformers : dict[str, CircuitComponentTranslator] = {
     'voltage_controlled_current_source' : voltage_controlled_current_source,
     'current_controlled_current_source' : current_controlled_current_source,
     'voltage_controlled_voltage_source' : voltage_controlled_voltage_source,
+    'operational_amplifier' : operational_amplifier,
     'current_controlled_voltage_source' : current_controlled_voltage_source,
     'periodic_voltage_source' : periodic_voltage_source,
     'periodic_current_source' : periodic_current_source,

@@ -116,6 +116,24 @@ def voltage_controlled_voltage_source(voltage_source: cp.Component, _: sp.Symbol
         element
     )
 
+def operational_amplifier(opamp: cp.Component, _: sp.Symbol) -> ntw.Branch:
+    gain = sp.sympify(opamp.value.get('gain', 'nan'))
+    if gain == sp.nan or opamp.id == opamp.value['gain']:
+        gain = sp.Symbol(opamp.id, real=True)
+    input_nodes = opamp.value['input_nodes']
+    if not isinstance(input_nodes, (tuple, list)) or len(input_nodes) != 2:
+        raise ValueError('Operational amplifier input nodes must contain two nodes.')
+    element = elm.voltage_controlled_voltage_source(
+        opamp.id,
+        gain,
+        control_nodes=(str(input_nodes[0]), str(input_nodes[1]))
+    )
+    return ntw.Branch(
+        opamp.nodes[0],
+        opamp.nodes[1],
+        element
+    )
+
 def current_controlled_voltage_source(voltage_source: cp.Component, _: sp.Symbol) -> ntw.Branch:
     transresistance = sp.sympify(voltage_source.value.get('transresistance', 'nan'))
     if transresistance == sp.nan or voltage_source.id == voltage_source.value['transresistance']:
@@ -158,6 +176,7 @@ transformers : dict[str, CircuitComponentTranslator] = {
     'voltage_controlled_current_source' : voltage_controlled_current_source,
     'current_controlled_current_source' : current_controlled_current_source,
     'voltage_controlled_voltage_source' : voltage_controlled_voltage_source,
+    'operational_amplifier' : operational_amplifier,
     'current_controlled_voltage_source' : current_controlled_voltage_source,
     'open_circuit' : open_circuit,
     'short_circuit' : short_circuit,
