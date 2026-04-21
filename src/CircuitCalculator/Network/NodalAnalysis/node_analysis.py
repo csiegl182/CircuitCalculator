@@ -71,8 +71,15 @@ def state_space_matrices(network: Network, c_values: Mapping[str, float | symbol
             Q[i][i] = 1
         Q = np.vstack((np.hstack( (Qi, np.zeros((Qi.shape[0], Q.shape[1]) ))),
                     np.hstack( (np.zeros((Q.shape[0], Qi.shape[1])), Q) )))
-        QS = Q[:,[label_mappings.source_mapping[l] for l in label_mappings.source_mapping if l not in values]]
-        QL = Q[:,[label_mappings.source_mapping[l] for l in label_mappings.source_mapping if l in values]]
+        source_mapping = label_mappings.source_and_inductance_mapping
+
+        def incidence_column(label: str) -> int:
+            if label in label_mappings.current_source_mapping.keys:
+                return label_mappings.current_source_mapping[label]
+            return label_mappings.current_source_mapping.N + label_mappings.voltage_source_mapping[label]
+
+        QS = Q[:,[incidence_column(l) for l in source_mapping if l not in values]]
+        QL = Q[:,[incidence_column(l) for l in source_mapping if l in values]]
         return QS, QL
     def value_matrix(c_values: Mapping[str, float | symbolic], l_values: Mapping[str, float | symbolic]) -> np.ndarray:
         return matrix_ops.vstack((

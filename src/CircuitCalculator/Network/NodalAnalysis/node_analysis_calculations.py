@@ -14,10 +14,18 @@ class InvalidControlledSource(Exception):
     ...
 
 
-def node_index(network: Network, label_mappings: NetworkLabelMappings, node: str) -> int | None:
+def node_index(
+    network: Network,
+    label_mappings: NetworkLabelMappings,
+    node: str,
+    role: str = "Node",
+) -> int | None:
     if node == network.reference_node_label:
         return None
-    return label_mappings.node_mapping[node]
+    try:
+        return label_mappings.node_mapping[node]
+    except KeyError as e:
+        raise InvalidControlledSource(f"{role} '{node}' is not connected to the network.") from e
 
 
 def output_nodes(branch: Branch) -> tuple[tuple[str, int], tuple[str, int]]:
@@ -49,10 +57,6 @@ def branch_current_terms(
     except (KeyError, ValueError) as e:
         raise InvalidControlledSource(f"Control branch '{branch_id}' does not exist.") from e
 
-    element = branch.element
-    if not is_norten_thevenin_element(element):
-        raise InvalidControlledSource(f"Control branch '{branch_id}' must be a Norten/Thevenin element.")
-
     node_terms: dict[str, mo.MatrixElement] = {}
     voltage_source_terms: dict[str, mo.MatrixElement] = {}
     constant = matrix_ops.elm(0)
@@ -60,6 +64,10 @@ def branch_current_terms(
     if branch_id in label_mappings.voltage_source_mapping.keys:
         voltage_source_terms[branch_id] = matrix_ops.elm(1)
         return node_terms, voltage_source_terms, constant
+
+    element = branch.element
+    if not is_norten_thevenin_element(element):
+        raise InvalidControlledSource(f"Control branch '{branch_id}' must be a Norten/Thevenin element.")
     if element.is_ideal_current_source:
         return node_terms, voltage_source_terms, matrix_ops.elm(element.I)
     if element.is_current_source:
@@ -101,7 +109,7 @@ def voltage_controlled_current_source_matrix(
             if row is None:
                 continue
             for control_node, control_sign in control_nodes:
-                column = node_index(network, label_mappings, control_node)
+                column = node_index(network, label_mappings, control_node, "Control node")
                 if column is None:
                     continue
                 Y[row, column] += output_sign*control_sign*transconductance
@@ -211,7 +219,7 @@ def voltage_controlled_voltage_source_constraint_matrix(
         row = label_mappings.voltage_source_mapping[source.id]
         control_nodes = ((source.element.control_node1, 1), (source.element.control_node2, -1))
         for control_node, control_sign in control_nodes:
-            column = node_index(network, label_mappings, control_node)
+            column = node_index(network, label_mappings, control_node, "Control node")
             if column is None:
                 continue
             A[row, column] += -control_sign*voltage_gain

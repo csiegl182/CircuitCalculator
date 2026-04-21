@@ -19,6 +19,7 @@ from CircuitCalculator.Network.elements import (
     impedance,
     resistor,
     voltage_controlled_current_source,
+    voltage_controlled_voltage_source,
     voltage_source,
 )
 from CircuitCalculator.Network.network import Branch, Network
@@ -116,6 +117,26 @@ def test_current_controlled_current_source_can_be_controlled_by_conductance_bran
     np.testing.assert_almost_equal(solution.get_current('Gcontrol'), 1)
     np.testing.assert_almost_equal(solution.get_current('F'), current_gain)
     np.testing.assert_almost_equal(solution.get_potential('2'), current_gain)
+
+
+def test_current_controlled_current_source_can_be_controlled_by_controlled_voltage_source_current() -> None:
+    current_gain = 2
+    network = Network(
+        branches=[
+            Branch('1', '0', voltage_source('Vin', 1)),
+            Branch('2', '0', voltage_controlled_voltage_source('Econtrol', 2, control_nodes=('1', '0'))),
+            Branch('2', '0', conductance('Gcontrol_load', 1)),
+            Branch('0', '3', current_controlled_current_source('F', current_gain, control_branch='Econtrol')),
+            Branch('3', '0', conductance('Gout', 1)),
+        ],
+        reference_node_label='0',
+    )
+
+    solution = numeric_nodal_analysis_bias_point_solution(network)
+
+    np.testing.assert_almost_equal(solution.get_current('Econtrol'), -2)
+    np.testing.assert_almost_equal(solution.get_current('F'), -current_gain*2)
+    np.testing.assert_almost_equal(solution.get_potential('3'), -current_gain*2)
 
 
 @pytest.mark.parametrize(

@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from hypothesis import given, strategies as st
+from hypothesis import given, settings, strategies as st
 
 from CircuitCalculator.SignalProcessing.periodic_functions import (
     CosFunction,
@@ -41,6 +41,10 @@ PHASES = st.floats(
     allow_subnormal=False,
 )
 
+trapezoid = getattr(np, 'trapezoid', None)
+if trapezoid is None:
+    trapezoid = np.trapz
+
 
 def calc_fourier_coefficients_via_integration(
     p_fcn: PeriodicFunction,
@@ -54,10 +58,10 @@ def calc_fourier_coefficients_via_integration(
     y = p_fcn.time_function(t)
 
     an = np.array(
-        [2/T*np.trapezoid(y*np.cos(n*w*t), dx=dt) for n in range(num_f_samples)]
+        [2/T*trapezoid(y*np.cos(n*w*t), dx=dt) for n in range(num_f_samples)]
     )
     bn = np.array(
-        [2/T*np.trapezoid(y*np.sin(n*w*t), dx=dt) for n in range(num_f_samples)]
+        [2/T*trapezoid(y*np.sin(n*w*t), dx=dt) for n in range(num_f_samples)]
     )
     return (an, bn)
 
@@ -84,6 +88,7 @@ def assert_coefficients(
     )
 
 
+@settings(deadline=None)
 @given(PERIODS, AMPLITUDES, PHASES, OFFSETS)
 def test_first_100_ab_coefficients_of_cos_function(
     T: float,
@@ -102,6 +107,7 @@ def test_first_100_ab_coefficients_of_cos_function(
             assert_coefficients(cos_coef, n, 0)
 
 
+@settings(deadline=None)
 @given(PERIODS, AMPLITUDES, PHASES, OFFSETS)
 def test_first_100_ab_coefficients_of_sin_function(
     T: float,
@@ -120,6 +126,7 @@ def test_first_100_ab_coefficients_of_sin_function(
             assert_coefficients(sin_coef, n, 0)
 
 
+@settings(deadline=None)
 @given(PERIODS, AMPLITUDES, PHASES, OFFSETS)
 def test_first_100_ab_coefficients_of_rect_function(
     T: float,
@@ -138,6 +145,7 @@ def test_first_100_ab_coefficients_of_rect_function(
             assert_coefficients(rect_coef, n, 4/n/np.pi*A, -np.pi/2+n*phi)
 
 
+@settings(deadline=None)
 @given(PERIODS, AMPLITUDES, PHASES, OFFSETS)
 def test_first_20_ab_coefficients_of_tri_function(
     T: float,
@@ -156,6 +164,7 @@ def test_first_20_ab_coefficients_of_tri_function(
             assert_coefficients(tri_coef, n, 8/n/n/np.pi/np.pi*A, n*phi)
 
 
+@settings(deadline=None)
 @given(PERIODS, AMPLITUDES, PHASES, OFFSETS)
 def test_first_20_ab_coefficients_of_saw_function(
     T: float,

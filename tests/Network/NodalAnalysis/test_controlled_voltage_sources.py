@@ -87,6 +87,25 @@ def test_current_controlled_voltage_source_is_solved_from_resistor_control_curre
     np.testing.assert_almost_equal(solution.get_current('Hout'), -3)
 
 
+def test_current_controlled_voltage_source_can_be_controlled_by_controlled_voltage_source_current() -> None:
+    transresistance = 3
+    network = Network(
+        branches=[
+            Branch('1', '0', voltage_source('Vin', 1)),
+            Branch('2', '0', voltage_controlled_voltage_source('Econtrol', 2, control_nodes=('1', '0'))),
+            Branch('2', '0', conductance('Gcontrol_load', 1)),
+            Branch('3', '0', current_controlled_voltage_source('Hout', transresistance, control_branch='Econtrol')),
+            Branch('3', '0', conductance('Gout', 1)),
+        ],
+        reference_node_label='0',
+    )
+
+    solution = numeric_nodal_analysis_bias_point_solution(network)
+
+    np.testing.assert_almost_equal(solution.get_current('Econtrol'), -2)
+    np.testing.assert_almost_equal(solution.get_voltage('Hout'), -transresistance*2)
+
+
 @pytest.mark.parametrize(
     "control_branch_id, branches",
     [

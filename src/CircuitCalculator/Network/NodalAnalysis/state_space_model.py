@@ -19,6 +19,7 @@ class StateSpaceGenericOutput:
             label_mappings_factory=label_mappings_factory
         )
         self._node_label_mapping = label_mappings_factory(self.network).node_mapping
+        self._source_label_mapping = label_mappings_factory(self.network).source_and_inductance_mapping
         self._voltage_source_label_mapping = label_mappings_factory(self.network).voltage_source_mapping
         self._current_source_label_mapping = label_mappings_factory(self.network).current_source_mapping
 
@@ -110,9 +111,7 @@ class StateSpaceGenericOutput:
         return extended_D
 
     def sources(self) -> list[str]:
-        current_sources = self._current_source_label_mapping.keys
-        voltage_sources = [vs for vs in self._voltage_source_label_mapping.keys if vs not in self.l_values]
-        return current_sources + voltage_sources
+        return [source for source in self._source_label_mapping.keys if source not in self.l_values]
 
 # def numeric_state_space_model(network: Network, c_values: Mapping[str, float], l_values: Mapping[str, float], node_index_mapper: map.NetworkMapper = map.default_node_mapper, voltage_source_index_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper, current_source_index_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper) -> StateSpaceGenericOutput:
 def numeric_state_space_model(network: Network, c_values: Mapping[str, float], l_values: Mapping[str, float], label_mappings_factory: map.LabelMappingsFactory = map.default_label_mappings_factory) -> StateSpaceGenericOutput:

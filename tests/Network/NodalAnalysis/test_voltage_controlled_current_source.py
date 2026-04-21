@@ -1,8 +1,9 @@
 import numpy as np
+import pytest
 import sympy as sp
 from CircuitCalculator.Network.NodalAnalysis.label_mapping import default_label_mappings_factory
 from CircuitCalculator.Network.NodalAnalysis.matrix_operations import NumPyMatrixOperations, SymPyMatrixOperations
-from CircuitCalculator.Network.NodalAnalysis.node_analysis_calculations import node_admittance_matrix
+from CircuitCalculator.Network.NodalAnalysis.node_analysis_calculations import InvalidControlledSource, node_admittance_matrix
 from CircuitCalculator.Network.network import Branch, Network
 from CircuitCalculator.Network.elements import conductance, voltage_controlled_current_source
 from CircuitCalculator.Network.symbolic_elements import admittance, voltage_controlled_current_source as symbolic_vccs
@@ -45,3 +46,16 @@ def test_symbolic_voltage_controlled_current_source_stamps_node_admittance_matri
         [1, 0],
         [-transconductance, 1]
     ])
+
+
+def test_voltage_controlled_current_source_reports_unknown_control_node() -> None:
+    network = Network(
+        branches=[
+            Branch('0', '2', voltage_controlled_current_source('Gm', 1, control_nodes=('missing', '0'))),
+            Branch('2', '0', conductance('Gout', 1)),
+        ],
+        reference_node_label='0'
+    )
+
+    with pytest.raises(InvalidControlledSource, match="Control node 'missing' is not connected to the network."):
+        node_admittance_matrix(network, NumPyMatrixOperations(), default_label_mappings_factory(network))
