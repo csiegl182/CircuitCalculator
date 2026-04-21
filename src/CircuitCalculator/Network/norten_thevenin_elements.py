@@ -1,64 +1,10 @@
-from typing import Protocol
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 import numpy as np
 import sympy as sp
 
-symbolic = sp.core.symbol.Symbol
-
-class NortenTheveninElement(Protocol):
-    @property
-    def name(self) -> str:
-        """Name of element"""
-        ...
-    @property
-    def type(self) -> str:
-        """Specific element type"""
-        ...
-    @property
-    def Z(self) -> complex | symbolic:
-        """Impedance value of element"""
-        ...
-    @property
-    def Y(self) -> complex | symbolic:
-        """Admittance value of element"""
-        ...
-    @property
-    def V(self) -> complex | symbolic:
-        """Voltage value of element"""
-        ...
-    @property
-    def I(self) -> complex | symbolic:
-        """Current value of element"""
-        ...
-    @property
-    def is_voltage_source(self) -> bool:
-        """Check if element behaves as a linear voltage source"""
-        ...
-    @property
-    def is_current_source(self) -> bool:
-        """Check if element behaves as a linear current source"""
-        ...
-    @property
-    def is_ideal_voltage_source(self) -> bool:
-        """Check if element behaves as an ideal voltage source"""
-        ...
-    @property
-    def is_ideal_current_source(self) -> bool:
-        """Check if element behaves as an ideal current source"""
-        ...
-    @property
-    def is_active(self) -> bool:
-        """Check if element is active"""
-        ...
-    @property
-    def is_short_circuit(self) -> bool:
-        """Check if element behaves as a short circuit"""
-        ... 
-    @property
-    def is_open_circuit(self) -> bool:
-        """Check if element behaves as an open circuit"""
-        ...
+from .controlled_sources import VoltageControlledCurrentSource
+from .network_components import NortenTheveninElement, symbolic
 
 @dataclass(frozen=True)
 class NumericNortenTheveninElement(ABC):
@@ -96,6 +42,34 @@ class NumericNortenTheveninElement(ABC):
     @property
     def is_ideal_current_source(self) -> bool:
         return np.abs(self.I) >= 0 and self.Y==0
+
+    @property
+    def is_voltage_controlled_current_source(self) -> bool:
+        return False
+
+    @property
+    def is_current_controlled_current_source(self) -> bool:
+        return False
+
+    @property
+    def is_voltage_controlled_voltage_source(self) -> bool:
+        return False
+
+    @property
+    def is_current_controlled_voltage_source(self) -> bool:
+        return False
+
+    @property
+    def is_controlled_source(self) -> bool:
+        return False
+
+    @property
+    def is_controlled_current_source(self) -> bool:
+        return False
+
+    @property
+    def is_controlled_voltage_source(self) -> bool:
+        return False
 
     @property
     def is_active(self) -> bool:
@@ -183,6 +157,34 @@ class SymbolicNortenTheveninElement(ABC):
     @property
     def is_ideal_current_source(self) -> bool:
         return self.I != sp.nan and self.Y == 0
+
+    @property
+    def is_voltage_controlled_current_source(self) -> bool:
+        return False
+
+    @property
+    def is_current_controlled_current_source(self) -> bool:
+        return False
+
+    @property
+    def is_voltage_controlled_voltage_source(self) -> bool:
+        return False
+
+    @property
+    def is_current_controlled_voltage_source(self) -> bool:
+        return False
+
+    @property
+    def is_controlled_source(self) -> bool:
+        return False
+
+    @property
+    def is_controlled_current_source(self) -> bool:
+        return False
+
+    @property
+    def is_controlled_voltage_source(self) -> bool:
+        return False
 
     @property
     def is_active(self) -> bool:

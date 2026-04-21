@@ -19,6 +19,13 @@ def test_impedance_of_inductance_is_zero() -> None:
     ])
     assert symbolic_open_circuit_dc_resistance(circuit, '1', '0') == 0
 
+def test_impedance_of_capacitance_is_infinite() -> None:
+    circuit = Circuit([
+        cp.capacitor(id='C', nodes=('1', '0')),
+        cp.ground(nodes=('0',))
+    ])
+    assert symbolic_open_circuit_dc_resistance(circuit, '1', '0') == sp.oo
+
 def test_impedance_of_resistor_with_following_short_circuit() -> None:
     R = sp.symbols('R', real=True, positive=True)
     circuit = Circuit([

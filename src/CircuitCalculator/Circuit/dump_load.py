@@ -54,6 +54,11 @@ circuit_component_translators : dict[str, Callable[..., cp.Component]] = {
     "dc_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.dc_current_source, s_cp.current_source), numeric_keys={'I': float}),
     "ac_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.ac_current_source, s_cp.current_source), numeric_keys={'I': float, 'w': float}),
     "complex_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.complex_current_source, s_cp.current_source), numeric_keys={'I': complex}),
+    "voltage_controlled_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.voltage_controlled_current_source, s_cp.voltage_controlled_current_source), numeric_keys={'G': float}),
+    "current_controlled_current_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.current_controlled_current_source, s_cp.current_controlled_current_source), numeric_keys={'current_gain': float}),
+    "voltage_controlled_voltage_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.voltage_controlled_voltage_source, s_cp.voltage_controlled_voltage_source), numeric_keys={'voltage_gain': float}),
+    "operational_amplifier" : functools.partial(numeric_component_factory, factory_fcn=(cp.operational_amplifier, s_cp.operational_amplifier), numeric_keys={'gain': float}),
+    "current_controlled_voltage_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.current_controlled_voltage_source, s_cp.current_controlled_voltage_source), numeric_keys={'transresistance': float}),
     "lamp" : functools.partial(numeric_component_factory, factory_fcn=(cp.resistive_load, s_cp.open_circuit), numeric_keys={'P': float, 'V_ref': float})
 }
 

@@ -1,5 +1,5 @@
 from CircuitCalculator.Network.network import Network, Branch
-from CircuitCalculator.Network.elements import resistor, voltage_source
+from CircuitCalculator.Network.elements import open_circuit, resistor, voltage_source
 from CircuitCalculator.Network.NodalAnalysis.node_analysis import open_circuit_impedance
 from numpy.testing import assert_almost_equal
 
@@ -24,6 +24,22 @@ def test_total_impedeance_returns_zero_on_nodes_of_ideal_voltage_source() -> Non
         Branch('3', '0', resistor('R3', R3)),
         ])
     assert open_circuit_impedance(network, '0', '1') == 0
+
+def test_total_impedeance_returns_infinity_on_open_circuit() -> None:
+    network = Network([
+        Branch('1', '0', open_circuit('X')),
+    ])
+
+    assert open_circuit_impedance(network, '1', '0') == complex(float('inf'), 0)
+
+def test_total_impedeance_ignores_unrelated_open_circuit() -> None:
+    R = 100
+    network = Network([
+        Branch('1', '0', open_circuit('X')),
+        Branch('2', '0', resistor('R', R)),
+    ])
+
+    assert open_circuit_impedance(network, '2', '0') == R
 
 def test_total_impedeance_returns_correct_values() -> None:
     R1, R2, R3 = 10, 20, 30

@@ -77,3 +77,17 @@ def test_complex_current_source_translator() -> None:
     assert current_source.nodes == current_source_dict['nodes']
     assert current_source.value['I_real'] == complex(current_source_dict['value']['I'].replace(' ', '')).real
     assert current_source.value['I_imag'] == complex(current_source_dict['value']['I'].replace(' ', '')).imag
+
+def test_voltage_controlled_current_source_translator() -> None:
+    current_source_dict = {
+        'type': 'voltage_controlled_current_source',
+        'id': 'Gm',
+        'nodes': ('0', '2'),
+        'value': {'G': 0.5, 'control_nodes': ('1', '0')}
+    }
+    current_source = generate_component(current_source_dict)
+    assert current_source.type == current_source_dict['type']
+    assert current_source.id == current_source_dict['id']
+    assert current_source.nodes == current_source_dict['nodes']
+    assert current_source.value['G'] == current_source_dict['value']['G']
+    assert current_source.value['control_nodes'] == current_source_dict['value']['control_nodes']

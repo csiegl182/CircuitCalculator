@@ -19,6 +19,7 @@ class StateSpaceGenericOutput:
             label_mappings_factory=label_mappings_factory
         )
         self._node_label_mapping = label_mappings_factory(self.network).node_mapping
+        self._source_label_mapping = label_mappings_factory(self.network).source_and_inductance_mapping
         self._voltage_source_label_mapping = label_mappings_factory(self.network).voltage_source_mapping
         self._current_source_label_mapping = label_mappings_factory(self.network).current_source_mapping
 
@@ -37,12 +38,19 @@ class StateSpaceGenericOutput:
         return c_pos - c_neg
 
     def c_row_current(self, branch_id: str) -> mo.Matrix:
-        voltage_source_mapping = self._voltage_source_label_mapping.filter_keys(lambda x: self.network[x].element.is_ideal_voltage_source)
+        element = self.network[branch_id].element
+        if element.is_voltage_controlled_current_source:
+            return element.transconductance * (
+                self.c_row_for_potential(element.control_node1)
+                - self.c_row_for_potential(element.control_node2)
+            )
+        if element.is_current_controlled_current_source:
+            return element.current_gain * self.c_row_current(element.control_branch)
         if branch_id in self.c_values:
             idx = list(self.c_values.keys()).index(branch_id)
             return self.c_values[branch_id] * self.A[idx, :] # type: ignore
         if branch_id in self._voltage_source_label_mapping:
-            return self.C[voltage_source_mapping[branch_id] + self._node_label_mapping.N, :] # type: ignore
+            return self.C[self._voltage_source_label_mapping[branch_id] + self._node_label_mapping.N, :] # type: ignore
         if branch_id in self._current_source_label_mapping:
             return self.matrix_ops.zeros((1, self.C.shape[1]))
         branch = self.network[branch_id]
@@ -60,6 +68,14 @@ class StateSpaceGenericOutput:
         return d_pos - d_neg
 
     def d_row_current(self, branch_id: str) -> mo.Matrix:
+        element = self.network[branch_id].element
+        if element.is_voltage_controlled_current_source:
+            return element.transconductance * (
+                self.d_row_for_potential(element.control_node1)
+                - self.d_row_for_potential(element.control_node2)
+            )
+        if element.is_current_controlled_current_source:
+            return element.current_gain * self.d_row_current(element.control_branch)
         if branch_id in self.c_values:
             idx = list(self.c_values.keys()).index(branch_id)
             return self.c_values[branch_id] * self.B[idx, :] # type: ignore
@@ -95,9 +111,7 @@ class StateSpaceGenericOutput:
         return extended_D
 
     def sources(self) -> list[str]:
-        current_sources = self._current_source_label_mapping.keys
-        voltage_sources = [vs for vs in self._voltage_source_label_mapping.keys if vs not in self.l_values]
-        return current_sources + voltage_sources
+        return [source for source in self._source_label_mapping.keys if source not in self.l_values]
 
 # def numeric_state_space_model(network: Network, c_values: Mapping[str, float], l_values: Mapping[str, float], node_index_mapper: map.NetworkMapper = map.default_node_mapper, voltage_source_index_mapper: map.SourceIndexMapper = map.alphabetic_voltage_source_mapper, current_source_index_mapper: map.SourceIndexMapper = map.alphabetic_current_source_mapper) -> StateSpaceGenericOutput:
 def numeric_state_space_model(network: Network, c_values: Mapping[str, float], l_values: Mapping[str, float], label_mappings_factory: map.LabelMappingsFactory = map.default_label_mappings_factory) -> StateSpaceGenericOutput:

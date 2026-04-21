@@ -154,6 +154,86 @@ def complex_current_source(current_source: cp.Component, w: float = 0, w_resolut
         current_source.nodes[1],
         element)
 
+def voltage_controlled_current_source(current_source: cp.Component, *_) -> ntw.Branch:
+    G = complex(float(current_source.value['G']), 0)
+    control_nodes = current_source.value['control_nodes']
+    if not isinstance(control_nodes, (tuple, list)) or len(control_nodes) != 2:
+        raise ValueError('Voltage controlled current source control nodes must contain two nodes.')
+    element = elm.voltage_controlled_current_source(
+        current_source.id,
+        G,
+        control_nodes=(str(control_nodes[0]), str(control_nodes[1]))
+    )
+    return ntw.Branch(
+        current_source.nodes[0],
+        current_source.nodes[1],
+        element
+    )
+
+def current_controlled_current_source(current_source: cp.Component, *_) -> ntw.Branch:
+    current_gain = complex(float(current_source.value['current_gain']), 0)
+    control_branch = str(current_source.value['control_branch'])
+    if len(control_branch) == 0:
+        raise ValueError('Current controlled current source control branch must not be empty.')
+    element = elm.current_controlled_current_source(
+        current_source.id,
+        current_gain,
+        control_branch=control_branch
+    )
+    return ntw.Branch(
+        current_source.nodes[0],
+        current_source.nodes[1],
+        element
+    )
+
+def voltage_controlled_voltage_source(voltage_source: cp.Component, *_) -> ntw.Branch:
+    voltage_gain = complex(float(voltage_source.value['voltage_gain']), 0)
+    control_nodes = voltage_source.value['control_nodes']
+    if not isinstance(control_nodes, (tuple, list)) or len(control_nodes) != 2:
+        raise ValueError('Voltage controlled voltage source control nodes must contain two nodes.')
+    element = elm.voltage_controlled_voltage_source(
+        voltage_source.id,
+        voltage_gain,
+        control_nodes=(str(control_nodes[0]), str(control_nodes[1]))
+    )
+    return ntw.Branch(
+        voltage_source.nodes[0],
+        voltage_source.nodes[1],
+        element
+    )
+
+def operational_amplifier(opamp: cp.Component, *_) -> ntw.Branch:
+    voltage_gain = complex(float(opamp.value['gain']), 0)
+    input_nodes = opamp.value['input_nodes']
+    if not isinstance(input_nodes, (tuple, list)) or len(input_nodes) != 2:
+        raise ValueError('Operational amplifier input nodes must contain two nodes.')
+    element = elm.voltage_controlled_voltage_source(
+        opamp.id,
+        voltage_gain,
+        control_nodes=(str(input_nodes[0]), str(input_nodes[1]))
+    )
+    return ntw.Branch(
+        opamp.nodes[0],
+        opamp.nodes[1],
+        element
+    )
+
+def current_controlled_voltage_source(voltage_source: cp.Component, *_) -> ntw.Branch:
+    transresistance = complex(float(voltage_source.value['transresistance']), 0)
+    control_branch = str(voltage_source.value['control_branch'])
+    if len(control_branch) == 0:
+        raise ValueError('Current controlled voltage source control branch must not be empty.')
+    element = elm.current_controlled_voltage_source(
+        voltage_source.id,
+        transresistance,
+        control_branch=control_branch
+    )
+    return ntw.Branch(
+        voltage_source.nodes[0],
+        voltage_source.nodes[1],
+        element
+    )
+
 def periodic_current_source(source: cp.Component, w: float = 0, w_resolution: float = 1e-3, *_) -> ntw.Branch:
     wavetype = str(source.value['wavetype'])
     w0 = float(source.value['w'])
@@ -217,6 +297,11 @@ transformers : dict[str, CircuitComponentTranslator] = {
     'dc_current_source' : dc_current_source,
     'ac_current_source' : ac_current_source,
     'complex_current_source' : complex_current_source,
+    'voltage_controlled_current_source' : voltage_controlled_current_source,
+    'current_controlled_current_source' : current_controlled_current_source,
+    'voltage_controlled_voltage_source' : voltage_controlled_voltage_source,
+    'operational_amplifier' : operational_amplifier,
+    'current_controlled_voltage_source' : current_controlled_voltage_source,
     'periodic_voltage_source' : periodic_voltage_source,
     'periodic_current_source' : periodic_current_source,
     'short_circuit' : short_circuit,

@@ -5,7 +5,7 @@ class Component:
     type : str
     id : str = field(default='0')
     nodes : tuple[str, ...] = field(default=('0',))
-    value: dict[str, float | str] = field(default_factory=dict)
+    value: dict[str, float | str | tuple[str, str]] = field(default_factory=dict)
 
 def resistor(id: str, nodes: tuple[str, str], R: float, **_) -> Component:
     if R < 0:
@@ -138,6 +138,69 @@ def complex_current_source(id: str, nodes: tuple[str, str], I: complex, Y: compl
         value={'I_real': I.real, 'I_imag': I.imag, 'G': Y.real, 'B': Y.imag},
         nodes=nodes
         )
+
+def voltage_controlled_current_source(id: str, nodes: tuple[str, str], G: float, *, control_nodes: tuple[str, str], **_) -> Component:
+    if len(nodes) != 2:
+        raise ValueError('Voltage controlled current source output nodes must contain two nodes.')
+    if len(control_nodes) != 2:
+        raise ValueError('Voltage controlled current source control nodes must contain two nodes.')
+    control_nodes = tuple(control_nodes)
+    return Component(
+        type='voltage_controlled_current_source',
+        id=id,
+        value={'G': G, 'control_nodes': control_nodes},
+        nodes=nodes
+    )
+
+def current_controlled_current_source(id: str, nodes: tuple[str, str], current_gain: float, *, control_branch: str, **_) -> Component:
+    if len(nodes) != 2:
+        raise ValueError('Current controlled current source output nodes must contain two nodes.')
+    if len(control_branch) == 0:
+        raise ValueError('Current controlled current source control branch must not be empty.')
+    return Component(
+        type='current_controlled_current_source',
+        id=id,
+        value={'current_gain': current_gain, 'control_branch': control_branch},
+        nodes=nodes
+    )
+
+def voltage_controlled_voltage_source(id: str, nodes: tuple[str, str], voltage_gain: float, *, control_nodes: tuple[str, str], **_) -> Component:
+    if len(nodes) != 2:
+        raise ValueError('Voltage controlled voltage source output nodes must contain two nodes.')
+    if len(control_nodes) != 2:
+        raise ValueError('Voltage controlled voltage source control nodes must contain two nodes.')
+    control_nodes = tuple(control_nodes)
+    return Component(
+        type='voltage_controlled_voltage_source',
+        id=id,
+        value={'voltage_gain': voltage_gain, 'control_nodes': control_nodes},
+        nodes=nodes
+    )
+
+def operational_amplifier(id: str, nodes: tuple[str, str], *, input_nodes: tuple[str, str], gain: float = 100_000, **_) -> Component:
+    if len(nodes) != 2:
+        raise ValueError('Operational amplifier output nodes must contain two nodes.')
+    if len(input_nodes) != 2:
+        raise ValueError('Operational amplifier input nodes must contain two nodes.')
+    input_nodes = tuple(input_nodes)
+    return Component(
+        type='operational_amplifier',
+        id=id,
+        value={'gain': gain, 'input_nodes': input_nodes},
+        nodes=nodes
+    )
+
+def current_controlled_voltage_source(id: str, nodes: tuple[str, str], transresistance: float, *, control_branch: str, **_) -> Component:
+    if len(nodes) != 2:
+        raise ValueError('Current controlled voltage source output nodes must contain two nodes.')
+    if len(control_branch) == 0:
+        raise ValueError('Current controlled voltage source control branch must not be empty.')
+    return Component(
+        type='current_controlled_voltage_source',
+        id=id,
+        value={'transresistance': transresistance, 'control_branch': control_branch},
+        nodes=nodes
+    )
 
 def periodic_current_source(id: str, nodes: tuple[str, str], wavetype: str, I: float, w: float, phi: float, G: float = 0, **_) -> Component:
     return Component(

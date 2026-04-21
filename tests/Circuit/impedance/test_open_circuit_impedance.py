@@ -15,6 +15,11 @@ def test_impedance_of_inductance_is_zero() -> None:
     circuit = Circuit(components=[cp.inductor(L=L, id='L', nodes=('1', '0'))], ground_node='0')
     assert open_circuit_impedance(circuit, '1', '0') == 0
 
+def test_impedance_of_capacitance_is_infinite() -> None:
+    C = 100
+    circuit = Circuit(components=[cp.capacitor(C=C, id='C', nodes=('1', '0'))], ground_node='0')
+    assert open_circuit_impedance(circuit, '1', '0') == float('inf')
+
 def test_impedance_of_resistor_with_following_short_circuit() -> None:
     R = 100
     circuit = Circuit([
