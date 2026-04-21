@@ -30,6 +30,9 @@ def nodal_analysis_solution(network: Network, matrix_ops: mo.MatrixOperations = 
         )
 
 def open_circuit_impedance(network: Network, node1: str, node2: str, matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations(), label_mappings_factory: LabelMappingsFactory = default_label_mappings_factory) -> complex | symbolic:
+    def retained_indices(matrix: mo.Matrix, axis: int) -> list[int]:
+        return [i for i, has_element in enumerate(matrix_ops.any_element(matrix, axis=axis)) if has_element]
+
     if node1 == node2:
         return matrix_ops.elm(0).value
     if any([b.element.is_ideal_voltage_source for b in network.branches_between(node1, node2)]):
@@ -39,11 +42,18 @@ def open_circuit_impedance(network: Network, node1: str, node2: str, matrix_ops:
     network = trf.switch_ground_node(network=network, new_ground=node2)
     label_mappings = label_mappings_factory(network)
     Y = nodal_analysis_coefficient_matrix(network, matrix_ops=matrix_ops, label_mappings=label_mappings)
-    Y = matrix_ops.delete(Y, np.where(~matrix_ops.any_element(Y, axis=0))[0].tolist(), axis=1)
-    Y = matrix_ops.delete(Y, np.where(~matrix_ops.any_element(Y, axis=1))[0].tolist(), axis=0)
-    Z = matrix_ops.inv(Y)
     i1 = label_mappings.node_mapping[node1]
-    return Z.diagonal()[i1]
+    retained_columns = retained_indices(Y, axis=0)
+    retained_rows = retained_indices(Y, axis=1)
+    if i1 not in retained_columns or i1 not in retained_rows:
+        return matrix_ops.elm(float('inf')).value
+
+    columns_to_remove = [i for i in range(matrix_ops.shape(Y)[1]) if i not in retained_columns]
+    rows_to_remove = [i for i in range(matrix_ops.shape(Y)[0]) if i not in retained_rows]
+    Y = matrix_ops.delete(Y, columns_to_remove, axis=1)
+    Y = matrix_ops.delete(Y, rows_to_remove, axis=0)
+    Z = matrix_ops.inv(Y)
+    return Z[retained_columns.index(i1), retained_rows.index(i1)]
 
 def element_impedance(network: Network, element: str, matrix_ops: mo.MatrixOperations = mo.NumPyMatrixOperations(), label_mappings_factory: LabelMappingsFactory = default_label_mappings_factory) -> complex | symbolic:
     return open_circuit_impedance(
