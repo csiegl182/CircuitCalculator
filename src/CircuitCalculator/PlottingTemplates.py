@@ -4,8 +4,11 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 import numpy as np
 from functools import partial
-from CircuitCalculator.Display.ScientificFloat import scientific_float
-from CircuitCalculator.Network.EquivalentSources import NortenEquivalentSource, TheveninEquivalentSource
+from CircuitCalculator.Display.ScientificFloat import ScientificFloat
+from CircuitCalculator.Network.equivalent_sources import NortenEquivalentSource, TheveninEquivalentSource
+
+def scientific_float(value: float, **kwargs) -> str:
+    return str(ScientificFloat(value, use_exp_prefix=True, **kwargs))
 
 def plot_equivalent_source_diagram(x0: float, y0: float, xlabel: str, ylabel: str, m2: float = 0, title: str = '', x0label: str = '', y0label: str = '') -> tuple[Figure, Axes]:
     fig, ax = plt.subplots()
