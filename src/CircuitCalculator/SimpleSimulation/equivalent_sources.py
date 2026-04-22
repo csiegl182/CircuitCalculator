@@ -1,21 +1,11 @@
 from .schematic import create_schematic
-from . import errors
+from .file_loaders import load_simulation_file
 from ..Circuit.circuit import Circuit
 from ..Circuit import terminal_analysis as ta
 from ..SimpleCircuit.DiagramTranslator import circuit_translator
-from ..dump_load import load, ParseError
 
 
 SimulationSource = str | dict
-
-
-def load_simulation_file(name: str) -> dict:
-    try:
-        return load(name)
-    except FileNotFoundError as e:
-        raise FileNotFoundError(f'Simulation file "{name}" does not exist.') from e
-    except ParseError as e:
-        raise ParseError(f'Cannot parse "{name}" as simulation file due to format issues.') from e
 
 
 def circuit_from_simulation_data(data: dict) -> Circuit:
@@ -106,6 +96,3 @@ def norten_parameters(
 
 
 norton_parameters = norten_parameters
-
-
-equivalent_source_exceptions = errors.simulation_exceptions
