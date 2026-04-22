@@ -1,6 +1,7 @@
 from typing import Optional, Callable
 from .schematic import draw_schematic, create_schematic
 from . import errors
+from . import equivalent_sources
 from matplotlib.axes import Axes
 from CircuitCalculator.dump_load import load, ParseError
 import CircuitCalculator.Circuit.solution as solution
@@ -81,3 +82,10 @@ def circuit_information_from_file(name: str) -> Circuit:
     except errors.simulation_exceptions as e:
         print(e)
         return Circuit([])
+
+
+open_circuit_voltage = equivalent_sources.open_circuit_voltage
+short_circuit_current = equivalent_sources.short_circuit_current
+thevenin_parameters = equivalent_sources.thevenin_parameters
+norten_parameters = equivalent_sources.norten_parameters
+norton_parameters = equivalent_sources.norton_parameters
