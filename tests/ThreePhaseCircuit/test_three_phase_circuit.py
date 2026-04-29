@@ -1,6 +1,8 @@
 import numpy as np
+import pytest
 
 from CircuitCalculator.Circuit.Components import components as cp
+from CircuitCalculator.Network.solution import NetworkSolutionException
 from CircuitCalculator.ThreePhaseCircuit import (
     NodeExpander,
     ThreePhaseCircuit,
@@ -119,7 +121,7 @@ def test_three_phase_custom_component_supports_line_topology() -> None:
     line = three_phase_custom_component_line(
         id="L1",
         nodes=("SRC", "LOAD"),
-                phase_a=lambda cid, nd: cp.impedance(id=cid, nodes=nd, Z=0.1 + 0.2j),
+        phase_a=lambda cid, nd: cp.impedance(id=cid, nodes=nd, Z=0.1 + 0.2j),
         phase_b=lambda cid, nd: cp.impedance(id=cid, nodes=nd, Z=0.1 + 0.2j),
         phase_c=lambda cid, nd: cp.impedance(id=cid, nodes=nd, Z=0.1 + 0.2j),
     )
@@ -135,14 +137,14 @@ def test_three_phase_custom_component_supports_star_and_delta_topology() -> None
     star = three_phase_custom_component_star(
         id="CS",
         nodes=("BUS", "N"),
-                phase_a=lambda cid, nd: cp.impedance(id=cid, nodes=nd, Z=1 + 1j),
+        phase_a=lambda cid, nd: cp.impedance(id=cid, nodes=nd, Z=1 + 1j),
         phase_b=lambda cid, nd: cp.impedance(id=cid, nodes=nd, Z=2 + 2j),
         phase_c=lambda cid, nd: cp.impedance(id=cid, nodes=nd, Z=3 + 3j),
     )
     delta = three_phase_custom_component_delta(
         id="CD",
         nodes=("BUS2",),
-                phase_a=lambda cid, nd: cp.impedance(id=cid, nodes=nd, Z=1 + 0j),
+        phase_a=lambda cid, nd: cp.impedance(id=cid, nodes=nd, Z=1 + 0j),
         phase_b=lambda cid, nd: cp.impedance(id=cid, nodes=nd, Z=1 + 0j),
         phase_c=lambda cid, nd: cp.impedance(id=cid, nodes=nd, Z=1 + 0j),
     )
@@ -171,3 +173,50 @@ def test_three_phase_complex_solution_runs_for_balanced_star_case() -> None:
     assert np.isfinite(solution.get_current("V1.a").real)
     assert np.isfinite(solution.get_current("V1.b").real)
     assert np.isfinite(solution.get_current("V1.c").real)
+
+
+def test_invalid_nodes_raise_node_mapping_error() -> None:
+    from CircuitCalculator.ThreePhaseCircuit.components import NodeMappingError
+
+    invalid_components = [
+        three_phase_voltage_source_star(id="Vs", nodes=("BUS",), V=230 + 0j),
+        three_phase_voltage_source_delta(id="Vd", nodes=("BUS", "N"), V=400 + 0j),
+        three_phase_current_source_star(id="Is", nodes=("BUS",), I=10 + 0j),
+        three_phase_current_source_delta(id="Id", nodes=("BUS", "N"), I=10 + 0j),
+        three_phase_impedance_load_star(id="Zs", nodes=("BUS",), Z=10 + 5j),
+        three_phase_impedance_load_delta(id="Zd", nodes=("BUS", "N"), Z=10 + 5j),
+        three_phase_custom_component_line(
+            id="L", nodes=("ONLY_ONE",),
+            phase_a=lambda cid, nd: cp.impedance(id=cid, nodes=nd, Z=1 + 0j),
+            phase_b=lambda cid, nd: cp.impedance(id=cid, nodes=nd, Z=1 + 0j),
+            phase_c=lambda cid, nd: cp.impedance(id=cid, nodes=nd, Z=1 + 0j),
+        ),
+    ]
+
+    for component in invalid_components:
+        with pytest.raises(NodeMappingError):
+            transform_three_phase_circuit(ThreePhaseCircuit(components=[component]))
+
+
+def test_node_expander_collision_uses_short_suffix() -> None:
+    expander = NodeExpander()
+    expander._allocated.add("BUS.a")
+    node = expander.phase_node("BUS", "a")
+    assert node == "BUS.a_2"
+
+
+def test_three_phase_complex_solution_returns_nan_on_solver_conflict() -> None:
+    circuit = ThreePhaseCircuit(
+        components=[
+            three_phase_current_source_delta(id="Id", nodes=("BUS",), I=12 + 0j),
+            three_phase_impedance_load_delta(id="Zd", nodes=("BUS",), Z=25 + 10j),
+        ]
+    )
+
+    def failing_solver(_):
+        raise NetworkSolutionException("conflict", contradictional_elements=("Id.ab",))
+
+    solution = three_phase_complex_solution(circuit, w=2 * np.pi * 50, solver=failing_solver)
+
+    assert np.isnan(solution.get_current("Id.ab"))
+    assert np.isnan(solution.get_voltage("Zd.ab"))

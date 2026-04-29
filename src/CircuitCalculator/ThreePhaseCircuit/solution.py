@@ -2,7 +2,19 @@ from __future__ import annotations
 
 from ..Circuit.solution import ComplexSolution, NetworkSolver, complex_solution
 from ..Network.NodalAnalysis.solution import numeric_nodal_analysis_bias_point_solution
+from ..Network.solution import NetworkSolutionException
 from .circuit import ThreePhaseCircuit, transform_three_phase_circuit
+
+
+class _NaNNetworkSolution:
+    def get_voltage(self, *_):
+        raise KeyError
+
+    def get_current(self, *_):
+        raise KeyError
+
+    def get_potential(self, *_):
+        raise KeyError
 
 
 def three_phase_complex_solution(
@@ -11,4 +23,7 @@ def three_phase_complex_solution(
     peak_values: bool = False,
     solver: NetworkSolver = numeric_nodal_analysis_bias_point_solution,
 ) -> ComplexSolution:
-    return complex_solution(transform_three_phase_circuit(circuit), w=w, peak_values=peak_values, solver=solver)
+    try:
+        return complex_solution(transform_three_phase_circuit(circuit), w=w, peak_values=peak_values, solver=solver)
+    except NetworkSolutionException:
+        return ComplexSolution(solution=_NaNNetworkSolution(), w=w, peak_values=peak_values)
