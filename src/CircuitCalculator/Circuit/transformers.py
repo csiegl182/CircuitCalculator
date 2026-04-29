@@ -145,10 +145,7 @@ def complex_current_source(current_source: cp.Component, w: float = 0, w_resolut
         float(current_source.value.get('G', 0)),
         float(current_source.value.get('B', 0))
     )
-    cs_w = float(current_source.value.get('w', 0))
     element = elm.current_source(current_source.id, cs_I, cs_Y)
-    if np.abs(w-cs_w) > w_resolution:
-        element = elm.short_circuit(current_source.id)
     return ntw.Branch(
         current_source.nodes[0],
         current_source.nodes[1],

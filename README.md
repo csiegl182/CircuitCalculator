@@ -54,6 +54,42 @@ V(R)=1.00V
 
 Several Jupyter/IPython notebook examples can be found in the [examples](examples/) directory.
 
+## Three-Phase API
+
+The three-phase API is available in `CircuitCalculator.ThreePhaseCircuit` and uses explicit factory functions per topology.
+
+```python
+from CircuitCalculator.ThreePhaseCircuit import (
+    ThreePhaseCircuit,
+    three_phase_voltage_source_star,
+    three_phase_voltage_source_delta,
+    three_phase_current_source_star,
+    three_phase_current_source_delta,
+    three_phase_impedance_load_star,
+    three_phase_impedance_load_delta,
+    three_phase_custom_component_line,
+    three_phase_custom_component_star,
+    three_phase_custom_component_delta,
+    three_phase_complex_solution,
+)
+```
+
+Main functions:
+
+- `three_phase_voltage_source_star(id, nodes=(phase_bus, neutral_bus), V, Z=0j)`
+- `three_phase_voltage_source_delta(id, nodes=(phase_bus,), V, Z=0j)`
+- `three_phase_current_source_star(id, nodes=(phase_bus, neutral_bus), I, Y=0j)`
+- `three_phase_current_source_delta(id, nodes=(phase_bus,), I, Y=0j)`
+- `three_phase_impedance_load_star(id, nodes=(phase_bus, neutral_bus), Z)`
+- `three_phase_impedance_load_delta(id, nodes=(phase_bus,), Z)`
+- `three_phase_custom_component_line(id, nodes=(from_bus, to_bus), phase_a, phase_b, phase_c)`
+- `three_phase_custom_component_star(id, nodes=(phase_bus, neutral_bus), phase_a, phase_b, phase_c)`
+- `three_phase_custom_component_delta(id, nodes=(phase_bus,), phase_a, phase_b, phase_c)`
+
+Solver note:
+
+- `three_phase_current_source_delta` may lead to a solver contradiction in pure-current-source setups without a stabilizing voltage-defined branch. See `examples/python/three_phase/example_three_phase_delta_current_source_conflict.ipynb`.
+
 ## Contribution
 
 This project is open-source and contributions are welcome. If you would like to contribute, please fork the repository and make a pull request.
