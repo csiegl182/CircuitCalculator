@@ -78,6 +78,32 @@ def test_complex_current_source_translator() -> None:
     assert current_source.value['I_real'] == complex(current_source_dict['value']['I'].replace(' ', '')).real
     assert current_source.value['I_imag'] == complex(current_source_dict['value']['I'].replace(' ', '')).imag
 
+def test_admittance_translator_accepts_cartesian_g_b_strings() -> None:
+    admittance_dict = {
+        'type': 'admittance',
+        'id': 'Y1',
+        'nodes': ('0', '1'),
+        'value': {'G': '0.125', 'B': '0.25'}
+    }
+    admittance = generate_component(admittance_dict)
+    assert admittance.id == admittance_dict['id']
+    assert admittance.nodes == admittance_dict['nodes']
+    assert admittance.value['G'] == float(admittance_dict['value']['G'])
+    assert admittance.value['B'] == float(admittance_dict['value']['B'])
+
+def test_admittance_translator_accepts_cartesian_g_b_values() -> None:
+    admittance_dict = {
+        'type': 'admittance',
+        'id': 'Y1',
+        'nodes': ('0', '1'),
+        'value': {'G': 0.125, 'B': 0.25}
+    }
+    admittance = generate_component(admittance_dict)
+    assert admittance.id == admittance_dict['id']
+    assert admittance.nodes == admittance_dict['nodes']
+    assert admittance.value['G'] == admittance_dict['value']['G']
+    assert admittance.value['B'] == admittance_dict['value']['B']
+
 def test_voltage_controlled_current_source_translator() -> None:
     current_source_dict = {
         'type': 'voltage_controlled_current_source',

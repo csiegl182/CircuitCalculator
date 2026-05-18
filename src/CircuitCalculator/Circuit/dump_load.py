@@ -15,6 +15,43 @@ class UnknownCircuitComponent(Exception):
 class IncorrectComponentInformation(Exception):
     ...
 
+def coerce_complex_part(value: Any) -> Any:
+    try:
+        value = value.replace(' ', '').replace('\t', '')
+    except AttributeError:
+        pass
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return value
+
+def combine_cartesian_to_complex(value: dict[str, Any], *, real_key: str, imag_key: str, target_key: str) -> dict[str, Any]:
+    if target_key in value:
+        return value
+    if real_key in value or imag_key in value:
+        return {
+            **value,
+            target_key: complex(
+                coerce_complex_part(value.get(real_key, 0)),
+                coerce_complex_part(value.get(imag_key, 0))
+            )
+        }
+    return value
+
+def normalize_component_value(component_type: str, value: dict[str, Any]) -> dict[str, Any]:
+    normalized = value.copy()
+    if component_type == "impedance":
+        return combine_cartesian_to_complex(normalized, real_key="R", imag_key="X", target_key="Z")
+    if component_type == "admittance":
+        return combine_cartesian_to_complex(normalized, real_key="G", imag_key="B", target_key="Y")
+    if component_type == "complex_voltage_source":
+        normalized = combine_cartesian_to_complex(normalized, real_key="V_real", imag_key="V_imag", target_key="V")
+        return combine_cartesian_to_complex(normalized, real_key="R", imag_key="X", target_key="Z")
+    if component_type == "complex_current_source":
+        normalized = combine_cartesian_to_complex(normalized, real_key="I_real", imag_key="I_imag", target_key="I")
+        return combine_cartesian_to_complex(normalized, real_key="G", imag_key="B", target_key="Y")
+    return normalized
+
 def numeric_component_factory(*_, factory_fcn: tuple[Callable[..., cp.Component], Callable[..., cp.Component]], numeric_keys: dict[str, type], **kwargs) -> cp.Component:
     def is_numeric(value: str) -> bool:
         try:
@@ -43,8 +80,8 @@ circuit_component_translators : dict[str, Callable[..., cp.Component]] = {
     "conductance" : functools.partial(numeric_component_factory, factory_fcn=(cp.conductance, s_cp.conductance), numeric_keys={'G': float}),
     "capacitor" : functools.partial(numeric_component_factory, factory_fcn=(cp.capacitor, s_cp.capacitor), numeric_keys={'C': float}),
     "inductor" : functools.partial(numeric_component_factory, factory_fcn=(cp.inductor, s_cp.inductor), numeric_keys={'L': float}),
-    "impedance" : functools.partial(numeric_component_factory, factory_fcn=(cp.impedance, s_cp.impedance), numeric_keys={'Z': float}),
-    "admittance" : functools.partial(numeric_component_factory, factory_fcn=(cp.admittance, s_cp.admittance), numeric_keys={'Y': float}),
+    "impedance" : functools.partial(numeric_component_factory, factory_fcn=(cp.impedance, s_cp.impedance), numeric_keys={'Z': complex}),
+    "admittance" : functools.partial(numeric_component_factory, factory_fcn=(cp.admittance, s_cp.admittance), numeric_keys={'Y': complex}),
     "dc_voltage_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.dc_voltage_source, s_cp.voltage_source), numeric_keys={'V': float}),
     "ac_voltage_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.ac_voltage_source, s_cp.voltage_source), numeric_keys={'V': float,  'w': float}),
     "complex_voltage_source" : functools.partial(numeric_component_factory, factory_fcn=(cp.complex_voltage_source, s_cp.voltage_source), numeric_keys={'V': complex}),
@@ -84,6 +121,7 @@ def generate_component(component: dict[str, Any]) -> Component:
         component_factory = circuit_component_translators[component_type]
     except KeyError:
         raise UnknownCircuitComponent(f"Unknown type '{component_type}' of component '{component_id}'.")
+    component_value = normalize_component_value(component_type, component_value)
     try:
         return component_factory(id=component_id, nodes=component_nodes, **component_value)
     except KeyError as e:
