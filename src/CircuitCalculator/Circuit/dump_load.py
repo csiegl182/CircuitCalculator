@@ -15,13 +15,26 @@ class UnknownCircuitComponent(Exception):
 class IncorrectComponentInformation(Exception):
     ...
 
+def coerce_complex_part(value: Any) -> Any:
+    try:
+        value = value.replace(' ', '').replace('\t', '')
+    except AttributeError:
+        pass
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return value
+
 def combine_cartesian_to_complex(value: dict[str, Any], *, real_key: str, imag_key: str, target_key: str) -> dict[str, Any]:
     if target_key in value:
         return value
     if real_key in value or imag_key in value:
         return {
             **value,
-            target_key: complex(value.get(real_key, 0), value.get(imag_key, 0))
+            target_key: complex(
+                coerce_complex_part(value.get(real_key, 0)),
+                coerce_complex_part(value.get(imag_key, 0))
+            )
         }
     return value
 

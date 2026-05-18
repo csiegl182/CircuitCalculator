@@ -27,11 +27,8 @@ def test_complex_admittance_json_can_be_deserialized_and_analyzed() -> None:
                 "id": "Y1",
                 "nodes": ["1", "0"],
                 "value": {
-                    "Y": {
-                        "__complex__": True,
-                        "real": 0.125,
-                        "imag": 0.0,
-                    }
+                    "G": 0.125,
+                    "B": 0.0,
                 },
             },
         ],
@@ -56,3 +53,18 @@ def test_numeric_complex_admittance_survives_circuit_json_roundtrip() -> None:
     assert loaded.ground_node == "0"
     assert loaded["Y1"].value["G"] == 0.125
     assert loaded["Y1"].value["B"] == 0.25
+
+
+def test_admittance_is_serialized_in_cartesian_form_like_impedance() -> None:
+    circuit = Circuit(
+        [
+            cp.impedance(id="Z1", nodes=("1", "0"), Z=10 + 5j),
+            cp.admittance(id="Y1", nodes=("1", "0"), Y=0.125 + 0.25j),
+        ],
+        ground_node="0",
+    )
+
+    serialized = json.loads(serialize(circuit, "json"))
+
+    assert serialized["components"][0]["value"] == {"R": 10.0, "X": 5.0}
+    assert serialized["components"][1]["value"] == {"G": 0.125, "B": 0.25}
