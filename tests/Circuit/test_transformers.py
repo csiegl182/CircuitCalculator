@@ -22,6 +22,16 @@ def test_conductance_transformer() -> None:
     assert transformed_conductance.id == id
     assert transformed_conductance.element.Y == G
 
+def test_admittance_transformer() -> None:
+    nodes = ('0', '1')
+    id = 'Y'
+    Y = 0.125 + 0.25j
+    adm = ccp.admittance(nodes=nodes, id=id, Y=Y)
+    transformed_admittance = transform.admittance(adm)
+    assert (transformed_admittance.node1, transformed_admittance.node2) == nodes
+    assert transformed_admittance.id == id
+    np.testing.assert_almost_equal(transformed_admittance.element.Y, Y)
+
 def test_voltage_source_transformer_transforms_dc_voltage_source() -> None:
     nodes = ('0', '1')
     id = 'U'

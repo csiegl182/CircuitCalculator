@@ -18,3 +18,18 @@ def test_complex_current_source_is_active_for_complex_solution_frequency() -> No
 
     assert np.isclose(solution.get_current("I1"), 5 + 2j)
     assert np.isclose(solution.get_current("Z1"), -(5 + 2j))
+
+
+def test_complex_admittance_is_supported_by_complex_solution() -> None:
+    circuit = Circuit(
+        [
+            cp.complex_voltage_source(id="Vs", nodes=("1", "0"), V=12 + 0j),
+            cp.admittance(id="Y1", nodes=("1", "0"), Y=0.125 + 0j),
+        ],
+        ground_node="0",
+    )
+
+    solution = complex_solution(circuit, w=2 * np.pi * 50)
+
+    assert np.isclose(solution.get_voltage("Vs"), 12 + 0j)
+    assert np.isclose(solution.get_current("Y1"), 1.5 + 0j)
