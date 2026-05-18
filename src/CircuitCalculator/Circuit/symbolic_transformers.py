@@ -181,5 +181,11 @@ transformers : dict[str, CircuitComponentTranslator] = {
     'open_circuit' : open_circuit,
     'short_circuit' : short_circuit,
     'dc_voltage_source' : voltage_source,
-    'dc_current_source' : current_source
+    'ac_voltage_source' : voltage_source,
+    'complex_voltage_source' : voltage_source,
+    'periodic_voltage_source' : voltage_source,
+    'dc_current_source' : current_source,
+    'ac_current_source' : current_source,
+    'complex_current_source' : current_source,
+    'periodic_current_source' : current_source
 }
