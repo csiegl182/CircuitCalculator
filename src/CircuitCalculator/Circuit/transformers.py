@@ -26,7 +26,7 @@ def impedance(impedance: cp.Component, *_) -> ntw.Branch:
 def admittance(admittance: cp.Component, *_) -> ntw.Branch:
     Y = complex(
         float(admittance.value['G']),
-        float(impedance.value['B'])
+        float(admittance.value['B'])
     )
     return ntw.Branch(admittance.nodes[0], admittance.nodes[1], elm.admittance(admittance.id, Y))
 
